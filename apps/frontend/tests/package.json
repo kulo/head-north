@@ -1,0 +1,27 @@
+{
+  "name": "frontend-tests",
+  "version": "1.0.0",
+  "description": "Frontend unit tests",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^2.4.0",
+    "jest": "^29.0.0",
+    "vue": "^3.4.0",
+    "vuex": "^4.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "moduleFileExtensions": ["js", "vue"],
+    "transform": {
+      "^.+\\.vue$": "@vue/vue3-jest",
+      "^.+\\.js$": "babel-jest"
+    },
+    "moduleNameMapping": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    }
+  }
+}

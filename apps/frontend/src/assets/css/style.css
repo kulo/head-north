@@ -1,0 +1,1237 @@
+/* Prewave Color Palette - Semantic Variables */
+:root {
+  /* Typography */
+  --font-primary: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  
+  /* Primary Colors */
+  --color-background: #000000; /* Black background */
+  --color-text-primary: #ffffff; /* White text */
+  --color-highlight: #ffd700; /* Prewave yellow */
+  
+  /* Secondary Colors - Grays */
+  --color-gray-100: #f5f5f5; /* Lightest gray */
+  --color-gray-200: #e5e5e5; /* Very light gray */
+  --color-gray-300: #d3d3d3; /* Light gray */
+  --color-gray-400: #a9a9a9; /* Medium light gray */
+  --color-gray-500: #808080; /* Medium gray */
+  --color-gray-600: #696969; /* Dark gray */
+  --color-gray-700: #404040; /* Darker gray */
+  --color-gray-800: #2a2a2a; /* Very dark gray */
+  --color-gray-900: #1a1a1a; /* Darkest gray */
+  
+  /* Status Colors */
+  --color-success: #32d17e; /* Green for success */
+  --color-warning: #ffa500; /* Orange for warnings */
+  --color-error: #e63939; /* Red for errors */
+  --color-info: #64a0b0; /* Blue for info */
+  
+  /* Legacy color mappings for gradual migration */
+  --color-legacy-bg: #0a132d;
+  --color-legacy-text: #eee;
+  --color-legacy-accent: #64a0b0;
+}
+
+html,
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  transform-origin: 0 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  height: 100%;
+  scrollbar-width: none;
+  overflow: -moz-scrollbars-none;
+}
+
+#app {
+  height: 100%;
+}
+
+.color1 {
+  color: var(--color-success);
+}
+
+.color2 {
+  color: var(--color-highlight);
+}
+
+.color3 {
+  color: var(--color-info);
+}
+
+.color4 {
+  color: var(--color-gray-600);
+}
+
+.color5 {
+  color: var(--color-gray-500);
+}
+
+/* Font declarations - Using Helvetica Neue as primary font */
+/* Helvetica Neue is a system font, so no @font-face declarations needed */
+
+.font-bold {
+  font-family: var(--font-primary);
+  font-weight: bold;
+}
+
+.font-semi-bold {
+  font-family: var(--font-primary);
+  font-weight: 600;
+}
+
+.font-light {
+  font-family: var(--font-primary);
+  font-weight: 300;
+}
+
+.font-extra-light {
+  font-family: var(--font-primary);
+  font-weight: 200;
+}
+
+.font-thin {
+  font-family: var(--font-primary);
+  font-weight: 100;
+}
+
+/* Ant Design Vue Dropdown Arrow - already covered in .ant-dropdown styles above */
+
+/* Ant Design Vue Popover/Tooltip - project popover styles */
+.ant-popover.project-popover {
+  background: var(--color-gray-800);
+  border: 1px solid var(--color-gray-700);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, .4), 0 0px 50px rgba(0, 0, 0, .2);
+  color: var(--color-text-primary);
+  padding: 0;
+  margin-top: -50px;
+  border-radius: 2px;
+  max-height: 99%;
+  max-width: 99%;
+  overflow: auto;
+}
+
+.ant-popover.project-popover .ant-popover-inner {
+  padding: 0;
+}
+
+.ant-popover-inner {
+    overflow: initial !important;
+    width: 100%;
+}
+
+.project-popover__header {
+  background: var(--color-gray-900);
+  padding: 15px 15px 0px 15px;
+  font-size: 18px;
+  position: relative;
+}
+
+.project-popover__header__owner {
+  font-size: 14px;
+  color: var(--color-info);
+  height: 22px;
+  width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-popover__header__name {
+  width: calc(100% - 110px);
+  min-height: 25px;
+  word-break: normal;
+  text-align: left;
+  font-weight: bold;
+  line-height: 20px;
+  padding-bottom: 3px;
+}
+
+.project-popover__header__progress {
+  width: 100px;
+  position: absolute;
+  right: 15px;
+  text-align: right;
+  top: 35px;
+  font-weight: bold;
+}
+
+.project-popover__header__weeks {
+  width: 200px;
+  color: var(--color-info);
+  position: absolute;
+  right: 15px;
+  text-align: right;
+  top: 15px;
+  font-size: 14px;
+}
+
+.project-popover__progress {
+  background: var(--color-gray-900);
+  height: 13px;
+}
+
+.project-popover__progress .progress-line {
+  height: 8px !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  background-color: var(--color-gray-700) !important;
+}
+
+.project-popover__progress .progress-line::after {
+  height: 8px !important;
+  border-radius: 0px !important;
+  box-shadow: 1px 0px 1px rgba(0, 0, 0, 0.4) !important;
+}
+
+.project-popover__progress .progress-line::before {
+  height: 8px !important;
+  border-radius: 0 !important;
+}
+
+.project-popover__progress .progress-line div {
+  right: 0px !important;
+  top: 0px !important;
+  height: 8px !important;
+  border-radius: 0 !important;
+  background: var(--color-gray-900) !important;
+}
+
+.project-popover__epics {
+  padding: 15px;
+  overflow: hidden;
+}
+
+.project-popover__epic {
+  min-height: 20px;
+  position: relative;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.project-popover__epic:last-child {
+  margin-bottom: 0;
+}
+
+.project-popover__epic__name {
+  width: calc(100% - 160px);
+  word-break: normal;
+  text-align: left;
+}
+
+.project-popover__epic__effort {
+  width: 70px;
+  position: absolute;
+  right: 80px;
+  top: 0;
+  color: var(--color-info);
+}
+
+.project-popover__epic__stage {
+  background: var(--color-gray-600);
+  border: 1px solid var(--color-gray-600);
+  border-radius: 12px;
+  padding: 0 8px;
+  text-align: center;
+}
+
+.project-popover__epic__validation {
+  color: var(--color-error);
+  padding: 2px;
+  margin-top: 4px;
+}
+
+.project-popover__epic__release_narrative {
+  color: var(--color-gray-600);
+  /*padding: 2px;*/
+  /*margin-top: 4px;*/
+}
+
+.project-popover__epic__warning {
+  color: var(--color-warning);
+  /*padding: 2px;*/
+  /*margin-top: 4px;*/
+}
+
+.epic-container-column__project__title .project-popover__epic__validation {
+  margin-top: 0;
+  padding: 0;
+}
+
+.validation-dialog a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.validation-dialog {
+  background: var(--color-gray-800);
+  color: var(--color-text-primary);
+}
+
+.validation-dialog .jira-link {
+  text-align: center;
+}
+
+.project-popover__epic__status {
+  width: 80px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  text-align: right;
+}
+
+.project-popover__epic.health-bad .project-popover__epic__status,
+.project-popover.health-bad .project-popover__header__progress {
+  color: var(--color-error);
+}
+
+.project-popover__epic.health-normal .project-popover__epic__status {
+  color: var(--color-text-primary);
+}
+
+.project-popover__epic.health-good .project-popover__epic__status {
+  color: var(--color-highlight);
+}
+
+.project-popover__epic.health-best .project-popover__epic__status,
+.project-popover.health-good .project-popover__header__progress {
+  color: var(--color-success);
+}
+
+.project-popover__epic.health-forget .project-popover__epic__status {
+  color: var(--color-info);
+}
+
+.project-popover.health-normal .project-popover__header__progress {
+  color: var(--color-info);
+}
+
+/* Ant Design Vue Layout Header */
+.ant-layout-header {
+  line-height: 50px;
+  background: var(--color-gray-800);
+  box-shadow: 0 0 12px 6px rgba(0, 0, 0, .3);
+  color: var(--color-info);
+  z-index: 5;
+}
+
+.header-logo-selector {
+  min-width: 500px;
+}
+
+.logo {
+  width: 180px;
+  margin-top: 6px;
+  vertical-align: top;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.logo svg {
+  height: 40px;
+}
+
+.page-selector {
+  vertical-align: top;
+  display: inline-block;
+  margin-top: 4px;
+  margin-left: 4px;
+}
+
+.external-selector {
+  vertical-align: top;
+  display: inline-block;
+  margin-top: 4px;
+  margin-left: 4px;
+  float: right;
+}
+
+.external-selector.validation-selector {
+  cursor: pointer;
+  color: var(--color-text-primary);
+}
+
+.assignee-dropdown {
+  height:300px;
+  overflow: auto;
+}
+
+.area-name {
+  cursor: pointer;
+  font-size: 24px;
+  color: var(--color-text-primary);
+  outline: 0;
+}
+
+.project-filter {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--color-text-primary);
+  outline: 0;
+}
+
+.epic-container {
+  height: auto;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+  display: flex;
+}
+
+.epic-container-column {
+  column-count: 3;
+  column-gap: 50px;
+  column-width: 300px;
+  padding: 0;
+  width: 100%;
+  padding-right: 30px;
+}
+
+.epic-container-column__objective,
+.epic-container-column__project {
+  align-items: center;
+  display: flex;
+  height: 60px;
+  padding: 0 10px;
+  width: 100%;
+  -webkit-column-break-inside: avoid-column;
+  page-break-inside: avoid-column;
+  break-inside: avoid-column;
+  transition: all .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+}
+
+.overview-page .epic-container-column__objective,
+.overview-page .epic-container-column__project {
+  height: 65px;
+}
+
+.epic-container-column__project {
+  cursor: pointer;
+}
+
+.epic-container-column__project,
+.epic-container-column__project * {
+  outline: none !important;
+}
+
+.epic-container-column__project__internal {
+  padding: 0;
+}
+
+.epic-container-column__objective {
+  background: var(--color-gray-800);
+  font-size: 18px;
+  height: 47px;
+  border-top: 10px solid var(--color-background);
+  padding-top: 3px;
+  -webkit-column-break-after: avoid;
+  -webkit-break-after: avoid-column;
+  -moz-break-after: avoid-column;
+  break-after: avoid-column;
+  text-shadow: 1px 1px rgba(0, 0, 0, 1);
+}
+
+.overview-page .epic-container-column__objective {
+  height: 52px;
+  margin-bottom: 10px;
+}
+
+.epic-container-column__objective__name {
+  width: calc(100% - 50px);
+  float: left;
+  font-weight: bold;
+}
+
+.epic-container-column__objective__percentage {
+  float: right;
+  width: 50px;
+  text-align: right;
+}
+
+.epic-container-column__project__title {
+  height: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100% - 105px);
+  display: inline-block;
+}
+
+.epic-container-column__project__area {
+ font-size: 11px;
+ color: var(--color-info);
+ opacity: .6;
+ padding-bottom: 1px;
+}
+
+.epic-container-column__project__epic-counts {
+  width: 100px;
+  height: 15px;
+  display: inline-block;
+  text-align: right;
+  top: -3px;
+  position: relative;
+  font-size: 12px;
+  color: var(--color-info);
+  opacity: .6;
+}
+
+.progress-line {
+  width: calc(100% - 45px);
+  display: inline-block;
+  background: var(--color-gray-800);
+  height: 4px;
+  border-radius: 2px;
+  position: relative;
+}
+
+.progress-line::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 4px;
+  border-radius: 2px;
+  width: var(--percentage);
+  background: var(--color-success);
+}
+
+.progress-line::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 4px;
+  border-radius: 2px;
+  width: var(--percentage-with-in-progress);
+  background: url(../stripe4.gif) center center repeat-x;
+  opacity: 0.8;
+}
+
+.progress-line div {
+  display: block;
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  height: 2px;
+  border-radius: 2px;
+  width: var(--percentage-not-to-do);
+  background: var(--color-gray-900);
+  max-width: calc(100% - 2px);
+}
+
+.progress-percentage {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  width: 40px;
+  display: inline-block;
+  text-align: right;
+  font-size: 12px;
+}
+
+.progress-percentage.done {
+  color: var(--color-success);
+  width: 65px;
+  font-size: 13px;
+  background: var(--color-gray-900);
+  font-weight: bold;
+}
+
+.progress-percentage.done i {
+  display: inline-block;
+  margin-right: 3px;
+}
+
+.global-objectives {
+    background: var(--color-gray-900);
+    margin: -20px -20px 20px -20px;
+    border-bottom: 1px solid var(--color-gray-700);
+    box-shadow: inset 0 -10px 10px -10px rgba(0,0,0,.3);
+}
+
+.global-objectives__container, .global-objectives__progress {
+    height: 310px;
+    position: relative;
+    margin: 20px;
+    background: var(--color-gray-800);
+    border: 1px solid var(--color-gray-700);
+    box-sizing: border-box;
+}
+
+.global-objectives__container {
+    margin-right: 10px;
+}
+
+.global-objectives__progress {
+    margin-left: 10px;
+    padding: 35px 40px;
+    box-sizing: border-box;
+}
+
+.global-objectives__chart-container {
+    width: 300px;
+    height: 350px;
+    position: absolute;
+    top: 0;
+}
+
+.global-objectives__details {
+    position: absolute;
+    left: 300px;
+    top: 45px;
+    width: calc(100% - 320px);
+}
+
+.global-objectives__details.global-objectives__details-1 {
+    top: 118px;
+}
+
+.global-objectives__details.global-objectives__details-2 {
+    top: 80px;
+}
+
+.global-objectives__details.global-objectives__details-3 {
+    top: 45px;
+}
+
+.global-objectives__details.global-objectives__details-4 {
+    top: 21px;
+}
+
+.global-objectives__details.global-objectives__details-gt4 {
+    top: 21px;
+    width: calc(100% - 300px);
+}
+
+.global-objectives__details__title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.global-objectives__detail {
+    padding: 12px 0;
+}
+
+.global-objectives__details-1 .global-objectives__detail {
+    padding: 12px 0;
+}
+
+.global-objectives__details-2 .global-objectives__detail {
+    padding: 12px 0;
+}
+
+.global-objectives__details-3 .global-objectives__detail {
+    padding: 12px 0;
+}
+
+.global-objectives__details-4 .global-objectives__detail {
+    padding: 8px 0;
+}
+
+.global-objectives__details-gt4 .global-objectives__detail {
+    padding: 8px 0;
+}
+
+.global-objectives__detail .global-objectives__detail__progress:before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border-radius: 2px;
+    position: relative;
+    top: 1px;
+}
+
+.global-objectives__details-gt4 .global-objectives__detail .global-objectives__detail__progress:before {
+  top: 3px;
+}
+
+.global-objectives__details-gt4 > div {
+  column-count: 2;
+  column-gap: 20px;
+  column-fill: auto;
+  height: 285px;
+}
+
+.global-objectives__details-gt4 .global-objectives__detail {
+  -webkit-column-break-inside: avoid-column;
+  page-break-inside: avoid-column;
+  break-inside: avoid-column;
+}
+
+.global-objectives__detail:nth-child(1) .global-objectives__detail__progress:before {
+    background: var(--color-highlight);
+}
+
+.global-objectives__detail:nth-child(2) .global-objectives__detail__progress:before {
+    background: var(--color-info);
+}
+
+.global-objectives__detail:nth-child(3) .global-objectives__detail__progress:before {
+    background: var(--color-gray-500);
+}
+
+.global-objectives__detail:nth-child(4) .global-objectives__detail__progress:before {
+  background: var(--color-gray-600);
+}
+
+.global-objectives__detail:nth-child(5) .global-objectives__detail__progress:before {
+  background: var(--color-gray-600);
+}
+
+.global-objectives__detail:nth-child(6) .global-objectives__detail__progress:before {
+  background: var(--color-gray-500);
+}
+
+.global-objectives__detail:nth-child(7) .global-objectives__detail__progress:before {
+  background: var(--color-warning);
+}
+
+.global-objectives__detail:nth-child(8) .global-objectives__detail__progress:before {
+  background: var(--color-gray-300);
+}
+
+.global-objectives__detail__name {
+    font-size: 15px;
+    color: var(--color-info);
+    margin-top: 1px;
+    margin-left: 33px;
+}
+
+.global-objectives__details-gt4 .global-objectives__detail__name {
+  font-size: 15px;
+}
+
+.global-objectives__detail__progress {
+    display: inline-block;
+    margin-left: 2px;
+    font-size: 24px;
+}
+
+.global-objectives__details-gt4 .global-objectives__detail__progress {
+  font-size: 20px;
+}
+
+.global-objectives__detail__weeks {
+    color: var(--color-info);
+    display: inline-block;
+    font-size: 12px;
+    opacity: .6;
+}
+
+.global-objectives__progress__row {
+    position: relative;
+}
+
+.global-objectives__progress__big-container {
+    text-align: center;
+}
+
+.global-objectives__progress__big {
+    font-size: 50px;
+    line-height: 50px;
+    font-weight: bold;
+}
+
+.global-objectives__progress__big-title {
+    font-size: 18px;
+    color: var(--color-info);
+}
+
+.global-objectives__progress-gt4 .global-objectives__progress__big-title {
+  font-size: 17px;
+}
+
+.global-objectives__progress__value-container {
+    text-align: center;
+}
+
+.global-objectives__progress__bar {
+    width: 100%;
+    height: 20px;
+    margin-top: 27px;
+    position: relative;
+}
+
+.global-objectives__progress__bar .global-objectives__progress__bar_inprogress,
+.global-objectives__progress__bar .global-objectives__progress__bar_done,
+.global-objectives__progress__bar .global-objectives__progress__bar_nottodo,
+.global-objectives__progress__bar:before {
+    content: " ";
+    position: absolute;
+    display: block;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--color-gray-700);
+    width: 100%;
+}
+
+.global-objectives__progress__bar .global-objectives__progress__bar_inprogress {
+  width: var(--percentage-with-in-progress);
+  background: var(--color-success);
+  background: url(../stripe7.gif) center center repeat-x;
+  opacity: 0.8;
+}
+
+.global-objectives__progress__bar .global-objectives__progress__bar_done {
+  width: var(--percentage);
+  background: var(--color-success);
+}
+
+.global-objectives__progress__bar .global-objectives__progress__bar_nottodo {
+  width: var(--percentage-not-to-do);
+  top: 0;
+  right: 0;
+  background: var(--color-error);
+}
+
+.global-objectives__progress__bar:after {
+    width: var(--percentage);
+    background: var(--color-success);
+}
+
+
+.global-objectives__time__bar {
+    width: 100%;
+    box-sizing: border-box;
+    height: 20px;
+    margin-top: 15px;
+    margin-bottom: 35px;
+    position: relative;
+    margin-bottom: 35px;
+    color: var(--color-info);
+    font-size: 12px;
+    opacity: .6;
+}
+
+.global-objectives__time__bar:before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 0px;
+    right: 0px;
+    display: block;
+    border-top: 2px dashed var(--color-info);
+}
+
+.global-objectives__time__start, .global-objectives__time__end {
+    position: absolute;
+    top: -6px;
+    background: var(--color-gray-900);
+}
+
+.global-objectives__time__start {
+    left: 0;
+    padding-right: 8px;
+}
+
+.global-objectives__time__end {
+    right: 0;
+    padding-left: 8px;
+}
+
+.global-objectives__time__current {
+    background: var(--color-gray-900);
+    position: absolute;
+    top: 10px;
+    /* color: #fff; */
+    font-weight: bold;
+}
+
+.global-objectives__time__current.label-left {
+    text-align: right;
+    width: var(--percentage);
+}
+
+.global-objectives__time__current.label-right {
+    text-align: left;
+    left: var(--percentage);
+}
+
+.global-objectives__progress__title {
+    font-size: 18px;
+    color: var(--color-info);
+}
+
+.global-objectives__progress-gt4 .global-objectives__progress__title {
+  font-size: 14px;
+}
+
+.global-objectives__progress_value {
+    font-size: 24px;
+}
+
+.global-objectives__progress-gt4 .global-objectives__progress_value {
+  font-size: 14px;
+}
+
+
+.global-objectives__chart-container svg, .global-objectives__chart-container .apexcharts-canvas {
+    height: 350px !important;
+    min-height: 350px !important;
+}
+
+.global-objectives__chart {
+    position: absolute;
+    top: 50px;
+    left: -10px;
+}
+
+.jira-link {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+@media only screen and (max-width: 1200px) {
+    .logo {
+      width: 20px;
+    }
+    .header-logo-selector {
+      min-width: 335px;
+    }
+
+    .area-name {
+        font-size: 16px;
+    }
+
+    .global-objectives__progress {
+        padding: 10px;
+    }
+
+    .global-objectives__progress {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .global-objectives__container, .global-objectives__progress {
+        height: 245px;
+        background: none;
+        border: none;
+    }
+
+    .global-objectives__progress_value {
+        font-size: 18px;
+    }
+
+    .global-objectives__progress__title {
+        font-size: 14px;
+    }
+
+    .ant-layout-header {
+      height: fit-content !important;
+    }
+  }
+
+
+@media only screen and (min-width: 1200px) {
+  .global-objectives > .ant-col-lg-9 {
+    width: 40%;
+  }
+}
+
+.stage-selector {
+  min-width: 202px;
+
+}
+
+/* Ant Design Vue Select - stage selector specific styles */
+.ant-select.stage-selector .ant-select-selector {
+  background-color: var(--color-gray-800) !important;
+  border: none !important;
+}
+
+.ant-select.stage-selector .ant-select-selection-item {
+  background-color: var(--color-gray-800) !important;
+  color: var(--color-text-primary) !important;
+  max-width: 120px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ant-select.stage-selector .ant-select-selection-item-remove {
+  background: none !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-dropdown.stage-selector-popper .ant-select-dropdown-arrow {
+  display: none;
+}
+
+.ant-select-dropdown.stage-selector-popper {
+  border: none !important;
+  background-color: var(--color-gray-800) !important;
+  margin-top: 0 !important;
+}
+
+.ant-select-dropdown.stage-selector-popper .ant-select-item-option-selected {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-gray-800) !important;
+}
+
+.ant-select-dropdown.stage-selector-popper .ant-select-item-option-active {
+  color: var(--color-text-primary) !important;
+  background: var(--color-gray-700) !important;
+}
+
+.ant-select-dropdown.stage-selector-popper .ant-select-item {
+  color: var(--color-text-primary) !important;
+}
+
+.theme-pill {
+  border: 1px solid var(--color-info);
+  border-radius: 2px;
+  padding: 2px 2px 0 2px;
+  font-size: 12px;
+}
+
+.initiative {
+  text-overflow: ellipsis;
+  width: calc(100% - 42px);
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+  margin: -5px 0;
+}
+
+.initiative.without-theme {
+  width: calc(100%);
+}
+
+.initiative:hover {
+  overflow: visible;
+}
+
+/* Ant Design Vue Collapse - roadmaps specific styles */
+#roadmaps .ant-collapse-item .ant-collapse-header {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-success) !important;
+  border-bottom: 0 !important;
+  padding-left: 10px !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+}
+
+#roadmaps .ant-collapse-content {
+  font-size: 14px !important;
+  padding-bottom: 10px !important;
+}
+
+#roadmaps .ant-collapse-item {
+  background-color: var(--color-background) !important;
+  border-bottom: 0 !important;
+}
+
+#roadmaps .ant-collapse {
+  border-bottom: 0 !important;
+  border-top: 0 !important;
+}
+
+/* Ant Design Vue Overrides for Dark Theme */
+.ant-select {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+}
+
+.ant-select .ant-select-selector {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select .ant-select-selection-item {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select .ant-select-selection-placeholder {
+  color: var(--color-gray-400) !important;
+}
+
+.ant-select .ant-select-arrow {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-dropdown {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
+}
+
+.ant-select-item {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-gray-800) !important;
+}
+
+.ant-select-item:hover {
+  background-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-item-option-selected {
+  background-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-item-option-active {
+  background-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-multiple .ant-select-selection-item {
+  background-color: var(--color-gray-700) !important;
+  border-color: var(--color-gray-600) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-multiple .ant-select-selection-item-remove {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-select-multiple .ant-select-selection-item-remove:hover {
+  color: var(--color-text-primary) !important;
+}
+
+/* Ant Design Vue Alert Component */
+.ant-alert {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-alert-error {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-error) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Ant Design Vue Empty Component */
+.ant-empty {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-empty-description {
+  color: var(--color-gray-400) !important;
+}
+
+/* Ant Design Vue Spin Component */
+.ant-spin {
+  color: var(--color-highlight) !important;
+}
+
+.ant-spin .ant-spin-dot {
+  color: var(--color-highlight) !important;
+}
+
+.ant-spin .ant-spin-dot-item {
+  background-color: var(--color-highlight) !important;
+}
+
+/* Ant Design Vue Dropdown and Menu Components */
+.ant-dropdown {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
+}
+
+.ant-menu {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+}
+
+.ant-menu-item {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-gray-800) !important;
+}
+
+.ant-menu-item:hover {
+  background-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-menu-item-selected {
+  background-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-menu-item-active {
+  background-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Ant Design Vue Button Component */
+.ant-btn {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-btn:hover {
+  background-color: var(--color-gray-700) !important;
+  border-color: var(--color-gray-600) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-btn:focus {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-btn-primary {
+  background-color: var(--color-info) !important;
+  border-color: var(--color-info) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-btn-primary:hover {
+  background-color: var(--color-gray-600) !important;
+  border-color: var(--color-gray-600) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Ant Design Vue Collapse Component */
+.ant-collapse {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-gray-700) !important;
+}
+
+.ant-collapse-item {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-gray-700) !important;
+}
+
+.ant-collapse-header {
+  background-color: var(--color-gray-800) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-gray-700) !important;
+}
+
+.ant-collapse-header:hover {
+  background-color: var(--color-gray-700) !important;
+}
+
+.ant-collapse-content {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-gray-700) !important;
+}
+
+.ant-collapse-content-box {
+  background-color: var(--color-background) !important;
+  color: var(--color-text-primary) !important;
+  padding: 16px !important;
+}
+
+.ant-collapse-arrow {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-collapse-item-active .ant-collapse-header {
+  background-color: var(--color-gray-700) !important;
+}

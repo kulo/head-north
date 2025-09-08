@@ -1,0 +1,20 @@
+{
+  "name": "backend-tests",
+  "version": "1.0.0",
+  "description": "Backend unit tests",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "server/**/*.js",
+      "!server/**/*.test.js"
+    ]
+  }
+}

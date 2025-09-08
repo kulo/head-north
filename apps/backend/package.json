@@ -1,0 +1,31 @@
+{
+  "name": "omega-service",
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "@omega-one/shared-utils": "file:../../packages/shared-utils",
+    "@omega/shared-config": "file:../../packages/shared-config",
+    "retry": "^0.13.1",
+    "@koa/cors": "^5.0.0",
+    "axios": "^1.6.0",
+    "csv-parse": "^5.5.0",
+    "jira.js": "^5.2.2",
+    "koa": "^2.14.2",
+    "@koa/router": "^12.0.0",
+    "lodash": "4.17.21",
+    "node-cache": "4.1.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.0",
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "start-dev": "nodemon -r dotenv/config server/index.js",
+    "test": "node --test"
+  }
+}
