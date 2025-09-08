@@ -44,7 +44,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prewave/omega-one.git"
+    "url": "git+https://github.com/kulo/omega-one.git"
   },
   "keywords": [
     "omega",
