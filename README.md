@@ -1,4 +1,4 @@
-# Omega One - Unified Monorepo
+# Omega One - Development Cycle Dashboard
 
 This is the unified monorepo containing both the Omega frontend and backend services, previously maintained as separate repositories.
 
@@ -7,8 +7,8 @@ This is the unified monorepo containing both the Omega frontend and backend serv
 ```
 omega-one/
 ├── apps/
-│   ├── frontend/      # Vue.js frontend application (formerly omega/)
-│   └── backend/       # Node.js/Koa backend service (formerly omega-data-service/)
+│   ├── frontend/      # Vue.js frontend application 
+│   └── backend/       # Node.js/Koa backend service 
 ├── packages/
 │   ├── shared-types/  # Shared TypeScript types and interfaces
 │   ├── shared-utils/  # Shared utility functions
@@ -146,18 +146,6 @@ The backend includes Google Cloud Build configuration:
 ### Frontend Deployment
 The frontend builds to static files in `dist/` directory and can be deployed to any static hosting service.
 
-## 📝 Migration Notes
-
-This monorepo was created by unifying two separate repositories:
-- **omega** → **frontend/** - Vue.js application for cycle tracking
-- **omega-data-service** → **backend/** - Node.js/Koa API service
-
-### Key Changes Made:
-1. **Node.js Version**: Backend upgraded from Node 14.21.1 to 16.15.0 for consistency
-2. **Workspace Configuration**: Added npm workspaces for unified dependency management
-3. **Unified Scripts**: Root package.json provides convenient commands for both services
-4. **Preserved Git History**: Both repositories maintain their individual git histories
-
 ## 🔍 Development Workflow
 
 1. **Start Development**: `npm run dev` (runs both services)
@@ -167,28 +155,14 @@ This monorepo was created by unifying two separate repositories:
 5. **Testing**: `npm run test` to run all tests
 6. **Linting**: `npm run lint` to check code quality
 
-### 🎯 Single Source of Truth Architecture
+### 🎯 Shared Configuration
 
-The project uses a **Single Source of Truth** approach for API configuration:
+The project uses a **Single Source of Truth** approach for configuration:
 
 - **API Endpoints**: Defined once in `packages/shared-config/`
 - **Frontend**: Uses shared endpoints for API calls
 - **Backend**: Uses shared endpoints for route registration
 - **Consistency**: Frontend and backend automatically stay in sync
-
-#### Debugging Tools (Development Only)
-
-```javascript
-// In browser console
-window.apiDebug.testAllEndpoints()           // Test all API endpoints
-window.apiDebug.testSharedConfig('production') // Test different environments
-window.routeConsistency.testRouteConsistency() // Verify frontend/backend consistency
-```
-
-## 📚 Original Repositories
-
-- **Frontend**: Originally `omega` - Development Cycle & Roadmap Dashboard Vue.js application
-- **Backend**: Originally `omega-data-service` - JIRA data collection and processing service
 
 ## 🤝 Contributing
 
