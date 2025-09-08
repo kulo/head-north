@@ -4,37 +4,43 @@
   "description": "Omega One - Unified Frontend and Backend Monorepo",
   "private": true,
   "workspaces": [
-    "frontend",
-    "backend"
+    "apps/*",
+    "packages/*",
+    "tools/*"
   ],
   "scripts": {
-    "install:all": "npm install && npm run install:frontend && npm run install:backend",
-    "install:frontend": "cd frontend && npm install",
-    "install:backend": "cd backend && npm install",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run start-dev",
+    "install:all": "npm install && npm run install:apps && npm run install:packages",
+    "install:apps": "npm run install:frontend && npm run install:backend",
+    "install:packages": "npm run install:shared-types && npm run install:shared-utils && npm run install:shared-config",
+    "install:frontend": "cd apps/frontend && npm install",
+    "install:backend": "cd apps/backend && npm install",
+    "install:shared-types": "cd packages/shared-types && npm install",
+    "install:shared-utils": "cd packages/shared-utils && npm install",
+    "install:shared-config": "cd packages/shared-config && npm install",
+    "dev:frontend": "cd apps/frontend && npm run dev",
+    "dev:backend": "cd apps/backend && npm run start-dev",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npm run start",
+    "build:frontend": "cd apps/frontend && npm run build",
+    "build:backend": "cd apps/backend && npm run start",
     "build": "npm run build:frontend && npm run build:backend",
-    "start:frontend": "cd frontend && npm run start",
-    "start:backend": "cd backend && npm run start",
+    "start:frontend": "cd apps/frontend && npm run start",
+    "start:backend": "cd apps/backend && npm run start",
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "test:frontend": "cd frontend && npm run test",
-    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd apps/frontend && npm run test",
+    "test:backend": "cd apps/backend && npm test",
     "test": "npm run test:frontend && npm run test:backend",
-    "lint:frontend": "cd frontend && npm run lint",
-    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd apps/frontend && npm run lint",
+    "lint:backend": "cd apps/backend && npm run lint",
     "lint": "npm run lint:frontend && npm run lint:backend",
-    "clean": "rm -rf frontend/node_modules backend/node_modules node_modules",
+    "clean": "rm -rf apps/*/node_modules packages/*/node_modules tools/*/node_modules node_modules",
     "clean:install": "npm run clean && npm run install:all"
   },
   "devDependencies": {
     "concurrently": "^7.6.0"
   },
   "engines": {
-    "node": "16.15.0",
-    "npm": "8.5.5"
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
   },
   "repository": {
     "type": "git",
@@ -50,5 +56,8 @@
     "koa"
   ],
   "author": "Prewave Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "vue": "^3.5.21"
+  }
 }

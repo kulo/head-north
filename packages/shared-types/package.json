@@ -1,0 +1,23 @@
+{
+  "name": "@omega/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for Omega applications",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "echo 'No build step needed for types'",
+    "test": "echo 'No tests for types package'"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "keywords": [
+    "types",
+    "omega",
+    "shared"
+  ],
+  "author": "Prewave Team",
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@omega/typescript-config",
+  "version": "1.0.0",
+  "description": "Shared TypeScript configuration for Omega applications",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "echo 'No build step needed for TypeScript config'",
+    "test": "echo 'No tests for TypeScript config'"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "typescript",
+    "config",
+    "omega",
+    "shared"
+  ],
+  "author": "Prewave Team",
+  "license": "UNLICENSED"
+}

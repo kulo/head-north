@@ -80,7 +80,7 @@ clean:
 
 # Docker commands
 docker-build:
-	cd backend && make build
+	cd apps/backend && make build
 
 docker-run:
-	cd backend && make start
+	cd apps/backend && make start

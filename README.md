@@ -6,8 +6,16 @@ This is the unified monorepo containing both the Omega frontend and backend serv
 
 ```
 omega-one/
-├── frontend/          # Vue.js frontend application (formerly omega/)
-├── backend/           # Node.js/Koa backend service (formerly omega-data-service/)
+├── apps/
+│   ├── frontend/      # Vue.js frontend application (formerly omega/)
+│   └── backend/       # Node.js/Koa backend service (formerly omega-data-service/)
+├── packages/
+│   ├── shared-types/  # Shared TypeScript types and interfaces
+│   ├── shared-utils/  # Shared utility functions
+│   └── shared-config/ # Shared configuration files
+├── tools/
+│   ├── eslint-config/ # Shared ESLint configuration
+│   └── typescript-config/ # Shared TypeScript configuration
 ├── package.json       # Root package.json with workspace configuration
 └── README.md          # This file
 ```
@@ -15,8 +23,8 @@ omega-one/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16.15.0
-- npm 8.5.5
+- Node.js 20.x LTS
+- npm 10.x
 
 ### Installation
 ```bash
@@ -69,20 +77,45 @@ npm run start
 - `npm run clean` - Remove all node_modules
 - `npm run clean:install` - Clean and reinstall everything
 
+## 📦 Shared Packages
+
+The monorepo includes several shared packages for code reuse and consistency:
+
+### Shared Types (`packages/shared-types/`)
+Common TypeScript types and interfaces used across frontend and backend.
+
+### Shared Utils (`packages/shared-utils/`)
+Utility functions that can be used by both frontend and backend applications.
+
+### Shared Config (`packages/shared-config/`)
+**Single Source of Truth** for all API endpoints and configuration settings. Ensures frontend and backend always use the same API paths and configuration values. Includes:
+- API endpoint definitions
+- Environment-specific configurations
+- Route consistency validation
+- Cross-platform configuration management
+
+### Tools
+- **ESLint Config** (`tools/eslint-config/`): Shared ESLint configuration
+- **TypeScript Config** (`tools/typescript-config/`): Shared TypeScript configuration
+
 ## 🔧 Individual Package Management
 
 Each workspace maintains its own `package.json` and can be managed independently:
 
 ```bash
 # Work in frontend directory
-cd frontend
+cd apps/frontend
 npm install <package>
 npm run <script>
 
 # Work in backend directory
-cd backend
+cd apps/backend
 npm install <package>
 npm run <script>
+
+# Work in shared packages
+cd packages/shared-types
+npm install <package>
 ```
 
 ## 🐳 Docker Support
@@ -90,7 +123,7 @@ npm run <script>
 ### Backend Docker
 The backend includes Docker support:
 ```bash
-cd backend
+cd apps/backend
 make build    # Build Docker image
 make start    # Run Docker container
 ```
@@ -98,7 +131,7 @@ make start    # Run Docker container
 ### Frontend Build
 The frontend can be built and served statically:
 ```bash
-cd frontend
+cd apps/frontend
 npm run build
 # Serve the dist/ directory with any static file server
 ```
@@ -128,15 +161,33 @@ This monorepo was created by unifying two separate repositories:
 ## 🔍 Development Workflow
 
 1. **Start Development**: `npm run dev` (runs both services)
-2. **Frontend**: Access at http://localhost:8080
+2. **Frontend**: Access at http://localhost:8081
 3. **Backend API**: Access at http://localhost:3000
 4. **Make Changes**: Edit files in respective directories
 5. **Testing**: `npm run test` to run all tests
 6. **Linting**: `npm run lint` to check code quality
 
+### 🎯 Single Source of Truth Architecture
+
+The project uses a **Single Source of Truth** approach for API configuration:
+
+- **API Endpoints**: Defined once in `packages/shared-config/`
+- **Frontend**: Uses shared endpoints for API calls
+- **Backend**: Uses shared endpoints for route registration
+- **Consistency**: Frontend and backend automatically stay in sync
+
+#### Debugging Tools (Development Only)
+
+```javascript
+// In browser console
+window.apiDebug.testAllEndpoints()           // Test all API endpoints
+window.apiDebug.testSharedConfig('production') // Test different environments
+window.routeConsistency.testRouteConsistency() // Verify frontend/backend consistency
+```
+
 ## 📚 Original Repositories
 
-- **Frontend**: Originally `omega` - Emarsys Cycle Tracker Vue.js application
+- **Frontend**: Originally `omega` - Development Cycle & Roadmap Dashboard Vue.js application
 - **Backend**: Originally `omega-data-service` - JIRA data collection and processing service
 
 ## 🤝 Contributing

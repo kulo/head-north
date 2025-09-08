@@ -1,0 +1,28 @@
+{
+  "name": "@omega/eslint-config",
+  "version": "1.0.0",
+  "description": "Shared ESLint configuration for Omega applications",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "echo 'No build step needed for ESLint config'",
+    "test": "echo 'No tests for ESLint config'"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "eslint-plugin-vue": "^9.20.1",
+    "eslint-plugin-node": "^11.1.0"
+  },
+  "keywords": [
+    "eslint",
+    "config",
+    "omega",
+    "shared"
+  ],
+  "author": "Prewave Team",
+  "license": "UNLICENSED"
+}
