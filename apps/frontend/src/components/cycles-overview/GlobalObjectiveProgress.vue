@@ -80,8 +80,8 @@
         <div class="global-objectives__progress__value-container">
           <div
             class="global-objectives__progress_value"
-          >{{ cycle.epicsDoneCount }} of {{ cycle.epicsCount }}</div>
-          <div class="global-objectives__progress__title">Epics Done</div>
+          >{{ cycle.releaseItemsDoneCount }} of {{ cycle.releaseItemsCount }}</div>
+          <div class="global-objectives__progress__title">Release Items Done</div>
         </div>
       </a-col>
     </a-row>

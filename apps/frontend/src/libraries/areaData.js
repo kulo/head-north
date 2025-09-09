@@ -16,15 +16,15 @@ export default class AreaData {
     end: "1975-01-01",
     progress: 0,
     progressWithInProgress: 0,
-    progressByEpics: 0,
+    progressByReleaseItems: 0,
     weeks: 0,
     weeksDone: 0,
     weeksInProgress: 0,
     weeksNotToDo: 0,
     weeksCancelled: 0,
     weeksPostponed: 0,
-    epicsCount: 0,
-    epicsDoneCount: 0,
+    releaseItemsCount: 0,
+    releaseItemsDoneCount: 0,
     percentageNotToDo: 0
   }
 
@@ -44,8 +44,8 @@ export default class AreaData {
         theme: objective.theme,
         initiative: objective.initiative,
         initiativeId: objective.initiativeId,
-        epicsCount: 0,
-        epicsDoneCount: 0,
+        releaseItemsCount: 0,
+        releaseItemsDoneCount: 0,
         weeks: 0,
         weeksDone: 0,
         weeksInProgress: 0,
@@ -54,22 +54,22 @@ export default class AreaData {
         weeksPostponed: 0,
         progress: 0,
         progressWithInProgress: 0,
-        progressByEpics: 0,
+        progressByReleaseItems: 0,
         percentageNotToDo: 0,
-        projects: []
+        roadmapItems: []
       }
 
-      preparedObjective.projects = objective.projects.map((project) => {
-        let preparedProject = {
-          area: project.area,
-          name: project.name,
-          owner: project.crew,
-          ticketId: project.projectId,
-          validations: project.validations,
-          aggregatedValidations: [project.validations, project.epics.map(epic => epic.validations).flat()].flat(),
-          startDate: project.startDate,
-          epicsCount: 0,
-          epicsDoneCount: 0,
+      preparedObjective.roadmapItems = objective.roadmapItems.map((roadmapItem) => {
+        let preparedRoadmapItem = {
+          area: roadmapItem.area,
+          name: roadmapItem.name,
+          owner: roadmapItem.crew,
+          ticketId: roadmapItem.projectId,
+          validations: roadmapItem.validations,
+          aggregatedValidations: [roadmapItem.validations, roadmapItem.releaseItems.map(releaseItem => releaseItem.validations).flat()].flat(),
+          startDate: roadmapItem.startDate,
+          releaseItemsCount: 0,
+          releaseItemsDoneCount: 0,
           weeks: 0,
           weeksDone: 0,
           weeksInProgress: 0,
@@ -79,56 +79,56 @@ export default class AreaData {
           weeksPostponed: 0,
           progress: 0,
           progressWithInProgress: 0,
-          progressByEpics: 0,
+          progressByReleaseItems: 0,
           percentageNotToDo: 0,
-          epics: project.epics,
-          url: project.url,
-          isPartOfReleaseNarrative: project.isPartOfReleaseNarrative,
-          isReleaseAtRisk: project.isReleaseAtRisk,
-          isCrossCloud: project.isCrossCloud
+          releaseItems: roadmapItem.releaseItems,
+          url: roadmapItem.url,
+          isPartOfReleaseNarrative: roadmapItem.isPartOfReleaseNarrative,
+          isReleaseAtRisk: roadmapItem.isReleaseAtRisk,
+          isCrossCloud: roadmapItem.isCrossCloud
         }
 
-        project.epics.forEach((epic) => {
-          let effort = parseFloat(epic.effort)
+        roadmapItem.releaseItems.forEach((releaseItem) => {
+          let effort = parseFloat(releaseItem.effort)
 
-          if (epic.status != STATUS.REPLANNED) {
-            preparedProject.weeks += effort
-            preparedProject.epicsCount += 1
+          if (releaseItem.status != STATUS.REPLANNED) {
+            preparedRoadmapItem.weeks += effort
+            preparedRoadmapItem.releaseItemsCount += 1
           }
 
-          if (epic.status == STATUS.TODO) {
-            preparedProject.weeksTodo += epic.effort
-          } else if (epic.status == STATUS.DONE) {
-            preparedProject.weeksDone += epic.effort
-            preparedProject.epicsDoneCount += 1
-          } else if (epic.status == STATUS.IN_PROGRESS) {
-            preparedProject.weeksInProgress += epic.effort
-          } else if (epic.status == STATUS.POSTPONED) {
-            preparedProject.weeksNotToDo += epic.effort
-            preparedProject.weeksPostponed += epic.effort
-          } else if (epic.status == STATUS.CANCELLED) {
-            preparedProject.weeksNotToDo += epic.effort
-            preparedProject.weeksCancelled += epic.effort
+          if (releaseItem.status == STATUS.TODO) {
+            preparedRoadmapItem.weeksTodo += releaseItem.effort
+          } else if (releaseItem.status == STATUS.DONE) {
+            preparedRoadmapItem.weeksDone += releaseItem.effort
+            preparedRoadmapItem.releaseItemsDoneCount += 1
+          } else if (releaseItem.status == STATUS.IN_PROGRESS) {
+            preparedRoadmapItem.weeksInProgress += releaseItem.effort
+          } else if (releaseItem.status == STATUS.POSTPONED) {
+            preparedRoadmapItem.weeksNotToDo += releaseItem.effort
+            preparedRoadmapItem.weeksPostponed += releaseItem.effort
+          } else if (releaseItem.status == STATUS.CANCELLED) {
+            preparedRoadmapItem.weeksNotToDo += releaseItem.effort
+            preparedRoadmapItem.weeksCancelled += releaseItem.effort
           }
         })
-        preparedProject.weeks = this.roundToTwoDigit(preparedProject.weeks);
-        preparedProject.progress = Math.round((preparedProject.weeksDone / preparedProject.weeks) * 100) || 0
-        preparedProject.progressWithInProgress = Math.round(((preparedProject.weeksDone + preparedProject.weeksInProgress) / preparedProject.weeks) * 100) || 0
-        preparedProject.progressByEpics = Math.round((preparedProject.epicsDoneCount / preparedProject.epicsCount) * 100) || 0
-        preparedProject.percentageNotToDo = Math.round((preparedProject.weeksNotToDo / preparedProject.weeks) * 100) || 0
+        preparedRoadmapItem.weeks = this.roundToTwoDigit(preparedRoadmapItem.weeks);
+        preparedRoadmapItem.progress = Math.round((preparedRoadmapItem.weeksDone / preparedRoadmapItem.weeks) * 100) || 0
+        preparedRoadmapItem.progressWithInProgress = Math.round(((preparedRoadmapItem.weeksDone + preparedRoadmapItem.weeksInProgress) / preparedRoadmapItem.weeks) * 100) || 0
+        preparedRoadmapItem.progressByReleaseItems = Math.round((preparedRoadmapItem.releaseItemsDoneCount / preparedRoadmapItem.releaseItemsCount) * 100) || 0
+        preparedRoadmapItem.percentageNotToDo = Math.round((preparedRoadmapItem.weeksNotToDo / preparedRoadmapItem.weeks) * 100) || 0
 
-        preparedObjective.weeks = this.normalize(preparedObjective.weeks + preparedProject.weeks)
-        preparedObjective.weeksDone = this.normalize(preparedObjective.weeksDone + preparedProject.weeksDone)
-        preparedObjective.weeksInProgress = this.normalize(preparedObjective.weeksInProgress + preparedProject.weeksInProgress)
-        preparedObjective.weeksTodo = this.normalize(preparedObjective.weeksTodo + preparedProject.weeksTodo)
-        preparedObjective.weeksNotToDo = this.normalize(preparedObjective.weeksNotToDo + preparedProject.weeksNotToDo)
-        preparedObjective.weeksCancelled = this.normalize(preparedObjective.weeksCancelled + preparedProject.weeksCancelled)
-        preparedObjective.weeksPostponed = this.normalize(preparedObjective.weeksPostponed + preparedProject.weeksPostponed)
+        preparedObjective.weeks = this.normalize(preparedObjective.weeks + preparedRoadmapItem.weeks)
+        preparedObjective.weeksDone = this.normalize(preparedObjective.weeksDone + preparedRoadmapItem.weeksDone)
+        preparedObjective.weeksInProgress = this.normalize(preparedObjective.weeksInProgress + preparedRoadmapItem.weeksInProgress)
+        preparedObjective.weeksTodo = this.normalize(preparedObjective.weeksTodo + preparedRoadmapItem.weeksTodo)
+        preparedObjective.weeksNotToDo = this.normalize(preparedObjective.weeksNotToDo + preparedRoadmapItem.weeksNotToDo)
+        preparedObjective.weeksCancelled = this.normalize(preparedObjective.weeksCancelled + preparedRoadmapItem.weeksCancelled)
+        preparedObjective.weeksPostponed = this.normalize(preparedObjective.weeksPostponed + preparedRoadmapItem.weeksPostponed)
 
-        preparedObjective.epicsCount += preparedProject.epicsCount
-        preparedObjective.epicsDoneCount += preparedProject.epicsDoneCount
+        preparedObjective.releaseItemsCount += preparedRoadmapItem.releaseItemsCount
+        preparedObjective.releaseItemsDoneCount += preparedRoadmapItem.releaseItemsDoneCount
 
-        return preparedProject
+        return preparedRoadmapItem
       })
 
       this.cycle.weeks = this.normalize(this.cycle.weeks + preparedObjective.weeks)
@@ -139,12 +139,12 @@ export default class AreaData {
       this.cycle.weeksCancelled = this.normalize(this.cycle.weeksCancelled + preparedObjective.weeksCancelled)
       this.cycle.weeksPostponed = this.normalize(this.cycle.weeksPostponed + preparedObjective.weeksPostponed)
 
-      this.cycle.epicsCount += preparedObjective.epicsCount
-      this.cycle.epicsDoneCount += preparedObjective.epicsDoneCount
+      this.cycle.releaseItemsCount += preparedObjective.releaseItemsCount
+      this.cycle.releaseItemsDoneCount += preparedObjective.releaseItemsDoneCount
 
       preparedObjective.progress = Math.round((preparedObjective.weeksDone / preparedObjective.weeks) * 100) || 0
       preparedObjective.progressWithInProgress = Math.round(((preparedObjective.weeksDone + preparedObjective.weeksInProgress) / preparedObjective.weeks) * 100) || 0
-      preparedObjective.progressByEpics = Math.round((preparedObjective.epicsDoneCount / preparedObjective.epicsCount) * 100) || 0
+      preparedObjective.progressByReleaseItems = Math.round((preparedObjective.releaseItemsDoneCount / preparedObjective.releaseItemsCount) * 100) || 0
       preparedObjective.percentageNotToDo = Math.round((preparedObjective.weeksNotToDo / preparedObjective.weeks) * 100) || 0
 
       return preparedObjective
@@ -154,7 +154,7 @@ export default class AreaData {
 
     this.cycle.progress = Math.round((this.cycle.weeksDone / this.cycle.weeks) * 100) || 0
     this.cycle.progressWithInProgress = Math.round(((this.cycle.weeksDone + this.cycle.weeksInProgress) / this.cycle.weeks) * 100) || 0
-    this.cycle.progressByEpics = Math.round((this.cycle.epicsDoneCount / this.cycle.epicsCount) * 100) || 0
+    this.cycle.progressByReleaseItems = Math.round((this.cycle.releaseItemsDoneCount / this.cycle.releaseItemsCount) * 100) || 0
     this.cycle.percentageNotToDo = Math.round((this.cycle.weeksNotToDo / this.cycle.weeks) * 100) || 0
 
     this.cycle.startMonth = new Date(this.cycle.delivery).toLocaleString('en-us', { month: 'short' })

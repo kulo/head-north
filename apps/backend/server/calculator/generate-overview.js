@@ -39,20 +39,20 @@ const validateGTMPlan = (releaseItems, omegaConfig) => {
 }
 
 
-export default (issues, issuesByRoadmapItems, projects, sprints, omegaConfig) => {
-  const roadmapItemParser = new RoadmapItemParser(projects, omegaConfig);
+export default (issues, issuesByRoadmapItems, roadmapItems, sprints, omegaConfig) => {
+  const roadmapItemParser = new RoadmapItemParser(roadmapItems, omegaConfig);
   const releaseItemsPerSprintGroups = issues.map((issueList, index) => {
     const currentSprint = sprints[index];
     const parser = new ReleaseItemParser(currentSprint, omegaConfig);
-    const epics = issueList.map(issue => parser.parse(issue));
+    const releaseItems = issueList.map(issue => parser.parse(issue));
 
     return {
       sprintId: currentSprint.id,
-      releaseItems: epics
+      releaseItems: releaseItems
     }
   });
 
-  const roadmapItems = Object.entries(projects).map(([id, project]) => {
+  const roadmapItemsResult = Object.entries(roadmapItems).map(([id, roadmapItemData]) => {
     const roadmapItem = roadmapItemParser.parse(id, issuesByRoadmapItems[id] || []);
     return {
       summary: roadmapItem.name,
@@ -66,14 +66,14 @@ export default (issues, issuesByRoadmapItems, projects, sprints, omegaConfig) =>
       sprints: releaseItemsPerSprintGroups.map((releaseItems) => {
         const releaseItemsForRoadmapItem = releaseItems.releaseItems
           .filter(item => item.projectId === id);
-        const { epics } = roadmapItemParser.parse(id, releaseItemsForRoadmapItem);
+        const { releaseItems: parsedReleaseItems } = roadmapItemParser.parse(id, releaseItemsForRoadmapItem);
         return {
           ...releaseItems,
-          releaseItems: epics.filter(item => item.isExternal)
+          releaseItems: parsedReleaseItems.filter(item => item.isExternal)
         };
       }).filter(hasAnyReleaseItem)
     };
   }).filter(entry => entry.sprints.some(hasAnyReleaseItem));
   
-  return roadmapItems;
+  return roadmapItemsResult;
 }

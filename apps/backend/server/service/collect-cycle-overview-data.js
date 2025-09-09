@@ -17,11 +17,13 @@ export default async (sprintId, omegaConfig, extraFields = []) => {
   const jiraApi = new JiraApiProxy(omegaConfig);
   
   const { sprint, sprints } = await jiraApi.getSprintById(sprintId);
-  const [projects, issues] = await Promise.all([
+  const [roadmapItems, issues] = await Promise.all([
     jiraApi.getRoadmapItems(),
     jiraApi.getIssuesForSprint(sprint.id, extraFields)
   ]);
   const assignees = getAssignees(issues);
+  const areas = omegaConfig.getAreas();
+  const initiatives = omegaConfig.getInitiatives();
 
-  return { projects, issues, sprint, sprints, assignees };
+  return { roadmapItems, issues, sprint, sprints, assignees, areas, initiatives };
 };

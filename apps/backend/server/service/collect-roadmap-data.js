@@ -12,5 +12,5 @@ export default async (omegaConfig, extraFields = []) => {
     ...sprints.map(({ id }) => jiraApi.getIssuesForSprint(id, extraFields))
   ]);
   
-  return { projects: roadmapItems, issues: issuesArrays, issuesByRoadmapItems: releaseItemsByRoadmapItem, sprint, sprints };
+  return { roadmapItems, issues: issuesArrays, issuesByRoadmapItems: releaseItemsByRoadmapItem, sprint, sprints };
 };

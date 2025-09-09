@@ -22,8 +22,8 @@ class FakeDataGenerator {
       name 
     }));
 
-    // Generate projects dynamically based on areas and initiatives from config
-    this.projects = this._generateRoadmapItems();
+    // Generate roadmap items dynamically based on areas and initiatives from config
+    this.roadmapItems = this._generateRoadmapItems();
 
     // Generate sprints following Shape-up methodology (2-month cycles)
     this.sprints = this._generateSprints();
@@ -57,14 +57,14 @@ class FakeDataGenerator {
 
   async getIssuesForSprint(sprintId, extraFields = []) {
     const issues = [];
-    const roadmapItemKeys = Object.keys(this.projects);
+    const roadmapItemKeys = Object.keys(this.roadmapItems);
     const statuses = ['To Do', 'In Progress', 'Done', 'Review'];
     const issueTypes = ['Story', 'Task', 'Bug', 'Epic', 'Release Item'];
     const externalStages = ['S1', 'S2', 'S3', 'S3+']; // Valid external release stages
 
     // Generate issues for each roadmap item to ensure we have release items
     roadmapItemKeys.forEach((roadmapItemKey, roadmapItemIndex) => {
-      const roadmapItem = this.projects[roadmapItemKey];
+      const roadmapItem = this.roadmapItems[roadmapItemKey];
       
       // Generate 2-4 issues per roadmap item
       const numIssues = Math.floor(Math.random() * 3) + 2;
@@ -102,7 +102,7 @@ class FakeDataGenerator {
   }
 
   async getRoadmapItems() {
-    return this.projects;
+    return this.roadmapItems;
   }
 
   async getReleaseItemsGroupedByRoadmapItem() {
@@ -110,8 +110,8 @@ class FakeDataGenerator {
     const externalStages = ['S1', 'S2', 'S3', 'S3+']; // Valid external release stages
     
     // Create multiple release items for each roadmap item with different assignees and areas
-    Object.keys(this.projects).forEach(roadmapItemKey => {
-      const roadmapItem = this.projects[roadmapItemKey];
+    Object.keys(this.roadmapItems).forEach(roadmapItemKey => {
+      const roadmapItem = this.roadmapItems[roadmapItemKey];
       const releaseItems = [];
       
       // Create 3-5 release items per roadmap item

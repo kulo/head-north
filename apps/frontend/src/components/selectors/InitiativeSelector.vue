@@ -8,10 +8,10 @@
     >
       <a-select-option
         v-for="initiative in initiatives"
-        :key="initiative.id"
-        :value="initiative.id"
+        :key="initiative?.id || initiative"
+        :value="initiative?.name || initiative"
       >
-        {{ initiative.name }}
+        {{ initiative?.name || initiative }}
       </a-select-option>
     </a-select>
   </div>
@@ -27,7 +27,7 @@ export default {
     const store = useStore()
     const selectedInitiative = ref(null)
     
-    const initiatives = computed(() => store.state.initiatives)
+    const initiatives = computed(() => store.state.initiatives || [])
     
     const handleInitiativeChange = (value) => {
       selectedInitiative.value = value

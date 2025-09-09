@@ -18,11 +18,11 @@ export default async (context) => {
   const cycleId = context.params.id || context.query.sprintId;
   logger.default.info('building cycle overview data for cycleId: ', { cycleId });
 
-  const { projects, issues, sprint, sprints, assignees, areas, initiatives } = 
+  const { roadmapItems, issues, sprint, sprints, assignees, areas, initiatives } = 
     await collectCycleOverviewData(cycleId, omegaConfig);
   
-  const objectives = parseJiraIssues(issues, projects, sprint, omegaConfig);
-  const teams = omegaConfig
+  const objectives = parseJiraIssues(issues, roadmapItems, sprint, omegaConfig);
+  const teams = omegaConfig.getTeams();
 
   context.body = {
     devCycleData: {

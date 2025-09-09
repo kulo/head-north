@@ -5,30 +5,30 @@ import { logger } from '@omega-one/shared-utils';
 import LabelResolver from './resolve-labels.js';
 
 class RoadmapItemParser {
-  constructor(projects, omegaConfig) {
-    this.projects = projects;
+  constructor(roadmapItems, omegaConfig) {
+    this.roadmapItems = roadmapItems;
     this.omegaConfig = omegaConfig;
     this.validationDictionary = omegaConfig.getValidationDictionary();
   }
 
-  parse(projectId, epics = []) {
-    const crew = uniq(map(epics, 'teams').flat()).join(', ');
+  parse(projectId, releaseItems = []) {
+    const crew = uniq(map(releaseItems, 'teams').flat()).join(', ');
     const url = getJiraLink(projectId, this.omegaConfig);
 
-    if (!this.projects.hasOwnProperty(projectId)) {
-      const ticketIds = epics.map(epic => epic.ticketId);
+    if (!this.roadmapItems.hasOwnProperty(projectId)) {
+      const ticketIds = releaseItems.map(releaseItem => releaseItem.ticketId);
       logger.calculator.info('not-found-project', { project_id: projectId, ticket_ids: ticketIds });
-      return { epics, crew, url, validations: [] };
+      return { releaseItems, crew, url, validations: [] };
     }
 
-    const project = this.projects[projectId];
+    const project = this.roadmapItems[projectId];
 
     const name = this._parseProjectName(project.summary);
     const area = LabelResolver.collectArea(project, this.omegaConfig);
     const theme = LabelResolver.collectTheme(project, this.omegaConfig);
     const initiative = LabelResolver.collectInitiative(project, this.omegaConfig);
-    const release = this._collectReleaseInfo(epics);
-    const external = this._collectExternal(project, epics);
+    const release = this._collectReleaseInfo(releaseItems);
+    const external = this._collectExternal(project, releaseItems);
     const hasNoPreReleaseAllowedLabel = this._hasNoPreReleaseAllowedLabel(project);
 
     const res = {
@@ -39,8 +39,8 @@ class RoadmapItemParser {
       projectId,
       area: area.value,
       isExternal: external.value,
-      epics: this._updateReleaseItemsExternalState(projectId, external.value, hasNoPreReleaseAllowedLabel, epics),
-      crew: uniq(map(epics, 'teams').flat()).join(', '),
+      releaseItems: this._updateReleaseItemsExternalState(projectId, external.value, hasNoPreReleaseAllowedLabel, releaseItems),
+      crew: uniq(map(releaseItems, 'teams').flat()).join(', '),
       url: getJiraLink(projectId, this.omegaConfig),
       validations: [
         area.validations,
@@ -95,12 +95,12 @@ class RoadmapItemParser {
     });
   }
 
-  _collectExternal(project, epics) {
+  _collectExternal(project, releaseItems) {
     const value = this._isExternal(project);
     const validations =  [
       ...this._validateExternal(project),
       ...this._validateExternalRoadmapDescription(project),
-      ...this._validateExternalReleaseStages(project, epics)
+      ...this._validateExternalReleaseStages(project, releaseItems)
     ];
     return { value, validations };
   }
@@ -114,14 +114,14 @@ class RoadmapItemParser {
     return projectName;
   }
 
-  _collectReleaseInfo(epics) {
+  _collectReleaseInfo(releaseItems) {
     const OR = (a,b) => a || b;
 
-    const epicsReleaseNarratives = map( epics, property('isPartOfReleaseNarrative') );
-    const isProjectPartOfNarrative = reduce( epicsReleaseNarratives, OR );
+    const releaseItemsReleaseNarratives = map( releaseItems, property('isPartOfReleaseNarrative') );
+    const isProjectPartOfNarrative = reduce( releaseItemsReleaseNarratives, OR );
 
-    const epicsReleaseRisks = map( epics, property('isReleaseAtRisk') );
-    const isProjectAtRisk = reduce( epicsReleaseRisks, OR );
+    const releaseItemsReleaseRisks = map( releaseItems, property('isReleaseAtRisk') );
+    const isProjectAtRisk = reduce( releaseItemsReleaseRisks, OR );
 
     return {
         isPartOfNarrative: isProjectPartOfNarrative,
@@ -156,9 +156,9 @@ class RoadmapItemParser {
     }
   }
 
-  _validateExternalReleaseStages(project, epics) {
+  _validateExternalReleaseStages(project, releaseItems) {
     const externalStages = this.omegaConfig.getStageCategories().externalStages;
-    const hasReleaseItemWithStage = epics.some(epic => externalStages.includes(epic.stage));
+    const hasReleaseItemWithStage = releaseItems.some(releaseItem => externalStages.includes(releaseItem.stage));
     if(!this._isExternal(project) && hasReleaseItemWithStage) {
       return [this.validationDictionary.roadmapItem.iternalWithStagedReleaseItem];
     }

@@ -1,14 +1,14 @@
 <template>
-  <div class="epic-container-column__project">
-    <div class="project-item">
-      <div class="project-name">
-        <a :href="project.url" class="jira-link" target="_blank">
-          {{ project.name }}
+  <div class="epic-container-column__roadmap-item">
+    <div class="roadmap-item">
+      <div class="roadmap-item-name">
+        <a :href="roadmapItem.url" class="jira-link" target="_blank">
+          {{ roadmapItem.name }}
           <a-icon type="link" />
         </a>
       </div>
-      <div class="project-owner">{{ project.owner }}</div>
-      <div class="project-progress">{{ project.progress }}%</div>
+      <div class="roadmap-item-owner">{{ roadmapItem.owner }}</div>
+      <div class="roadmap-item-progress">{{ roadmapItem.progress }}%</div>
     </div>
   </div>
 </template>
@@ -18,9 +18,9 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
-  name: 'ProjectListItem',
+  name: 'RoadmapItemListItem',
   props: {
-    project: {
+    roadmapItem: {
       type: Object,
       required: true
     },
@@ -34,8 +34,8 @@ export default {
     
     const validationEnabled = computed(() => store.state.validationEnabled)
     
-    const showValidation = (project) => {
-      emit('showValidation', project)
+    const showValidation = (roadmapItem) => {
+      emit('showValidation', roadmapItem)
     }
 
     return {
@@ -47,24 +47,24 @@ export default {
 </script>
 
 <style scoped>
-.project-item {
+.roadmap-item {
   padding: 10px;
   border: 1px solid var(--color-gray-300);
   margin: 5px 0;
   border-radius: 4px;
 }
 
-.project-name {
+.roadmap-item-name {
   font-weight: bold;
   margin-bottom: 5px;
 }
 
-.project-owner {
+.roadmap-item-owner {
   color: var(--color-gray-500);
   font-size: 0.9em;
 }
 
-.project-progress {
+.roadmap-item-progress {
   color: var(--color-info);
   font-size: 0.9em;
 }

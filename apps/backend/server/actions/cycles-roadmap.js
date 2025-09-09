@@ -42,16 +42,16 @@ export default async (context) => {
   
   const omegaConfig = context.omegaConfig;
   
-  const { projects, issuesByRoadmapItems, issues, sprint, sprints } = await collectRoadmapData(omegaConfig);
+  const { roadmapItems, issuesByRoadmapItems, issues, sprint, sprints } = await collectRoadmapData(omegaConfig);
   
-  let roadmapItems = buildOverview(issues, issuesByRoadmapItems, projects, sprints, omegaConfig);
+  let roadmapItemsResult = buildOverview(issues, issuesByRoadmapItems, roadmapItems, sprints, omegaConfig);
 
-  let initiatives = getInitiatives(roadmapItems);
-  let areas = getAreas(roadmapItems, omegaConfig);
-  let assignees = getAssignees(roadmapItems);
+  let initiatives = getInitiatives(roadmapItemsResult);
+  let areas = getAreas(roadmapItemsResult, omegaConfig);
+  let assignees = getAssignees(roadmapItemsResult);
   
   context.body = {
-    groupedRoadmapItems: groupBy(roadmapItems, x => x.initiativeId),
+    groupedRoadmapItems: groupBy(roadmapItemsResult, x => x.initiativeId),
     sprint,
     sprints,
     stages: omegaConfig.getStages(),

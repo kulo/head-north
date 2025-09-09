@@ -2,57 +2,57 @@ import AreaData from "./areaData.js";
 
 const uniq = (list) => [...new Set(list)];
 
-const filterEpics = (epicPredicate) => (project) => {
+const filterReleaseItems = (releaseItemPredicate) => (roadmapItem) => {
   return {
-    ...project,
-    epics: project.epics.filter(epicPredicate)
+    ...roadmapItem,
+    releaseItems: roadmapItem.releaseItems.filter(releaseItemPredicate)
   };
 };
 
-const hasEpics = (project) => project.epics.length !== 0;
-const hasProjects = (objective) => objective.projects.length !== 0;
+const hasReleaseItems = (roadmapItem) => roadmapItem.releaseItems.length !== 0;
+const hasRoadmapItems = (objective) => objective.roadmapItems.length !== 0;
 
-const recalculateEpicBasedFields = (areaTranslation) => (project) => {
-  const areaIds = project.epics.map(epic => epic.areaIds).flat();
-  const teams = project.epics.map(epic => epic.teams).flat();
+const recalculateReleaseItemBasedFields = (areaTranslation) => (roadmapItem) => {
+  const areaIds = roadmapItem.releaseItems.map(releaseItem => releaseItem.areaIds).flat();
+  const teams = roadmapItem.releaseItems.map(releaseItem => releaseItem.teams).flat();
   return {
-    ...project,
+    ...roadmapItem,
     crew: uniq(teams).join(', '),
     area: uniq(areaIds).map(id => areaTranslation[id]).join(', ')
   };
 };
 
-const filterProjects = (epicPredicate, areaTranslation) => (objective) => {
-  const projects = objective.projects
-    .map(filterEpics(epicPredicate))
-    .filter(hasEpics)
-    .map(recalculateEpicBasedFields(areaTranslation));
+const filterRoadmapItems = (releaseItemPredicate, areaTranslation) => (objective) => {
+  const roadmapItems = objective.roadmapItems
+    .map(filterReleaseItems(releaseItemPredicate))
+    .filter(hasReleaseItems)
+    .map(recalculateReleaseItemBasedFields(areaTranslation));
 
-  return { ...objective, projects };
+  return { ...objective, roadmapItems };
 };
 
 const createPredicates = (areaMapping, predicate) => {
   const predicates = Object.keys(areaMapping).map(area => {
-    return { id: area, epicPredicate: createAreaPredicate(area, predicate) };
+    return { id: area, releaseItemPredicate: createAreaPredicate(area, predicate) };
   });
-  return predicates.concat({ id: 'overview', epicPredicate: predicate });
+  return predicates.concat({ id: 'overview', releaseItemPredicate: predicate });
 }
 
 const createAreaPredicate = (area, predicate) => {
-  return (epic) => epic.areaIds.includes(area) && predicate(epic);
+  return (releaseItem) => releaseItem.areaIds.includes(area) && predicate(releaseItem);
 }
 
 export const calculateAreaData = 
-  (cycleData, epicPredicate = () => true, objectivePredicate = () => true) => {
+  (cycleData, releaseItemPredicate = () => true, objectivePredicate = () => true) => {
   const areaMapping = cycleData.area;
-  const predicates = createPredicates(areaMapping, epicPredicate);
+  const predicates = createPredicates(areaMapping, releaseItemPredicate);
 
   const areaData = {};
-  for(const { id, epicPredicate } of predicates) {
+  for(const { id, releaseItemPredicate } of predicates) {
     const objectives = cycleData.objectives
       .filter(objectivePredicate)
-      .map(filterProjects(epicPredicate, areaMapping))
-      .filter(hasProjects);
+      .map(filterRoadmapItems(releaseItemPredicate, areaMapping))
+      .filter(hasRoadmapItems);
 
     if(objectives.length !== 0) {
       areaData[id] = new AreaData().applyData({ ...cycleData, objectives });
