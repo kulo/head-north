@@ -22,8 +22,6 @@ export default async (sprintId, omegaConfig, extraFields = []) => {
     jiraApi.getIssuesForSprint(sprint.id, extraFields)
   ]);
   const assignees = getAssignees(issues);
-  const areas = omegaConfig.getAreas();
-  const initiatives = omegaConfig.getInitiatives();
 
-  return { projects, issues, sprint, sprints, assignees, areas, initiatives };
+  return { projects, issues, sprint, sprints, assignees };
 };
