@@ -16,10 +16,42 @@ export function getLabelsWithPrefix(labels, prefix) {
 
 export function translateLabel(labelType, value, omegaConfig) {
   const labelTranslations = omegaConfig.getLabelTranslations();
-  return labelTranslations[labelType][value] || value;
+  
+  // Map singular label types to plural keys in the translations object
+  const labelTypeMapping = {
+    'area': 'areas',
+    'team': 'teams', 
+    'theme': 'themes',
+    'initiative': 'initiatives'
+  };
+  
+  const pluralLabelType = labelTypeMapping[labelType] || labelType;
+  const translationMap = labelTranslations[pluralLabelType];
+  
+  if (!translationMap) {
+    return value;
+  }
+  
+  return translationMap[value] || value;
 }
 
 export function translateLabelWithoutFallback(labelType, value, omegaConfig) {
   const labelTranslations = omegaConfig.getLabelTranslations();
-  return labelTranslations[labelType][value];
+  
+  // Map singular label types to plural keys in the translations object
+  const labelTypeMapping = {
+    'area': 'areas',
+    'team': 'teams', 
+    'theme': 'themes',
+    'initiative': 'initiatives'
+  };
+  
+  const pluralLabelType = labelTypeMapping[labelType] || labelType;
+  const translationMap = labelTranslations[pluralLabelType];
+  
+  if (!translationMap) {
+    return undefined;
+  }
+  
+  return translationMap[value];
 }

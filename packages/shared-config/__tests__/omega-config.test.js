@@ -58,10 +58,10 @@ describe('OmegaConfig', () => {
       expect(typeof host).toBe('string')
     })
 
-    it('should set and get API host', () => {
-      const newHost = 'https://api.example.com'
-      config.setHost(newHost)
-      expect(config.getHost()).toBe(newHost)
+    it('should get API host from environment configuration', () => {
+      const host = config.getHost()
+      expect(host).toBeDefined()
+      expect(typeof host).toBe('string')
     })
 
     it('should get full URL for endpoint', () => {

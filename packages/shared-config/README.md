@@ -54,7 +54,6 @@ const config = new OmegaConfig('development', {
 ### Core Methods
 
 - `getHost()` - Get API host URL
-- `setHost(host)` - Set API host URL
 - `getUrl(endpoint)` - Get full URL for an endpoint
 - `getEndpoints()` - Get all API endpoints
 - `getConfig()` - Get complete configuration object

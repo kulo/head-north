@@ -6,8 +6,10 @@ import { logger } from '@omega-one/shared-utils';
 import errorHandler from './error-handler.js';
 
 // Create OmegaConfig instance for backend
-const environment = process.env.NODE_ENV || 'development';
-const omegaConfig = new OmegaConfig(environment);
+const omegaConfig = new OmegaConfig( { 
+  processEnv: process.env, 
+  overrides: { environment: process.env.NODE_ENV || 'development' } 
+} );
 
 // Create the Koa app
 const app = new Koa();
@@ -26,7 +28,7 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 try {
-  const port = omegaConfig.get('port');
+  const port = omegaConfig.get('backend.port');
   app.listen(port);
   logger.default.info('started', { port });
 } catch(error) {

@@ -2,9 +2,7 @@ import pkg from 'lodash';
 const { map, reduce, uniq, property } = pkg;
 import { getJiraLink, getLabelsWithPrefix, translateLabelWithoutFallback } from './parse-common.js';
 import { logger } from '@omega-one/shared-utils';
-import { externalStages, finalReleaseStage } from './release-item-parser.js';
 import LabelResolver from './resolve-labels.js';
-const noPreReleaseAllowedLabel = 'omega:no-pre-release-allowed';
 
 class RoadmapItemParser {
   constructor(projects, omegaConfig) {
@@ -65,8 +63,8 @@ class RoadmapItemParser {
       const isExternal = item.isExternal || false;
       const validations = Array.isArray(item.validations) ? item.validations : [];
       
-      const hasExternalStage = externalStages.includes(stage);
-      const isFinalReleaseStage = finalReleaseStage.includes(stage);
+      const hasExternalStage = this.omegaConfig.isExternalStage(stage);
+      const isFinalReleaseStage = this.omegaConfig.isFinalReleaseStage(stage);
       const hasStageViolation = hasExternalStage && hasNoPreReleaseAllowedLabel && !isFinalReleaseStage;
       const newIsExternal = hasExternalStage && (isRoadmapItemExternal || hasNoPreReleaseAllowedLabel);
       
@@ -136,6 +134,7 @@ class RoadmapItemParser {
   }
 
   _hasNoPreReleaseAllowedLabel(project) {
+    const noPreReleaseAllowedLabel = this.omegaConfig.getNoPrereleaseAllowedLabel();
     return project.labels.includes(noPreReleaseAllowedLabel);
   }
 
@@ -158,6 +157,7 @@ class RoadmapItemParser {
   }
 
   _validateExternalReleaseStages(project, epics) {
+    const externalStages = this.omegaConfig.getStageCategories().externalStages;
     const hasReleaseItemWithStage = epics.some(epic => externalStages.includes(epic.stage));
     if(!this._isExternal(project) && hasReleaseItemWithStage) {
       return [this.validationDictionary.roadmapItem.iternalWithStagedReleaseItem];

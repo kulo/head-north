@@ -17,6 +17,9 @@ class CycleDataService {
     this._roadmapCache = null
     this._roadmapCacheTimestamp = null
     this._roadmapCacheTTL = this.config.getCacheTTL()
+    this._apiTimeout = this.config.getEnvironmentConfig().timeout
+    this._apiRetries = this.config.getEnvironmentConfig().retries
+    this._apiAttempts = this.config.getEnvironmentConfig().attempts
   }
 
   /**
@@ -52,21 +55,21 @@ class CycleDataService {
    */
   async request(endpoint, options = {}) {
     const url = this.config.getUrl(endpoint)
-    const config = this.config.getConfig()
     
+
     const defaultOptions = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      timeout: config.api.timeout
+      timeout: this._apiTimeout
     }
 
     const requestOptions = { ...defaultOptions, ...options }
 
     let lastError
-    for (let attempt = 1; attempt <= config.api.retries; attempt++) {
+    for (let attempt = 1; attempt <= this._apiRetries; attempt++) {
       try {
         const response = await fetch(url, requestOptions)
         
@@ -80,7 +83,7 @@ class CycleDataService {
         lastError = error
         logger.service.warnSafe(`API request attempt ${attempt} failed`, error, { attempt })
         
-        if (attempt < config.api.retries) {
+        if (attempt < this._apiRetries) {
           // Exponential backoff
           const delay = Math.pow(2, attempt) * 1000
           await new Promise(resolve => setTimeout(resolve, delay))
@@ -90,7 +93,7 @@ class CycleDataService {
 
     // TODO actually show all errors and not just the last
     const finalErrorMessage = lastError?.message || lastError?.toString() || 'Unknown error'
-    throw new Error(`API request failed after ${config.api.retries} attempts: ${finalErrorMessage}`)
+    throw new Error(`API request failed after ${this._apiRetries} attempts: ${finalErrorMessage}`)
   }
 
   /**
@@ -174,21 +177,7 @@ class CycleDataService {
     this._roadmapCacheTimestamp = null
   }
 
-  /**
-   * Set API host (useful for testing or different environments)
-   * @param {string} host - The API host URL
-   */
-  setHost(host) {
-    this.config.setHost(host)
-  }
 
-  /**
-   * Get current API host
-   * @returns {string} The current API host
-   */
-  getHost() {
-    return this.config.getHost()
-  }
 }
 
 export default CycleDataService

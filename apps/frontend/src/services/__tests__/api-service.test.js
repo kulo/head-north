@@ -21,12 +21,13 @@ describe('Cycle Data Service', () => {
 
   describe('Configuration', () => {
     test('should have correct default host', () => {
-      expect(cycleDataService.getHost()).toBe('http://localhost:3000')
+      expect(omegaConfig.getHost()).toBe('http://localhost:3000')
     })
 
-    test('should allow host to be changed', () => {
-      cycleDataService.setHost('https://api.example.com')
-      expect(cycleDataService.getHost()).toBe('https://api.example.com')
+    test('should get host from configuration', () => {
+      const host = omegaConfig.getHost()
+      expect(host).toBeDefined()
+      expect(typeof host).toBe('string')
     })
   })
 

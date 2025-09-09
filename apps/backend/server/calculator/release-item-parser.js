@@ -1,7 +1,7 @@
 import { resolveStatus } from './resolve-status.js';
 import { getJiraLink, translateLabel, getLabelsWithPrefix, translateLabelWithoutFallback } from './parse-common.js';
 import { logger } from '@omega-one/shared-utils';
-import { finalReleaseStage, externalStages, resolveStage } from './resolve-stage.js';
+import { resolveStage } from './resolve-stage.js';
 
 class ReleaseItemParser {
   constructor(sprint, omegaConfig) {
@@ -26,7 +26,7 @@ class ReleaseItemParser {
       name: this._parseEpicName(issue.fields.summary),
       areaIds: areaIds.value,
       teams: teams.value,
-      status: resolveStatus(issue.fields, this.sprint),
+      status: resolveStatus(issue.fields, this.sprint, this.omegaConfig),
       url: getJiraLink(issue.key, this.omegaConfig),
       isExternal: this._isExternalRoadmap(issue),
       stage: stage.value,
@@ -99,7 +99,7 @@ class ReleaseItemParser {
   }
 
   _collectStage(issue) {
-    const stage = resolveStage(issue.fields.summary);
+    const stage = resolveStage(issue.fields.summary, this.omegaConfig);
     return { value: stage, validations: [] };
   }
 
@@ -114,7 +114,7 @@ class ReleaseItemParser {
   }
 
   _parseEpicName(originalName) {
-    let stage = resolveStage(originalName);
+    let stage = resolveStage(originalName, this.omegaConfig);
     if (!stage) { return originalName; }
     if (stage === 's3+') {
       stage = 's3\\+';
@@ -156,4 +156,4 @@ class ReleaseItemParser {
   }
 }
 
-export { ReleaseItemParser, externalStages, finalReleaseStage };
+export { ReleaseItemParser };

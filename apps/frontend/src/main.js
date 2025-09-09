@@ -11,8 +11,9 @@ import './assets/css/style.css'
 import VueApexCharts from 'vue3-apexcharts'
 
 // Create services
-const environment = import.meta.env?.MODE || 'development'
-const omegaConfig = new OmegaConfig(environment)
+const omegaConfig = new OmegaConfig({
+  overrides: { environment: import.meta.env?.MODE || 'development' }
+})
 const cycleDataService = new CycleDataService(omegaConfig)
 
 // Create the Vue app

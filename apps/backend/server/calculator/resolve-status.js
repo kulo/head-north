@@ -1,34 +1,25 @@
-const IN_PROGRESS_STATUS_ID = '18264';
-const PLANNED_STATUS_ID = '18234';
-const DONE_STATUS_ID = '18235';
-const CANCELLED_STATUS_ID = '18295';
-const POSTPONED_STATUS_ID = '18306';
-
-const statusMapping = {
-  [PLANNED_STATUS_ID]: 'todo',
-  [IN_PROGRESS_STATUS_ID]: 'inprogress',
-  [DONE_STATUS_ID]: 'done',
-  [CANCELLED_STATUS_ID]: 'cancelled',
-  [POSTPONED_STATUS_ID]: 'postponed'
-};
-
-const finishedStatuses = [DONE_STATUS_ID, CANCELLED_STATUS_ID];
-
-export function isFinishedStatus(issueFields) {
+/**
+ * Resolve JIRA issue status to Omega status value
+ * 
+ * Converts a JIRA issue's status ID to the corresponding Omega status value
+ * using the JIRA status mappings from OmegaConfig. Handles special cases like
+ * postponed status when sprint timing doesn't match.
+ * 
+ * @param {object} issueFields - JIRA issue fields object
+ * @param {object} sprint - Sprint object with start/end dates
+ * @param {OmegaConfig} omegaConfig - OmegaConfig instance for status mappings
+ * @returns {string} Omega status value ('todo', 'inprogress', 'done', 'cancelled', 'postponed')
+ * 
+ * @example
+ * const status = resolveStatus(issue.fields, sprint, omegaConfig)
+ * // Returns: 'inprogress', 'done', 'todo', etc.
+ */
+export function resolveStatus(issueFields, sprint, omegaConfig) {
   const statusId = issueFields.status.id;
-  return finishedStatuses.includes(statusId);
-}
-
-export function possibleFutureStatus(issueFields) {
-  const statusId = issueFields.status.id;
-  return [PLANNED_STATUS_ID, IN_PROGRESS_STATUS_ID, POSTPONED_STATUS_ID].includes(statusId);
-}
-
-export function resolveStatus(issueFields, sprint) {
-  const statusId = issueFields.status.id;
+  const jiraConfig = omegaConfig.getJiraConfig();
 
   if(issueFields.sprint && new Date(sprint.start) < new Date(issueFields.sprint.startDate)) {
-    return statusMapping[POSTPONED_STATUS_ID];
+    return jiraConfig.statusMappings[omegaConfig.getItemStatusValues().POSTPONED]; // POSTPONED_STATUS_ID
   }
-  return statusMapping[statusId] || 'todo';
+  return jiraConfig.statusMappings[statusId] || omegaConfig.getItemStatusValues().TODO;
 }

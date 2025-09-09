@@ -12,96 +12,21 @@ class FakeDataGenerator {
       { displayName: 'Emma Davis', accountId: 'emma.davis' }
     ];
 
-    this.areas = [
-      { id: 'frontend', name: 'Frontend' },
-      { id: 'backend', name: 'Backend' },
-      { id: 'devops', name: 'DevOps' },
-      { id: 'data', name: 'Data Engineering' },
-      { id: 'mobile', name: 'Mobile' },
-      { id: 'ai', name: 'AI/ML' }
-    ];
+    // Get areas and initiatives from omega config
+    const areasConfig = this.omegaConfig.getAreas();
+    this.areas = Object.entries(areasConfig).map(([id, name]) => ({ id, name }));
 
-    this.initiatives = [
-      { id: 1, name: 'AI Platform Enhancement' },
-      { id: 2, name: 'Customer Data Platform' },
-      { id: 3, name: 'Mobile Experience' },
-      { id: 4, name: 'Performance Optimization' },
-      { id: 5, name: 'Security Hardening' }
-    ];
+    const initiativesConfig = this.omegaConfig.getInitiatives();
+    this.initiatives = Object.entries(initiativesConfig).map(([id, name], index) => ({ 
+      id: index + 1, 
+      name 
+    }));
 
-        this.projects = {
-          'PROJ1': {
-            summary: 'AI Platform Enhancement',
-            labels: ['ai', 'platform', 'frontend', 'initiative:ai-platform', 'area:ai'],
-            externalRoadmap: 'AI Initiative',
-            externalRoadmapDescription: 'Enhance AI capabilities',
-            area: 'ai',
-            initiativeId: 1
-          },
-          'PROJ2': {
-            summary: 'Customer Data Platform',
-            labels: ['data', 'customer', 'backend', 'initiative:data-platform', 'area:data'],
-            externalRoadmap: 'Data Initiative',
-            externalRoadmapDescription: 'Improve customer data handling',
-            area: 'data',
-            initiativeId: 2
-          },
-          'PROJ3': {
-            summary: 'Mobile Experience',
-            labels: ['mobile', 'ux', 'frontend', 'initiative:mobile-experience', 'area:mobile'],
-            externalRoadmap: 'Mobile Initiative',
-            externalRoadmapDescription: 'Enhance mobile user experience',
-            area: 'mobile',
-            initiativeId: 3
-          },
-          'PROJ4': {
-            summary: 'API Performance',
-            labels: ['api', 'performance', 'backend', 'initiative:performance', 'area:backend'],
-            externalRoadmap: 'Performance Initiative',
-            externalRoadmapDescription: 'Optimize API performance',
-            area: 'backend',
-            initiativeId: 4
-          },
-          'PROJ5': {
-            summary: 'Security Audit',
-            labels: ['security', 'audit', 'devops', 'initiative:security', 'area:devops'],
-            externalRoadmap: 'Security Initiative',
-            externalRoadmapDescription: 'Comprehensive security audit',
-            area: 'devops',
-            initiativeId: 5
-          },
-          'PROJ6': {
-            summary: 'Frontend Dashboard',
-            labels: ['frontend', 'dashboard', 'ui', 'initiative:ai-platform', 'area:frontend'],
-            externalRoadmap: 'AI Initiative',
-            externalRoadmapDescription: 'AI-powered dashboard',
-            area: 'frontend',
-            initiativeId: 1
-          },
-          'PROJ7': {
-            summary: 'Data Analytics Engine',
-            labels: ['analytics', 'data', 'backend', 'initiative:data-platform', 'area:data'],
-            externalRoadmap: 'Data Initiative',
-            externalRoadmapDescription: 'Advanced analytics engine',
-            area: 'data',
-            initiativeId: 2
-          },
-          'PROJ8': {
-            summary: 'Mobile SDK',
-            labels: ['mobile', 'sdk', 'backend', 'initiative:mobile-experience', 'area:mobile'],
-            externalRoadmap: 'Mobile Initiative',
-            externalRoadmapDescription: 'Mobile SDK for developers',
-            area: 'mobile',
-            initiativeId: 3
-          }
-        };
+    // Generate projects dynamically based on areas and initiatives from config
+    this.projects = this._generateRoadmapItems();
 
-    this.sprints = [
-      { id: 1, name: 'Sprint 1 - Q1 2024', state: 'active', startDate: '2024-01-01', endDate: '2024-01-15' },
-      { id: 2, name: 'Sprint 2 - Q1 2024', state: 'closed', startDate: '2024-01-16', endDate: '2024-01-30' },
-      { id: 3, name: 'Sprint 3 - Q1 2024', state: 'future', startDate: '2024-01-31', endDate: '2024-02-14' },
-      { id: 4, name: 'Sprint 4 - Q1 2024', state: 'future', startDate: '2024-02-15', endDate: '2024-02-29' }
-    ];
+    // Generate sprints following Shape-up methodology (2-month cycles)
+    this.sprints = this._generateSprints();
   }
 
   async getSprintById(sprintId) {
@@ -132,92 +57,87 @@ class FakeDataGenerator {
 
   async getIssuesForSprint(sprintId, extraFields = []) {
     const issues = [];
-    const projectKeys = Object.keys(this.projects);
+    const roadmapItemKeys = Object.keys(this.projects);
     const statuses = ['To Do', 'In Progress', 'Done', 'Review'];
     const issueTypes = ['Story', 'Task', 'Bug', 'Epic', 'Release Item'];
+    const externalStages = ['S1', 'S2', 'S3', 'S3+']; // Valid external release stages
 
-    for (let i = 0; i < 30; i++) {
-      const projectKey = projectKeys[Math.floor(Math.random() * projectKeys.length)];
-      const project = this.projects[projectKey];
-      const assignee = this.assignees[Math.floor(Math.random() * (this.assignees.length - 1)) + 1]; // Skip 'All Assignees'
-      const issueType = issueTypes[Math.floor(Math.random() * issueTypes.length)];
+    // Generate issues for each roadmap item to ensure we have release items
+    roadmapItemKeys.forEach((roadmapItemKey, roadmapItemIndex) => {
+      const roadmapItem = this.projects[roadmapItemKey];
+      
+      // Generate 2-4 issues per roadmap item
+      const numIssues = Math.floor(Math.random() * 3) + 2;
+      
+      for (let i = 0; i < numIssues; i++) {
+        const assignee = this.assignees[Math.floor(Math.random() * (this.assignees.length - 1)) + 1]; // Skip 'All Assignees'
+        const issueType = issueTypes[Math.floor(Math.random() * issueTypes.length)];
+        const issueIndex = roadmapItemIndex * 10 + i; // Ensure unique IDs
+        const releaseStage = externalStages[Math.floor(Math.random() * externalStages.length)];
 
-      issues.push({
-        id: `issue-${i}`,
-        key: `ISSUE-${i}`,
-        fields: {
-          summary: `${project.summary} - ${issueType} ${i + 1}`,
-          status: { name: statuses[Math.floor(Math.random() * statuses.length)] },
-          assignee: assignee,
-          effort: Math.floor(Math.random() * 8) + 1,
-          externalRoadmap: project.externalRoadmap,
-          labels: project.labels,
-          parent: { key: projectKey },
-          issuetype: { name: issueType },
-          area: project.area,
-          initiativeId: project.initiativeId,
-          url: `https://example.com/browse/ISSUE-${i}`,
-          // Add additional fields for release items
-          teams: [assignee.accountId],
-          areaIds: [project.area]
-        }
-      });
-    }
+        issues.push({
+          id: `issue-${issueIndex}`,
+          key: `ISSUE-${issueIndex}`,
+          fields: {
+            summary: `${roadmapItem.summary} - ${issueType} ${i + 1} - (${releaseStage})`, // Encode release stage in summary
+            status: { name: statuses[Math.floor(Math.random() * statuses.length)] },
+            assignee: assignee,
+            effort: Math.floor(Math.random() * 8) + 1,
+            externalRoadmap: 'Yes', // This needs to be 'Yes' for isExternal to return true
+            labels: roadmapItem.labels, // Use the roadmap item's labels which now include proper prefixes
+            parent: { key: roadmapItemKey },
+            issuetype: { name: issueType },
+            area: roadmapItem.area,
+            initiativeId: roadmapItem.initiativeId,
+            url: `https://example.com/browse/ISSUE-${issueIndex}`,
+            // Add additional fields for release items
+            teams: [assignee.accountId],
+            areaIds: [roadmapItem.area]
+          }
+        });
+      }
+    });
+    
     return issues;
   }
 
-  async getProjects() {
+  async getRoadmapItems() {
     return this.projects;
   }
 
-  async getFutureIssuesByRoadmapItems() {
-    const roadmapItems = {};
+  async getReleaseItemsGroupedByRoadmapItem() {
+    const releaseItemsByRoadmapItem = {};
+    const externalStages = ['S1', 'S2', 'S3', 'S3+']; // Valid external release stages
     
-    // Create multiple release items for each project with different assignees and areas
-    Object.keys(this.projects).forEach(projectKey => {
-      const project = this.projects[projectKey];
+    // Create multiple release items for each roadmap item with different assignees and areas
+    Object.keys(this.projects).forEach(roadmapItemKey => {
+      const roadmapItem = this.projects[roadmapItemKey];
       const releaseItems = [];
       
-      // Create 3-5 release items per project
+      // Create 3-5 release items per roadmap item
       const numItems = Math.floor(Math.random() * 3) + 3;
       
       for (let i = 0; i < numItems; i++) {
         const assignee = this.assignees[Math.floor(Math.random() * (this.assignees.length - 1)) + 1]; // Skip 'All Assignees'
         const statuses = ['To Do', 'In Progress', 'Done', 'Review'];
         const status = statuses[Math.floor(Math.random() * statuses.length)];
-        const stages = ['s0', 's1', 's2', 's3', 's3+'];
-        const stage = stages[Math.floor(Math.random() * stages.length)];
+        const releaseStage = externalStages[Math.floor(Math.random() * externalStages.length)];
         
+        // Create simplified structure (like real Jira API does)
         releaseItems.push({
-          id: `${projectKey}-RELEASE-${i + 1}`,
-          summary: `${project.summary} - Release Item ${i + 1}`,
-          parent: projectKey,
-          status: status,
+          id: `${roadmapItemKey}-RELEASE-${i + 1}`,
+          summary: `${roadmapItem.summary} - Release Item ${i + 1} - (${releaseStage})`, // Encode release stage in summary
           closedSprints: [],
-          sprint: null,
-          // Add properties that the roadmap item parser expects
-          ticketId: `${projectKey}-RELEASE-${i + 1}`,
-          stage: stage,
-          isExternal: Math.random() > 0.5,
-          validations: [],
-          areaIds: [project.area],
-          teams: [assignee.accountId],
-          effort: Math.floor(Math.random() * 8) + 1,
-          assignee: assignee,
-          // Add properties needed for the release item parser
-          projectId: projectKey,
-          isScheduledForFuture: Math.random() > 0.5,
-          isInBacklog: Math.random() > 0.5,
-          labels: project.labels,
-          // Add URL for the roadmap item
-          url: `https://example.com/browse/${projectKey}-RELEASE-${i + 1}`
+          parent: roadmapItemKey,
+          status: status,
+          sprint: null
         });
       }
       
-      roadmapItems[projectKey] = releaseItems;
+      releaseItemsByRoadmapItem[roadmapItemKey] = releaseItems;
     });
     
-    return roadmapItems;
+    return releaseItemsByRoadmapItem;
   }
 
   _getRandomStage() {
@@ -235,6 +155,151 @@ class FakeDataGenerator {
 
   getInitiatives() {
     return this.initiatives;
+  }
+
+  /**
+   * Generate roadmap items dynamically based on areas and initiatives from config
+   * @private
+   */
+  _generateRoadmapItems() {
+    const roadmapItems = {};
+    
+    // Get teams and themes from omega config
+    const teams = this.omegaConfig.getTeams();
+    const themes = this.omegaConfig.getThemes();
+    const teamKeys = Object.keys(teams);
+    const themeKeys = Object.keys(themes);
+    
+    let roadmapItemCounter = 1;
+    
+    // Generate roadmap items for each area-initiative combination
+    this.areas.forEach((area, areaIndex) => {
+      this.initiatives.forEach((initiative, initiativeIndex) => {
+        const roadmapItemKey = `ROAD-${roadmapItemCounter}`;
+        const summary = `${initiative.name} - ${roadmapItemCounter}`;
+        
+        // Pick a team that matches the area
+        const areaTeams = teamKeys.filter(teamKey => teamKey.startsWith(area.id));
+        const selectedTeam = areaTeams.length > 0 ? areaTeams[Math.floor(Math.random() * areaTeams.length)] : teamKeys[0];
+        
+        // Pick a theme that matches the initiative
+        const selectedTheme = themeKeys[Math.floor(Math.random() * themeKeys.length)];
+        
+        roadmapItems[roadmapItemKey] = {
+          summary,
+          labels: [
+            area.id, 
+            `initiative:${initiative.id}`,
+            `area:${area.id}`,
+            `team:${selectedTeam}`,
+            `theme:${selectedTheme}`
+          ],
+          externalRoadmap: 'Yes',
+          externalRoadmapDescription: `${initiative.name} - roadmap item ${roadmapItemCounter}`,
+          area: area.id,
+          initiativeId: initiative.id
+        };
+        
+        roadmapItemCounter++;
+      });
+    });
+    
+    // Add some roadmap items without initiatives to test UI behavior
+    for (let i = 0; i < 3; i++) {
+      const roadmapItemKey = `ROAD-${roadmapItemCounter}`;
+      const area = this.areas[Math.floor(Math.random() * this.areas.length)];
+      const summary = `Unassigned - ${roadmapItemCounter}`;
+      
+      // Pick a team that matches the area
+      const areaTeams = teamKeys.filter(teamKey => teamKey.startsWith(area.id));
+      const selectedTeam = areaTeams.length > 0 ? areaTeams[Math.floor(Math.random() * areaTeams.length)] : teamKeys[0];
+      
+      // Pick a random theme
+      const selectedTheme = themeKeys[Math.floor(Math.random() * themeKeys.length)];
+      
+      roadmapItems[roadmapItemKey] = {
+        summary,
+        labels: [
+          area.id, 
+          `area:${area.id}`,
+          `team:${selectedTeam}`,
+          `theme:${selectedTheme}`
+        ],
+        externalRoadmap: 'Yes',
+        externalRoadmapDescription: `Unassigned roadmap item ${roadmapItemCounter}`,
+        area: area.id,
+        initiativeId: null // No initiative assigned
+      };
+      
+      roadmapItemCounter++;
+    }
+    
+    return roadmapItems;
+  }
+
+  /**
+   * Generate sprints following Shape-up methodology (2-month cycles)
+   * Creates: 1 past sprint, 1 active sprint, 2 future sprints
+   * @private
+   */
+  _generateSprints() {
+    const now = new Date();
+    const sprints = [];
+    
+    // Get current month and year
+    const currentMonth = now.getMonth(); // 0-based (0 = January)
+    const currentYear = now.getFullYear();
+    
+    // Calculate the current 2-month cycle
+    // Shape-up cycles: Jan-Feb, Mar-Apr, May-Jun, Jul-Aug, Sep-Oct, Nov-Dec
+    const cycleStartMonth = Math.floor(currentMonth / 2) * 2; // 0, 2, 4, 6, 8, 10
+    
+    // Generate 4 sprints: 1 past, 1 active, 2 future
+    for (let i = -1; i <= 2; i++) {
+      // Calculate the sprint's start month and year
+      const sprintStartMonth = (cycleStartMonth + i * 2) % 12;
+      const sprintYear = currentYear + Math.floor((cycleStartMonth + i * 2) / 12);
+      
+      // Calculate the sprint's end month and year (second month of the cycle)
+      const sprintEndMonth = (sprintStartMonth + 1) % 12;
+      const sprintEndYear = sprintStartMonth === 11 ? sprintYear + 1 : sprintYear;
+      
+      // Create start date (1st of first month)
+      const startDate = new Date(sprintYear, sprintStartMonth, 1);
+      
+      // Create end date (last day of second month)
+      const endDate = new Date(sprintEndYear, sprintEndMonth + 1, 0); // Last day of the month
+      
+      // Determine sprint state based on current date
+      let state;
+      const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (currentDate < startDate) {
+        state = 'future';
+      } else if (currentDate >= startDate && currentDate <= endDate) {
+        state = 'active';
+      } else {
+        state = 'closed';
+      }
+      
+      // Create sprint name
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      const startMonthName = monthNames[sprintStartMonth];
+      const endMonthName = monthNames[sprintEndMonth];
+      const sprintName = `${startMonthName}-${endMonthName} ${sprintYear}`;
+      
+      sprints.push({
+        id: i + 2, // Start from 1, so: 1, 2, 3, 4
+        name: sprintName,
+        state: state,
+        startDate: startDate.toISOString().split('T')[0], // YYYY-MM-DD format
+        endDate: endDate.toISOString().split('T')[0] // YYYY-MM-DD format
+      });
+    }
+    
+    return sprints;
   }
 }
 

@@ -342,7 +342,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
 
   // Initialize pages from configuration
   if (omegaConfig) {
-    const pages = omegaConfig.FrontendConfig.getAllPages()
+    const pages = omegaConfig.getFrontendConfig().getAllPages()
     store.commit('SET_PAGES', pages)
     
     // Set current page based on initial route

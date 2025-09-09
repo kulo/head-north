@@ -1,4 +1,4 @@
-const collectJiraData = require('../server/service/collect-jira-data');
+const collectCycleOverviewData = require('../server/service/collect-cycle-overview-data');
 const { jiraLabelTranslations: labelTranslations } = require('../server/config');
 const { uniq } = require('lodash');
 
@@ -10,7 +10,7 @@ const getLabels = (labels, prefix) => {
 };
 
 (async () => {
-  const { projects, issues } = await collectJiraData();
+  const { projects, issues } = await collectCycleOverviewData();
 
   const isssuesWithLabels = issues.filter(issue => {
     return issue.fields.labels.length !== 0;

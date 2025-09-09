@@ -1,5 +1,5 @@
 'use strict';
-const collectJiraData = require('../server/service/collect-jira-data');
+const collectCycleOverviewData = require('../server/service/collect-cycle-overview-data');
 const parseJiraIssues = require('../server/calculator/parse-jira-issues');
 const { jiraHost } = require('../server/config');
 
@@ -9,7 +9,7 @@ const logTicketId = (ticketId) => {
 };
 
 (async () => {
-  const { projects, issues } = await collectJiraData();
+  const { projects, issues } = await collectCycleOverviewData();
 
   console.log('Release Item without labels: ');
   const issuesWithLabels = issues.filter(issue => {

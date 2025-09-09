@@ -45,10 +45,10 @@ import { OmegaConfig } from '@omega/shared-config'
 const omegaConfig = new OmegaConfig('development')
 
 // Get frontend configuration
-const frontendConfig = omegaConfig.FrontendConfig
+const frontendConfig = omegaConfig.getFrontendConfig()
 
 // Get all pages
-const pages = omegaConfig.FrontendConfig.getAllPages()
+const pages = omegaConfig.getFrontendConfig().getAllPages()
 ```
 
 ### Environment-specific Configuration

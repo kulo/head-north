@@ -6,41 +6,24 @@
 import { logger } from '@omega-one/shared-utils';
 
 /**
- * Register API routes using shared configuration
+ * Register API routes using provided route definitions
  * @param {Object} router - Koa router instance
+ * @param {Array} routes - Array of route definitions
  * @param {Object} handlers - Object containing route handlers
- * @param {Object} omegaConfig - OmegaConfig instance
  * @param {Object} options - Registration options
  */
-function registerApiRoutes(router, handlers, omegaConfig, options = {}) {
+function registerApiRoutes(router, routes, handlers, options = {}) {
   const { logRoutes = true, prefix = '' } = options;
-  const endpoints = omegaConfig.getEndpoints();
-  
-  const routes = [
-    {
-      method: 'GET',
-      path: endpoints.HEALTH_CHECK,
-      handler: handlers.healthCheck || defaultHealthCheck,
-      description: 'Health check endpoint'
-    },
-    {
-      method: 'GET',
-      path: endpoints.CYCLE_OVERVIEW,
-      handler: handlers.cycleOverview,
-      description: 'Overview data for a specific cycle/sprint'
-    },
-    {
-      method: 'GET',
-      path: endpoints.CYCLES_ROADMAP,
-      handler: handlers.cyclesRoadmap,
-      description: 'Cycles roadmap data showing past, current, and future cycles'
-    }
-  ];
 
   routes.forEach(route => {
-    if (route.handler) {
+    // Get the actual handler function from the handlers object
+    const handlerFunction = typeof route.handler === 'string' 
+      ? handlers[route.handler] || defaultHealthCheck
+      : route.handler;
+    
+    if (handlerFunction) {
       const fullPath = prefix + route.path;
-      router[route.method.toLowerCase()](fullPath, route.handler);
+      router[route.method.toLowerCase()](fullPath, handlerFunction);
       
       if (logRoutes) {
         logger.default.info('Route registered', {
@@ -53,9 +36,9 @@ function registerApiRoutes(router, handlers, omegaConfig, options = {}) {
   });
 
   if (logRoutes) {
-    logger.default.info('API routes registered using shared configuration', {
+    logger.default.info('API routes registered', {
       totalRoutes: routes.length,
-      endpoints: Object.values(endpoints)
+      routePaths: routes.map(r => r.path)
     });
   }
 }

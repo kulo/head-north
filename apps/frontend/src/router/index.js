@@ -4,7 +4,7 @@ import ReleaseOverview from '@/components/roadmap/ReleaseOverview.vue'
 
 // Router factory function that accepts OmegaConfig
 export default function createAppRouter(omegaConfig) {
-  const pages = omegaConfig.FrontendConfig.pages
+  const pages = omegaConfig.getFrontendConfig().pages
 
   const routes = [
     { 

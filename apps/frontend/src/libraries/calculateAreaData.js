@@ -42,7 +42,8 @@ const createAreaPredicate = (area, predicate) => {
   return (epic) => epic.areaIds.includes(area) && predicate(epic);
 }
 
-export const calculateAreaData = (cycleData, epicPredicate = () => true, objectivePredicate = () => true) => {
+export const calculateAreaData = 
+  (cycleData, epicPredicate = () => true, objectivePredicate = () => true) => {
   const areaMapping = cycleData.area;
   const predicates = createPredicates(areaMapping, epicPredicate);
 

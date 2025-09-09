@@ -63,7 +63,7 @@ class JiraAPI {
     });
   }
 
-  async getProjects() {
+  async getRoadmapItems() {
     const jiraConfig = this.omegaConfig.getJiraConfig();
     const response = await this._client.board.getIssuesForBoard({
       boardId: jiraConfig.boardId,
@@ -71,7 +71,7 @@ class JiraAPI {
       jql: 'issuetype = "Roadmap Item"',
       fields: ['summary', 'labels', jiraConfig.fields.externalRoadmap, jiraConfig.fields.externalRoadmapDescription]
     });
-    const projectData = response.issues.map(issue => ({
+    const roadmapItemData = response.issues.map(issue => ({
       [issue.key]: {
         summary: issue.fields.summary,
         labels: issue.fields.labels,
@@ -79,10 +79,10 @@ class JiraAPI {
         externalRoadmapDescription: get(issue, `fields.${jiraConfig.fields.externalRoadmapDescription}`)
       }
     }));
-    return Object.assign({}, ...projectData);
+    return Object.assign({}, ...roadmapItemData);
   }
 
-  async getFutureIssuesByRoadmapItems() {
+  async getReleaseItemsGroupedByRoadmapItem() {
     const jiraConfig = this.omegaConfig.getJiraConfig();
     const issues = await this._client.board.getIssuesForBoard({
       boardId: jiraConfig.boardId,
