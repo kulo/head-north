@@ -390,7 +390,7 @@ body {
   padding-right: 30px;
 }
 
-.epic-container-column__objective,
+.epic-container-column__initiative,
 .epic-container-column__project {
   align-items: center;
   display: flex;
@@ -403,7 +403,7 @@ body {
   transition: all .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
 }
 
-.overview-page .epic-container-column__objective,
+.overview-page .epic-container-column__initiative,
 .overview-page .epic-container-column__project {
   height: 65px;
 }
@@ -421,7 +421,7 @@ body {
   padding: 0;
 }
 
-.epic-container-column__objective {
+.epic-container-column__initiative {
   background: var(--color-gray-800);
   font-size: 18px;
   height: 47px;
@@ -434,18 +434,18 @@ body {
   text-shadow: 1px 1px rgba(0, 0, 0, 1);
 }
 
-.overview-page .epic-container-column__objective {
+.overview-page .epic-container-column__initiative {
   height: 52px;
   margin-bottom: 10px;
 }
 
-.epic-container-column__objective__name {
+.epic-container-column__initiative__name {
   width: calc(100% - 50px);
   float: left;
   font-weight: bold;
 }
 
-.epic-container-column__objective__percentage {
+.epic-container-column__initiative__percentage {
   float: right;
   width: 50px;
   text-align: right;
@@ -548,14 +548,14 @@ body {
   margin-right: 3px;
 }
 
-.global-objectives {
+.global-initiatives {
     background: var(--color-gray-900);
     margin: -20px -20px 20px -20px;
     border-bottom: 1px solid var(--color-gray-700);
     box-shadow: inset 0 -10px 10px -10px rgba(0,0,0,.3);
 }
 
-.global-objectives__container, .global-objectives__progress {
+.global-initiatives__container, .global-initiatives__progress {
     height: 310px;
     position: relative;
     margin: 20px;
@@ -564,81 +564,81 @@ body {
     box-sizing: border-box;
 }
 
-.global-objectives__container {
+.global-initiatives__container {
     margin-right: 10px;
 }
 
-.global-objectives__progress {
+.global-initiatives__progress {
     margin-left: 10px;
     padding: 35px 40px;
     box-sizing: border-box;
 }
 
-.global-objectives__chart-container {
+.global-initiatives__chart-container {
     width: 300px;
     height: 350px;
     position: absolute;
     top: 0;
 }
 
-.global-objectives__details {
+.global-initiatives__details {
     position: absolute;
     left: 300px;
     top: 45px;
     width: calc(100% - 320px);
 }
 
-.global-objectives__details.global-objectives__details-1 {
+.global-initiatives__details.global-initiatives__details-1 {
     top: 118px;
 }
 
-.global-objectives__details.global-objectives__details-2 {
+.global-initiatives__details.global-initiatives__details-2 {
     top: 80px;
 }
 
-.global-objectives__details.global-objectives__details-3 {
+.global-initiatives__details.global-initiatives__details-3 {
     top: 45px;
 }
 
-.global-objectives__details.global-objectives__details-4 {
+.global-initiatives__details.global-initiatives__details-4 {
     top: 21px;
 }
 
-.global-objectives__details.global-objectives__details-gt4 {
+.global-initiatives__details.global-initiatives__details-gt4 {
     top: 21px;
     width: calc(100% - 300px);
 }
 
-.global-objectives__details__title {
+.global-initiatives__details__title {
     font-size: 24px;
     font-weight: bold;
 }
 
-.global-objectives__detail {
+.global-initiatives__detail {
     padding: 12px 0;
 }
 
-.global-objectives__details-1 .global-objectives__detail {
+.global-initiatives__details-1 .global-initiatives__detail {
     padding: 12px 0;
 }
 
-.global-objectives__details-2 .global-objectives__detail {
+.global-initiatives__details-2 .global-initiatives__detail {
     padding: 12px 0;
 }
 
-.global-objectives__details-3 .global-objectives__detail {
+.global-initiatives__details-3 .global-initiatives__detail {
     padding: 12px 0;
 }
 
-.global-objectives__details-4 .global-objectives__detail {
+.global-initiatives__details-4 .global-initiatives__detail {
     padding: 8px 0;
 }
 
-.global-objectives__details-gt4 .global-objectives__detail {
+.global-initiatives__details-gt4 .global-initiatives__detail {
     padding: 8px 0;
 }
 
-.global-objectives__detail .global-objectives__detail__progress:before {
+.global-initiatives__detail .global-initiatives__detail__progress:before {
     content: '';
     display: inline-block;
     width: 20px;
@@ -649,121 +649,121 @@ body {
     top: 1px;
 }
 
-.global-objectives__details-gt4 .global-objectives__detail .global-objectives__detail__progress:before {
+.global-initiatives__details-gt4 .global-initiatives__detail .global-initiatives__detail__progress:before {
   top: 3px;
 }
 
-.global-objectives__details-gt4 > div {
+.global-initiatives__details-gt4 > div {
   column-count: 2;
   column-gap: 20px;
   column-fill: auto;
   height: 285px;
 }
 
-.global-objectives__details-gt4 .global-objectives__detail {
+.global-initiatives__details-gt4 .global-initiatives__detail {
   -webkit-column-break-inside: avoid-column;
   page-break-inside: avoid-column;
   break-inside: avoid-column;
 }
 
-.global-objectives__detail:nth-child(1) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(1) .global-initiatives__detail__progress:before {
     background: var(--color-highlight);
 }
 
-.global-objectives__detail:nth-child(2) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(2) .global-initiatives__detail__progress:before {
     background: var(--color-info);
 }
 
-.global-objectives__detail:nth-child(3) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(3) .global-initiatives__detail__progress:before {
     background: var(--color-gray-500);
 }
 
-.global-objectives__detail:nth-child(4) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(4) .global-initiatives__detail__progress:before {
   background: var(--color-gray-600);
 }
 
-.global-objectives__detail:nth-child(5) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(5) .global-initiatives__detail__progress:before {
   background: var(--color-gray-600);
 }
 
-.global-objectives__detail:nth-child(6) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(6) .global-initiatives__detail__progress:before {
   background: var(--color-gray-500);
 }
 
-.global-objectives__detail:nth-child(7) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(7) .global-initiatives__detail__progress:before {
   background: var(--color-warning);
 }
 
-.global-objectives__detail:nth-child(8) .global-objectives__detail__progress:before {
+.global-initiatives__detail:nth-child(8) .global-initiatives__detail__progress:before {
   background: var(--color-gray-300);
 }
 
-.global-objectives__detail__name {
+.global-initiatives__detail__name {
     font-size: 15px;
     color: var(--color-info);
     margin-top: 1px;
     margin-left: 33px;
 }
 
-.global-objectives__details-gt4 .global-objectives__detail__name {
+.global-initiatives__details-gt4 .global-initiatives__detail__name {
   font-size: 15px;
 }
 
-.global-objectives__detail__progress {
+.global-initiatives__detail__progress {
     display: inline-block;
     margin-left: 2px;
     font-size: 24px;
 }
 
-.global-objectives__details-gt4 .global-objectives__detail__progress {
+.global-initiatives__details-gt4 .global-initiatives__detail__progress {
   font-size: 20px;
 }
 
-.global-objectives__detail__weeks {
+.global-initiatives__detail__weeks {
     color: var(--color-info);
     display: inline-block;
     font-size: 12px;
     opacity: .6;
 }
 
-.global-objectives__progress__row {
+.global-initiatives__progress__row {
     position: relative;
 }
 
-.global-objectives__progress__big-container {
+.global-initiatives__progress__big-container {
     text-align: center;
 }
 
-.global-objectives__progress__big {
+.global-initiatives__progress__big {
     font-size: 50px;
     line-height: 50px;
     font-weight: bold;
 }
 
-.global-objectives__progress__big-title {
+.global-initiatives__progress__big-title {
     font-size: 18px;
     color: var(--color-info);
 }
 
-.global-objectives__progress-gt4 .global-objectives__progress__big-title {
+.global-initiatives__progress-gt4 .global-initiatives__progress__big-title {
   font-size: 17px;
 }
 
-.global-objectives__progress__value-container {
+.global-initiatives__progress__value-container {
     text-align: center;
 }
 
-.global-objectives__progress__bar {
+.global-initiatives__progress__bar {
     width: 100%;
     height: 20px;
     margin-top: 27px;
     position: relative;
 }
 
-.global-objectives__progress__bar .global-objectives__progress__bar_inprogress,
-.global-objectives__progress__bar .global-objectives__progress__bar_done,
-.global-objectives__progress__bar .global-objectives__progress__bar_nottodo,
-.global-objectives__progress__bar:before {
+.global-initiatives__progress__bar .global-initiatives__progress__bar_inprogress,
+.global-initiatives__progress__bar .global-initiatives__progress__bar_done,
+.global-initiatives__progress__bar .global-initiatives__progress__bar_nottodo,
+.global-initiatives__progress__bar:before {
     content: " ";
     position: absolute;
     display: block;
@@ -773,32 +773,32 @@ body {
     width: 100%;
 }
 
-.global-objectives__progress__bar .global-objectives__progress__bar_inprogress {
+.global-initiatives__progress__bar .global-initiatives__progress__bar_inprogress {
   width: var(--percentage-with-in-progress);
   background: var(--color-success);
   background: url(../stripe7.gif) center center repeat-x;
   opacity: 0.8;
 }
 
-.global-objectives__progress__bar .global-objectives__progress__bar_done {
+.global-initiatives__progress__bar .global-initiatives__progress__bar_done {
   width: var(--percentage);
   background: var(--color-success);
 }
 
-.global-objectives__progress__bar .global-objectives__progress__bar_nottodo {
+.global-initiatives__progress__bar .global-initiatives__progress__bar_nottodo {
   width: var(--percentage-not-to-do);
   top: 0;
   right: 0;
   background: var(--color-error);
 }
 
-.global-objectives__progress__bar:after {
+.global-initiatives__progress__bar:after {
     width: var(--percentage);
     background: var(--color-success);
 }
 
 
-.global-objectives__time__bar {
+.global-initiatives__time__bar {
     width: 100%;
     box-sizing: border-box;
     height: 20px;
@@ -811,7 +811,7 @@ body {
     opacity: .6;
 }
 
-.global-objectives__time__bar:before {
+.global-initiatives__time__bar:before {
     content: " ";
     position: absolute;
     top: 0;
@@ -821,23 +821,23 @@ body {
     border-top: 2px dashed var(--color-info);
 }
 
-.global-objectives__time__start, .global-objectives__time__end {
+.global-initiatives__time__start, .global-initiatives__time__end {
     position: absolute;
     top: -6px;
     background: var(--color-gray-900);
 }
 
-.global-objectives__time__start {
+.global-initiatives__time__start {
     left: 0;
     padding-right: 8px;
 }
 
-.global-objectives__time__end {
+.global-initiatives__time__end {
     right: 0;
     padding-left: 8px;
 }
 
-.global-objectives__time__current {
+.global-initiatives__time__current {
     background: var(--color-gray-900);
     position: absolute;
     top: 10px;
@@ -845,40 +845,40 @@ body {
     font-weight: bold;
 }
 
-.global-objectives__time__current.label-left {
+.global-initiatives__time__current.label-left {
     text-align: right;
     width: var(--percentage);
 }
 
-.global-objectives__time__current.label-right {
+.global-initiatives__time__current.label-right {
     text-align: left;
     left: var(--percentage);
 }
 
-.global-objectives__progress__title {
+.global-initiatives__progress__title {
     font-size: 18px;
     color: var(--color-info);
 }
 
-.global-objectives__progress-gt4 .global-objectives__progress__title {
+.global-initiatives__progress-gt4 .global-initiatives__progress__title {
   font-size: 14px;
 }
 
-.global-objectives__progress_value {
+.global-initiatives__progress_value {
     font-size: 24px;
 }
 
-.global-objectives__progress-gt4 .global-objectives__progress_value {
+.global-initiatives__progress-gt4 .global-initiatives__progress_value {
   font-size: 14px;
 }
 
 
-.global-objectives__chart-container svg, .global-objectives__chart-container .apexcharts-canvas {
+.global-initiatives__chart-container svg, .global-initiatives__chart-container .apexcharts-canvas {
     height: 350px !important;
     min-height: 350px !important;
 }
 
-.global-objectives__chart {
+.global-initiatives__chart {
     position: absolute;
     top: 50px;
     left: -10px;
@@ -901,26 +901,26 @@ body {
         font-size: 16px;
     }
 
-    .global-objectives__progress {
+    .global-initiatives__progress {
         padding: 10px;
     }
 
-    .global-objectives__progress {
+    .global-initiatives__progress {
         margin-left: 20px;
         margin-right: 20px;
     }
 
-    .global-objectives__container, .global-objectives__progress {
+    .global-initiatives__container, .global-initiatives__progress {
         height: 245px;
         background: none;
         border: none;
     }
 
-    .global-objectives__progress_value {
+    .global-initiatives__progress_value {
         font-size: 18px;
     }
 
-    .global-objectives__progress__title {
+    .global-initiatives__progress__title {
         font-size: 14px;
     }
 
@@ -931,7 +931,7 @@ body {
 
 
 @media only screen and (min-width: 1200px) {
-  .global-objectives > .ant-col-lg-9 {
+  .global-initiatives > .ant-col-lg-9 {
     width: 40%;
   }
 }

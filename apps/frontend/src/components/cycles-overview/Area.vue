@@ -22,14 +22,14 @@
     </div>
     
     <div v-else-if="areaData && areaData.cycle && areaData.initiatives" class="area-content">
-      <global-objective-progress 
+      <global-initiative-progress 
         :cycle="areaData.cycle" 
         :initiatives="areaData.initiatives">
-      </global-objective-progress>
+      </global-initiative-progress>
       
-      <objective-chart 
+      <initiative-chart 
         :initiatives="areaData.initiatives">
-      </objective-chart>
+      </initiative-chart>
     </div>
     
     <div v-else class="no-data-container">
@@ -51,8 +51,8 @@ import ReleaseSelector from "../selectors/ReleaseSelector.vue"
 import AssigneeSelector from "../selectors/AssigneeSelector.vue"
 // TODO: Remove this import if CycleAreaSelector is permanently removed
 // import CycleAreaSelector from "../selectors/CycleAreaSelector.vue"
-import GlobalObjectiveProgress from "./GlobalObjectiveProgress.vue"
-import ObjectiveChart from "./ObjectiveChart.vue"
+import GlobalInitiativeProgress from "./GlobalInitiativeProgress.vue"
+import InitiativeChart from "./InitiativeChart.vue"
 
 export default {
   name: "Area",
@@ -67,8 +67,8 @@ export default {
     AssigneeSelector,
     // TODO: Remove this component if CycleAreaSelector is permanently removed
     // CycleAreaSelector,
-    GlobalObjectiveProgress,
-    ObjectiveChart
+    GlobalInitiativeProgress,
+    InitiativeChart
   },
   setup() {
     const store = useStore()

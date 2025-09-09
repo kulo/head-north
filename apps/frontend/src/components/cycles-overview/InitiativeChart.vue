@@ -1,33 +1,33 @@
 <template>
-  <div class="global-objectives__container">
+  <div class="global-initiatives__container">
     <div
-      class="global-objectives__chart-container"
+      class="global-initiatives__chart-container"
       style="transform: rotateY(180deg) rotateX(180deg)">
       <apexchart
-        class="global-objectives__chart global-objectives__chart_background"
+        class="global-initiatives__chart global-initiatives__chart_background"
         type="radialBar"
         height="100%"
         :options="options2"
         :series="initiativeTracks"></apexchart>
       <apexchart
-        class="global-objectives__chart"
+        class="global-initiatives__chart"
         type="radialBar"
         height="100%"
         :options="inProgressOptions"
         :series="initiativeInProgress"></apexchart>
       <apexchart
-        class="global-objectives__chart"
+        class="global-initiatives__chart"
         type="radialBar"
         height="100%"
         :options="options1"
         :series="initiativeProgresses"></apexchart>
     </div>
-    <div class="global-objectives__details" :class="initiativeLengthClass()">
+    <div class="global-initiatives__details" :class="initiativeLengthClass()">
       <div>
-        <div class="global-objectives__detail" v-for="initiative in initiativesWithRelativeValues" :key="initiative.name">
-          <div class="global-objectives__detail__progress">{{ initiative.progress }}%
-            <div class="global-objectives__detail__weeks"><strong>{{ initiative.weeksDone }}</strong> of {{ initiative.weeks }} weeks</div></div>
-          <div class="global-objectives__detail__name">
+        <div class="global-initiatives__detail" v-for="initiative in initiativesWithRelativeValues" :key="initiative.name">
+          <div class="global-initiatives__detail__progress">{{ initiative.progress }}%
+            <div class="global-initiatives__detail__weeks"><strong>{{ initiative.weeksDone }}</strong> of {{ initiative.weeks }} weeks</div></div>
+          <div class="global-initiatives__detail__name">
             <span class="initiative">{{ initiative.initiative }}</span>
           </div>
         </div>
@@ -48,7 +48,7 @@ const sortInitiatives = (initiatives) => {
 }
 
 export default {
-  name: "objective-chart",
+  name: "initiative-chart",
   props: {
     initiatives: {
       type: Array,
@@ -305,8 +305,8 @@ export default {
 
     const initiativeLengthClass = () => {
       let initiativeClass = {}
-      initiativeClass['global-objectives__details-' + summarizedInitiatives.value.length] = true
-      if (summarizedInitiatives.value.length > 4) initiativeClass['global-objectives__details-gt4'] = true
+      initiativeClass['global-initiatives__details-' + summarizedInitiatives.value.length] = true
+      if (summarizedInitiatives.value.length > 4) initiativeClass['global-initiatives__details-gt4'] = true
       return initiativeClass
     }
 
