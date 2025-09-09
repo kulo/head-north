@@ -172,12 +172,6 @@ export default class OmegaConfig {
             "retention": "Retention",
             "uncategorized": "Uncategorized"
           },
-          objectives: {
-            // Placeholder for future objectives configuration
-            // Example structure:
-            // "objective-1": "Objective Name",
-            // "objective-2": "Another Objective"
-          }
         }
       },
       
@@ -424,7 +418,7 @@ export default class OmegaConfig {
 
   /**
    * Get product strategy configuration
-   * @returns {object} Product strategy configuration (themes, initiatives, objectives)
+   * @returns {object} Product strategy configuration (themes, initiatives)
    */
   getProductStrategyConfig() {
     return this.config.common.productStrategy
@@ -446,13 +440,6 @@ export default class OmegaConfig {
     return this.config.common.productStrategy.initiatives
   }
 
-  /**
-   * Get objectives configuration
-   * @returns {object} Objectives configuration
-   */
-  getObjectives() {
-    return this.config.common.productStrategy.objectives
-  }
 
   /**
    * Check if a stage is a final release stage

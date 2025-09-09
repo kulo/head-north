@@ -17,8 +17,8 @@ class FakeDataGenerator {
     this.areas = Object.entries(areasConfig).map(([id, name]) => ({ id, name }));
 
     const initiativesConfig = this.omegaConfig.getInitiatives();
-    this.initiatives = Object.entries(initiativesConfig).map(([id, name], index) => ({ 
-      id: index + 1, 
+    this.initiatives = Object.entries(initiativesConfig).map(([id, name]) => ({ 
+      id, 
       name 
     }));
 

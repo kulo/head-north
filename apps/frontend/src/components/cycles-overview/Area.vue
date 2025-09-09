@@ -21,14 +21,14 @@
       <a-alert type="error" :message="error" show-icon />
     </div>
     
-    <div v-else-if="areaData && areaData.cycle && areaData.objectives" class="area-content">
+    <div v-else-if="areaData && areaData.cycle && areaData.initiatives" class="area-content">
       <global-objective-progress 
         :cycle="areaData.cycle" 
-        :objectives="areaData.objectives">
+        :initiatives="areaData.initiatives">
       </global-objective-progress>
       
       <objective-chart 
-        :objectives="areaData.objectives">
+        :initiatives="areaData.initiatives">
       </objective-chart>
     </div>
     

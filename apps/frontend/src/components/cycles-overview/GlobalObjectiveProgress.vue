@@ -1,5 +1,5 @@
 <template>
-  <div class="global-objectives__progress" :class="{ 'global-objectives__progress-gt4': objectives.length > 4}">
+  <div class="global-objectives__progress" :class="{ 'global-objectives__progress-gt4': initiatives.length > 4}">
     <div class="global-objectives__progress__row">
       <div class="global-objectives__progress__big-container">
         <div class="global-objectives__progress__big">{{ cycle.progress }}%</div>
@@ -101,7 +101,7 @@ export default {
       type: Object,
       required: true
     },
-    objectives: {
+    initiatives: {
       type: Array,
       required: true
     }

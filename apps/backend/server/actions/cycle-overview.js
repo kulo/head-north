@@ -5,10 +5,6 @@ import { logger } from '@omega-one/shared-utils';
 
 const { uniqBy } = pkg;
 
-const getInitiatives = (objectives) => {
-  const usedInitiatives = objectives.map(objective => ({ id: objective.initiativeId, name: objective.initiative }));
-  return uniqBy(usedInitiatives, initiative => initiative.id);
-}
 
 export default async (context) => {
   
@@ -18,24 +14,23 @@ export default async (context) => {
   const cycleId = context.params.id || context.query.sprintId;
   logger.default.info('building cycle overview data for cycleId: ', { cycleId });
 
-  const { roadmapItems, issues, sprint, sprints, assignees, areas, initiatives } = 
+  const { roadmapItems, issues, sprint, sprints, assignees, areas, initiatives: configInitiatives } = 
     await collectCycleOverviewData(cycleId, omegaConfig);
   
-  const objectives = parseJiraIssues(issues, roadmapItems, sprint, omegaConfig);
+  const initiatives = parseJiraIssues(issues, roadmapItems, sprint, omegaConfig);
   const teams = omegaConfig.getTeams();
 
   context.body = {
     devCycleData: {
       cycle: sprint,
-      objectives,
+      initiatives,
       area: omegaConfig.getLabelTranslations().areas,
       assignees,
-      teams,
-      initiatives
+      teams
     },
     sprints,
     stages: omegaConfig.getStages(),
     areas,
-    initiatives
+    initiatives: configInitiatives
   };
 };

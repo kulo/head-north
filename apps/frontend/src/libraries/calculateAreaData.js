@@ -10,7 +10,7 @@ const filterReleaseItems = (releaseItemPredicate) => (roadmapItem) => {
 };
 
 const hasReleaseItems = (roadmapItem) => roadmapItem.releaseItems.length !== 0;
-const hasRoadmapItems = (objective) => objective.roadmapItems.length !== 0;
+const hasRoadmapItems = (initiative) => initiative.roadmapItems.length !== 0;
 
 const recalculateReleaseItemBasedFields = (areaTranslation) => (roadmapItem) => {
   const areaIds = roadmapItem.releaseItems.map(releaseItem => releaseItem.areaIds).flat();
@@ -22,13 +22,13 @@ const recalculateReleaseItemBasedFields = (areaTranslation) => (roadmapItem) => 
   };
 };
 
-const filterRoadmapItems = (releaseItemPredicate, areaTranslation) => (objective) => {
-  const roadmapItems = objective.roadmapItems
+const filterRoadmapItems = (releaseItemPredicate, areaTranslation) => (initiative) => {
+  const roadmapItems = initiative.roadmapItems
     .map(filterReleaseItems(releaseItemPredicate))
     .filter(hasReleaseItems)
     .map(recalculateReleaseItemBasedFields(areaTranslation));
 
-  return { ...objective, roadmapItems };
+  return { ...initiative, roadmapItems };
 };
 
 const createPredicates = (areaMapping, predicate) => {
@@ -43,19 +43,19 @@ const createAreaPredicate = (area, predicate) => {
 }
 
 export const calculateAreaData = 
-  (cycleData, releaseItemPredicate = () => true, objectivePredicate = () => true) => {
+  (cycleData, releaseItemPredicate = () => true, initiativePredicate = () => true) => {
   const areaMapping = cycleData.area;
   const predicates = createPredicates(areaMapping, releaseItemPredicate);
 
   const areaData = {};
   for(const { id, releaseItemPredicate } of predicates) {
-    const objectives = cycleData.objectives
-      .filter(objectivePredicate)
+    const initiatives = cycleData.initiatives
+      .filter(initiativePredicate)
       .map(filterRoadmapItems(releaseItemPredicate, areaMapping))
       .filter(hasRoadmapItems);
 
-    if(objectives.length !== 0) {
-      areaData[id] = new AreaData().applyData({ ...cycleData, objectives });
+    if(initiatives.length !== 0) {
+      areaData[id] = new AreaData().applyData({ ...cycleData, initiatives });
     }
   }
 

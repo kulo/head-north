@@ -269,7 +269,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           const currentAreaId = state.selectedArea || 'overview';
           const currentAreaData = areaData[currentAreaId] || {
             cycle: cycleData.cycle,
-            objectives: cycleData.objectives
+            initiatives: cycleData.initiatives
           };
           commit('SET_CURRENT_AREA_DATA', currentAreaData);
 

@@ -17,7 +17,7 @@ class IssueParser {
     const releaseItems = this.issues.map(issue => this._releaseItemParser.parse(issue));
 
     const roadmapItems = this._groupByRoadmapItems(releaseItems);
-    return this._groupByObjectives(roadmapItems);
+    return this._groupByInitiatives(roadmapItems);
   }
 
   _groupByRoadmapItems(parsed) {
@@ -30,34 +30,33 @@ class IssueParser {
     });
   }
 
-  _groupByObjectives(roadmapItems) {
+  _groupByInitiatives(roadmapItems) {
     const virtualId = 'virtual';
     const virtualLabel = translateLabel('theme', virtualId, this.omegaConfig);
     const virtuals = roadmapItems.filter(roadmapItem => roadmapItem.theme === virtualLabel);
     const nonVirtuals = roadmapItems.filter(roadmapItem => roadmapItem.theme !== virtualLabel);
-    const grouped = groupBy(nonVirtuals, roadmapItem => {
-      return roadmapItem.theme ? `${roadmapItem.theme} - ${roadmapItem.initiative}` : roadmapItem.initiative;
-    });
+    
+    // Group by initiative instead of theme + initiative
+    const grouped = groupBy(nonVirtuals, roadmapItem => roadmapItem.initiativeId);
 
-    const nonVirtualObjectives = Object.entries(grouped).map(([key, value]) => {
+    const initiatives = Object.entries(grouped).map(([initiativeId, value]) => {
       return {
-        objective: key,
-        theme: get(value, '0.theme'),
         initiative: get(value, '0.initiative'),
-        initiativeId: get(value, '0.initiativeId'),
+        initiativeId: initiativeId,
         roadmapItems: value.map(roadmapItem => omit(roadmapItem, ['theme', 'initiative', 'initiativeId']))
       };
     });
 
-    return [
-      ...nonVirtualObjectives,
-      {
-        objective: virtualLabel,
+    // Add virtual items as a separate initiative
+    if (virtuals.length > 0) {
+      initiatives.push({
         initiative: virtualLabel,
         initiativeId: virtualId,
         roadmapItems: virtuals.map(roadmapItem => omit(roadmapItem, ['theme', 'initiative', 'initiativeId']))
-      }
-    ];
+      });
+    }
+
+    return initiatives;
   }
 }
 

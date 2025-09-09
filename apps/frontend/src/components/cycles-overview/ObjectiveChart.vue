@@ -8,31 +8,27 @@
         type="radialBar"
         height="100%"
         :options="options2"
-        :series="objectiveTracks"></apexchart>
+        :series="initiativeTracks"></apexchart>
       <apexchart
         class="global-objectives__chart"
         type="radialBar"
         height="100%"
         :options="inProgressOptions"
-        :series="objectiveInProgress"></apexchart>
+        :series="initiativeInProgress"></apexchart>
       <apexchart
         class="global-objectives__chart"
         type="radialBar"
         height="100%"
         :options="options1"
-        :series="objectiveProgresses"></apexchart>
+        :series="initiativeProgresses"></apexchart>
     </div>
-    <div class="global-objectives__details" :class="objectiveLengthClass()">
+    <div class="global-objectives__details" :class="initiativeLengthClass()">
       <div>
-        <div class="global-objectives__detail" v-for="objective in objectivesWithRelativeValues" :key="objective.name">
-          <div class="global-objectives__detail__progress">{{ objective.progress }}%
-            <div class="global-objectives__detail__weeks"><strong>{{ objective.weeksDone }}</strong> of {{ objective.weeks }} weeks</div></div>
-          <div class="global-objectives__detail__name" v-if="objective.theme">
-            <span class="theme-pill">{{ objective.theme }}</span>
-            <span class="initiative">{{ objective.initiative }}</span>
-          </div>
-          <div class="global-objectives__detail__name" v-if="!objective.theme">
-            <span class="initiative without-theme">{{ objective.initiative }}</span>
+        <div class="global-objectives__detail" v-for="initiative in initiativesWithRelativeValues" :key="initiative.name">
+          <div class="global-objectives__detail__progress">{{ initiative.progress }}%
+            <div class="global-objectives__detail__weeks"><strong>{{ initiative.weeksDone }}</strong> of {{ initiative.weeks }} weeks</div></div>
+          <div class="global-objectives__detail__name">
+            <span class="initiative">{{ initiative.initiative }}</span>
           </div>
         </div>
       </div>
@@ -47,14 +43,14 @@ const deepCopy = function(src) {
   return JSON.parse(JSON.stringify(src));
 }
 
-const sortObjectives = (objectives) => {
-  return deepCopy(objectives).sort((obj1, obj2) => obj2.weeks - obj1.weeks)
+const sortInitiatives = (initiatives) => {
+  return deepCopy(initiatives).sort((init1, init2) => init2.weeks - init1.weeks)
 }
 
 export default {
   name: "objective-chart",
   props: {
-    objectives: {
+    initiatives: {
       type: Array,
       required: true
     }
@@ -199,16 +195,16 @@ export default {
       }
     }
 
-    const summarizedObjectives = computed(() => {
-      const maxObjectivesOnPage = 8;
-      if(props.objectives.length <= maxObjectivesOnPage) {
-        return props.objectives
+    const summarizedInitiatives = computed(() => {
+      const maxInitiativesOnPage = 8;
+      if(props.initiatives.length <= maxInitiativesOnPage) {
+        return props.initiatives
       }
 
-      const sortedObjectives = sortObjectives(props.objectives)
-      const headObjectives = sortedObjectives.slice(0, maxObjectivesOnPage - 1)
-      const tailObjectives = sortedObjectives.slice(maxObjectivesOnPage - 1)
-      const defaultOtherObjective = {
+      const sortedInitiatives = sortInitiatives(props.initiatives)
+      const headInitiatives = sortedInitiatives.slice(0, maxInitiativesOnPage - 1)
+      const tailInitiatives = sortedInitiatives.slice(maxInitiativesOnPage - 1)
+      const defaultOtherInitiative = {
         name: 'Other Projects',
         initiative: 'Other Projects',
         weeks: 0,
@@ -216,57 +212,56 @@ export default {
         weeksInProgress: 0
       }
 
-      const summarizedOtherObjective = tailObjectives.reduce((acc, obj) => {
-        acc.weeks += obj.weeks
-        acc.weeksDone += obj.weeksDone
-        acc.weeksInProgress += obj.weeksInProgress
+      const summarizedOtherInitiative = tailInitiatives.reduce((acc, init) => {
+        acc.weeks += init.weeks
+        acc.weeksDone += init.weeksDone
+        acc.weeksInProgress += init.weeksInProgress
         return acc
-      }, defaultOtherObjective)
+      }, defaultOtherInitiative)
 
-      const progressRate = summarizedOtherObjective.weeksDone / summarizedOtherObjective.weeks;
-      summarizedOtherObjective.progress = Math.round(progressRate * 100) || 0;
+      const progressRate = summarizedOtherInitiative.weeksDone / summarizedOtherInitiative.weeks;
+      summarizedOtherInitiative.progress = Math.round(progressRate * 100) || 0;
 
-      const inprogressRate = (summarizedOtherObjective.weeksDone + summarizedOtherObjective.weeksInProgress) / summarizedOtherObjective.weeks;
-      summarizedOtherObjective.progressWithInProgress = Math.round(inprogressRate * 100) || 0;
+      const inprogressRate = (summarizedOtherInitiative.weeksDone + summarizedOtherInitiative.weeksInProgress) / summarizedOtherInitiative.weeks;
+      summarizedOtherInitiative.progressWithInProgress = Math.round(inprogressRate * 100) || 0;
 
-      return sortObjectives(headObjectives.concat(summarizedOtherObjective))
+      return sortInitiatives(headInitiatives.concat(summarizedOtherInitiative))
     })
 
     const options1 = computed(() => {
       let options = deepCopy(options1Default)
-      if (summarizedObjectives.value.length > 4) options.plotOptions.radialBar.hollow.size = '15%'
+      if (summarizedInitiatives.value.length > 4) options.plotOptions.radialBar.hollow.size = '15%'
       return options
     })
 
     const options2 = computed(() => {
       let options = deepCopy(options2Default)
-      if (summarizedObjectives.value.length > 4) options.plotOptions.radialBar.hollow.size = '15%'
+      if (summarizedInitiatives.value.length > 4) options.plotOptions.radialBar.hollow.size = '15%'
       return options;
     })
 
     const inProgressOptions = computed(() => {
       let options = deepCopy(inProgressOptionsDefault)
-      if (summarizedObjectives.value.length > 4) options.plotOptions.radialBar.hollow.size = '15%'
+      if (summarizedInitiatives.value.length > 4) options.plotOptions.radialBar.hollow.size = '15%'
       return options;
     })
 
-    const objectivesWithRelativeValues = computed(() => {
-      let objectives = summarizedObjectives.value.map(objective => {
+    const initiativesWithRelativeValues = computed(() => {
+      let initiatives = summarizedInitiatives.value.map(initiative => {
         return {
-          name: objective.name,
-          theme: objective.theme,
-          initiative: objective.initiative,
-          weeks: objective.weeks,
-          weeksDone: objective.weeksDone,
-          progress: objective.progress,
-          progressWithInProgress: objective.progressWithInProgress
+          name: initiative.name,
+          initiative: initiative.initiative,
+          weeks: initiative.weeks,
+          weeksDone: initiative.weeksDone,
+          progress: initiative.progress,
+          progressWithInProgress: initiative.progressWithInProgress
         }
       })
 
-      let longestObjective = objectives[0]
+      let longestInitiative = initiatives[0]
 
-      return objectives.map((objective, i) => {
-        let relativeModifierToLongest = objective.weeks / longestObjective.weeks;
+      return initiatives.map((initiative, i) => {
+        let relativeModifierToLongest = initiative.weeks / longestInitiative.weeks;
         let trackLength = Math.ceil(relativeModifierToLongest * 100 * 1.1) ||  0;
 
         if (trackLength < 10) trackLength *= 2.3;
@@ -274,16 +269,15 @@ export default {
         else if (trackLength < 80) trackLength *= 1.15;
 
         if (trackLength > 100) trackLength = 100;
-        let progressOnTrack = Math.ceil((objective.progress / 100) * trackLength) || 0;
-        let inprogressOnTrack = Math.ceil((objective.progressWithInProgress / 100) * trackLength) || 0;
+        let progressOnTrack = Math.ceil((initiative.progress / 100) * trackLength) || 0;
+        let inprogressOnTrack = Math.ceil((initiative.progressWithInProgress / 100) * trackLength) || 0;
 
         return {
-          name: objective.name,
-          theme: objective.theme,
-          initiative: objective.initiative,
-          weeks: objective.weeks,
-          weeksDone: objective.weeksDone,
-          progress: objective.progress,
+          name: initiative.name,
+          initiative: initiative.initiative,
+          weeks: initiative.weeks,
+          weeksDone: initiative.weeksDone,
+          progress: initiative.progress,
           trackLength,
           progressOnTrack,
           inprogressOnTrack
@@ -291,40 +285,40 @@ export default {
       })
     })
 
-    const objectiveTracks = computed(() => {
-      return objectivesWithRelativeValues.value.map(
-        objective => objective.trackLength
+    const initiativeTracks = computed(() => {
+      return initiativesWithRelativeValues.value.map(
+        initiative => initiative.trackLength
       )
     })
 
-    const objectiveProgresses = computed(() => {
-      return objectivesWithRelativeValues.value.map(
-        objective => objective.progressOnTrack
+    const initiativeProgresses = computed(() => {
+      return initiativesWithRelativeValues.value.map(
+        initiative => initiative.progressOnTrack
       )
     })
 
-    const objectiveInProgress = computed(() => {
-      return objectivesWithRelativeValues.value.map(
-        objective => objective.inprogressOnTrack
+    const initiativeInProgress = computed(() => {
+      return initiativesWithRelativeValues.value.map(
+        initiative => initiative.inprogressOnTrack
       )
     })
 
-    const objectiveLengthClass = () => {
-      let objectiveClass = {}
-      objectiveClass['global-objectives__details-' + summarizedObjectives.value.length] = true
-      if (summarizedObjectives.value.length > 4) objectiveClass['global-objectives__details-gt4'] = true
-      return objectiveClass
+    const initiativeLengthClass = () => {
+      let initiativeClass = {}
+      initiativeClass['global-objectives__details-' + summarizedInitiatives.value.length] = true
+      if (summarizedInitiatives.value.length > 4) initiativeClass['global-objectives__details-gt4'] = true
+      return initiativeClass
     }
 
     return {
       options1,
       options2,
       inProgressOptions,
-      objectiveTracks,
-      objectiveProgresses,
-      objectiveInProgress,
-      objectivesWithRelativeValues,
-      objectiveLengthClass
+      initiativeTracks,
+      initiativeProgresses,
+      initiativeInProgress,
+      initiativesWithRelativeValues,
+      initiativeLengthClass
     }
   }
 }

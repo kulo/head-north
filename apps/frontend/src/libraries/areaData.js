@@ -28,22 +28,21 @@ export default class AreaData {
     percentageNotToDo: 0
   }
 
-  objectives = []
+  initiatives = []
 
-  constructor({ cycle, objectives } = {}) {
+  constructor({ cycle, initiatives } = {}) {
     if (cycle) this.cycle = cycle
-    if (objectives) this.objectives = objectives
+    if (initiatives) this.initiatives = initiatives
   }
 
   applyData(data) {
     Object.assign(this.cycle, data.cycle)
 
-    this.objectives = data.objectives.map((objective) => {
-      let preparedObjective = {
-        name: objective.objective,
-        theme: objective.theme,
-        initiative: objective.initiative,
-        initiativeId: objective.initiativeId,
+    this.initiatives = data.initiatives.map((initiative) => {
+      let preparedInitiative = {
+        name: initiative.initiative,
+        initiative: initiative.initiative,
+        initiativeId: initiative.initiativeId,
         releaseItemsCount: 0,
         releaseItemsDoneCount: 0,
         weeks: 0,
@@ -59,7 +58,7 @@ export default class AreaData {
         roadmapItems: []
       }
 
-      preparedObjective.roadmapItems = objective.roadmapItems.map((roadmapItem) => {
+      preparedInitiative.roadmapItems = initiative.roadmapItems.map((roadmapItem) => {
         let preparedRoadmapItem = {
           area: roadmapItem.area,
           name: roadmapItem.name,
@@ -117,40 +116,40 @@ export default class AreaData {
         preparedRoadmapItem.progressByReleaseItems = Math.round((preparedRoadmapItem.releaseItemsDoneCount / preparedRoadmapItem.releaseItemsCount) * 100) || 0
         preparedRoadmapItem.percentageNotToDo = Math.round((preparedRoadmapItem.weeksNotToDo / preparedRoadmapItem.weeks) * 100) || 0
 
-        preparedObjective.weeks = this.normalize(preparedObjective.weeks + preparedRoadmapItem.weeks)
-        preparedObjective.weeksDone = this.normalize(preparedObjective.weeksDone + preparedRoadmapItem.weeksDone)
-        preparedObjective.weeksInProgress = this.normalize(preparedObjective.weeksInProgress + preparedRoadmapItem.weeksInProgress)
-        preparedObjective.weeksTodo = this.normalize(preparedObjective.weeksTodo + preparedRoadmapItem.weeksTodo)
-        preparedObjective.weeksNotToDo = this.normalize(preparedObjective.weeksNotToDo + preparedRoadmapItem.weeksNotToDo)
-        preparedObjective.weeksCancelled = this.normalize(preparedObjective.weeksCancelled + preparedRoadmapItem.weeksCancelled)
-        preparedObjective.weeksPostponed = this.normalize(preparedObjective.weeksPostponed + preparedRoadmapItem.weeksPostponed)
+        preparedInitiative.weeks = this.normalize(preparedInitiative.weeks + preparedRoadmapItem.weeks)
+        preparedInitiative.weeksDone = this.normalize(preparedInitiative.weeksDone + preparedRoadmapItem.weeksDone)
+        preparedInitiative.weeksInProgress = this.normalize(preparedInitiative.weeksInProgress + preparedRoadmapItem.weeksInProgress)
+        preparedInitiative.weeksTodo = this.normalize(preparedInitiative.weeksTodo + preparedRoadmapItem.weeksTodo)
+        preparedInitiative.weeksNotToDo = this.normalize(preparedInitiative.weeksNotToDo + preparedRoadmapItem.weeksNotToDo)
+        preparedInitiative.weeksCancelled = this.normalize(preparedInitiative.weeksCancelled + preparedRoadmapItem.weeksCancelled)
+        preparedInitiative.weeksPostponed = this.normalize(preparedInitiative.weeksPostponed + preparedRoadmapItem.weeksPostponed)
 
-        preparedObjective.releaseItemsCount += preparedRoadmapItem.releaseItemsCount
-        preparedObjective.releaseItemsDoneCount += preparedRoadmapItem.releaseItemsDoneCount
+        preparedInitiative.releaseItemsCount += preparedRoadmapItem.releaseItemsCount
+        preparedInitiative.releaseItemsDoneCount += preparedRoadmapItem.releaseItemsDoneCount
 
         return preparedRoadmapItem
       })
 
-      this.cycle.weeks = this.normalize(this.cycle.weeks + preparedObjective.weeks)
-      this.cycle.weeksDone = this.normalize(this.cycle.weeksDone + preparedObjective.weeksDone)
-      this.cycle.weeksInProgress = this.normalize(this.cycle.weeksInProgress + preparedObjective.weeksInProgress)
-      this.cycle.weeksTodo = this.normalize(this.cycle.weeksTodo + preparedObjective.weeksTodo)
-      this.cycle.weeksNotToDo = this.normalize(this.cycle.weeksNotToDo + preparedObjective.weeksNotToDo)
-      this.cycle.weeksCancelled = this.normalize(this.cycle.weeksCancelled + preparedObjective.weeksCancelled)
-      this.cycle.weeksPostponed = this.normalize(this.cycle.weeksPostponed + preparedObjective.weeksPostponed)
+      this.cycle.weeks = this.normalize(this.cycle.weeks + preparedInitiative.weeks)
+      this.cycle.weeksDone = this.normalize(this.cycle.weeksDone + preparedInitiative.weeksDone)
+      this.cycle.weeksInProgress = this.normalize(this.cycle.weeksInProgress + preparedInitiative.weeksInProgress)
+      this.cycle.weeksTodo = this.normalize(this.cycle.weeksTodo + preparedInitiative.weeksTodo)
+      this.cycle.weeksNotToDo = this.normalize(this.cycle.weeksNotToDo + preparedInitiative.weeksNotToDo)
+      this.cycle.weeksCancelled = this.normalize(this.cycle.weeksCancelled + preparedInitiative.weeksCancelled)
+      this.cycle.weeksPostponed = this.normalize(this.cycle.weeksPostponed + preparedInitiative.weeksPostponed)
 
-      this.cycle.releaseItemsCount += preparedObjective.releaseItemsCount
-      this.cycle.releaseItemsDoneCount += preparedObjective.releaseItemsDoneCount
+      this.cycle.releaseItemsCount += preparedInitiative.releaseItemsCount
+      this.cycle.releaseItemsDoneCount += preparedInitiative.releaseItemsDoneCount
 
-      preparedObjective.progress = Math.round((preparedObjective.weeksDone / preparedObjective.weeks) * 100) || 0
-      preparedObjective.progressWithInProgress = Math.round(((preparedObjective.weeksDone + preparedObjective.weeksInProgress) / preparedObjective.weeks) * 100) || 0
-      preparedObjective.progressByReleaseItems = Math.round((preparedObjective.releaseItemsDoneCount / preparedObjective.releaseItemsCount) * 100) || 0
-      preparedObjective.percentageNotToDo = Math.round((preparedObjective.weeksNotToDo / preparedObjective.weeks) * 100) || 0
+      preparedInitiative.progress = Math.round((preparedInitiative.weeksDone / preparedInitiative.weeks) * 100) || 0
+      preparedInitiative.progressWithInProgress = Math.round(((preparedInitiative.weeksDone + preparedInitiative.weeksInProgress) / preparedInitiative.weeks) * 100) || 0
+      preparedInitiative.progressByReleaseItems = Math.round((preparedInitiative.releaseItemsDoneCount / preparedInitiative.releaseItemsCount) * 100) || 0
+      preparedInitiative.percentageNotToDo = Math.round((preparedInitiative.weeksNotToDo / preparedInitiative.weeks) * 100) || 0
 
-      return preparedObjective
+      return preparedInitiative
     })
 
-    this.objectives = [...this.objectives].sort((objectiveA, objectiveB) => { return objectiveA.weeks < objectiveB.weeks ? 1 : -1 })
+    this.initiatives = [...this.initiatives].sort((initiativeA, initiativeB) => { return initiativeA.weeks < initiativeB.weeks ? 1 : -1 })
 
     this.cycle.progress = Math.round((this.cycle.weeksDone / this.cycle.weeks) * 100) || 0
     this.cycle.progressWithInProgress = Math.round(((this.cycle.weeksDone + this.cycle.weeksInProgress) / this.cycle.weeks) * 100) || 0

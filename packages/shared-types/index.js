@@ -30,7 +30,7 @@ module.exports = {
     status: null,
     startDate: null,
     endDate: null,
-    objectives: [],
+    initiatives: [],
     items: []
   },
   
@@ -39,7 +39,7 @@ module.exports = {
     id: null,
     name: null,
     description: null,
-    objectives: [],
+    initiatives: [],
     progress: 0
   }
 };
