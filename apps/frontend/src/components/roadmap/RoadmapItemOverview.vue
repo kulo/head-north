@@ -21,7 +21,7 @@
               <a :href="releaseItem.url" class="jira-link" target="_blank">
                 {{ releaseItem.name }}
               </a>
-              <span v-if="releaseItem.stage" :class="{ [releaseItem.stage]: true, 'project-popover__epic__stage': true }">
+              <span v-if="releaseItem.stage" :class="{ [releaseItem.stage]: true, 'project-popover__release-item__stage': true }">
                     {{ releaseItem.stage }}
               </span>
             </p>
@@ -120,7 +120,7 @@ export default {
 .s2 { background: var(--color-success); }
 .s3 { background: var(--color-info); }
 
-.project-popover__epic__stage {
+.project-popover__release-item__stage {
   border: none;
   padding-top: 2px;
 }

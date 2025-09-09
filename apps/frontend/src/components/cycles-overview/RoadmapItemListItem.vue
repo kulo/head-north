@@ -1,5 +1,5 @@
 <template>
-  <div class="epic-container-column__roadmap-item">
+  <div class="release-item-container-column__roadmap-item">
     <div class="roadmap-item">
       <div class="roadmap-item-name">
         <a :href="roadmapItem.url" class="jira-link" target="_blank">

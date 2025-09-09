@@ -2,24 +2,24 @@ export const releaseFilters = [
   { 
     value: "all", 
     name: "All Release Items", 
-    predicate: (epic) => true 
+    predicate: (releaseItem) => true 
   },
   { 
     value: "part-of-narrative", 
     name: "Part of Release Narrative", 
-    predicate: (epic) => epic.isPartOfReleaseNarrative,
+    predicate: (releaseItem) => releaseItem.isPartOfReleaseNarrative,
     style: "anticon anticon-rocket",
   },
   { 
     value: "at-risk", 
     name: "Release at Risk", 
-    predicate: (epic) => epic.isReleaseAtRisk,
+    predicate: (releaseItem) => releaseItem.isReleaseAtRisk,
     style: "anticon anticon-warning",
   },
   { 
     value: "cross-cloud", 
     name: "Cross-Cloud Efforts", 
-    predicate: (epic) => epic.isCrossCloud,
+    predicate: (releaseItem) => releaseItem.isCrossCloud,
     style: "anticon anticon-cloud",
   },
 ];

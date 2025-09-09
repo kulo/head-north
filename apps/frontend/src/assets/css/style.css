@@ -200,29 +200,29 @@ body {
   background: var(--color-gray-900) !important;
 }
 
-.project-popover__epics {
+.project-popover__release-items {
   padding: 15px;
   overflow: hidden;
 }
 
-.project-popover__epic {
+.project-popover__release-item {
   min-height: 20px;
   position: relative;
   margin-bottom: 15px;
   font-weight: bold;
 }
 
-.project-popover__epic:last-child {
+.project-popover__release-item:last-child {
   margin-bottom: 0;
 }
 
-.project-popover__epic__name {
+.project-popover__release-item__name {
   width: calc(100% - 160px);
   word-break: normal;
   text-align: left;
 }
 
-.project-popover__epic__effort {
+.project-popover__release-item__effort {
   width: 70px;
   position: absolute;
   right: 80px;
@@ -230,7 +230,7 @@ body {
   color: var(--color-info);
 }
 
-.project-popover__epic__stage {
+.project-popover__release-item__stage {
   background: var(--color-gray-600);
   border: 1px solid var(--color-gray-600);
   border-radius: 12px;
@@ -238,25 +238,25 @@ body {
   text-align: center;
 }
 
-.project-popover__epic__validation {
+.project-popover__release-item__validation {
   color: var(--color-error);
   padding: 2px;
   margin-top: 4px;
 }
 
-.project-popover__epic__release_narrative {
+.project-popover__release-item__release_narrative {
   color: var(--color-gray-600);
   /*padding: 2px;*/
   /*margin-top: 4px;*/
 }
 
-.project-popover__epic__warning {
+.project-popover__release-item__warning {
   color: var(--color-warning);
   /*padding: 2px;*/
   /*margin-top: 4px;*/
 }
 
-.epic-container-column__project__title .project-popover__epic__validation {
+.release-item-container-column__project__title .project-popover__release-item__validation {
   margin-top: 0;
   padding: 0;
 }
@@ -275,7 +275,7 @@ body {
   text-align: center;
 }
 
-.project-popover__epic__status {
+.project-popover__release-item__status {
   width: 80px;
   position: absolute;
   right: 0;
@@ -283,25 +283,25 @@ body {
   text-align: right;
 }
 
-.project-popover__epic.health-bad .project-popover__epic__status,
+.project-popover__release-item.health-bad .project-popover__release-item__status,
 .project-popover.health-bad .project-popover__header__progress {
   color: var(--color-error);
 }
 
-.project-popover__epic.health-normal .project-popover__epic__status {
+.project-popover__release-item.health-normal .project-popover__release-item__status {
   color: var(--color-text-primary);
 }
 
-.project-popover__epic.health-good .project-popover__epic__status {
+.project-popover__release-item.health-good .project-popover__release-item__status {
   color: var(--color-highlight);
 }
 
-.project-popover__epic.health-best .project-popover__epic__status,
+.project-popover__release-item.health-best .project-popover__release-item__status,
 .project-popover.health-good .project-popover__header__progress {
   color: var(--color-success);
 }
 
-.project-popover__epic.health-forget .project-popover__epic__status {
+.project-popover__release-item.health-forget .project-popover__release-item__status {
   color: var(--color-info);
 }
 
@@ -373,7 +373,7 @@ body {
   outline: 0;
 }
 
-.epic-container {
+.release-item-container {
   height: auto;
   align-items: center;
   justify-content: center;
@@ -381,7 +381,7 @@ body {
   display: flex;
 }
 
-.epic-container-column {
+.release-item-container-column {
   column-count: 3;
   column-gap: 50px;
   column-width: 300px;
@@ -390,8 +390,8 @@ body {
   padding-right: 30px;
 }
 
-.epic-container-column__initiative,
-.epic-container-column__project {
+.release-item-container-column__initiative,
+.release-item-container-column__project {
   align-items: center;
   display: flex;
   height: 60px;
@@ -403,25 +403,25 @@ body {
   transition: all .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
 }
 
-.overview-page .epic-container-column__initiative,
-.overview-page .epic-container-column__project {
+.overview-page .release-item-container-column__initiative,
+.overview-page .release-item-container-column__project {
   height: 65px;
 }
 
-.epic-container-column__project {
+.release-item-container-column__project {
   cursor: pointer;
 }
 
-.epic-container-column__project,
-.epic-container-column__project * {
+.release-item-container-column__project,
+.release-item-container-column__project * {
   outline: none !important;
 }
 
-.epic-container-column__project__internal {
+.release-item-container-column__project__internal {
   padding: 0;
 }
 
-.epic-container-column__initiative {
+.release-item-container-column__initiative {
   background: var(--color-gray-800);
   font-size: 18px;
   height: 47px;
@@ -434,24 +434,24 @@ body {
   text-shadow: 1px 1px rgba(0, 0, 0, 1);
 }
 
-.overview-page .epic-container-column__initiative {
+.overview-page .release-item-container-column__initiative {
   height: 52px;
   margin-bottom: 10px;
 }
 
-.epic-container-column__initiative__name {
+.release-item-container-column__initiative__name {
   width: calc(100% - 50px);
   float: left;
   font-weight: bold;
 }
 
-.epic-container-column__initiative__percentage {
+.release-item-container-column__initiative__percentage {
   float: right;
   width: 50px;
   text-align: right;
 }
 
-.epic-container-column__project__title {
+.release-item-container-column__project__title {
   height: 15px;
   white-space: nowrap;
   overflow: hidden;
@@ -460,14 +460,14 @@ body {
   display: inline-block;
 }
 
-.epic-container-column__project__area {
+.release-item-container-column__project__area {
  font-size: 11px;
  color: var(--color-info);
  opacity: .6;
  padding-bottom: 1px;
 }
 
-.epic-container-column__project__epic-counts {
+.release-item-container-column__project__release-item-counts {
   width: 100px;
   height: 15px;
   display: inline-block;
