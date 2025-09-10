@@ -1,35 +1,43 @@
 <template>
   <a-select
-    v-if="selectedStages"
+    v-model:value="selectedStages"
     class="external-selector stage-selector"
-    :value="selectedStages"
     mode="multiple"
     size="small"
     placeholder="All Stages"
-    @change="setSelectedStages">
+    style="width: 150px; margin-right: 10px"
+    @change="setSelectedStages"
+  >
     <a-select-option
       v-for="stage in stages"
-      :key="stage.name"
-      :value="stage">
+      :key="stage.id || stage.name"
+      :value="stage"
+    >
       {{ stage.name }}
     </a-select-option>
   </a-select>
 </template>
 
 <script>
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
-  name: 'stageSelector',
+  name: 'StageSelector',
   setup() {
     const store = useStore()
     
-    const selectedStages = computed(() => store.state.selectedStages)
+    const selectedStages = ref(store.state.selectedStages || [])
     const stages = computed(() => store.state.stages)
     
+    // Watch for changes in store and update local ref
+    watch(() => store.state.selectedStages, (newValue) => {
+      selectedStages.value = newValue || []
+    }, { immediate: true })
+    
     const setSelectedStages = (stages) => {
-      store.commit('setSelectedStages', stages)
+      selectedStages.value = stages
+      store.dispatch('setSelectedStages', stages)
     }
 
     return {
@@ -38,5 +46,5 @@ export default {
       setSelectedStages
     }
   }
-};
+}
 </script>

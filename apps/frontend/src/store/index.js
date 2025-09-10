@@ -15,14 +15,14 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         roadmapItems: [],
         activeSprint: null
       },
-      // Area data
-      areaData: null,
-      currentAreaData: null,
+      // Cycle overview data
+      cycleOverviewData: null,
+      currentCycleOverviewData: null,
       // Selector data
       initiatives: [],
       assignees: [],
       areas: [],
-      sprints: [],
+      cycles: [],
       stages: [],
       releaseFilters: [],
       pages: {
@@ -30,20 +30,20 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         current: {}
       },
       // Selected filters
-      selectedInitiative: null,
-      selectedAssignee: null,
+      selectedInitiatives: [],
+      selectedAssignees: [],
       selectedArea: null,
-      selectedSprint: null,
+      selectedCycle: null,
       selectedStages: [],
-      selectedReleaseFilter: { value: 'all', name: 'All Releases' },
+      selectedReleaseFilters: [],
       // Validation
       validationEnabled: false,
       validationSummary: []
     },
     getters: {
       releaseOverviewData: (state) => state.releaseOverviewData,
-      areaData: (state) => state.areaData,
-      currentAreaData: (state) => state.currentAreaData,
+      cycleOverviewData: (state) => state.cycleOverviewData,
+      currentCycleOverviewData: (state) => state.currentCycleOverviewData,
       validationSummary: (state) => state.validationSummary,
       initiativeName: (state) => (initiativeId) => {
         const initiative = state.initiatives.find(i => i.id === initiativeId)
@@ -72,23 +72,23 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       SET_AREAS(state, areas) {
         state.areas = areas
       },
-      SET_SELECTED_INITIATIVE(state, initiativeId) {
-        state.selectedInitiative = initiativeId
+      SET_SELECTED_INITIATIVES(state, initiatives) {
+        state.selectedInitiatives = initiatives
       },
-      SET_SELECTED_ASSIGNEE(state, assigneeId) {
-        state.selectedAssignee = assigneeId
+      SET_SELECTED_ASSIGNEES(state, assignees) {
+        state.selectedAssignees = assignees
       },
       SET_SELECTED_AREA(state, areaId) {
         state.selectedArea = areaId
       },
-      SET_AREA_DATA(state, data) {
-        state.areaData = data
+      SET_CYCLE_OVERVIEW_DATA(state, data) {
+        state.cycleOverviewData = data
       },
-      SET_CURRENT_AREA_DATA(state, data) {
-        state.currentAreaData = data
+      SET_CURRENT_CYCLE_OVERVIEW_DATA(state, data) {
+        state.currentCycleOverviewData = data
       },
-      SET_SPRINTS(state, sprints) {
-        state.sprints = sprints
+      SET_CYCLES(state, cycles) {
+        state.cycles = cycles
       },
       SET_STAGES(state, stages) {
         state.stages = stages
@@ -96,8 +96,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       SET_RELEASE_FILTERS(state, filters) {
         state.releaseFilters = filters
       },
-      SET_SELECTED_SPRINT(state, sprint) {
-        state.selectedSprint = sprint
+      SET_SELECTED_CYCLE(state, cycle) {
+        state.selectedCycle = cycle
       },
       SET_SELECTED_STAGES(state, stages) {
         state.selectedStages = stages
@@ -105,8 +105,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       setSelectedStages(state, stages) {
         state.selectedStages = stages
       },
-      SET_SELECTED_RELEASE_FILTER(state, filter) {
-        state.selectedReleaseFilter = filter
+      SET_SELECTED_RELEASE_FILTERS(state, filters) {
+        state.selectedReleaseFilters = filters
       },
       TOGGLE_VALIDATION(state) {
         state.validationEnabled = !state.validationEnabled
@@ -214,24 +214,32 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         }
       },
       
-      setSelectedInitiative({ commit }, initiativeId) {
-        commit('SET_SELECTED_INITIATIVE', initiativeId)
+      setSelectedInitiatives({ commit }, initiatives) {
+        commit('SET_SELECTED_INITIATIVES', initiatives)
       },
       
-      setSelectedAssignee({ commit }, assigneeId) {
-        commit('SET_SELECTED_ASSIGNEE', assigneeId)
+      setSelectedAssignees({ commit }, assignees) {
+        commit('SET_SELECTED_ASSIGNEES', assignees)
+      },
+      
+      setSelectedReleaseFilters({ commit }, filters) {
+        commit('SET_SELECTED_RELEASE_FILTERS', filters)
+      },
+      
+      setSelectedStages({ commit }, stages) {
+        commit('SET_SELECTED_STAGES', stages)
       },
       
       setSelectedArea({ commit }, areaId) {
         commit('SET_SELECTED_AREA', areaId)
       },
       
-      // Area data actions
-      async fetchAreaData({ state, commit }) {
+      // Cycle overview data actions
+      async fetchCycleOverviewData({ state, commit }) {
         commit('CLEAR_ERROR')
         try {
-          // Use API service with cycle/sprint ID parameter
-          const cycleId = state.selectedSprint ? state.selectedSprint.id : null
+          // Use API service with cycle ID parameter
+          const cycleId = state.selectedCycle ? state.selectedCycle.id : null
           const areaDataset = await cycleDataService.getOverviewForCycle(cycleId);
           const sprints = areaDataset.sprints;
           const stages = areaDataset.stages;
@@ -239,12 +247,12 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           const assignees = cycleData.assignees;
           const areaData = calculateAreaData(cycleData);
 
-          commit('SET_AREA_DATA', areaData);
+          commit('SET_CYCLE_OVERVIEW_DATA', areaData);
           // TODO: Restore this when CycleAreaSelector is fixed or removed
           // commit('SET_ALL_PAGES', cycleData.area);
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
-          commit('SET_SPRINTS', sprints);
-          commit('SET_SELECTED_SPRINT', cycleData.cycle);
+          commit('SET_CYCLES', sprints);
+          commit('SET_SELECTED_CYCLE', cycleData.cycle);
           commit('SET_STAGES', stages);
 
           if (!state.selectedStages || state.selectedStages.length === 0) {
@@ -252,46 +260,62 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           }
 
           const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(cycleData.initiatives);
+          const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(assignees);
+          const allStages = [{ name: 'All Stages', id: 'all' }].concat(stages);
+          const allReleaseFilters = [{ name: 'All Releases', value: 'all' }].concat(state.releaseFilters || []);
 
           commit('SET_INITIATIVES', allInitiatives);
+          commit('SET_ASSIGNEES', allAssignees);
+          commit('SET_STAGES', allStages);
+          commit('SET_RELEASE_FILTERS', allReleaseFilters);
 
           if (!state.selectedInitiatives || state.selectedInitiatives.length === 0) {
             commit('SET_SELECTED_INITIATIVES', [allInitiatives[0]]);
           }
 
-          commit('SET_ASSIGNEES', assignees);
-
-          if (!state.selectedAssignee) {
-            commit('SET_SELECTED_ASSIGNEE', assignees[0]);
+          if (!state.selectedAssignees || state.selectedAssignees.length === 0) {
+            commit('SET_SELECTED_ASSIGNEES', [allAssignees[0]]);
           }
 
-          // Set current area data for display
+          if (!state.selectedStages || state.selectedStages.length === 0) {
+            commit('SET_SELECTED_STAGES', [allStages[0]]);
+          }
+
+          if (!state.selectedReleaseFilters || state.selectedReleaseFilters.length === 0) {
+            commit('SET_SELECTED_RELEASE_FILTERS', [allReleaseFilters[0]]);
+          }
+
+          // Set current cycle overview data for display
           const currentAreaId = state.selectedArea || 'overview';
-          const currentAreaData = areaData[currentAreaId] || {
+          const currentCycleOverviewData = areaData[currentAreaId] || {
             cycle: cycleData.cycle,
             initiatives: cycleData.initiatives
           };
-          commit('SET_CURRENT_AREA_DATA', currentAreaData);
+          commit('SET_CURRENT_CYCLE_OVERVIEW_DATA', currentCycleOverviewData);
 
         } catch (e) {
           const errorMessage = e?.message || e?.toString() || 'Unknown error'
-          logger.error.errorSafe('Error on loading Area data', e)
+          logger.error.errorSafe('Error on loading Cycle Overview data', e)
           commit('SET_ERROR', errorMessage)
         }
       },
       
       // Additional selector actions
-      async fetchSprints({ commit }) {
+      async fetchCycles({ commit }) {
         try {
-          const data = await cycleDataService.getAllSprints()
-          commit('SET_SPRINTS', data)
+          const data = await cycleDataService.getAllCycles()
+          commit('SET_CYCLES', data)
           if (data.length > 0) {
-            commit('SET_SELECTED_SPRINT', data[0])
+            commit('SET_SELECTED_CYCLE', data[0])
           }
         } catch (error) {
           const errorMessage = error?.message || error?.toString() || 'Unknown error'
           commit('SET_ERROR', errorMessage)
         }
+      },
+      
+      fetchCycle({ commit }, cycle) {
+        commit('SET_SELECTED_CYCLE', cycle)
       },
       
       async fetchStages({ commit }) {

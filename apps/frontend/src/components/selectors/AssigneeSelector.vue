@@ -1,52 +1,49 @@
 <template>
-  <div class="assignee-selector">
-    <a-select
-      v-model:value="selectedAssignee"
-      placeholder="Select Assignee"
-      style="width: 180px; margin-right: 10px"
-      @change="handleAssigneeChange"
-      allow-clear
+  <a-select
+    v-model:value="selectedAssignees"
+    class="external-selector assignee-selector"
+    mode="multiple"
+    size="small"
+    placeholder="All Assignees"
+    style="width: 150px; margin-right: 10px"
+    @change="setSelectedAssignees"
+  >
+    <a-select-option
+      v-for="assignee in assignees"
+      :key="assignee.id"
+      :value="assignee"
     >
-      <a-select-option
-        v-for="assignee in assignees"
-        :key="assignee.id"
-        :value="assignee.id"
-      >
-        {{ assignee.name }}
-      </a-select-option>
-    </a-select>
-  </div>
+      {{ assignee.name }}
+    </a-select-option>
+  </a-select>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
   name: 'AssigneeSelector',
   setup() {
     const store = useStore()
-    const selectedAssignee = ref(null)
     
+    const selectedAssignees = ref(store.state.selectedAssignees || [])
     const assignees = computed(() => store.state.assignees)
     
-    const handleAssigneeChange = (value) => {
-      selectedAssignee.value = value
-      // Dispatch action to filter by assignee
-      store.dispatch('setSelectedAssignee', value)
+    // Watch for changes in store and update local ref
+    watch(() => store.state.selectedAssignees, (newValue) => {
+      selectedAssignees.value = newValue || []
+    }, { immediate: true })
+    
+    const setSelectedAssignees = (assignees) => {
+      selectedAssignees.value = assignees
+      store.dispatch('setSelectedAssignees', assignees)
     }
     
-    onMounted(() => {
-      // Load assignees if not already loaded
-      if (assignees.value.length === 0) {
-        store.dispatch('fetchAssignees')
-      }
-    })
-    
     return {
-      selectedAssignee,
+      selectedAssignees,
       assignees,
-      handleAssigneeChange
+      setSelectedAssignees
     }
   }
 }

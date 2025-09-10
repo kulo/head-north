@@ -38,7 +38,7 @@ class CycleDataService {
     
     // Fetch fresh data
     const endpoints = this.config.getEndpoints()
-    const data = await this.request(endpoints.CYCLES_ROADMAP)
+    const data = await this._request(endpoints.CYCLES_ROADMAP)
     
     // Cache the data
     this._roadmapCache = data
@@ -53,7 +53,7 @@ class CycleDataService {
    * @param {object} options - Fetch options
    * @returns {Promise<any>} The response data
    */
-  async request(endpoint, options = {}) {
+  async _request(endpoint, options = {}) {
     const url = this.config.getUrl(endpoint)
     
 
@@ -107,7 +107,7 @@ class CycleDataService {
     const endpoint = cycleId 
       ? endpoints.CYCLE_OVERVIEW.replace(':id', cycleId.toString())
       : endpoints.CYCLE_OVERVIEW.replace(':id', 'default')
-    return this.request(endpoint)
+    return this._request(endpoint)
   }
 
   /**
@@ -117,7 +117,7 @@ class CycleDataService {
    */
   async getCyclesRoadmap() {
     const endpoints = this.config.getEndpoints()
-    return this.request(endpoints.CYCLES_ROADMAP)
+    return this._request(endpoints.CYCLES_ROADMAP)
   }
 
 
@@ -152,11 +152,12 @@ class CycleDataService {
   }
 
   /**
-   * Get all sprints from the roadmap data
-   * @returns {Promise<Array>} Array of sprints
+   * Get all cycles from the roadmap data
+   * @returns {Promise<Array>} Array of cycles
    */
-  async getAllSprints() {
+  async getAllCycles() {
     const data = await this._getRoadmapData()
+    // Map sprints to cycles for consistency
     return data.sprints || []
   }
 
@@ -176,8 +177,6 @@ class CycleDataService {
     this._roadmapCache = null
     this._roadmapCacheTimestamp = null
   }
-
-
 }
 
 export default CycleDataService

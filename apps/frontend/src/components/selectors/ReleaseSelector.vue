@@ -1,50 +1,51 @@
 <template>
-  <a-dropdown 
-    class="external-selector"  
-    @command="setSelectedReleaseFilter">
-    <div class="project-filter">
-      {{ selectedReleaseFilter.name }}
-      <DownOutlined />
-    </div>
-    <template #overlay>
-      <a-menu>
-        <a-menu-item 
-          v-for="releaseFilter in releaseFilters" 
-          :key="releaseFilter.value" 
-          :command="releaseFilter">
-          {{ releaseFilter.name }}
-          <i v-bind:class="releaseFilter.style"></i>
-        </a-menu-item>      
-      </a-menu>
-    </template>
-  </a-dropdown>
+  <a-select
+    v-model:value="selectedReleaseFilters"
+    class="external-selector release-selector"
+    mode="multiple"
+    size="small"
+    placeholder="All Releases"
+    style="width: 150px; margin-right: 10px"
+    @change="setSelectedReleaseFilters"
+  >
+    <a-select-option
+      v-for="releaseFilter in releaseFilters"
+      :key="releaseFilter.value"
+      :value="releaseFilter"
+    >
+      {{ releaseFilter.name }}
+      <i v-if="releaseFilter.style" v-bind:class="releaseFilter.style"></i>
+    </a-select-option>
+  </a-select>
 </template>
 
 <script>
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
-import { DownOutlined } from '@ant-design/icons-vue'
 
 export default {
-  name: 'releaseSelector',
-  components: {
-    DownOutlined
-  },
+  name: 'ReleaseSelector',
   setup() {
     const store = useStore()
     
-    const selectedReleaseFilter = computed(() => store.state.selectedReleaseFilter)
+    const selectedReleaseFilters = ref(store.state.selectedReleaseFilters || [])
     const releaseFilters = computed(() => store.state.releaseFilters)
     
-    const setSelectedReleaseFilter = (filter) => {
-      store.commit('setSelectedReleaseFilter', filter)
+    // Watch for changes in store and update local ref
+    watch(() => store.state.selectedReleaseFilters, (newValue) => {
+      selectedReleaseFilters.value = newValue || []
+    }, { immediate: true })
+    
+    const setSelectedReleaseFilters = (filters) => {
+      selectedReleaseFilters.value = filters
+      store.dispatch('setSelectedReleaseFilters', filters)
     }
 
     return {
-      selectedReleaseFilter,
+      selectedReleaseFilters,
       releaseFilters,
-      setSelectedReleaseFilter
+      setSelectedReleaseFilters
     }
   }
-};
+}
 </script>

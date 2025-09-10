@@ -1,51 +1,49 @@
 <template>
-  <div class="initiative-selector">
-    <a-select
-      v-model:value="selectedInitiative"
-      placeholder="Select Initiative"
-      style="width: 200px; margin-right: 10px"
-      @change="handleInitiativeChange"
+  <a-select
+    v-model:value="selectedInitiatives"
+    class="external-selector initiative-selector"
+    mode="multiple"
+    size="small"
+    placeholder="All Initiatives"
+    style="width: 150px; margin-right: 10px"
+    @change="setSelectedInitiatives"
+  >
+    <a-select-option
+      v-for="initiative in initiatives"
+      :key="initiative?.id || initiative"
+      :value="initiative"
     >
-      <a-select-option
-        v-for="initiative in initiatives"
-        :key="initiative?.id || initiative"
-        :value="initiative?.name || initiative"
-      >
-        {{ initiative?.name || initiative }}
-      </a-select-option>
-    </a-select>
-  </div>
+      {{ initiative?.name || initiative }}
+    </a-select-option>
+  </a-select>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
   name: 'InitiativeSelector',
   setup() {
     const store = useStore()
-    const selectedInitiative = ref(null)
     
+    const selectedInitiatives = ref(store.state.selectedInitiatives || [])
     const initiatives = computed(() => store.state.initiatives || [])
     
-    const handleInitiativeChange = (value) => {
-      selectedInitiative.value = value
-      // Dispatch action to filter by initiative
-      store.dispatch('setSelectedInitiative', value)
+    // Watch for changes in store and update local ref
+    watch(() => store.state.selectedInitiatives, (newValue) => {
+      selectedInitiatives.value = newValue || []
+    }, { immediate: true })
+    
+    const setSelectedInitiatives = (initiatives) => {
+      selectedInitiatives.value = initiatives
+      store.dispatch('setSelectedInitiatives', initiatives)
     }
     
-    onMounted(() => {
-      // Load initiatives if not already loaded
-      if (initiatives.value.length === 0) {
-        store.dispatch('fetchInitiatives')
-      }
-    })
-    
     return {
-      selectedInitiative,
+      selectedInitiatives,
       initiatives,
-      handleInitiativeChange
+      setSelectedInitiatives
     }
   }
 }

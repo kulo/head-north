@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Area from '@/components/cycles-overview/Area.vue'
+import CycleOverview from '@/components/cycles-overview/CycleOverview.vue'
 import ReleaseOverview from '@/components/roadmap/ReleaseOverview.vue'
 
 // Router factory function that accepts OmegaConfig
@@ -13,7 +13,7 @@ export default function createAppRouter(omegaConfig) {
     },
     { 
       path: pages.CYCLE_OVERVIEW.path, 
-      component: Area 
+      component: CycleOverview 
     },
     { 
       path: pages.ROADMAP.path, 
