@@ -18,7 +18,7 @@
     
     <div v-if="loading" class="loading-container">
       <a-spin size="large" />
-      <p>Loading area data...</p>
+      <p>Loading data...</p>
     </div>
     
     <div v-else-if="error" class="error-container">

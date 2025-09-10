@@ -351,7 +351,7 @@ body {
 }
 
 .validation-dialog {
-  background: var(--color-gray-800);
+  background-color: var(--color-background);
   color: var(--color-text-primary);
 }
 
@@ -1356,13 +1356,13 @@ body {
 
 /* Ant Design Vue Dropdown and Menu Components */
 .ant-dropdown {
-  background-color: var(--color-gray-900) !important;
+  background-color: var(--color-background) !important;
   border-color: var(--color-gray-600) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
 }
 
 .ant-menu {
-  background-color: var(--color-gray-900) !important;
+  background-color: var(--color-background) !important;
   border-color: var(--color-gray-600) !important;
 }
 
