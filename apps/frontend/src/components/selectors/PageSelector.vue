@@ -35,10 +35,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.page-selector {
-  display: inline-block;
-  margin-left: 10px;
-}
-</style>

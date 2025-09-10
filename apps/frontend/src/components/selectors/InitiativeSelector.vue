@@ -50,9 +50,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.initiative-selector {
-  display: inline-block;
-}
-</style>

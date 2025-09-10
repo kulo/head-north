@@ -51,9 +51,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.assignee-selector {
-  display: inline-block;
-}
-</style>

@@ -101,37 +101,100 @@ body {
 
 /* Ant Design Vue Dropdown Arrow - already covered in .ant-dropdown styles above */
 
-/* Ant Design Vue Popover/Tooltip - project popover styles */
-.ant-popover.project-popover {
-  background: var(--color-gray-800);
-  border: 1px solid var(--color-gray-700);
-  box-shadow: 0 1px 10px rgba(0, 0, 0, .4), 0 0px 50px rgba(0, 0, 0, .2);
-  color: var(--color-text-primary);
-  padding: 0;
-  margin-top: -50px;
-  border-radius: 2px;
-  max-height: 99%;
-  max-width: 99%;
-  overflow: auto;
+/* Popover Backdrop Blur Effect */
+.popover-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  cursor: pointer;
 }
 
-.ant-popover.project-popover .ant-popover-inner {
+/* Ant Design Vue Popover/Tooltip - roadmap popover styles */
+.ant-popover.roadmap-popover {
+  background: var(--color-gray-800);
+  border: 1px solid var(--color-gray-700);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .6), 0 0px 50px rgba(0, 0, 0, .3);
+  color: var(--color-text-primary);
   padding: 0;
+  margin-top: 10px;
+  border-radius: 8px;
+  max-height: 80vh;
+  max-width: 80vw;
+  width: auto;
+  height: auto;
+  min-width: 300px;
+  min-height: 200px;
+  overflow: visible;
+  z-index: 1000;
+}
+
+.ant-popover.roadmap-popover .ant-popover-inner {
+  padding: 15px;
+  background: var(--color-background) !important;
+  color: var(--color-text-primary) !important;
+  width: auto;
+  height: auto;
+}
+
+.ant-popover.roadmap-popover .ant-popover-content {
+  background: var(--color-background) !important;
+  color: var(--color-text-primary) !important;
+  width: auto;
+  height: auto;
+  padding: 0;
+}
+
+.ant-popover.roadmap-popover .ant-popover-arrow {
+  border-top-color: var(--color-background) !important;
+  border-bottom-color: var(--color-background) !important;
+}
+
+/* Ensure all text in roadmap popover is white */
+.ant-popover.roadmap-popover * {
+  color: var(--color-text-primary) !important;
+}
+
+/* Override specific colored elements to maintain their intended colors */
+.ant-popover.roadmap-popover .roadmap-popover__header__owner,
+.ant-popover.roadmap-popover .roadmap-popover__header__weeks,
+.ant-popover.roadmap-popover .roadmap-popover__release-item__effort {
+  color: var(--color-info) !important;
+}
+
+.ant-popover.roadmap-popover .roadmap-popover__release-item__validation {
+  color: var(--color-error) !important;
+}
+
+.ant-popover.roadmap-popover .roadmap-popover__release-item__warning {
+  color: var(--color-warning) !important;
+}
+
+.ant-popover.roadmap-popover .roadmap-popover__release-item__release_narrative {
+  color: var(--color-gray-600) !important;
 }
 
 .ant-popover-inner {
     overflow: initial !important;
+    padding: 30;
     width: 100%;
 }
 
-.project-popover__header {
-  background: var(--color-gray-900);
-  padding: 15px 15px 0px 15px;
+.roadmap-popover__header {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  padding: 0;
   font-size: 18px;
   position: relative;
+  margin-bottom: 15px;
 }
 
-.project-popover__header__owner {
+.roadmap-popover__header__owner {
   font-size: 14px;
   color: var(--color-info);
   height: 22px;
@@ -140,7 +203,7 @@ body {
   text-overflow: ellipsis;
 }
 
-.project-popover__header__name {
+.roadmap-popover__header__name {
   width: calc(100% - 110px);
   min-height: 25px;
   word-break: normal;
@@ -148,18 +211,20 @@ body {
   font-weight: bold;
   line-height: 20px;
   padding-bottom: 3px;
+  color: var(--color-text-primary);
 }
 
-.project-popover__header__progress {
+.roadmap-popover__header__progress {
   width: 100px;
   position: absolute;
   right: 15px;
   text-align: right;
   top: 35px;
   font-weight: bold;
+  color: var(--color-text-primary);
 }
 
-.project-popover__header__weeks {
+.roadmap-popover__header__weeks {
   width: 200px;
   color: var(--color-info);
   position: absolute;
@@ -169,30 +234,31 @@ body {
   font-size: 14px;
 }
 
-.project-popover__progress {
-  background: var(--color-gray-900);
+.roadmap-popover__progress {
+  background: var(--color-background);
+  color: var(--color-text-primary);
   height: 13px;
 }
 
-.project-popover__progress .progress-line {
+.roadmap-popover__progress .progress-line {
   height: 8px !important;
   border-radius: 0 !important;
   width: 100% !important;
   background-color: var(--color-gray-700) !important;
 }
 
-.project-popover__progress .progress-line::after {
+.roadmap-popover__progress .progress-line::after {
   height: 8px !important;
   border-radius: 0px !important;
   box-shadow: 1px 0px 1px rgba(0, 0, 0, 0.4) !important;
 }
 
-.project-popover__progress .progress-line::before {
+.roadmap-popover__progress .progress-line::before {
   height: 8px !important;
   border-radius: 0 !important;
 }
 
-.project-popover__progress .progress-line div {
+.roadmap-popover__progress .progress-line div {
   right: 0px !important;
   top: 0px !important;
   height: 8px !important;
@@ -200,29 +266,34 @@ body {
   background: var(--color-gray-900) !important;
 }
 
-.project-popover__release-items {
-  padding: 15px;
-  overflow: hidden;
+.roadmap-popover__release-items {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  padding: 0;
+  overflow: visible;
 }
 
-.project-popover__release-item {
+.roadmap-popover__release-item {
+  background: var(--color-background);
+  color: var(--color-text-primary);
   min-height: 20px;
   position: relative;
   margin-bottom: 15px;
   font-weight: bold;
 }
 
-.project-popover__release-item:last-child {
+.roadmap-popover__release-item:last-child {
   margin-bottom: 0;
 }
 
-.project-popover__release-item__name {
+.roadmap-popover__release-item__name {
   width: calc(100% - 160px);
   word-break: normal;
   text-align: left;
+  color: var(--color-text-primary);
 }
 
-.project-popover__release-item__effort {
+.roadmap-popover__release-item__effort {
   width: 70px;
   position: absolute;
   right: 80px;
@@ -230,33 +301,46 @@ body {
   color: var(--color-info);
 }
 
-.project-popover__release-item__stage {
+.roadmap-popover__release-item__stage {
   background: var(--color-gray-600);
   border: 1px solid var(--color-gray-600);
-  border-radius: 12px;
-  padding: 0 8px;
+  border-radius: 8px;
+  padding: 2px 6px;
   text-align: center;
+  color: var(--color-text-primary);
+  width: auto;
+  min-width: 30px;
+  display: inline-block;
+  font-size: 10px;
+  line-height: 1.2;
+  position: absolute;
+  right: 0;
+  top: 0;
+  max-width: 60px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.project-popover__release-item__validation {
+.roadmap-popover__release-item__validation {
   color: var(--color-error);
   padding: 2px;
   margin-top: 4px;
 }
 
-.project-popover__release-item__release_narrative {
+.roadmap-popover__release-item__release_narrative {
   color: var(--color-gray-600);
   /*padding: 2px;*/
   /*margin-top: 4px;*/
 }
 
-.project-popover__release-item__warning {
+.roadmap-popover__release-item__warning {
   color: var(--color-warning);
   /*padding: 2px;*/
   /*margin-top: 4px;*/
 }
 
-.release-item-container-column__project__title .project-popover__release-item__validation {
+.release-item-container-column__project__title .roadmap-popover__release-item__validation {
   margin-top: 0;
   padding: 0;
 }
@@ -275,38 +359,89 @@ body {
   text-align: center;
 }
 
-.project-popover__release-item__status {
-  width: 80px;
+.roadmap-popover__release-item__status {
+  width: 70px;
   position: absolute;
-  right: 0;
+  right: 70px;
   top: 0;
   text-align: right;
+  color: var(--color-text-primary);
+  font-size: 11px;
 }
 
-.project-popover__release-item.health-bad .project-popover__release-item__status,
-.project-popover.health-bad .project-popover__header__progress {
+.roadmap-popover__release-item.health-bad .roadmap-popover__release-item__status,
+.roadmap-popover.health-bad .roadmap-popover__header__progress {
   color: var(--color-error);
 }
 
-.project-popover__release-item.health-normal .project-popover__release-item__status {
+.roadmap-popover__release-item.health-normal .roadmap-popover__release-item__status {
   color: var(--color-text-primary);
 }
 
-.project-popover__release-item.health-good .project-popover__release-item__status {
+.roadmap-popover__release-item.health-good .roadmap-popover__release-item__status {
   color: var(--color-highlight);
 }
 
-.project-popover__release-item.health-best .project-popover__release-item__status,
-.project-popover.health-good .project-popover__header__progress {
-  color: var(--color-success);
+.roadmap-popover__release-item.health-best .roadmap-popover__release-item__status,
+.roadmap-popover.health-good .roadmap-popover__header__progress {
+  color: var(--color-highlight);
 }
 
-.project-popover__release-item.health-forget .project-popover__release-item__status {
+.roadmap-popover__release-item.health-forget .roadmap-popover__release-item__status {
   color: var(--color-info);
 }
 
-.project-popover.health-normal .project-popover__header__progress {
+.roadmap-popover.health-normal .roadmap-popover__header__progress {
   color: var(--color-info);
+}
+
+/* Area Container */
+.area-container {
+  margin: 20px;
+}
+
+/* Area Header - Fixed Menu Bar */
+.area-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-x: auto;
+  background: transparent;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.area-header__left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.area-header__left > * {
+  margin-right: 20px;
+}
+
+.area-header__left > *:last-child {
+  margin-right: 0;
+}
+
+.area-header__right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.area-header__right > * {
+  margin-left: 15px;
+}
+
+.area-header__right > *:first-child {
+  margin-left: 0;
 }
 
 /* Ant Design Vue Layout Header */
@@ -316,6 +451,11 @@ body {
   box-shadow: 0 0 12px 6px rgba(0, 0, 0, .3);
   color: var(--color-info);
   z-index: 5;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-x: auto;
 }
 
 .header-logo-selector {
@@ -323,30 +463,89 @@ body {
 }
 
 .logo {
-  width: 180px;
+  width: auto;
+  min-width: 200px;
   margin-top: 6px;
   vertical-align: top;
   display: inline-block;
-  overflow: hidden;
+  overflow: visible;
+  white-space: nowrap;
 }
 
 .logo svg {
-  height: 40px;
+  height: 30px;
+}
+
+.logo img {
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 8px;
+  filter: brightness(0) invert(1);
+  -webkit-filter: brightness(0) invert(1);
+}
+
+.logo h1 {
+  display: inline-block;
+  margin: 0;
+  font-size: 24px;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--color-text-primary);
+  font-weight: bold;
 }
 
 .page-selector {
   vertical-align: top;
   display: inline-block;
   margin-top: 4px;
-  margin-left: 4px;
+  margin-left: 0;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+/* PageSelector Button Styling */
+.page-selector .ant-btn {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-gray-600) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.page-selector .ant-btn:hover {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-500) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.page-selector .ant-btn:focus {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-gray-600) !important;
+  color: var(--color-text-primary) !important;
 }
 
 .external-selector {
   vertical-align: top;
-  display: inline-block;
   margin-top: 4px;
   margin-left: 4px;
   float: right;
+}
+
+/* External Selector (ReleaseSelector, SprintSelector) Styling */
+.external-selector .project-filter {
+  background-color: var(--color-background) !important;
+  border: 1px solid var(--color-gray-600) !important;
+  color: var(--color-text-primary) !important;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-block;
+  min-width: 100px;
+  text-align: left;
+}
+
+.external-selector .project-filter:hover {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-500) !important;
+  color: var(--color-text-primary) !important;
 }
 
 .external-selector.validation-selector {
@@ -549,43 +748,56 @@ body {
 }
 
 .global-initiatives {
-    background: var(--color-gray-900);
-    margin: -20px -20px 20px -20px;
-    border-bottom: 1px solid var(--color-gray-700);
-    box-shadow: inset 0 -10px 10px -10px rgba(0,0,0,.3);
+    background: transparent;
+    margin: 0;
+    border-bottom: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
 }
 
 .global-initiatives__container, .global-initiatives__progress {
-    height: 310px;
+    height: auto;
+    min-height: 300px;
     position: relative;
-    margin: 20px;
-    background: var(--color-gray-800);
-    border: 1px solid var(--color-gray-700);
+    margin: 0;
+    background: transparent;
+    border: none;
     box-sizing: border-box;
+    padding: 20px;
 }
 
 .global-initiatives__container {
     margin-right: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
 }
 
 .global-initiatives__progress {
     margin-left: 10px;
-    padding: 35px 40px;
+    flex: 1;
+    padding: 20px;
     box-sizing: border-box;
 }
 
 .global-initiatives__chart-container {
     width: 300px;
-    height: 350px;
-    position: absolute;
+    height: 300px;
+    position: relative;
     top: 0;
+    flex-shrink: 0;
 }
 
 .global-initiatives__details {
-    position: absolute;
-    left: 300px;
-    top: 45px;
+    position: relative;
+    left: 0;
+    top: 0;
     width: calc(100% - 320px);
+    margin-left: 20px;
+    flex: 1;
 }
 
 .global-initiatives__details.global-initiatives__details-1 {
@@ -874,14 +1086,17 @@ body {
 
 
 .global-initiatives__chart-container svg, .global-initiatives__chart-container .apexcharts-canvas {
-    height: 350px !important;
-    min-height: 350px !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    width: 300px !important;
 }
 
 .global-initiatives__chart {
     position: absolute;
-    top: 50px;
-    left: -10px;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 300px;
 }
 
 .jira-link {
@@ -910,10 +1125,16 @@ body {
         margin-right: 20px;
     }
 
+    .global-initiatives {
+        flex-direction: column;
+    }
+    
     .global-initiatives__container, .global-initiatives__progress {
-        height: 245px;
-        background: none;
+        height: auto;
+        min-height: 200px;
+        background: transparent;
         border: none;
+        padding: 10px;
     }
 
     .global-initiatives__progress_value {
@@ -1036,13 +1257,13 @@ body {
 
 /* Ant Design Vue Overrides for Dark Theme */
 .ant-select {
-  background-color: var(--color-gray-800) !important;
-  border-color: var(--color-gray-700) !important;
+  background-color: var(--color-background) !important;
+  border-color: var(--color-gray-600) !important;
 }
 
 .ant-select .ant-select-selector {
-  background-color: var(--color-gray-800) !important;
-  border-color: var(--color-gray-700) !important;
+  background-color: var(--color-background) !important;
+  border-color: var(--color-gray-600) !important;
   color: var(--color-text-primary) !important;
 }
 
@@ -1059,33 +1280,33 @@ body {
 }
 
 .ant-select-dropdown {
-  background-color: var(--color-gray-800) !important;
-  border-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-900) !important;
+  border-color: var(--color-gray-600) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
 }
 
 .ant-select-item {
   color: var(--color-text-primary) !important;
-  background-color: var(--color-gray-800) !important;
+  background-color: var(--color-gray-900) !important;
 }
 
 .ant-select-item:hover {
-  background-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-800) !important;
   color: var(--color-text-primary) !important;
 }
 
 .ant-select-item-option-selected {
-  background-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-800) !important;
   color: var(--color-text-primary) !important;
 }
 
 .ant-select-item-option-active {
-  background-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-800) !important;
   color: var(--color-text-primary) !important;
 }
 
 .ant-select-multiple .ant-select-selection-item {
-  background-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-800) !important;
   border-color: var(--color-gray-600) !important;
   color: var(--color-text-primary) !important;
 }
@@ -1135,33 +1356,33 @@ body {
 
 /* Ant Design Vue Dropdown and Menu Components */
 .ant-dropdown {
-  background-color: var(--color-gray-800) !important;
-  border-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-900) !important;
+  border-color: var(--color-gray-600) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8) !important;
 }
 
 .ant-menu {
-  background-color: var(--color-gray-800) !important;
-  border-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-900) !important;
+  border-color: var(--color-gray-600) !important;
 }
 
 .ant-menu-item {
   color: var(--color-text-primary) !important;
-  background-color: var(--color-gray-800) !important;
+  background-color: var(--color-gray-900) !important;
 }
 
 .ant-menu-item:hover {
-  background-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-800) !important;
   color: var(--color-text-primary) !important;
 }
 
 .ant-menu-item-selected {
-  background-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-800) !important;
   color: var(--color-text-primary) !important;
 }
 
 .ant-menu-item-active {
-  background-color: var(--color-gray-700) !important;
+  background-color: var(--color-gray-800) !important;
   color: var(--color-text-primary) !important;
 }
 
@@ -1234,4 +1455,167 @@ body {
 
 .ant-collapse-item-active .ant-collapse-header {
   background-color: var(--color-gray-700) !important;
+}
+
+/* Roadmap Item Styles */
+.roadmap-item {
+  padding: 10px;
+  border: none;
+  margin: 5px 0;
+  border-radius: 0;
+  background: var(--color-gray-700);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.roadmap-item-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.roadmap-item-owner {
+  color: var(--color-gray-500);
+  font-size: 0.9em;
+}
+
+.roadmap-item-progress {
+  color: var(--color-info);
+  font-size: 0.9em;
+}
+
+/* Status Colors for Roadmap Popover */
+.roadmap-popover__release-item__status.status-done,
+.roadmap-popover__release-item__status.status-completed,
+.roadmap-popover__release-item__status.status-finished {
+  color: var(--color-success) !important;
+}
+
+.roadmap-popover__release-item__status.status-in-progress,
+.roadmap-popover__release-item__status.status-active,
+.roadmap-popover__release-item__status.status-working {
+  color: var(--color-highlight) !important;
+}
+
+.roadmap-popover__release-item__status.status-todo,
+.roadmap-popover__release-item__status.status-pending,
+.roadmap-popover__release-item__status.status-waiting {
+  color: var(--color-gray-500) !important;
+}
+
+.roadmap-popover__release-item__status.status-blocked,
+.roadmap-popover__release-item__status.status-failed,
+.roadmap-popover__release-item__status.status-error {
+  color: var(--color-error) !important;
+}
+
+.roadmap-popover__release-item__status.status-review,
+.roadmap-popover__release-item__status.status-testing,
+.roadmap-popover__release-item__status.status-qa {
+  color: var(--color-info) !important;
+}
+
+/* Stage Colors for Roadmap Popover */
+.roadmap-popover__release-item__stage.stage-done,
+.roadmap-popover__release-item__stage.stage-completed,
+.roadmap-popover__release-item__stage.stage-finished {
+  background: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.roadmap-popover__release-item__stage.stage-dev,
+.roadmap-popover__release-item__stage.stage-development,
+.roadmap-popover__release-item__stage.stage-coding {
+  background: var(--color-highlight) !important;
+  border-color: var(--color-highlight) !important;
+  color: var(--color-background) !important;
+}
+
+.roadmap-popover__release-item__stage.stage-qa,
+.roadmap-popover__release-item__stage.stage-testing,
+.roadmap-popover__release-item__stage.stage-review {
+  background: var(--color-info) !important;
+  border-color: var(--color-info) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.roadmap-popover__release-item__stage.stage-todo,
+.roadmap-popover__release-item__stage.stage-pending,
+.roadmap-popover__release-item__stage.stage-waiting {
+  background: var(--color-gray-500) !important;
+  border-color: var(--color-gray-500) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.roadmap-popover__release-item__stage.stage-blocked,
+.roadmap-popover__release-item__stage.stage-failed,
+.roadmap-popover__release-item__stage.stage-error {
+  background: var(--color-error) !important;
+  border-color: var(--color-error) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Generic status/stage coloring based on common values */
+.roadmap-popover__release-item__status[class*="done"],
+.roadmap-popover__release-item__status[class*="complete"],
+.roadmap-popover__release-item__status[class*="finish"] {
+  color: var(--color-success) !important;
+}
+
+.roadmap-popover__release-item__status[class*="progress"],
+.roadmap-popover__release-item__status[class*="active"],
+.roadmap-popover__release-item__status[class*="working"] {
+  color: var(--color-highlight) !important;
+}
+
+.roadmap-popover__release-item__status[class*="todo"],
+.roadmap-popover__release-item__status[class*="pending"],
+.roadmap-popover__release-item__status[class*="waiting"] {
+  color: var(--color-gray-500) !important;
+}
+
+.roadmap-popover__release-item__status[class*="blocked"],
+.roadmap-popover__release-item__status[class*="failed"],
+.roadmap-popover__release-item__status[class*="error"] {
+  color: var(--color-error) !important;
+}
+
+.roadmap-popover__release-item__stage[class*="done"],
+.roadmap-popover__release-item__stage[class*="complete"],
+.roadmap-popover__release-item__stage[class*="finish"] {
+  background: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.roadmap-popover__release-item__stage[class*="dev"],
+.roadmap-popover__release-item__stage[class*="coding"],
+.roadmap-popover__release-item__stage[class*="progress"] {
+  background: var(--color-highlight) !important;
+  border-color: var(--color-highlight) !important;
+  color: var(--color-background) !important;
+}
+
+.roadmap-popover__release-item__stage[class*="qa"],
+.roadmap-popover__release-item__stage[class*="test"],
+.roadmap-popover__release-item__stage[class*="review"] {
+  background: var(--color-info) !important;
+  border-color: var(--color-info) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.roadmap-popover__release-item__stage[class*="todo"],
+.roadmap-popover__release-item__stage[class*="pending"],
+.roadmap-popover__release-item__stage[class*="waiting"] {
+  background: var(--color-gray-500) !important;
+  border-color: var(--color-gray-500) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.roadmap-popover__release-item__stage[class*="blocked"],
+.roadmap-popover__release-item__stage[class*="failed"],
+.roadmap-popover__release-item__stage[class*="error"] {
+  background: var(--color-error) !important;
+  border-color: var(--color-error) !important;
+  color: var(--color-text-primary) !important;
 }

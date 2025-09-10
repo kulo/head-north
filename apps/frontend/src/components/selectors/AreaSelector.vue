@@ -50,9 +50,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.area-selector {
-  display: inline-block;
-}
-</style>
