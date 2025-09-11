@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-row :class="{ 'roadmap-item-row': true, 'odd': itemIndex % 2 === 0 }">
+    <a-row :class="{ 'roadmap-item-row': true, 'odd': itemIndex % 2 === 1 }">
       <a-col :span="6" class="roadmap-item">
         <p>
           <a :href="roadmapItem.url" class="jira-link" target="_blank">
@@ -15,8 +15,8 @@
         </div>
       </a-col>
       <a-col :span="4" class="sprint-release-items" v-for="sprint in orderedSprints" :key="sprint.id">
-        <template v-if="roadmapItem.sprints[sprint.id]">
-          <a-row class="release-item" v-for="releaseItem in roadmapItem.sprints[sprint.id]" :key="releaseItem.ticketId">
+        <template v-if="getReleaseItemsForSprint(sprint.id).length > 0">
+          <a-row class="release-item" v-for="releaseItem in getReleaseItemsForSprint(sprint.id)" :key="releaseItem.ticketId">
             <p>
               <a :href="releaseItem.url" class="jira-link" target="_blank">
                 {{ releaseItem.name }}
@@ -52,8 +52,17 @@ export default {
         !this.validations.hasScheduledRelease ? 'No scheduled S1/S3 release.' : [],
         !this.validations.hasGlobalReleaseInBacklog ? 'No planned S3 release.' : []
       ].flat().join(' ');
-   }
+    }
+  },
+  methods: {
+    getReleaseItemsForSprint(sprintId) {
+      if (!this.roadmapItem.sprints) {
+        return [];
+      }
+      
+      const sprintData = this.roadmapItem.sprints.find(sprint => sprint.sprintId === sprintId);
+      return sprintData ? sprintData.releaseItems : [];
+    }
   }
 }
 </script>
-

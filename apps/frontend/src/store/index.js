@@ -9,8 +9,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
     state: {
       loading: false,
       error: null,
-      // Release overview data
-      releaseOverviewData: {
+      // Roadmap data
+      roadmapData: {
         orderedSprints: [],
         roadmapItems: [],
         activeSprint: null
@@ -41,13 +41,16 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       validationSummary: []
     },
     getters: {
-      releaseOverviewData: (state) => state.releaseOverviewData,
+      roadmapData: (state) => state.roadmapData,
       cycleOverviewData: (state) => state.cycleOverviewData,
       currentCycleOverviewData: (state) => state.currentCycleOverviewData,
       validationSummary: (state) => state.validationSummary,
       initiativeName: (state) => (initiativeId) => {
+        console.log('🔍 initiativeName getter called with:', initiativeId);
+        console.log('🔍 Available initiatives:', state.initiatives);
         const initiative = state.initiatives.find(i => i.id === initiativeId)
-        return initiative ? initiative.name : 'Unknown Initiative'
+        console.log('🔍 Found initiative:', initiative);
+        return initiative ? initiative.name : `Unknown Initiative (${initiativeId})`
       },
       selectedPageName: (state) => {
         return state.pages.current?.name || omegaConfig.getPage('CYCLE_OVERVIEW').name
@@ -60,8 +63,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       SET_ERROR(state, error) {
         state.error = error
       },
-      SET_RELEASE_OVERVIEW_DATA(state, data) {
-        state.releaseOverviewData = data
+      SET_ROADMAP_DATA(state, data) {
+        state.roadmapData = data
       },
       SET_INITIATIVES(state, initiatives) {
         state.initiatives = initiatives
@@ -127,9 +130,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       // SET_ALL_PAGES(state, pages) {
       //   state.pages = pages
       // },
-      SET_SELECTED_INITIATIVES(state, initiatives) {
-        state.selectedInitiatives = initiatives
-      },
       SET_PAGES(state, pages) {
         state.pages.all = pages
       },
@@ -138,7 +138,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       }
     },
     actions: {
-      async fetchReleaseOverview({ commit }) {
+      async fetchRoadmap({ commit }) {
         try {
           commit('SET_LOADING', true)
           commit('SET_ERROR', null)
@@ -151,18 +151,19 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
             orderedSprints: data.sprints || [],
             roadmapItems: data.groupedRoadmapItems && Object.keys(data.groupedRoadmapItems).length > 0 
               ? Object.entries(data.groupedRoadmapItems).map(([initiativeId, roadmapItems]) => ({
-                  initiativeId: parseInt(initiativeId),
+                  initiativeId: initiativeId, // Keep as string to match initiative IDs
                   roadmapItems: roadmapItems || []
                 }))
               : [],
             activeSprint: data.sprint || null
           }
           
-          commit('SET_RELEASE_OVERVIEW_DATA', transformedData)
+          commit('SET_ROADMAP_DATA', transformedData)
           
           // Also set initiatives and assignees from the API response
           if (data.initiatives) {
-            commit('SET_INITIATIVES', data.initiatives)
+            const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(data.initiatives)
+            commit('SET_INITIATIVES', allInitiatives)
           }
           if (data.assignees) {
             commit('SET_ASSIGNEES', data.assignees.map(assignee => ({

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import CycleOverview from '@/components/cycles-overview/CycleOverview.vue'
-import ReleaseOverview from '@/components/roadmap/ReleaseOverview.vue'
+import Roadmap from '@/components/roadmap/Roadmap.vue'
 
 // Router factory function that accepts OmegaConfig
 export default function createAppRouter(omegaConfig) {
@@ -17,7 +17,7 @@ export default function createAppRouter(omegaConfig) {
     },
     { 
       path: pages.ROADMAP.path, 
-      component: ReleaseOverview 
+      component: Roadmap 
     }
   ]
 

@@ -112,7 +112,7 @@ class CycleDataService {
 
   /**
    * Get cycles roadmap data showing past, current, and future cycles
-   * Used by the ReleaseOverview component
+   * Used by the Roadmap component
    * @returns {Promise<object>} Cycles roadmap data
    */
   async getCyclesRoadmap() {

@@ -1233,11 +1233,12 @@ body {
 /* Ant Design Vue Collapse - roadmaps specific styles */
 #roadmaps .ant-collapse-item .ant-collapse-header {
   color: var(--color-text-primary) !important;
-  background-color: var(--color-success) !important;
+  background-color: var(--color-gray-800) !important;
   border-bottom: 0 !important;
-  padding-left: 10px !important;
-  font-weight: bold !important;
+  padding: 12px 16px !important;
+  font-weight: 600 !important;
   font-size: 16px !important;
+  border-radius: 6px 6px 0 0 !important;
 }
 
 #roadmaps .ant-collapse-content {
@@ -1247,12 +1248,96 @@ body {
 
 #roadmaps .ant-collapse-item {
   background-color: var(--color-background) !important;
-  border-bottom: 0 !important;
+  border: 1px solid var(--color-gray-700) !important;
+  margin-bottom: 8px !important;
+  border-radius: 6px !important;
 }
 
 #roadmaps .ant-collapse {
   border-bottom: 0 !important;
   border-top: 0 !important;
+  margin-top: 20px;
+}
+
+#roadmaps .ant-collapse-content {
+  background-color: var(--color-gray-100) !important;
+  border-radius: 0 0 6px 6px !important;
+}
+
+#roadmaps .ant-collapse-content-box {
+  padding: 16px !important;
+}
+
+#roadmaps .ant-collapse-arrow {
+  color: var(--color-text-primary) !important;
+}
+
+/* Roadmap Item Row Styles */
+#roadmaps .roadmap-item-row {
+  border-bottom: 1px solid var(--color-gray-200);
+  padding: 8px 0;
+}
+
+#roadmaps .roadmap-item-row.odd {
+  background-color: var(--color-gray-700) !important;
+}
+
+/* Jira Link Styles */
+.jira-link {
+  color: var(--color-info);
+  text-decoration: none;
+}
+
+.jira-link:hover {
+  color: var(--color-gray-400);
+  text-decoration: underline;
+}
+
+.link-icon {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+/* GTM Validation Styles */
+.gtm-validation {
+  color: var(--color-error);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Sprint Release Items Styles */
+.sprint-release-items {
+  text-align: center;
+  padding: 4px;
+}
+
+.release-item {
+  margin-bottom: 4px;
+  background-color: var(--color-gray-300);
+  border: 1px solid var(--color-gray-400);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 2px 0;
+}
+
+.project-popover__release-item__stage {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+/* Error Styles */
+.error {
+  color: var(--color-error);
+  text-align: center;
+  padding: 20px;
+  background-color: var(--color-gray-800);
+  border: 1px solid var(--color-error);
+  border-radius: 6px;
+  margin: 20px 0;
 }
 
 /* Ant Design Vue Overrides for Dark Theme */
