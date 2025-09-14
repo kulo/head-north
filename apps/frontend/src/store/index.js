@@ -43,7 +43,43 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
     getters: {
       roadmapData: (state) => state.roadmapData,
       cycleOverviewData: (state) => state.cycleOverviewData,
-      currentCycleOverviewData: (state) => state.currentCycleOverviewData,
+      currentCycleOverviewData: (state) => {
+        const rawData = state.currentCycleOverviewData;
+        if (!rawData || !rawData.initiatives) {
+          return rawData;
+        }
+
+        const selectedInitiatives = state.selectedInitiatives || [];
+        
+        // If no initiatives selected or "All" is selected, show all
+        if (!selectedInitiatives || selectedInitiatives.length === 0) {
+          return rawData;
+        }
+        
+        // Check if "All" is selected
+        const isAllSelected = selectedInitiatives.some(init => 
+          init && (init.id === 'all' || init.value === 'all')
+        );
+        
+        if (isAllSelected) {
+          return rawData;
+        }
+        
+        // Filter by selected initiative IDs
+        const selectedInitiativeIds = selectedInitiatives
+          .filter(init => init && init.id)
+          .map(init => String(init.id)) // Convert to string for comparison
+          .filter(id => id !== 'all');
+        
+        const filteredInitiatives = rawData.initiatives.filter(initiative => 
+          selectedInitiativeIds.includes(String(initiative.initiativeId))
+        );
+        
+        return {
+          ...rawData,
+          initiatives: filteredInitiatives
+        };
+      },
       validationSummary: (state) => state.validationSummary,
       initiativeName: (state) => (initiativeId) => {
         console.log('🔍 initiativeName getter called with:', initiativeId);
@@ -185,10 +221,14 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       },
       
       // Selector actions
-      async fetchInitiatives({ commit }) {
+      async fetchInitiatives({ commit, state }) {
         try {
-          const initiatives = await cycleDataService.getAllInitiatives()
-          commit('SET_INITIATIVES', initiatives)
+          const cycleId = state.selectedCycle ? state.selectedCycle.id : null
+          const initiatives = await cycleDataService.getAllInitiatives(cycleId)
+          
+          // Add "All Initiatives" option
+          const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiatives)
+          commit('SET_INITIATIVES', allInitiatives)
         } catch (error) {
           const errorMessage = error?.message || error?.toString() || 'Unknown error'
           commit('SET_ERROR', errorMessage)

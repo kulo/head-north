@@ -17,10 +17,10 @@
     </a-select-option>
     <a-select-option
       v-for="initiative in filteredInitiatives"
-      :key="initiative?.id || initiative"
+      :key="initiative.id"
       :value="initiative.id"
     >
-      {{ initiative?.name || initiative }}
+      {{ initiative.name }}
     </a-select-option>
   </a-select>
 </template>

@@ -6,7 +6,7 @@
         <page-selector></page-selector>
       </div>
       <div class="cycle-overview-header__right">
-        <!-- <initiative-selector></initiative-selector> -->
+        <initiative-selector></initiative-selector>
         <!-- <assignee-selector></assignee-selector> -->
         <!-- <release-selector></release-selector> -->
         <!-- <stage-selector></stage-selector> -->
@@ -97,7 +97,7 @@ import PageSelector from "../selectors/PageSelector.vue"
 import ValidationSelector from "../selectors/ValidationSelector.vue"
 import CycleSelector from "../selectors/CycleSelector.vue"
 // import StageSelector from "../selectors/StageSelector.vue"
-// import InitiativeSelector from "../selectors/InitiativeSelector.vue"
+import InitiativeSelector from "../selectors/InitiativeSelector.vue"
 // import ReleaseSelector from "../selectors/ReleaseSelector.vue"
 // import AssigneeSelector from "../selectors/AssigneeSelector.vue"
 // TODO: Remove this import if CycleAreaSelector is permanently removed
@@ -114,8 +114,8 @@ export default {
     PageSelector,
     ValidationSelector,
     CycleSelector,
+    InitiativeSelector,
     // StageSelector,
-    // InitiativeSelector,
     // ReleaseSelector,
     // AssigneeSelector,
     // TODO: Remove this component if CycleAreaSelector is permanently removed
@@ -133,95 +133,6 @@ export default {
     const cycleOverviewData = computed(() => store.getters.currentCycleOverviewData)
     const isOverviewPage = computed(() => store.getters.selectedPageName === 'Cycle Overview')
     
-    // Filtering logic - TEMPORARILY COMMENTED OUT
-    // const cycleOverviewData = computed(() => {
-    //   if (!rawCycleOverviewData.value || !rawCycleOverviewData.value.initiatives) {
-    //     return rawCycleOverviewData.value
-    //   }
-    //   
-    //   const selectedInitiatives = store.state.selectedInitiatives || []
-    //   const selectedAssignees = store.state.selectedAssignees || []
-    //   const selectedStages = store.state.selectedStages || []
-    //   const selectedReleaseFilters = store.state.selectedReleaseFilters || []
-    //   
-    //   // Helper function to check if "All" is selected
-    //   const isAllSelected = (selectedItems) => {
-    //     if (!selectedItems || selectedItems.length === 0) return true
-    //     return selectedItems.some(item => item && (item.id === 'all' || item.value === 'all'))
-    //   }
-    //   
-    //   // Filter initiatives
-    //   let filteredInitiatives = rawCycleOverviewData.value.initiatives
-    //   if (!isAllSelected(selectedInitiatives)) {
-    //     const selectedInitiativeIds = selectedInitiatives
-    //       .filter(init => init && init.id)
-    //       .map(init => init.id)
-    //       .filter(id => id !== 'all')
-    //     filteredInitiatives = filteredInitiatives.filter(initiative => 
-    //       selectedInitiativeIds.includes(initiative.initiativeId)
-    //     )
-    //   }
-    //   
-    //   // Filter by assignee (crew/owner)
-    //   if (!isAllSelected(selectedAssignees)) {
-    //     const selectedAssigneeIds = selectedAssignees
-    //       .filter(assignee => assignee && assignee.id)
-    //       .map(assignee => assignee.id)
-    //       .filter(id => id !== 'all')
-    //     filteredInitiatives = filteredInitiatives.map(initiative => ({
-    //       ...initiative,
-    //       roadmapItems: initiative.roadmapItems.filter(roadmapItem => {
-    //         // Check if any release item has a matching assignee
-    //         return roadmapItem.releaseItems.some(releaseItem => 
-    //           selectedAssigneeIds.includes(releaseItem.assignee?.accountId) || 
-    //           selectedAssigneeIds.includes(releaseItem.assignee) ||
-    //           selectedAssigneeIds.includes(releaseItem.crew)
-    //         )
-    //       })
-    //     })).filter(initiative => initiative.roadmapItems.length > 0)
-    //   }
-    //   
-    //   // Filter by stage
-    //   if (!isAllSelected(selectedStages)) {
-    //     const selectedStageNames = selectedStages
-    //       .filter(stage => stage && stage.name)
-    //       .map(stage => stage.name)
-    //       .filter(name => name !== 'All Stages')
-    //     filteredInitiatives = filteredInitiatives.map(initiative => ({
-    //       ...initiative,
-    //       roadmapItems: initiative.roadmapItems.filter(roadmapItem => {
-    //         // Check if any release item has a matching stage
-    //         return roadmapItem.releaseItems.some(releaseItem => 
-    //           selectedStageNames.includes(releaseItem.stage)
-    //         )
-    //       })
-    //     })).filter(initiative => initiative.roadmapItems.length > 0)
-    //   }
-    //   
-    //   // Filter by release filter
-    //   if (!isAllSelected(selectedReleaseFilters)) {
-    //     const selectedReleaseValues = selectedReleaseFilters
-    //       .filter(filter => filter && filter.value)
-    //       .map(filter => filter.value)
-    //       .filter(value => value !== 'all')
-    //     filteredInitiatives = filteredInitiatives.map(initiative => ({
-    //       ...initiative,
-    //       roadmapItems: initiative.roadmapItems.filter(roadmapItem => {
-    //         // Check if any release item matches the release filter
-    //         return roadmapItem.releaseItems.some(releaseItem => 
-    //           selectedReleaseValues.includes(releaseItem.release) ||
-    //           selectedReleaseValues.includes(releaseItem.releaseFilter) ||
-    //           selectedReleaseValues.includes(releaseItem.status)
-    //         )
-    //       })
-    //     })).filter(initiative => initiative.roadmapItems.length > 0)
-    //   }
-    //   
-    //   return {
-    //     ...rawCycleOverviewData.value,
-    //     initiatives: filteredInitiatives
-    //   }
-    // })
     
     // Dialog state
     const dialogOpen = ref(false)

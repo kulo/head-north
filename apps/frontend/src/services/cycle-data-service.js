@@ -122,12 +122,22 @@ class CycleDataService {
 
 
   /**
-   * Get all initiatives from the roadmap data
-   * @returns {Promise<Array>} Array of initiatives
+   * Get all initiatives from the cycle overview data
+   * @param {string|number} cycleId - The cycle or sprint ID to get initiatives for
+   * @returns {Promise<Array>} Array of initiatives with id and name properties
    */
-  async getAllInitiatives() {
-    const data = await this._getRoadmapData()
-    return data.initiatives || []
+  async getAllInitiatives(cycleId = null) {
+    // Use cycle overview data as the primary source for initiatives
+    const data = await this.getOverviewForCycle(cycleId)
+    const initiatives = data.initiatives || []
+    
+    // Transform initiatives from key-value pairs to array of objects if needed
+    if (initiatives && typeof initiatives === 'object' && !Array.isArray(initiatives)) {
+      // Convert from {id: name} format to [{id, name}] format
+      return Object.entries(initiatives).map(([id, name]) => ({ id, name }))
+    }
+    
+    return initiatives
   }
 
   /**
