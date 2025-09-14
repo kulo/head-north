@@ -1,6 +1,6 @@
 <template>
-  <a-dropdown class="page-selector" @command="changePage">
-    <a-button>{{ selectedPageName }}<DownOutlined /></a-button>
+  <a-dropdown class="external-selector page-selector" @command="changePage" style="margin-right: 10px">
+    <a-button style="width: 200px; text-align: left;">{{ selectedPageName }}<DownOutlined /></a-button>
     <template #overlay>
       <a-menu @click="handleMenuClick">
         <a-menu-item v-for="page in allPages" :key="page.id" :command="page.id">

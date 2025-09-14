@@ -1,14 +1,14 @@
 <template>
-  <div class="area-container">
-    <a-layout-header :style="{ height: '50px', lineHeight: '50px' }" class="area-header" v-if="!loading">
-      <div class="area-header">
+  <div class="cycle-overview-container">
+    <div class="cycle-overview-header">
+      <div class="cycle-overview-header__left">
         <logo></logo>
         <page-selector></page-selector>
-        <!-- TODO: Remove this if CycleAreaSelector is permanently removed -->
-        <!-- <cycle-area-selector></cycle-area-selector> -->
+      </div>
+      <div class="cycle-overview-header__right">
         <initiative-selector></initiative-selector>
-      </div>  
-    </a-layout-header>
+      </div>
+    </div>
     <a-layout-content id="roadmaps">
       <div v-if="error" class="error">{{ error }}</div>
       <a-row :gutter="20">
@@ -106,6 +106,13 @@ export default {
     
     // Create a reactive reference for the active initiative IDs (for v-model)
     const activeInitiativeIds = ref([])
+    
+    // Watch for changes in filtered roadmap data to auto-expand all panels
+    watch(filteredRoadmapData, (newData) => {
+      if (newData && newData.length > 0) {
+        activeInitiativeIds.value = newData.map(row => row.initiativeId || 'unknown')
+      }
+    }, { immediate: true })
 
     const fetchRoadmap = async () => {
       await store.dispatch('fetchRoadmap')
