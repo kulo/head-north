@@ -61,9 +61,7 @@ export default class OmegaConfig {
         
         // Cache Configuration
         cache: {
-          ttl: 5 * 60 * 1000, // 5 minutes
-          roadmapTTL: 5 * 60 * 1000, // 5 minutes
-          defaultTTL: 2 * 60 * 1000  // 2 minutes
+          ttl: 5 * 60 * 1000  // 5 minutes
         },
         
         // Release Strategy Configuration (shared between frontend and backend)
@@ -348,7 +346,7 @@ export default class OmegaConfig {
    * @returns {number} Cache TTL in milliseconds
    */
   getCacheTTL() {
-    return this.config.common.cache.roadmapTTL
+    return this.config.common.cache.ttl
   }
 
   /**

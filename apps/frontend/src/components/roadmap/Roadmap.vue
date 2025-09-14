@@ -7,6 +7,7 @@
       </div>
       <div class="cycle-overview-header__right">
         <initiative-selector></initiative-selector>
+        <area-selector></area-selector>
       </div>
     </div>
     <a-layout-content id="roadmaps">
@@ -68,36 +69,47 @@ export default {
     const error = computed(() => store.state.error)
     const initiatives = computed(() => store.state.initiatives)
     const selectedInitiatives = computed(() => store.state.selectedInitiatives)
+    const selectedArea = computed(() => store.state.selectedArea)
     
-    // Filter roadmap data based on selected initiatives
+    // Filter roadmap data based on selected initiatives and area
     const filteredRoadmapData = computed(() => {
       if (!roadmapData.value || !roadmapData.value.roadmapItems) {
         return []
       }
       
-      // If no initiatives selected or "All" is selected, show all
-      if (!selectedInitiatives.value || selectedInitiatives.value.length === 0) {
-        return roadmapData.value.roadmapItems
+      let filteredItems = roadmapData.value.roadmapItems
+      
+      // Filter by selected initiatives
+      if (selectedInitiatives.value && selectedInitiatives.value.length > 0) {
+        // Check if "All" is selected
+        const isAllSelected = selectedInitiatives.value.some(init => 
+          init && (init.id === 'all' || init.value === 'all')
+        )
+        
+        if (!isAllSelected) {
+          // Filter by selected initiative IDs
+          const selectedInitiativeIds = selectedInitiatives.value
+            .filter(init => init && init.id)
+            .map(init => String(init.id)) // Convert to string for comparison
+            .filter(id => id !== 'all')
+          
+          filteredItems = filteredItems.filter(row => 
+            selectedInitiativeIds.includes(String(row.initiativeId)) // Convert to string for comparison
+          )
+        }
       }
       
-      // Check if "All" is selected
-      const isAllSelected = selectedInitiatives.value.some(init => 
-        init && (init.id === 'all' || init.value === 'all')
-      )
-      
-      if (isAllSelected) {
-        return roadmapData.value.roadmapItems
+      // Filter by selected area
+      if (selectedArea.value && selectedArea.value !== 'all') {
+        filteredItems = filteredItems.filter(row => {
+          // Check if any roadmap item in this row matches the selected area
+          return row.roadmapItems.some(roadmapItem => 
+            roadmapItem.area === selectedArea.value
+          )
+        })
       }
       
-      // Filter by selected initiative IDs
-      const selectedInitiativeIds = selectedInitiatives.value
-        .filter(init => init && init.id)
-        .map(init => String(init.id)) // Convert to string for comparison
-        .filter(id => id !== 'all')
-      
-      return roadmapData.value.roadmapItems.filter(row => 
-        selectedInitiativeIds.includes(String(row.initiativeId)) // Convert to string for comparison
-      )
+      return filteredItems
     })
     
     const initiativeIds = computed(() => {

@@ -14,12 +14,43 @@ class CycleDataService {
       throw new Error('CycleDataService requires an OmegaConfig instance to be injected')
     }
     this.config = omegaConfig
+    
+    // Unified cache management
+    this._cacheTimestamp = null
     this._roadmapCache = null
-    this._roadmapCacheTimestamp = null
-    this._roadmapCacheTTL = this.config.getCacheTTL()
+    this._cycleOverviewCache = new Map() // Map<cycleId, data>
+    this._cacheTTL = this.config.getCacheTTL()
     this._apiTimeout = this.config.getEnvironmentConfig().timeout
     this._apiRetries = this.config.getEnvironmentConfig().retries
     this._apiAttempts = this.config.getEnvironmentConfig().attempts
+  }
+
+  /**
+   * Check if any cached data is still valid
+   * @returns {boolean} True if cache is valid
+   * @private
+   */
+  _isCacheValid() {
+    if (!this._cacheTimestamp) return false
+    return (Date.now() - this._cacheTimestamp) < this._cacheTTL
+  }
+
+  /**
+   * Clear all caches
+   * @private
+   */
+  _clearAllCaches() {
+    this._roadmapCache = null
+    this._cycleOverviewCache.clear()
+    this._cacheTimestamp = null
+  }
+
+  /**
+   * Set cache timestamp when any data is cached
+   * @private
+   */
+  _setCacheTimestamp() {
+    this._cacheTimestamp = Date.now()
   }
 
   /**
@@ -28,21 +59,23 @@ class CycleDataService {
    * @private
    */
   async _getRoadmapData() {
-    const now = Date.now()
-    
-    // Return cached data if it's still valid
-    if (this._roadmapCache && this._roadmapCacheTimestamp && 
-        (now - this._roadmapCacheTimestamp) < this._roadmapCacheTTL) {
+    // Check if any cached data is still valid
+    if (this._isCacheValid() && this._roadmapCache) {
       return this._roadmapCache
+    }
+    
+    // If cache is invalid, clear all caches
+    if (!this._isCacheValid()) {
+      this._clearAllCaches()
     }
     
     // Fetch fresh data
     const endpoints = this.config.getEndpoints()
     const data = await this._request(endpoints.CYCLES_ROADMAP)
     
-    // Cache the data
+    // Cache the data and set timestamp
     this._roadmapCache = data
-    this._roadmapCacheTimestamp = now
+    this._setCacheTimestamp()
     
     return data
   }
@@ -97,6 +130,36 @@ class CycleDataService {
   }
 
   /**
+   * Get cycle overview data with caching
+   * @param {string|number} cycleId - The cycle or sprint ID to get overview for
+   * @returns {Promise<object>} Cycle overview data
+   * @private
+   */
+  async _getCycleOverviewData(cycleId) {
+    // Check if any cached data is still valid
+    if (this._isCacheValid() && this._cycleOverviewCache.has(cycleId)) {
+      return this._cycleOverviewCache.get(cycleId)
+    }
+    
+    // If cache is invalid, clear all caches
+    if (!this._isCacheValid()) {
+      this._clearAllCaches()
+    }
+    
+    // Fetch fresh cycle-overview data
+    const data = await this.getOverviewForCycle(cycleId)
+    
+    // Cache the data and set timestamp (if not already set by roadmap)
+    if (!this._cacheTimestamp) {
+      this._setCacheTimestamp()
+    }
+    
+    this._cycleOverviewCache.set(cycleId, data)
+    
+    return data
+  }
+
+  /**
    * Get overview data for a specific cycle/sprint
    * This is the main data source for the Area component
    * @param {string|number} cycleId - The cycle or sprint ID to get overview for
@@ -118,6 +181,15 @@ class CycleDataService {
   async getCyclesRoadmap() {
     const endpoints = this.config.getEndpoints()
     return this._request(endpoints.CYCLES_ROADMAP)
+  }
+
+  /**
+   * Get the currently active sprint
+   * @returns {Promise<object|null>} Active sprint data or null if none found
+   */
+  async getActiveSprint() {
+    const data = await this._getRoadmapData()
+    return data.activeSprint || data.sprints?.find(sprint => sprint.active) || null
   }
 
 
@@ -153,12 +225,102 @@ class CycleDataService {
   }
 
   /**
-   * Get all areas from the roadmap data
-   * @returns {Promise<Array>} Array of areas with id and name
+   * Extract area IDs from backend data
+   * @param {object} data - Backend data (roadmap or cycle-overview)
+   * @returns {Array<string>} Array of area IDs
+   * @private
    */
-  async getAllAreas() {
-    const data = await this._getRoadmapData()
-    return data.area ? Object.entries(data.area).map(([id, name]) => ({ id, name })) : []
+  _extractAreasFromData(data) {
+    // Handle roadmap data structure
+    if (data.area && typeof data.area === 'object') {
+      return Object.keys(data.area) // Get area IDs
+    }
+    
+    // Handle cycle-overview data structure (devCycleData.area)
+    if (data.devCycleData?.area && typeof data.devCycleData.area === 'object') {
+      return Object.keys(data.devCycleData.area)
+    }
+    
+    // Extract from roadmap items if available
+    if (data.roadmapItems || data.groupedRoadmapItems) {
+      const items = data.roadmapItems || Object.values(data.groupedRoadmapItems).flat()
+      const areaIds = new Set()
+      
+      items.forEach(item => {
+        if (item.area) areaIds.add(item.area)
+        if (item.roadmapItems) {
+          item.roadmapItems.forEach(ri => {
+            if (ri.area) areaIds.add(ri.area)
+          })
+        }
+      })
+      
+      return Array.from(areaIds)
+    }
+    
+    return []
+  }
+
+  /**
+   * Get config areas for translations
+   * @returns {Array<{id: string, name: string}>} Array of config areas
+   * @private
+   */
+  _getConfigAreas() {
+    const config = this.config.getAreas()
+    return Object.entries(config).map(([id, name]) => ({ id, name }))
+  }
+
+  /**
+   * Create union of backend areas and config areas with proper fallbacks
+   * @param {Array<string>} backendAreaIds - Area IDs from backend
+   * @param {Array<{id: string, name: string}>} configAreas - Config areas with translations
+   * @returns {Array<{id: string, name: string}>} Union of areas with fallbacks
+   * @private
+   */
+  _createAreaUnion(backendAreaIds, configAreas) {
+    const areaMap = new Map()
+    
+    // Add config areas first (for translations)
+    configAreas.forEach(area => {
+      areaMap.set(area.id, area.name)
+    })
+    
+    // Add backend areas (IDs only, use config name if available)
+    backendAreaIds.forEach(areaId => {
+      if (!areaMap.has(areaId)) {
+        areaMap.set(areaId, areaId) // Use ID as fallback name
+      }
+    })
+    
+    // Convert to array format
+    return Array.from(areaMap.entries()).map(([id, name]) => ({ id, name }))
+  }
+
+  /**
+   * Get all areas from appropriate data source with config fallbacks
+   * @param {string|number} cycleId - The cycle or sprint ID to get areas for
+   * @returns {Promise<Array>} Array of areas with id and name properties
+   */
+  async getAllAreas(cycleId = null) {
+    try {
+      // Get areas from appropriate data source
+      const sourceData = cycleId 
+        ? await this._getCycleOverviewData(cycleId)
+        : await this._getRoadmapData()
+      
+      // Extract areas from backend data
+      const backendAreas = this._extractAreasFromData(sourceData)
+      
+      // Get config areas for translations
+      const configAreas = this._getConfigAreas()
+      
+      // Create union with proper fallbacks
+      return this._createAreaUnion(backendAreas, configAreas)
+    } catch (error) {
+      // Fallback to config only if backend fails
+      return this._getConfigAreas()
+    }
   }
 
   /**
@@ -181,11 +343,10 @@ class CycleDataService {
   }
 
   /**
-   * Clear the roadmap cache (useful for testing or when data needs to be refreshed)
+   * Clear all caches (useful for testing or when data needs to be refreshed)
    */
-  clearRoadmapCache() {
-    this._roadmapCache = null
-    this._roadmapCacheTimestamp = null
+  clearCache() {
+    this._clearAllCaches()
   }
 }
 

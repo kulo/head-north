@@ -44,16 +44,63 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       roadmapData: (state) => state.roadmapData,
       cycleOverviewData: (state) => state.cycleOverviewData,
       currentCycleOverviewData: (state) => {
+        console.log('🔍 currentCycleOverviewData getter called');
         const rawData = state.currentCycleOverviewData;
+        console.log('🔍 rawData:', rawData);
+        console.log('🔍 rawData.initiatives:', rawData?.initiatives);
         if (!rawData || !rawData.initiatives) {
+          console.log('🔍 Early return - no rawData or initiatives');
           return rawData;
         }
 
         const selectedInitiatives = state.selectedInitiatives || [];
+        const selectedArea = state.selectedArea;
         
-        // If no initiatives selected or "All" is selected, show all
+        console.log('🔍 selectedInitiatives:', selectedInitiatives);
+        console.log('🔍 selectedArea:', selectedArea);
+        
+        let filteredInitiatives = [...rawData.initiatives];
+        
+        // First, apply area filtering if an area is selected
+        if (selectedArea && selectedArea !== 'all') {
+          filteredInitiatives = filteredInitiatives.map(initiative => ({
+            ...initiative,
+            roadmapItems: initiative.roadmapItems.map(roadmapItem => {
+              const filteredReleaseItems = roadmapItem.releaseItems ? roadmapItem.releaseItems.filter(releaseItem => {
+                // Check direct area match (case-insensitive)
+                if (releaseItem.area && releaseItem.area.toLowerCase() === selectedArea.toLowerCase()) {
+                  return true;
+                }
+                
+                // Check area from roadmap item (case-insensitive)
+                if (roadmapItem.area && roadmapItem.area.toLowerCase() === selectedArea.toLowerCase()) {
+                  return true;
+                }
+                
+                // For now, skip team-based filtering since team IDs are not in area.team format
+                // TODO: Implement proper team-to-area mapping if needed
+                
+                return false;
+              }) : [];
+              
+              const hasMatchingReleaseItems = filteredReleaseItems.length > 0;
+              // Check roadmap item area match (case-insensitive)
+              const hasDirectAreaMatch = roadmapItem.area && roadmapItem.area.toLowerCase() === selectedArea.toLowerCase();
+              
+              if (hasMatchingReleaseItems || hasDirectAreaMatch) {
+                return { ...roadmapItem, releaseItems: filteredReleaseItems };
+              }
+              
+              return null;
+            }).filter(item => item !== null)
+          })).filter(initiative => initiative.roadmapItems.length > 0);
+        }
+        
+        // Then, apply initiative filtering if specific initiatives are selected
+        // If no initiatives selected or "All" is selected, show all (already filtered by area)
         if (!selectedInitiatives || selectedInitiatives.length === 0) {
-          return rawData;
+          console.log('🔍 Early return - no initiatives selected');
+          return { ...rawData, initiatives: filteredInitiatives };
         }
         
         // Check if "All" is selected
@@ -61,8 +108,11 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           init && (init.id === 'all' || init.value === 'all')
         );
         
+        console.log('🔍 isAllSelected:', isAllSelected);
+        
         if (isAllSelected) {
-          return rawData;
+          console.log('🔍 All initiatives selected - returning area-filtered data');
+          return { ...rawData, initiatives: filteredInitiatives };
         }
         
         // Filter by selected initiative IDs
@@ -71,9 +121,10 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           .map(init => String(init.id)) // Convert to string for comparison
           .filter(id => id !== 'all');
         
-        const filteredInitiatives = rawData.initiatives.filter(initiative => 
+        filteredInitiatives = filteredInitiatives.filter(initiative => 
           selectedInitiativeIds.includes(String(initiative.initiativeId))
         );
+        
         
         return {
           ...rawData,
@@ -174,6 +225,26 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       }
     },
     actions: {
+      /**
+       * Helper function to get cycle ID, setting selectedCycle if needed
+       * @param {object} context - Vuex action context
+       * @returns {Promise<string|null>} Cycle ID or null
+       */
+      async _ensureSelectedCycle({ commit, state }) {
+        let cycleId = state.selectedCycle?.id
+        
+        // If no cycle selected, get active sprint and set it
+        if (!cycleId) {
+          const activeSprint = await cycleDataService.getActiveSprint()
+          if (activeSprint) {
+            cycleId = activeSprint.id
+            commit('SET_SELECTED_CYCLE', activeSprint)
+          }
+        }
+        
+        return cycleId
+      },
+
       async fetchRoadmap({ commit }) {
         try {
           commit('SET_LOADING', true)
@@ -221,9 +292,9 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       },
       
       // Selector actions
-      async fetchInitiatives({ commit, state }) {
+      async fetchInitiatives({ commit, dispatch }) {
         try {
-          const cycleId = state.selectedCycle ? state.selectedCycle.id : null
+          const cycleId = await dispatch('_ensureSelectedCycle')
           const initiatives = await cycleDataService.getAllInitiatives(cycleId)
           
           // Add "All Initiatives" option
@@ -245,9 +316,10 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         }
       },
       
-      async fetchAreas({ commit }) {
+      async fetchAreas({ commit, dispatch }) {
         try {
-          const areas = await cycleDataService.getAllAreas()
+          const cycleId = await dispatch('_ensureSelectedCycle')
+          const areas = await cycleDataService.getAllAreas(cycleId)
           commit('SET_AREAS', areas)
         } catch (error) {
           const errorMessage = error?.message || error?.toString() || 'Unknown error'

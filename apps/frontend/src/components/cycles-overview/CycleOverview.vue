@@ -7,12 +7,12 @@
       </div>
       <div class="cycle-overview-header__right">
         <initiative-selector></initiative-selector>
+        <area-selector></area-selector>
         <!-- <assignee-selector></assignee-selector> -->
         <!-- <release-selector></release-selector> -->
         <!-- <stage-selector></stage-selector> -->
         <cycle-selector></cycle-selector>
         <validation-selector></validation-selector>
-        <!--<cycle-area-selector></cycle-area-selector>-->
       </div>
     </div>
     
@@ -96,6 +96,7 @@ import Logo from "../Logo.vue"
 import PageSelector from "../selectors/PageSelector.vue"
 import ValidationSelector from "../selectors/ValidationSelector.vue"
 import CycleSelector from "../selectors/CycleSelector.vue"
+import AreaSelector from "../selectors/AreaSelector.vue"
 // import StageSelector from "../selectors/StageSelector.vue"
 import InitiativeSelector from "../selectors/InitiativeSelector.vue"
 // import ReleaseSelector from "../selectors/ReleaseSelector.vue"
@@ -114,6 +115,7 @@ export default {
     PageSelector,
     ValidationSelector,
     CycleSelector,
+    AreaSelector,
     InitiativeSelector,
     // StageSelector,
     // ReleaseSelector,
