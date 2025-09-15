@@ -330,6 +330,7 @@ export default class OmegaConfig {
       HEALTH_CHECK: '/healthcheck',
       CYCLE_OVERVIEW: '/cycles/:id/overview',
       CYCLES_ROADMAP: '/cycles/roadmap',
+      UNIFIED_DATA: '/unified-data',
     }
   }
 

@@ -69,9 +69,12 @@ class CycleDataService {
       this._clearAllCaches()
     }
     
-    // Fetch fresh data
+    // Fetch fresh data from unified endpoint
     const endpoints = this.config.getEndpoints()
-    const data = await this._request(endpoints.CYCLES_ROADMAP)
+    const unifiedData = await this._request(endpoints.UNIFIED_DATA)
+    
+    // Transform unified data to legacy roadmap format
+    const data = this._transformUnifiedToRoadmap(unifiedData)
     
     // Cache the data and set timestamp
     this._roadmapCache = data
@@ -237,6 +240,11 @@ class CycleDataService {
    * @private
    */
   _extractAreasFromData(data) {
+    // Handle unified data structure (metadata.areas)
+    if (data.metadata?.areas && typeof data.metadata.areas === 'object') {
+      return Object.keys(data.metadata.areas) // Get area IDs
+    }
+    
     // Handle roadmap data structure
     if (data.area && typeof data.area === 'object') {
       return Object.keys(data.area) // Get area IDs
@@ -335,7 +343,13 @@ class CycleDataService {
    */
   async getAllCycles() {
     const data = await this._getRoadmapData()
-    // Map sprints to cycles for consistency
+    
+    // Handle unified data structure (metadata.cycles.ordered)
+    if (data.metadata?.cycles?.ordered) {
+      return data.metadata.cycles.ordered
+    }
+    
+    // Fallback to legacy structure
     return data.sprints || []
   }
 
@@ -345,6 +359,13 @@ class CycleDataService {
    */
   async getAllStages() {
     const data = await this._getRoadmapData()
+    
+    // Handle unified data structure (metadata.stages)
+    if (data.metadata?.stages) {
+      return data.metadata.stages
+    }
+    
+    // Fallback to legacy structure
     return data.stages || []
   }
 
