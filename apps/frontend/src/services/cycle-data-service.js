@@ -450,13 +450,10 @@ class CycleDataService {
    */
   _extractAreasFromUnifiedData(unifiedData) {
     const { metadata } = unifiedData
-    const areas = {}
     
-    metadata.areas.forEach(area => {
-      areas[area.id] = area.name
-    })
-    
-    return areas
+    // metadata.areas is already an object with {id: name} format
+    // Just return it directly
+    return metadata.areas || {}
   }
 
   /**
