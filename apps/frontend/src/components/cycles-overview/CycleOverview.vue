@@ -9,9 +9,9 @@
       <div class="cycle-overview-header__right">
         <initiative-selector></initiative-selector>
         <area-selector></area-selector>
-        <!-- <assignee-selector></assignee-selector> -->
-        <!-- <release-selector></release-selector> -->
-        <!-- <stage-selector></stage-selector> -->
+        <assignee-selector></assignee-selector>
+        <release-selector></release-selector>
+        <stage-selector></stage-selector>
         <validation-selector></validation-selector>
       </div>
     </div>
@@ -97,12 +97,10 @@ import PageSelector from "../selectors/PageSelector.vue"
 import ValidationSelector from "../selectors/ValidationSelector.vue"
 import CycleSelector from "../selectors/CycleSelector.vue"
 import AreaSelector from "../selectors/AreaSelector.vue"
-// import StageSelector from "../selectors/StageSelector.vue"
+import StageSelector from "../selectors/StageSelector.vue"
 import InitiativeSelector from "../selectors/InitiativeSelector.vue"
-// import ReleaseSelector from "../selectors/ReleaseSelector.vue"
-// import AssigneeSelector from "../selectors/AssigneeSelector.vue"
-// TODO: Remove this import if CycleAreaSelector is permanently removed
-// import CycleAreaSelector from "../selectors/CycleAreaSelector.vue"
+import ReleaseSelector from "../selectors/ReleaseSelector.vue"
+import AssigneeSelector from "../selectors/AssigneeSelector.vue"
 import GlobalInitiativeProgress from "./GlobalInitiativeProgress.vue"
 import InitiativeChart from "./InitiativeChart.vue"
 import InitiativeListItem from "./InitiativeListItem.vue"
@@ -117,11 +115,9 @@ export default {
     CycleSelector,
     AreaSelector,
     InitiativeSelector,
-    // StageSelector,
-    // ReleaseSelector,
-    // AssigneeSelector,
-    // TODO: Remove this component if CycleAreaSelector is permanently removed
-    // CycleAreaSelector,
+    StageSelector,
+    ReleaseSelector,
+    AssigneeSelector,
     GlobalInitiativeProgress,
     InitiativeChart,
     InitiativeListItem,

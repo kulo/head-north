@@ -7,9 +7,16 @@
     @change="setSelectedStages"
   >
     <a-select-option
-      v-for="stage in stages"
-      :key="stage.id || stage.name"
-      :value="stage"
+      key="all"
+      value="all"
+    >
+      All Stages
+    </a-select-option>
+    <a-select-option
+      v-for="stage in filteredStages"
+      :key="stage.value || stage.id || stage.name"
+      :value="stage.value || stage.id || stage.name"
+      :class="{ 'stage-option-selected': isStageSelected(stage.value || stage.id || stage.name) }"
     >
       {{ stage.name }}
     </a-select-option>
@@ -17,7 +24,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -25,22 +32,46 @@ export default {
   setup() {
     const store = useStore()
     
-    const selectedStages = ref(store.state.selectedStages || [])
-    const stages = computed(() => store.state.stages)
+    // Use store getters for global state
+    const stages = computed(() => store.state.stages || [])
+    const filteredStages = computed(() => store.getters.filteredStages)
+    const isStageSelected = (stageId) => store.getters.isStageSelected(stageId)
     
-    // Watch for changes in store and update local ref
-    watch(() => store.state.selectedStages, (newValue) => {
+    // Create writable ref for v-model
+    const selectedStages = ref([])
+    
+    // Watch store changes and update local ref
+    watch(() => store.getters.selectedStageIds, (newValue) => {
       selectedStages.value = newValue || []
     }, { immediate: true })
     
-    const setSelectedStages = (stages) => {
-      selectedStages.value = stages
-      store.dispatch('setSelectedStages', stages)
+    const setSelectedStages = (stageIds) => {
+      // If "all" is selected, clear all selections
+      if (stageIds && stageIds.includes('all')) {
+        store.dispatch('setSelectedStages', [])
+        return
+      }
+      
+      // If no stages selected, clear the store (equivalent to "All Stages")
+      if (!stageIds || stageIds.length === 0) {
+        store.dispatch('setSelectedStages', [])
+        return
+      }
+      
+      // Convert IDs back to stage objects for the store
+      const stageObjects = stageIds.map(id => {
+        const stage = stages.value.find(stage => (stage.value || stage.id || stage.name) === id)
+        return stage || { value: id, name: 'Unknown Stage' }
+      })
+      
+      store.dispatch('setSelectedStages', stageObjects)
     }
-
+    
     return {
       selectedStages,
       stages,
+      filteredStages,
+      isStageSelected,
       setSelectedStages
     }
   }

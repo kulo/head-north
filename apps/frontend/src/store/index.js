@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 import { CycleDataService } from '@/services/index.js'
 import { calculateAreaData } from '@/libraries/calculateAreaData.js'
 import { logger } from '@omega-one/shared-utils'
-import { filteringUtils } from '@/filters/filteringUtils.js'
+import { applyFilters } from '@/filters/unifiedFiltering.js'
 
 // Store factory function that accepts dependencies
 export default function createAppStore(cycleDataService, omegaConfig, router) {
@@ -51,9 +51,10 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           return []
         }
         
-        return filteringUtils.applyFilters(state.roadmapData.roadmapItems, {
+        return applyFilters(state.roadmapData.roadmapItems, {
           area: state.selectedArea,
-          initiatives: state.selectedInitiatives
+          initiatives: state.selectedInitiatives,
+          stages: state.selectedStages
         })
       },
       
@@ -63,9 +64,10 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           return rawData;
         }
 
-        const filteredInitiatives = filteringUtils.applyFilters(rawData.initiatives, {
+        const filteredInitiatives = applyFilters(rawData.initiatives, {
           area: state.selectedArea,
-          initiatives: state.selectedInitiatives
+          initiatives: state.selectedInitiatives,
+          stages: state.selectedStages
         });
 
         return {
@@ -80,6 +82,21 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       },
       selectedPageName: (state) => {
         return state.pages.current?.name || omegaConfig.getPage('CYCLE_OVERVIEW').name
+      },
+      
+      // Stage selector getters - these are global state used for filtering
+      filteredStages: (state) => {
+        return state.stages.filter(stage => stage.id !== 'all')
+      },
+      
+      isStageSelected: (state) => (stageId) => {
+        return state.selectedStages.some(stage => (stage.value || stage.id || stage.name) === stageId)
+      },
+      
+      selectedStageIds: (state) => {
+        return state.selectedStages
+          .map(stage => stage.value || stage.id || stage.name || stage)
+          .filter(id => id !== undefined && id !== 'all')
       }
     },
     mutations: {
@@ -152,10 +169,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           state.selectedArea = route.params.areaId
         }
       },
-      // TODO: Remove this mutation if CycleAreaSelector is permanently removed
-      // SET_ALL_PAGES(state, pages) {
-      //   state.pages = pages
-      // },
       SET_PAGES(state, pages) {
         state.pages.all = pages
       },
@@ -301,8 +314,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           const areaData = calculateAreaData(cycleData);
 
           commit('SET_CYCLE_OVERVIEW_DATA', areaData);
-          // TODO: Restore this when CycleAreaSelector is fixed or removed
-          // commit('SET_ALL_PAGES', cycleData.area);
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
           commit('SET_CYCLES', sprints);
           commit('SET_SELECTED_CYCLE', cycleData.cycle);

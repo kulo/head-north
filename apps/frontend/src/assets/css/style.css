@@ -1424,54 +1424,7 @@ body {
   }
 }
 
-.stage-selector {
-  min-width: 202px;
-
-}
-
-/* Ant Design Vue Select - stage selector specific styles */
-.ant-select.stage-selector .ant-select-selector {
-  background-color: var(--color-gray-800) !important;
-  border: none !important;
-}
-
-.ant-select.stage-selector .ant-select-selection-item {
-  background-color: var(--color-gray-800) !important;
-  color: var(--color-text-primary) !important;
-  max-width: 120px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.ant-select.stage-selector .ant-select-selection-item-remove {
-  background: none !important;
-  color: var(--color-text-primary) !important;
-}
-
-.ant-select-dropdown.stage-selector-popper .ant-select-dropdown-arrow {
-  display: none;
-}
-
-.ant-select-dropdown.stage-selector-popper {
-  border: none !important;
-  background-color: var(--color-gray-800) !important;
-  margin-top: 0 !important;
-}
-
-.ant-select-dropdown.stage-selector-popper .ant-select-item-option-selected {
-  color: var(--color-text-primary) !important;
-  background-color: var(--color-gray-800) !important;
-}
-
-.ant-select-dropdown.stage-selector-popper .ant-select-item-option-active {
-  color: var(--color-text-primary) !important;
-  background: var(--color-gray-700) !important;
-}
-
-.ant-select-dropdown.stage-selector-popper .ant-select-item {
-  color: var(--color-text-primary) !important;
-}
+/* Stage selector now uses unified external-selector styling */
 
 .theme-pill {
   border: 1px solid var(--color-info);
@@ -1650,6 +1603,85 @@ body {
 .ant-select-item-option-selected {
   background-color: var(--color-gray-800) !important;
   color: var(--color-text-primary) !important;
+}
+
+/* Custom check marks for selected options in all selectors */
+.external-selector .ant-select-item-option-selected::after,
+.ant-select-dropdown .ant-select-item-option-selected::after,
+.ant-select-item-option-selected::after {
+  content: "✓";
+  color: var(--color-info) !important;
+  font-weight: bold;
+  margin-left: 8px;
+  display: inline-block !important;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Alternative approach - target the option content directly */
+.external-selector .ant-select-item-option-selected {
+  position: relative;
+}
+
+.external-selector .ant-select-item-option-selected::before {
+  content: "✓";
+  color: var(--color-info) !important;
+  font-weight: bold;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+/* More specific targeting for dropdown items */
+.ant-select-dropdown .ant-select-item-option-selected {
+  position: relative;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected::after {
+  content: "✓";
+  color: var(--color-info) !important;
+  font-weight: bold;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: block !important;
+}
+
+/* Debug: Make selected items more visible */
+.ant-select-item-option-selected {
+  border-left: 3px solid var(--color-info) !important;
+}
+
+/* Ensure Ant Design's default check marks are visible */
+.ant-select-item-option-selected .ant-select-item-option-state {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: var(--color-info) !important;
+}
+
+/* Force visibility of any check mark icons */
+.ant-select-item-option-selected .anticon,
+.ant-select-item-option-selected .ant-select-item-option-state .anticon {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: var(--color-info) !important;
+}
+
+/* Custom check marks in StageSelector options */
+.stage-option-selected::after {
+  content: "✓";
+  color: var(--color-info) !important;
+  font-weight: bold;
+  margin-left: 8px;
+  float: right;
 }
 
 .ant-select-item-option-active {
