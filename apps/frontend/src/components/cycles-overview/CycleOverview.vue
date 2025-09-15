@@ -4,6 +4,7 @@
       <div class="cycle-overview-header__left">
         <logo></logo>
         <page-selector></page-selector>
+        <cycle-selector></cycle-selector>
       </div>
       <div class="cycle-overview-header__right">
         <initiative-selector></initiative-selector>
@@ -11,7 +12,6 @@
         <!-- <assignee-selector></assignee-selector> -->
         <!-- <release-selector></release-selector> -->
         <!-- <stage-selector></stage-selector> -->
-        <cycle-selector></cycle-selector>
         <validation-selector></validation-selector>
       </div>
     </div>
@@ -146,6 +146,9 @@ export default {
     }
 
     onMounted(async () => {
+      // Ensure we have a selected cycle before loading data
+      await store.dispatch('_ensureSelectedCycle')
+      
       // Load initial data
       await Promise.all([
         store.dispatch('fetchCycleOverviewData'),

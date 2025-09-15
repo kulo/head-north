@@ -1,36 +1,53 @@
 <template>
-  <a-dropdown class="external-selector page-selector" @command="changePage" style="margin-right: 10px">
-    <a-button style="width: 200px; text-align: left;">{{ selectedPageName }}<DownOutlined /></a-button>
-    <template #overlay>
-      <a-menu @click="handleMenuClick">
-        <a-menu-item v-for="page in allPages" :key="page.id" :command="page.id">
-          {{ page.name }}
-        </a-menu-item>
-      </a-menu>
-    </template>
-  </a-dropdown>
+  <a-select
+    v-model:value="selectedPageValue"
+    class="external-selector page-selector"
+    placeholder="Select Page"
+    @change="handlePageChange"
+  >
+    <a-select-option
+      v-for="page in allPages"
+      :key="page.id"
+      :value="page.id"
+    >
+      {{ page.name }}
+    </a-select-option>
+  </a-select>
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex'
-import { DownOutlined } from '@ant-design/icons-vue'
+import { computed, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
 export default {
   name: 'PageSelector',
-  components: {
-    DownOutlined
-  },
-  computed: {
-    ...mapState(['pages']),
-    ...mapGetters(['selectedPageName']),
-    allPages() {
-      return this.pages.all
+  setup() {
+    const store = useStore()
+    
+    const pages = computed(() => store.state.pages)
+    const selectedPageName = computed(() => store.getters.selectedPageName)
+    const selectedPageValue = ref(null)
+    
+    const allPages = computed(() => pages.value.all)
+    
+    // Watch for changes in store and update local ref
+    watch(() => store.state.pages, (newPages) => {
+      if (newPages && newPages.current) {
+        selectedPageValue.value = newPages.current.id
+      }
+    }, { immediate: true })
+    
+    const handlePageChange = (pageId) => {
+      selectedPageValue.value = pageId
+      store.dispatch('changePage', pageId)
     }
-  },
-  methods: {
-    ...mapActions(['changePage']),
-    handleMenuClick({ key }) {
-      this.changePage(key)
+
+    return {
+      pages,
+      selectedPageName,
+      selectedPageValue,
+      allPages,
+      handlePageChange
     }
   }
 }

@@ -3,9 +3,7 @@
     v-model:value="selectedStages"
     class="external-selector stage-selector"
     mode="multiple"
-    size="small"
     placeholder="All Stages"
-    style="width: 150px; margin-right: 10px"
     @change="setSelectedStages"
   >
     <a-select-option

@@ -3,9 +3,7 @@
     v-model:value="selectedAssignees"
     class="external-selector assignee-selector"
     mode="multiple"
-    size="small"
     placeholder="All Assignees"
-    style="width: 150px; margin-right: 10px"
     @change="setSelectedAssignees"
   >
     <a-select-option

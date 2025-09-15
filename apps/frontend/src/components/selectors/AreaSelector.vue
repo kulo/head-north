@@ -3,13 +3,11 @@
     v-model:value="selectedArea"
     class="external-selector area-selector"
     placeholder="All Areas"
-    style="width: 160px; margin-right: 10px"
     @change="handleAreaChange"
   >
     <a-select-option
       key="all"
       value="all"
-      style="font-weight: bold; color: var(--color-info);"
     >
       All Areas
     </a-select-option>

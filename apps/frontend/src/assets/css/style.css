@@ -633,6 +633,7 @@ body {
   width: auto;
   min-width: 200px;
   margin-top: 6px;
+  padding-bottom: 5px;
   vertical-align: top;
   display: inline-block;
   overflow: visible;
@@ -728,29 +729,96 @@ body {
   float: right;
 }
 
-/* External Selector (ReleaseSelector, CycleSelector) Styling */
-.external-selector .project-filter {
+/* ========================================
+   UNIFIED SELECTOR STYLING
+   All selector components should have consistent appearance
+   ======================================== */
+
+/* Base selector styling - applies to all external selectors */
+.external-selector {
+  width: 200px !important;
+  margin-right: 10px !important;
+  display: inline-block;
+  vertical-align: top;
+}
+
+/* ========================================
+   A-SELECT COMPONENTS (All selectors now use a-select)
+   ======================================== */
+
+.external-selector.ant-select .ant-select-selector {
   background-color: var(--color-background) !important;
   border: 1px solid var(--color-gray-600) !important;
   color: var(--color-text-primary) !important;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-block;
-  min-width: 100px;
-  text-align: left;
 }
 
-.external-selector .project-filter:hover {
+.external-selector.ant-select .ant-select-selector:hover {
   background-color: var(--color-gray-800) !important;
   border-color: var(--color-gray-500) !important;
+}
+
+/* Single select styling - most selectors use gray color for selected text */
+.external-selector.ant-select:not(.page-selector):not(.cycle-selector) .ant-select-selection-item {
+  color: var(--color-gray-400) !important;
+}
+
+/* Multiple select styling - only for selectors with mode="multiple" */
+.external-selector.ant-select.ant-select-multiple .ant-select-selection-item {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-gray-800) !important;
+  border: 1px solid var(--color-gray-600) !important;
+}
+
+/* Page selector - white bold text for navigation */
+.external-selector.page-selector .ant-select-selection-item {
+  color: var(--color-text-primary) !important;
+  font-weight: bold !important;
+}
+
+/* Cycle selector - white text for navigation */
+.external-selector.cycle-selector .ant-select-selection-item {
   color: var(--color-text-primary) !important;
 }
 
-.external-selector.validation-selector {
+.external-selector.ant-select .ant-select-selection-placeholder {
+  color: var(--color-gray-400) !important;
+}
+
+.external-selector.ant-select .ant-select-arrow {
+  color: var(--color-text-primary) !important;
+}
+
+/* ========================================
+   SELECT OPTION STYLING
+   ======================================== */
+
+/* "All" option styling for selectors that have it */
+.external-selector .ant-select-option[data-value="all"] {
+  font-weight: bold !important;
+  color: var(--color-info) !important;
+}
+
+/* ========================================
+   VALIDATION SELECTOR (Exception - Simple Icon Only)
+   ======================================== */
+
+.validation-selector {
   cursor: pointer;
   color: var(--color-text-primary);
+  display: inline-block;
+  padding: 4px;
+  margin-right: 10px;
 }
+
+.validation-selector:hover {
+  color: var(--color-gray-400);
+}
+
+/* Disabled flag icon styling */
+.validation-selector .anticon-flag[style*="opacity: 0.3"] {
+  opacity: 0.3 !important;
+}
+
 
 .assignee-dropdown {
   height:300px;

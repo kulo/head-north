@@ -1,6 +1,6 @@
 <template>
-  <a-tooltip :title="tooltipContent" placement="bottom">
-    <div class="external-selector validation-selector" @click="toggleValidation">
+  <a-tooltip title="Toggle validation!" placement="bottom">
+    <div class="validation-selector" @click="toggleValidation">
       <FlagOutlined v-if="validationEnabled" />
       <FlagOutlined v-if="!validationEnabled" style="opacity: 0.3" />
     </div>
@@ -20,12 +20,6 @@ export default {
     const store = useStore()
     
     const validationEnabled = computed(() => store.state.validationEnabled)
-    const validationSummary = computed(() => store.getters.validationSummary)
-    
-    const tooltipContent = computed(() => {
-      const issueText = `(${validationSummary.value.length} issue)`;
-      return validationEnabled.value ? `Hide validation ${issueText}` : 'Show validation';
-    })
 
     const toggleValidation = () => {
       store.commit('TOGGLE_VALIDATION')
@@ -33,8 +27,6 @@ export default {
 
     return {
       validationEnabled,
-      validationSummary,
-      tooltipContent,
       toggleValidation
     }
   }

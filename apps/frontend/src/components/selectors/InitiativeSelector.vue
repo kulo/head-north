@@ -3,15 +3,12 @@
     v-model:value="selectedInitiatives"
     class="external-selector initiative-selector"
     mode="multiple"
-    size="small"
     placeholder="All Initiatives"
-    style="width: 200px; margin-right: 10px"
     @change="setSelectedInitiatives"
   >
     <a-select-option
       key="all"
       value="all"
-      style="font-weight: bold; color: var(--color-info);"
     >
       All Initiatives
     </a-select-option>

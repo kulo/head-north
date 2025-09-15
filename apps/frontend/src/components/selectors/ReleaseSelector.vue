@@ -3,9 +3,7 @@
     v-model:value="selectedReleaseFilters"
     class="external-selector release-selector"
     mode="multiple"
-    size="small"
     placeholder="All Releases"
-    style="width: 150px; margin-right: 10px"
     @change="setSelectedReleaseFilters"
   >
     <a-select-option
