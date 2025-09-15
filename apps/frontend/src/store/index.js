@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 import { CycleDataService } from '@/services/index.js'
 import { calculateAreaData } from '@/libraries/calculateAreaData.js'
 import { logger } from '@omega-one/shared-utils'
-import { applyFilters } from '@/filters/unifiedFiltering.js'
+import { applyFilters } from '@/filters/unifiedDataSystem.js'
 
 // Store factory function that accepts dependencies
 export default function createAppStore(cycleDataService, omegaConfig, router) {
@@ -51,11 +51,14 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           return []
         }
         
-        return applyFilters(state.roadmapData.roadmapItems, {
+        const filteredData = applyFilters(state.roadmapData, {
           area: state.selectedArea,
           initiatives: state.selectedInitiatives,
           stages: state.selectedStages
         })
+        
+        // Return just the roadmapItems array for the template
+        return filteredData.roadmapItems || []
       },
       
       currentCycleOverviewData: (state) => {
@@ -317,11 +320,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
           commit('SET_CYCLES', sprints);
           commit('SET_SELECTED_CYCLE', cycleData.cycle);
-          commit('SET_STAGES', stages);
-
-          if (!state.selectedStages || state.selectedStages.length === 0) {
-            commit('SET_SELECTED_STAGES', [stages[0]]);
-          }
 
           const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(cycleData.initiatives);
           const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(assignees);
@@ -330,6 +328,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
 
           commit('SET_INITIATIVES', allInitiatives);
           commit('SET_ASSIGNEES', allAssignees);
+          commit('SET_AREAS', areaData);
           commit('SET_STAGES', allStages);
           commit('SET_RELEASE_FILTERS', allReleaseFilters);
 

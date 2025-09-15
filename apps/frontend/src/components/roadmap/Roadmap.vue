@@ -11,37 +11,48 @@
       </div>
     </div>
     <a-layout-content id="roadmaps">
-      <div v-if="error" class="error">{{ error }}</div>
-      <a-row :gutter="20">
-        <a-col :span="4" :offset="index === 0 ? 6 : 0" :class="{ active: sprint.id === roadmapData.activeSprint.id}" v-for="(sprint, index) in roadmapData.orderedSprints" :key="sprint.id">
-          <p style="text-align: center">{{ sprint.name }}</p>
-        </a-col>
-      </a-row>
-      <a-collapse v-model:activeKey="activeInitiativeIds" class="initiative-collapse">
-        <a-collapse-panel 
-          v-for="row in filteredRoadmapData" 
-          :key="row.initiativeId || 'unknown'" 
-          :name="row.initiativeId || 'unknown'" 
-          class="initiative-panel"
+      <div v-if="loading" class="loading">Loading roadmap data...</div>
+      <div v-else-if="error" class="error">{{ error }}</div>
+      <div v-else-if="!filteredRoadmapData || filteredRoadmapData.length === 0" class="no-data">
+        No roadmap data available
+      </div>
+      <div v-else>
+        <a-row :gutter="20">
+          <a-col :span="4" :offset="index === 0 ? 6 : 0" :class="{ active: sprint.id === roadmapData.activeSprint.id}" v-for="(sprint, index) in roadmapData.orderedSprints" :key="sprint.id">
+            <p style="text-align: center">{{ sprint.name }}</p>
+          </a-col>
+        </a-row>
+        <a-collapse 
+          v-model:activeKey="activeInitiativeIds" 
+          class="initiative-collapse"
+          :expandIconPosition="'right'"
         >
-          <template #header>
-            <span>{{ initiativeName(row.initiativeId) || `Initiative: ${row.initiativeId}` }}</span>
+          <template v-for="(row, index) in filteredRoadmapData" :key="row?.initiativeId || index">
+            <a-collapse-panel 
+              v-if="row && row.initiativeId"
+              :key="row.initiativeId" 
+              class="initiative-panel"
+            >
+              <template #header>
+                <span>{{ initiativeName(row.initiativeId) || `Initiative: ${row.initiativeId}` }}</span>
+              </template>
+              <roadmap-item-overview 
+                :orderedSprints="roadmapData.orderedSprints" 
+                :roadmapItem="roadmapItem" 
+                :itemIndex="itemIndex" 
+                v-for="(roadmapItem, itemIndex) in (row.roadmapItems || [])" 
+                :key="roadmapItem.id"
+              ></roadmap-item-overview>
+            </a-collapse-panel>
           </template>
-          <roadmap-item-overview 
-            :orderedSprints="roadmapData.orderedSprints" 
-            :roadmapItem="roadmapItem" 
-            :itemIndex="index" 
-            v-for="(roadmapItem, index) in row.roadmapItems" 
-            :key="roadmapItem.id"
-          ></roadmap-item-overview>
-        </a-collapse-panel>
-      </a-collapse>
+        </a-collapse>
+      </div>
     </a-layout-content>
   </div>
 </template>
 
 <script>
-import { computed, onMounted, ref, watch } from "vue"
+import { computed, nextTick, onMounted, ref, watch } from "vue"
 import { useStore } from "vuex"
 import RoadmapItemOverview from "./RoadmapItemOverview.vue";
 import Logo from "../Logo.vue";
@@ -70,6 +81,11 @@ export default {
     const initiatives = computed(() => store.state.initiatives)
     const selectedInitiatives = computed(() => store.state.selectedInitiatives)
     const selectedArea = computed(() => store.state.selectedArea)
+    const areas = computed(() => {
+      const areasData = store.state.areas || []
+      console.log('Areas data:', areasData)
+      return areasData
+    })
     
     // Use the unified filtering getter from the store
     const filteredRoadmapData = computed(() => store.getters.filteredRoadmapData)
@@ -82,19 +98,40 @@ export default {
     const activeInitiativeIds = ref([])
     
     // Watch for changes in filtered roadmap data to auto-expand all panels
+    // Only expand on initial load, not on every filter change
+    let isInitialLoad = true
+    let hasExpandedInitially = false
+    
     watch(filteredRoadmapData, (newData) => {
       if (newData && newData.length > 0) {
-        activeInitiativeIds.value = newData.map(row => row.initiativeId || 'unknown')
+        const initiativeIds = newData
+          .filter(row => row && row.initiativeId)
+          .map(row => row.initiativeId)
+        
+        // Only auto-expand on initial load, not on filter changes
+        if (isInitialLoad && !hasExpandedInitially) {
+          // Use a longer delay to ensure DOM is fully ready
+          setTimeout(() => {
+            activeInitiativeIds.value = [...initiativeIds]
+            isInitialLoad = false
+            hasExpandedInitially = true
+          }, 500)
+        }
+        // On filter changes, preserve current expanded state
+      } else {
+        activeInitiativeIds.value = []
       }
     }, { immediate: true })
 
     const fetchRoadmap = async () => {
       await store.dispatch('fetchRoadmap')
     }
+    
 
     const fetchAreas = async () => {
       await store.dispatch('fetchAreas')
     }
+    
 
     onMounted(async () => {
       await Promise.all([
@@ -117,6 +154,7 @@ export default {
       initiatives,
       initiativeIds,
       activeInitiativeIds,
+      areas,
       fetchRoadmap
     }
   }
