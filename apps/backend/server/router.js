@@ -29,13 +29,13 @@ function createRouter(omegaConfig) {
       method: 'GET',
       path: '/unified-data',
       handler: 'unifiedData',
-      description: 'Unified data endpoint for both roadmap and cycle overview'
+      description: 'Unified data endpoint with single data structure for all views'
     },
     {
       method: 'GET',
       path: '/unified-data/:id',
       handler: 'unifiedData',
-      description: 'Unified data endpoint for specific cycle'
+      description: 'Unified data endpoint for specific cycle with single data structure'
     },
     {
       method: 'GET',

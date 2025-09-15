@@ -1,9 +1,8 @@
 import collectUnifiedData from '../service/collect-unified-data.js';
-import parseJiraIssues from '../calculator/parse-jira-issues.js';
 import buildOverview from '../calculator/generate-overview.js';
 import { logger } from '@omega-one/shared-utils';
 import pkg from "lodash";
-const { uniqBy, uniq, groupBy, pick } = pkg;
+const { groupBy } = pkg;
 
 /**
  * Unified data endpoint that serves both roadmap and cycle overview data
@@ -14,10 +13,9 @@ export default async (context) => {
   
   // Get parameters
   const cycleId = context.params.id || context.query.cycleId || context.query.sprintId;
-  const view = context.query.view || 'both'; // 'roadmap', 'cycle-overview', or 'both'
   const filters = context.query.filters ? JSON.parse(context.query.filters) : {};
   
-  logger.default.info('building unified data', { cycleId, view, filters });
+  logger.default.info('building unified data', { cycleId, filters });
 
   try {
     // Collect all necessary data
@@ -34,10 +32,26 @@ export default async (context) => {
       teams 
     } = await collectUnifiedData(cycleId, omegaConfig);
 
-    // Build response based on view type
+    // Build unified data structure that both views can use
+    const roadmapData = buildOverview(issues, issuesByRoadmapItems, roadmapItems, cycles, omegaConfig);
+    const groupedInitiatives = groupBy(roadmapData, x => x.initiativeId);
+    
+    // Convert to unified structure
+    const unifiedInitiatives = Object.entries(groupedInitiatives).map(([initiativeId, roadmapItems]) => ({
+      initiativeId,
+      initiative: roadmapItems[0]?.initiative || initiativeId,
+      roadmapItems: roadmapItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        area: item.area,
+        theme: item.theme,
+        releaseItems: item.cycles?.flatMap(cycle => cycle.releaseItems) || []
+      }))
+    }));
+
     const response = {
       metadata: {
-        type: view === 'both' ? 'unified' : view,
+        type: 'unified',
         cycles: {
           active: cycle,
           ordered: cycles,
@@ -52,35 +66,10 @@ export default async (context) => {
         assignees,
         initiatives: configInitiatives
       },
-      data: {}
+      data: {
+        initiatives: unifiedInitiatives
+      }
     };
-
-    // Add roadmap data if requested
-    if (view === 'roadmap' || view === 'both') {
-      const roadmapData = buildOverview(issues, issuesByRoadmapItems, roadmapItems, cycles, omegaConfig);
-      response.data.roadmap = {
-        groupedRoadmapItems: groupBy(roadmapData, x => x.initiativeId),
-        initiatives: getInitiatives(roadmapData),
-        areas: getAreas(roadmapData, omegaConfig),
-        assignees: getAssignees(roadmapData)
-      };
-    }
-
-    // Add cycle overview data if requested
-    if (view === 'cycle-overview' || view === 'both') {
-      const cycleIssues = cycleId ? issues[0] : issues.flat();
-      const initiatives = parseJiraIssues(cycleIssues, roadmapItems, cycle, omegaConfig);
-      
-      response.data.cycleOverview = {
-        devCycleData: {
-          cycle,
-          initiatives,
-          area: omegaConfig.getLabelTranslations().areas,
-          assignees,
-          teams
-        }
-      };
-    }
 
     // Apply server-side filtering if requested
     if (Object.keys(filters).length > 0) {
@@ -100,48 +89,6 @@ export default async (context) => {
   }
 };
 
-/**
- * Extract initiatives from roadmap data
- */
-const getInitiatives = (roadmapItems) => {
-  const usedInitiatives = roadmapItems.map(roadmapItem => ({
-    id: roadmapItem.initiativeId,
-    name: roadmapItem.initiative
-  }));
-  return uniqBy(usedInitiatives, initiative => initiative.id);
-};
-
-/**
- * Extract areas from roadmap data
- */
-const getAreas = (roadmapItems, omegaConfig) => {
-  const areaIds = roadmapItems.map(roadmapItem => {
-    return roadmapItem.cycles.map(cycle => {
-      return cycle.releaseItems.map(item => item.areaIds).flat();
-    }).flat();
-  }).flat();
-
-  const uniqAreaIds = uniq(areaIds);
-  return pick(omegaConfig.getLabelTranslations().area, uniqAreaIds);
-};
-
-/**
- * Extract assignees from roadmap data
- */
-const getAssignees = (roadmapItems) => {
-  const assignees = roadmapItems.map(roadmapItem => {
-    return roadmapItem.cycles.map(cycle => {
-      return cycle.releaseItems.map(releaseItem => releaseItem.assignee);
-    }).flat();
-  }).flat();
-  const orderedAssignees = uniqBy(assignees.filter(assignee => assignee !== null), 'accountId')
-    .sort((assignee1, assignee2) => assignee1.displayName > assignee2.displayName ? 1 : -1);
-
-  return [{
-    displayName: 'All Assignees',
-    accountId: 'all'
-  }].concat(orderedAssignees);
-};
 
 /**
  * Apply server-side filtering to the data
