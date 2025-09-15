@@ -2,6 +2,7 @@ import { createStore } from 'vuex'
 import { CycleDataService } from '@/services/index.js'
 import { calculateAreaData } from '@/libraries/calculateAreaData.js'
 import { logger } from '@omega-one/shared-utils'
+import { filteringUtils } from '@/filters/filteringUtils.js'
 
 // Store factory function that accepts dependencies
 export default function createAppStore(cycleDataService, omegaConfig, router) {
@@ -43,89 +44,30 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
     getters: {
       roadmapData: (state) => state.roadmapData,
       cycleOverviewData: (state) => state.cycleOverviewData,
+      
+      // Unified filtering getters using the filtering utilities
+      filteredRoadmapData: (state) => {
+        if (!state.roadmapData || !state.roadmapData.roadmapItems) {
+          return []
+        }
+        
+        return filteringUtils.applyFilters(state.roadmapData.roadmapItems, {
+          area: state.selectedArea,
+          initiatives: state.selectedInitiatives
+        })
+      },
+      
       currentCycleOverviewData: (state) => {
-        console.log('🔍 currentCycleOverviewData getter called');
         const rawData = state.currentCycleOverviewData;
-        console.log('🔍 rawData:', rawData);
-        console.log('🔍 rawData.initiatives:', rawData?.initiatives);
         if (!rawData || !rawData.initiatives) {
-          console.log('🔍 Early return - no rawData or initiatives');
           return rawData;
         }
 
-        const selectedInitiatives = state.selectedInitiatives || [];
-        const selectedArea = state.selectedArea;
-        
-        console.log('🔍 selectedInitiatives:', selectedInitiatives);
-        console.log('🔍 selectedArea:', selectedArea);
-        
-        let filteredInitiatives = [...rawData.initiatives];
-        
-        // First, apply area filtering if an area is selected
-        if (selectedArea && selectedArea !== 'all') {
-          filteredInitiatives = filteredInitiatives.map(initiative => ({
-            ...initiative,
-            roadmapItems: initiative.roadmapItems.map(roadmapItem => {
-              const filteredReleaseItems = roadmapItem.releaseItems ? roadmapItem.releaseItems.filter(releaseItem => {
-                // Check direct area match (case-insensitive)
-                if (releaseItem.area && releaseItem.area.toLowerCase() === selectedArea.toLowerCase()) {
-                  return true;
-                }
-                
-                // Check area from roadmap item (case-insensitive)
-                if (roadmapItem.area && roadmapItem.area.toLowerCase() === selectedArea.toLowerCase()) {
-                  return true;
-                }
-                
-                // For now, skip team-based filtering since team IDs are not in area.team format
-                // TODO: Implement proper team-to-area mapping if needed
-                
-                return false;
-              }) : [];
-              
-              const hasMatchingReleaseItems = filteredReleaseItems.length > 0;
-              // Check roadmap item area match (case-insensitive)
-              const hasDirectAreaMatch = roadmapItem.area && roadmapItem.area.toLowerCase() === selectedArea.toLowerCase();
-              
-              if (hasMatchingReleaseItems || hasDirectAreaMatch) {
-                return { ...roadmapItem, releaseItems: filteredReleaseItems };
-              }
-              
-              return null;
-            }).filter(item => item !== null)
-          })).filter(initiative => initiative.roadmapItems.length > 0);
-        }
-        
-        // Then, apply initiative filtering if specific initiatives are selected
-        // If no initiatives selected or "All" is selected, show all (already filtered by area)
-        if (!selectedInitiatives || selectedInitiatives.length === 0) {
-          console.log('🔍 Early return - no initiatives selected');
-          return { ...rawData, initiatives: filteredInitiatives };
-        }
-        
-        // Check if "All" is selected
-        const isAllSelected = selectedInitiatives.some(init => 
-          init && (init.id === 'all' || init.value === 'all')
-        );
-        
-        console.log('🔍 isAllSelected:', isAllSelected);
-        
-        if (isAllSelected) {
-          console.log('🔍 All initiatives selected - returning area-filtered data');
-          return { ...rawData, initiatives: filteredInitiatives };
-        }
-        
-        // Filter by selected initiative IDs
-        const selectedInitiativeIds = selectedInitiatives
-          .filter(init => init && init.id)
-          .map(init => String(init.id)) // Convert to string for comparison
-          .filter(id => id !== 'all');
-        
-        filteredInitiatives = filteredInitiatives.filter(initiative => 
-          selectedInitiativeIds.includes(String(initiative.initiativeId))
-        );
-        
-        
+        const filteredInitiatives = filteringUtils.applyFilters(rawData.initiatives, {
+          area: state.selectedArea,
+          initiatives: state.selectedInitiatives
+        });
+
         return {
           ...rawData,
           initiatives: filteredInitiatives
@@ -318,10 +260,15 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       
       async fetchAreas({ commit, dispatch }) {
         try {
+          console.log('🔍 fetchAreas called');
           const cycleId = await dispatch('_ensureSelectedCycle')
+          console.log('🔍 fetchAreas - cycleId:', cycleId);
           const areas = await cycleDataService.getAllAreas(cycleId)
+          console.log('🔍 fetchAreas - areas from service:', areas);
           commit('SET_AREAS', areas)
+          console.log('🔍 fetchAreas - areas committed to store');
         } catch (error) {
+          console.error('🔍 fetchAreas - error:', error);
           const errorMessage = error?.message || error?.toString() || 'Unknown error'
           commit('SET_ERROR', errorMessage)
         }

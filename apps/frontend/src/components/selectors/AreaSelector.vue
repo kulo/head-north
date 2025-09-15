@@ -42,9 +42,13 @@ export default {
     }
     
     onMounted(() => {
+      console.log('🔍 AreaSelector mounted - areas:', areas.value);
       // Load areas if not already loaded
       if (areas.value.length === 0) {
+        console.log('🔍 AreaSelector - fetching areas because none loaded');
         store.dispatch('fetchAreas')
+      } else {
+        console.log('🔍 AreaSelector - areas already loaded:', areas.value);
       }
     })
     

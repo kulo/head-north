@@ -71,46 +71,8 @@ export default {
     const selectedInitiatives = computed(() => store.state.selectedInitiatives)
     const selectedArea = computed(() => store.state.selectedArea)
     
-    // Filter roadmap data based on selected initiatives and area
-    const filteredRoadmapData = computed(() => {
-      if (!roadmapData.value || !roadmapData.value.roadmapItems) {
-        return []
-      }
-      
-      let filteredItems = roadmapData.value.roadmapItems
-      
-      // Filter by selected initiatives
-      if (selectedInitiatives.value && selectedInitiatives.value.length > 0) {
-        // Check if "All" is selected
-        const isAllSelected = selectedInitiatives.value.some(init => 
-          init && (init.id === 'all' || init.value === 'all')
-        )
-        
-        if (!isAllSelected) {
-          // Filter by selected initiative IDs
-          const selectedInitiativeIds = selectedInitiatives.value
-            .filter(init => init && init.id)
-            .map(init => String(init.id)) // Convert to string for comparison
-            .filter(id => id !== 'all')
-          
-          filteredItems = filteredItems.filter(row => 
-            selectedInitiativeIds.includes(String(row.initiativeId)) // Convert to string for comparison
-          )
-        }
-      }
-      
-      // Filter by selected area
-      if (selectedArea.value && selectedArea.value !== 'all') {
-        filteredItems = filteredItems.filter(row => {
-          // Check if any roadmap item in this row matches the selected area
-          return row.roadmapItems.some(roadmapItem => 
-            roadmapItem.area === selectedArea.value
-          )
-        })
-      }
-      
-      return filteredItems
-    })
+    // Use the unified filtering getter from the store
+    const filteredRoadmapData = computed(() => store.getters.filteredRoadmapData)
     
     const initiativeIds = computed(() => {
       return initiatives.value.map(x => x.id);
@@ -130,9 +92,17 @@ export default {
       await store.dispatch('fetchRoadmap')
     }
 
+    const fetchAreas = async () => {
+      await store.dispatch('fetchAreas')
+    }
+
     onMounted(async () => {
-      await fetchRoadmap();
+      await Promise.all([
+        fetchRoadmap(),
+        fetchAreas()
+      ]);
       console.log('🔍 Roadmap mounted - Initiatives:', initiatives.value);
+      console.log('🔍 Roadmap mounted - Areas:', store.state.areas);
       console.log('🔍 Roadmap mounted - Filtered data:', filteredRoadmapData.value);
       if (filteredRoadmapData.value.length > 0) {
         console.log('🔍 First row initiativeId:', filteredRoadmapData.value[0].initiativeId);
