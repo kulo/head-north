@@ -6,6 +6,8 @@
  * different filtering logic and data transformations.
  */
 
+import { UnifiedData, Cycle, Initiative, RoadmapItem, ReleaseItem } from '@omega/shared-types'
+
 /**
  * @typedef {Object} Cycle
  * @property {string} id

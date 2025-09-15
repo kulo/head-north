@@ -166,11 +166,14 @@ class CycleDataService {
    * @returns {Promise<object>} Cycle overview data with devCycleData
    */
   async getOverviewForCycle(cycleId) {
-    const endpoints = this.config.getEndpoints()
-    const endpoint = cycleId 
-      ? endpoints.CYCLE_OVERVIEW.replace(':id', cycleId.toString())
-      : endpoints.CYCLE_OVERVIEW.replace(':id', 'default')
-    return this._request(endpoint)
+    // Use unified endpoint instead of legacy cycle-overview endpoint
+    const params = new URLSearchParams()
+    if (cycleId) params.set('cycleId', cycleId.toString())
+    
+    const unifiedData = await this._request(`/unified-data?${params.toString()}`)
+    
+    // Transform unified data to legacy format for backward compatibility
+    return this._transformUnifiedToCycleOverview(unifiedData)
   }
 
   /**
@@ -179,8 +182,11 @@ class CycleDataService {
    * @returns {Promise<object>} Cycles roadmap data
    */
   async getCyclesRoadmap() {
-    const endpoints = this.config.getEndpoints()
-    return this._request(endpoints.CYCLES_ROADMAP)
+    // Use unified endpoint instead of legacy cycles-roadmap endpoint
+    const unifiedData = await this._request('/unified-data')
+    
+    // Transform unified data to legacy format for backward compatibility
+    return this._transformUnifiedToRoadmap(unifiedData)
   }
 
   /**
@@ -340,6 +346,96 @@ class CycleDataService {
   async getAllStages() {
     const data = await this._getRoadmapData()
     return data.stages || []
+  }
+
+  /**
+   * Get unified data directly from the unified endpoint
+   * This is the new preferred method for getting data
+   * @param {string|number} cycleId - Optional cycle ID
+   * @param {object} filters - Optional filters to apply
+   * @returns {Promise<object>} Unified data structure
+   */
+  async getUnifiedData(cycleId = null, filters = {}) {
+    const params = new URLSearchParams()
+    if (cycleId) params.set('cycleId', cycleId.toString())
+    if (Object.keys(filters).length > 0) params.set('filters', JSON.stringify(filters))
+    
+    return this._request(`/unified-data?${params.toString()}`)
+  }
+
+  /**
+   * Transform unified data to legacy cycle overview format
+   * @param {object} unifiedData - Unified data from backend
+   * @returns {object} Legacy cycle overview format
+   * @private
+   */
+  _transformUnifiedToCycleOverview(unifiedData) {
+    const { metadata, data } = unifiedData
+    
+    return {
+      devCycleData: {
+        cycle: metadata.cycles.active,
+        initiatives: data.initiatives,
+        area: this._extractAreasFromUnifiedData(unifiedData),
+        assignees: metadata.assignees,
+        teams: [] // TODO: Add teams to unified data
+      },
+      cycles: metadata.cycles.ordered,
+      stages: metadata.stages,
+      areas: metadata.areas,
+      initiatives: metadata.initiatives
+    }
+  }
+
+  /**
+   * Transform unified data to legacy roadmap format
+   * @param {object} unifiedData - Unified data from backend
+   * @returns {object} Legacy roadmap format
+   * @private
+   */
+  _transformUnifiedToRoadmap(unifiedData) {
+    const { metadata, data } = unifiedData
+    
+    return {
+      groupedRoadmapItems: this._groupInitiativesByInitiativeId(data.initiatives),
+      cycle: metadata.cycles.active,
+      cycles: metadata.cycles.ordered,
+      stages: metadata.stages,
+      area: this._extractAreasFromUnifiedData(unifiedData),
+      assignees: metadata.assignees,
+      initiatives: data.initiatives.map(init => ({ id: init.initiativeId, name: init.initiative }))
+    }
+  }
+
+  /**
+   * Group initiatives by initiativeId for legacy roadmap format
+   * @param {Array} initiatives - Array of initiatives
+   * @returns {object} Grouped initiatives
+   * @private
+   */
+  _groupInitiativesByInitiativeId(initiatives) {
+    const grouped = {}
+    initiatives.forEach(initiative => {
+      grouped[initiative.initiativeId] = initiative.roadmapItems
+    })
+    return grouped
+  }
+
+  /**
+   * Extract areas from unified data
+   * @param {object} unifiedData - Unified data from backend
+   * @returns {object} Areas in legacy format
+   * @private
+   */
+  _extractAreasFromUnifiedData(unifiedData) {
+    const { metadata } = unifiedData
+    const areas = {}
+    
+    metadata.areas.forEach(area => {
+      areas[area.id] = area.name
+    })
+    
+    return areas
   }
 
   /**
