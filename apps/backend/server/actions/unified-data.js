@@ -45,7 +45,7 @@ export default async (context) => {
         name: item.name,
         area: item.area,
         theme: item.theme,
-        releaseItems: item.cycles?.flatMap(cycle => cycle.releaseItems) || []
+        releaseItems: item.sprints?.flatMap(sprint => sprint.releaseItems) || []
       }))
     }));
 
