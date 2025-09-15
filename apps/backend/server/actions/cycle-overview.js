@@ -14,21 +14,21 @@ export default async (context) => {
   const cycleId = context.params.id || context.query.sprintId;
   logger.default.info('building cycle overview data for cycleId: ', { cycleId });
 
-  const { roadmapItems, issues, sprint, sprints, assignees, areas, initiatives: configInitiatives } = 
+  const { roadmapItems, issues, cycle, cycles, assignees, areas, initiatives: configInitiatives } = 
     await collectCycleOverviewData(cycleId, omegaConfig);
   
-  const initiatives = parseJiraIssues(issues, roadmapItems, sprint, omegaConfig);
+  const initiatives = parseJiraIssues(issues, roadmapItems, cycle, omegaConfig);
   const teams = omegaConfig.getTeams();
 
   context.body = {
     devCycleData: {
-      cycle: sprint,
+      cycle: cycle,  // Use cycle instead of sprint
       initiatives,
       area: omegaConfig.getLabelTranslations().areas,
       assignees,
       teams
     },
-    sprints,
+    cycles,  // Use cycles instead of sprints
     stages: omegaConfig.getStages(),
     areas,
     initiatives: configInitiatives

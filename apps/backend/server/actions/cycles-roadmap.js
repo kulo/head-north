@@ -14,8 +14,8 @@ const getInitiatives = (roadmapItems) => {
 
 const getAssignees = (roadmapItems) => {
   const assignees = roadmapItems.map(roadmapItem => {
-    return roadmapItem.sprints.map(sprint => {
-      return sprint.releaseItems.map(releaseItem => releaseItem.assignee);
+    return roadmapItem.cycles.map(cycle => {
+      return cycle.releaseItems.map(releaseItem => releaseItem.assignee);
     }).flat();
   }).flat();
   const orderedAssignees = uniqBy(assignees.filter(assignee => assignee !== null), 'accountId')
@@ -29,8 +29,8 @@ const getAssignees = (roadmapItems) => {
 
 const getAreas = (roadmapItems, omegaConfig) => {
   const areaIds = roadmapItems.map(roadmapItem => {
-    return roadmapItem.sprints.map(sprint => {
-      return sprint.releaseItems.map(item => item.areaIds).flat();
+    return roadmapItem.cycles.map(cycle => {
+      return cycle.releaseItems.map(item => item.areaIds).flat();
     }).flat();
   }).flat();
 
@@ -42,9 +42,9 @@ export default async (context) => {
   
   const omegaConfig = context.omegaConfig;
   
-  const { roadmapItems, issuesByRoadmapItems, issues, sprint, sprints } = await collectRoadmapData(omegaConfig);
+  const { roadmapItems, issuesByRoadmapItems, issues, cycle, cycles } = await collectRoadmapData(omegaConfig);
   
-  let roadmapItemsResult = buildOverview(issues, issuesByRoadmapItems, roadmapItems, sprints, omegaConfig);
+  let roadmapItemsResult = buildOverview(issues, issuesByRoadmapItems, roadmapItems, cycles, omegaConfig);
 
   let initiatives = getInitiatives(roadmapItemsResult);
   let areas = getAreas(roadmapItemsResult, omegaConfig);
@@ -52,8 +52,8 @@ export default async (context) => {
   
   context.body = {
     groupedRoadmapItems: groupBy(roadmapItemsResult, x => x.initiativeId),
-    sprint,
-    sprints,
+    cycle,  // Use cycle instead of sprint
+    cycles, // Use cycles instead of sprints
     stages: omegaConfig.getStages(),
     area: areas,
     assignees: assignees,
