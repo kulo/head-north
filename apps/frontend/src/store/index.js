@@ -75,10 +75,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       },
       validationSummary: (state) => state.validationSummary,
       initiativeName: (state) => (initiativeId) => {
-        console.log('🔍 initiativeName getter called with:', initiativeId);
-        console.log('🔍 Available initiatives:', state.initiatives);
         const initiative = state.initiatives.find(i => i.id === initiativeId)
-        console.log('🔍 Found initiative:', initiative);
         return initiative ? initiative.name : `Unknown Initiative (${initiativeId})`
       },
       selectedPageName: (state) => {
@@ -260,15 +257,11 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       
       async fetchAreas({ commit, dispatch }) {
         try {
-          console.log('🔍 fetchAreas called');
           const cycleId = await dispatch('_ensureSelectedCycle')
-          console.log('🔍 fetchAreas - cycleId:', cycleId);
           const areas = await cycleDataService.getAllAreas(cycleId)
-          console.log('🔍 fetchAreas - areas from service:', areas);
           commit('SET_AREAS', areas)
-          console.log('🔍 fetchAreas - areas committed to store');
         } catch (error) {
-          console.error('🔍 fetchAreas - error:', error);
+          console.error('Error fetching areas:', error);
           const errorMessage = error?.message || error?.toString() || 'Unknown error'
           commit('SET_ERROR', errorMessage)
         }

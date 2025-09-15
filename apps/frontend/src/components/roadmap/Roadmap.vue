@@ -101,18 +101,11 @@ export default {
         fetchRoadmap(),
         fetchAreas()
       ]);
-      console.log('🔍 Roadmap mounted - Initiatives:', initiatives.value);
-      console.log('🔍 Roadmap mounted - Areas:', store.state.areas);
-      console.log('🔍 Roadmap mounted - Filtered data:', filteredRoadmapData.value);
-      if (filteredRoadmapData.value.length > 0) {
-        console.log('🔍 First row initiativeId:', filteredRoadmapData.value[0].initiativeId);
-        console.log('🔍 Initiative name for first row:', initiativeName.value(filteredRoadmapData.value[0].initiativeId));
-      }
     })
 
     // Watch for changes in initiatives
     watch(initiatives, (newInitiatives) => {
-      console.log('🔍 Initiatives changed:', newInitiatives);
+      // Initiatives changed - no action needed as filtering is handled by store
     }, { immediate: true })
 
     return {
