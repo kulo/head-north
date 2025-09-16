@@ -15,10 +15,9 @@ class CycleDataService {
     }
     this.config = omegaConfig
     
-    // Unified cache management
+    // Unified cache management - single cache for all data
+    this._unifiedCache = null
     this._cacheTimestamp = null
-    this._roadmapCache = null
-    this._cycleOverviewCache = new Map() // Map<cycleId, data>
     this._cacheTTL = this.config.getCacheTTL()
     this._apiTimeout = this.config.getEnvironmentConfig().timeout
     this._apiRetries = this.config.getEnvironmentConfig().retries
@@ -26,22 +25,21 @@ class CycleDataService {
   }
 
   /**
-   * Check if any cached data is still valid
+   * Check if unified cache is still valid
    * @returns {boolean} True if cache is valid
    * @private
    */
   _isCacheValid() {
-    if (!this._cacheTimestamp) return false
+    if (!this._unifiedCache || !this._cacheTimestamp) return false
     return (Date.now() - this._cacheTimestamp) < this._cacheTTL
   }
 
   /**
-   * Clear all caches
+   * Clear unified cache
    * @private
    */
-  _clearAllCaches() {
-    this._roadmapCache = null
-    this._cycleOverviewCache.clear()
+  _clearCache() {
+    this._unifiedCache = null
     this._cacheTimestamp = null
   }
 
@@ -54,27 +52,25 @@ class CycleDataService {
   }
 
   /**
-   * Get roadmap data with caching
-   * @returns {Promise<object>} The roadmap data
+   * Get unified data with caching
+   * @returns {Promise<object>} The unified data
    * @private
    */
-  async _getRoadmapData() {
-    // Check if any cached data is still valid
-    if (this._isCacheValid() && this._roadmapCache) {
-      return this._roadmapCache
+  async _getUnifiedData() {
+    // Check if unified cache is still valid
+    if (this._isCacheValid()) {
+      return this._unifiedCache
     }
     
-    // If cache is invalid, clear all caches
-    if (!this._isCacheValid()) {
-      this._clearAllCaches()
-    }
+    // Clear cache if invalid
+    this._clearCache()
     
     // Fetch fresh data from unified endpoint
     const endpoints = this.config.getEndpoints()
     const unifiedData = await this._request(endpoints.UNIFIED_DATA)
     
-    // Cache the unified data directly
-    this._roadmapCache = unifiedData
+    // Cache the unified data
+    this._unifiedCache = unifiedData
     this._setCacheTimestamp()
     
     return unifiedData
@@ -129,35 +125,6 @@ class CycleDataService {
     throw new Error(`API request failed after ${this._apiRetries} attempts: ${finalErrorMessage}`)
   }
 
-  /**
-   * Get cycle overview data with caching
-   * @param {string|number} cycleId - The cycle or sprint ID to get overview for
-   * @returns {Promise<object>} Cycle overview data
-   * @private
-   */
-  async _getCycleOverviewData(cycleId) {
-    // Check if any cached data is still valid
-    if (this._isCacheValid() && this._cycleOverviewCache.has(cycleId)) {
-      return this._cycleOverviewCache.get(cycleId)
-    }
-    
-    // If cache is invalid, clear all caches
-    if (!this._isCacheValid()) {
-      this._clearAllCaches()
-    }
-    
-    // Fetch fresh cycle-overview data
-    const data = await this.getOverviewForCycle(cycleId)
-    
-    // Cache the data and set timestamp (if not already set by roadmap)
-    if (!this._cacheTimestamp) {
-      this._setCacheTimestamp()
-    }
-    
-    this._cycleOverviewCache.set(cycleId, data)
-    
-    return data
-  }
 
   /**
    * Get overview data for a specific cycle/sprint
@@ -166,11 +133,12 @@ class CycleDataService {
    * @returns {Promise<object>} Cycle overview data with devCycleData
    */
   async getOverviewForCycle(cycleId) {
-    // Use unified endpoint instead of legacy cycle-overview endpoint
-    const params = new URLSearchParams()
-    if (cycleId) params.set('cycleId', cycleId.toString())
+    // Use unified cache - all data is available in the unified structure
+    const data = await this._getUnifiedData()
     
-    return this._request(`/unified-data?${params.toString()}`)
+    // If a specific cycle is requested, we could filter the data here
+    // For now, return the full unified data as it contains all cycles
+    return data
   }
 
   /**
@@ -179,8 +147,8 @@ class CycleDataService {
    * @returns {Promise<object>} Cycles roadmap data
    */
   async getCyclesRoadmap() {
-    // Use unified endpoint instead of legacy cycles-roadmap endpoint
-    return this._request('/unified-data')
+    // Use unified cache - all data is available in the unified structure
+    return this._getUnifiedData()
   }
 
   /**
@@ -188,7 +156,7 @@ class CycleDataService {
    * @returns {Promise<object|null>} Active sprint data or null if none found
    */
   async getActiveSprint() {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     return data.activeSprint || data.sprints?.find(sprint => sprint.active) || null
   }
 
@@ -267,10 +235,8 @@ class CycleDataService {
    */
   async getAllAreas(cycleId = null) {
     try {
-      // Get areas from appropriate data source
-      const sourceData = cycleId 
-        ? await this._getCycleOverviewData(cycleId)
-        : await this._getRoadmapData()
+      // Get areas from unified data source
+      const sourceData = await this._getUnifiedData()
       
       // Extract areas from backend data
       const backendAreas = this._extractAreasFromData(sourceData)
@@ -291,7 +257,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of cycles
    */
   async getAllCycles() {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     return data.metadata?.cycles || []
   }
 
@@ -300,7 +266,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of stages
    */
   async getAllStages() {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     return data.metadata?.stages || []
   }
 
@@ -309,7 +275,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of all teams across all areas
    */
   async getAllTeams() {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     const areas = data.metadata?.organisation?.areas || {}
     
     const allTeams = []
@@ -334,7 +300,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of teams for the specified area
    */
   async getTeamsForArea(areaId) {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     const areas = data.metadata?.organisation?.areas || {}
     const area = areas[areaId]
     
@@ -354,7 +320,7 @@ class CycleDataService {
    * @returns {Promise<object>} Organisation data structure
    */
   async getOrganisationData() {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     return data.metadata?.organisation || {
       areas: {},
       assignees: []
@@ -366,7 +332,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of assignees
    */
   async getAllAssignees() {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     const assignees = data.metadata?.organisation?.assignees || []
     return assignees.map(assignee => ({
       id: assignee.accountId,
@@ -382,6 +348,12 @@ class CycleDataService {
    * @returns {Promise<object>} Unified data structure
    */
   async getUnifiedData(cycleId = null, filters = {}) {
+    // If no specific cycle or filters, use cached data
+    if (!cycleId && Object.keys(filters).length === 0) {
+      return this._getUnifiedData()
+    }
+    
+    // For specific cycles or filters, make a direct API call
     const params = new URLSearchParams()
     if (cycleId) params.set('cycleId', cycleId.toString())
     if (Object.keys(filters).length > 0) params.set('filters', JSON.stringify(filters))
@@ -394,7 +366,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of active cycles
    */
   async getActiveCycles() {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     const cycles = data.metadata?.cycles || []
     return cycles.filter(cycle => cycle.state === 'active')
   }
@@ -417,7 +389,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of cycles with the specified state
    */
   async getCyclesByState(state) {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     const cycles = data.metadata?.cycles || []
     return cycles.filter(cycle => cycle.state === state)
   }
@@ -428,7 +400,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of cycles sorted by the specified field
    */
   async getOrderedCycles(sortBy = 'startDate') {
-    const data = await this._getRoadmapData()
+    const data = await this._getUnifiedData()
     const cycles = data.metadata?.cycles || []
     
     return [...cycles].sort((a, b) => {
