@@ -73,14 +73,11 @@ class CycleDataService {
     const endpoints = this.config.getEndpoints()
     const unifiedData = await this._request(endpoints.UNIFIED_DATA)
     
-    // Transform unified data to legacy roadmap format
-    const data = this._transformUnifiedToRoadmap(unifiedData)
-    
-    // Cache the data and set timestamp
-    this._roadmapCache = data
+    // Cache the unified data directly
+    this._roadmapCache = unifiedData
     this._setCacheTimestamp()
     
-    return data
+    return unifiedData
   }
 
   /**
@@ -173,10 +170,7 @@ class CycleDataService {
     const params = new URLSearchParams()
     if (cycleId) params.set('cycleId', cycleId.toString())
     
-    const unifiedData = await this._request(`/unified-data?${params.toString()}`)
-    
-    // Transform unified data to legacy format for backward compatibility
-    return this._transformUnifiedToCycleOverview(unifiedData)
+    return this._request(`/unified-data?${params.toString()}`)
   }
 
   /**
@@ -186,10 +180,7 @@ class CycleDataService {
    */
   async getCyclesRoadmap() {
     // Use unified endpoint instead of legacy cycles-roadmap endpoint
-    const unifiedData = await this._request('/unified-data')
-    
-    // Transform unified data to legacy format for backward compatibility
-    return this._transformUnifiedToRoadmap(unifiedData)
+    return this._request('/unified-data')
   }
 
   /**
@@ -203,39 +194,30 @@ class CycleDataService {
 
 
   /**
-   * Get all initiatives from the cycle overview data
+   * Get all initiatives from the unified data
    * @param {string|number} cycleId - The cycle or sprint ID to get initiatives for
    * @returns {Promise<Array>} Array of initiatives with id and name properties
    */
   async getAllInitiatives(cycleId = null) {
-    // Use cycle overview data as the primary source for initiatives
     const data = await this.getOverviewForCycle(cycleId)
-    const initiatives = data.initiatives || []
-    
-    // Transform initiatives from key-value pairs to array of objects if needed
-    if (initiatives && typeof initiatives === 'object' && !Array.isArray(initiatives)) {
-      // Convert from {id: name} format to [{id, name}] format
-      return Object.entries(initiatives).map(([id, name]) => ({ id, name }))
-    }
-    
-    return initiatives
+    return data.metadata?.initiatives || []
   }
 
   /**
-   * Get all assignees from the roadmap data
+   * Get all assignees from the unified data
    * @returns {Promise<Array>} Array of assignees with id and name
    */
   async getAllAssignees() {
     const data = await this._getRoadmapData()
-    return data.assignees?.map(assignee => ({
+    return data.metadata?.assignees?.map(assignee => ({
       id: assignee.accountId,
       name: assignee.displayName
     })) || []
   }
 
   /**
-   * Extract area IDs from backend data
-   * @param {object} data - Backend data (roadmap or cycle-overview)
+   * Extract area IDs from unified data
+   * @param {object} data - Unified data from backend
    * @returns {Array<string>} Array of area IDs
    * @private
    */
@@ -243,33 +225,6 @@ class CycleDataService {
     // Handle unified data structure (metadata.areas)
     if (data.metadata?.areas && typeof data.metadata.areas === 'object') {
       return Object.keys(data.metadata.areas) // Get area IDs
-    }
-    
-    // Handle roadmap data structure
-    if (data.area && typeof data.area === 'object') {
-      return Object.keys(data.area) // Get area IDs
-    }
-    
-    // Handle cycle-overview data structure (devCycleData.area)
-    if (data.devCycleData?.area && typeof data.devCycleData.area === 'object') {
-      return Object.keys(data.devCycleData.area)
-    }
-    
-    // Extract from roadmap items if available
-    if (data.roadmapItems || data.groupedRoadmapItems) {
-      const items = data.roadmapItems || Object.values(data.groupedRoadmapItems).flat()
-      const areaIds = new Set()
-      
-      items.forEach(item => {
-        if (item.area) areaIds.add(item.area)
-        if (item.roadmapItems) {
-          item.roadmapItems.forEach(ri => {
-            if (ri.area) areaIds.add(ri.area)
-          })
-        }
-      })
-      
-      return Array.from(areaIds)
     }
     
     return []
@@ -338,35 +293,21 @@ class CycleDataService {
   }
 
   /**
-   * Get all cycles from the roadmap data
+   * Get all cycles from the unified data
    * @returns {Promise<Array>} Array of cycles
    */
   async getAllCycles() {
     const data = await this._getRoadmapData()
-    
-    // Handle unified data structure (metadata.cycles.ordered)
-    if (data.metadata?.cycles?.ordered) {
-      return data.metadata.cycles.ordered
-    }
-    
-    // Fallback to legacy structure
-    return data.sprints || []
+    return data.metadata?.cycles?.ordered || []
   }
 
   /**
-   * Get all stages from the roadmap data
+   * Get all stages from the unified data
    * @returns {Promise<Array>} Array of stages
    */
   async getAllStages() {
     const data = await this._getRoadmapData()
-    
-    // Handle unified data structure (metadata.stages)
-    if (data.metadata?.stages) {
-      return data.metadata.stages
-    }
-    
-    // Fallback to legacy structure
-    return data.stages || []
+    return data.metadata?.stages || []
   }
 
   /**
@@ -384,77 +325,6 @@ class CycleDataService {
     return this._request(`/unified-data?${params.toString()}`)
   }
 
-  /**
-   * Transform unified data to legacy cycle overview format
-   * @param {object} unifiedData - Unified data from backend
-   * @returns {object} Legacy cycle overview format
-   * @private
-   */
-  _transformUnifiedToCycleOverview(unifiedData) {
-    const { metadata, data } = unifiedData
-    
-    return {
-      devCycleData: {
-        cycle: metadata.cycles.active,
-        initiatives: data.initiatives,
-        area: this._extractAreasFromUnifiedData(unifiedData),
-        assignees: metadata.assignees,
-        teams: [] // TODO: Add teams to unified data
-      },
-      cycles: metadata.cycles.ordered,
-      stages: metadata.stages,
-      areas: metadata.areas,
-      initiatives: metadata.initiatives
-    }
-  }
-
-  /**
-   * Transform unified data to legacy roadmap format
-   * @param {object} unifiedData - Unified data from backend
-   * @returns {object} Legacy roadmap format
-   * @private
-   */
-  _transformUnifiedToRoadmap(unifiedData) {
-    const { metadata, data } = unifiedData
-    
-    return {
-      groupedRoadmapItems: this._groupInitiativesByInitiativeId(data.initiatives),
-      cycle: metadata.cycles.active,
-      cycles: metadata.cycles.ordered,
-      stages: metadata.stages,
-      area: this._extractAreasFromUnifiedData(unifiedData),
-      assignees: metadata.assignees,
-      initiatives: data.initiatives.map(init => ({ id: init.initiativeId, name: init.initiative }))
-    }
-  }
-
-  /**
-   * Group initiatives by initiativeId for legacy roadmap format
-   * @param {Array} initiatives - Array of initiatives
-   * @returns {object} Grouped initiatives
-   * @private
-   */
-  _groupInitiativesByInitiativeId(initiatives) {
-    const grouped = {}
-    initiatives.forEach(initiative => {
-      grouped[initiative.initiativeId] = initiative.roadmapItems
-    })
-    return grouped
-  }
-
-  /**
-   * Extract areas from unified data
-   * @param {object} unifiedData - Unified data from backend
-   * @returns {object} Areas in legacy format
-   * @private
-   */
-  _extractAreasFromUnifiedData(unifiedData) {
-    const { metadata } = unifiedData
-    
-    // metadata.areas is already an object with {id: name} format
-    // Just return it directly
-    return metadata.areas || {}
-  }
 
   /**
    * Clear all caches (useful for testing or when data needs to be refreshed)
