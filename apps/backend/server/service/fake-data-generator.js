@@ -176,11 +176,17 @@ class FakeDataGenerator {
     
     let roadmapItemCounter = 1;
     
-    // Generate roadmap items for each area-initiative combination
-    this.areas.forEach((area, areaIndex) => {
-      this.initiatives.forEach((initiative, initiativeIndex) => {
+    // Generate roadmap items for each initiative (1-5 items per initiative)
+    this.initiatives.forEach((initiative, initiativeIndex) => {
+      // Generate between 1 and 5 roadmap items per initiative
+      const numRoadmapItems = Math.floor(Math.random() * 5) + 1; // 1-5 items
+      
+      for (let i = 0; i < numRoadmapItems; i++) {
         const roadmapItemKey = `ROAD-${roadmapItemCounter}`;
         const summary = `${initiative.name} - ${roadmapItemCounter}`;
+        
+        // Pick a random area for this roadmap item
+        const area = this.areas[Math.floor(Math.random() * this.areas.length)];
         
         // Pick a team that matches the area
         const areaTeams = teamKeys.filter(teamKey => teamKey.startsWith(area.id));
@@ -205,7 +211,7 @@ class FakeDataGenerator {
         };
         
         roadmapItemCounter++;
-      });
+      }
     });
     
     // Add some roadmap items without initiatives to test UI behavior
