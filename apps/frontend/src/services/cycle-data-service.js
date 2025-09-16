@@ -184,11 +184,6 @@ class CycleDataService {
       return Object.keys(data.metadata.organisation.areas) // Get area IDs
     }
     
-    // Fallback to old structure for backward compatibility
-    if (data.metadata?.areas && typeof data.metadata.areas === 'object') {
-      return Object.keys(data.metadata.areas) // Get area IDs
-    }
-    
     return []
   }
 
