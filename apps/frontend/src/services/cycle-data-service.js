@@ -203,17 +203,6 @@ class CycleDataService {
     return data.metadata?.initiatives || []
   }
 
-  /**
-   * Get all assignees from the unified data
-   * @returns {Promise<Array>} Array of assignees with id and name
-   */
-  async getAllAssignees() {
-    const data = await this._getRoadmapData()
-    return data.metadata?.assignees?.map(assignee => ({
-      id: assignee.accountId,
-      name: assignee.displayName
-    })) || []
-  }
 
   /**
    * Extract area IDs from unified data
@@ -222,7 +211,12 @@ class CycleDataService {
    * @private
    */
   _extractAreasFromData(data) {
-    // Handle unified data structure (metadata.areas)
+    // Handle unified data structure (metadata.organisation.areas)
+    if (data.metadata?.organisation?.areas && typeof data.metadata.organisation.areas === 'object') {
+      return Object.keys(data.metadata.organisation.areas) // Get area IDs
+    }
+    
+    // Fallback to old structure for backward compatibility
     if (data.metadata?.areas && typeof data.metadata.areas === 'object') {
       return Object.keys(data.metadata.areas) // Get area IDs
     }
@@ -308,6 +302,76 @@ class CycleDataService {
   async getAllStages() {
     const data = await this._getRoadmapData()
     return data.metadata?.stages || []
+  }
+
+  /**
+   * Get all teams from all areas in the organisation
+   * @returns {Promise<Array>} Array of all teams across all areas
+   */
+  async getAllTeams() {
+    const data = await this._getRoadmapData()
+    const areas = data.metadata?.organisation?.areas || {}
+    
+    const allTeams = []
+    Object.entries(areas).forEach(([areaId, areaData]) => {
+      if (areaData.teams && Array.isArray(areaData.teams)) {
+        areaData.teams.forEach(team => {
+          allTeams.push({
+            ...team,
+            areaId,
+            areaName: areaData.name || areaId
+          })
+        })
+      }
+    })
+    
+    return allTeams
+  }
+
+  /**
+   * Get teams for a specific area
+   * @param {string} areaId - The area ID to get teams for
+   * @returns {Promise<Array>} Array of teams for the specified area
+   */
+  async getTeamsForArea(areaId) {
+    const data = await this._getRoadmapData()
+    const areas = data.metadata?.organisation?.areas || {}
+    const area = areas[areaId]
+    
+    if (!area || !area.teams) {
+      return []
+    }
+    
+    return area.teams.map(team => ({
+      ...team,
+      areaId,
+      areaName: area.name || areaId
+    }))
+  }
+
+  /**
+   * Get organisation data (areas with teams and assignees)
+   * @returns {Promise<object>} Organisation data structure
+   */
+  async getOrganisationData() {
+    const data = await this._getRoadmapData()
+    return data.metadata?.organisation || {
+      areas: {},
+      assignees: []
+    }
+  }
+
+  /**
+   * Get all assignees from the organisation
+   * @returns {Promise<Array>} Array of assignees
+   */
+  async getAllAssignees() {
+    const data = await this._getRoadmapData()
+    const assignees = data.metadata?.organisation?.assignees || []
+    return assignees.map(assignee => ({
+      id: assignee.accountId,
+      name: assignee.displayName
+    }))
   }
 
   /**

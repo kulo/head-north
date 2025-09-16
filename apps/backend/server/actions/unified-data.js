@@ -53,8 +53,10 @@ export default async (context) => {
       metadata: {
         cycles,
         stages,
-        areas,
-        assignees,
+        organisation: {
+          areas,
+          assignees
+        },
         initiatives: configInitiatives
       },
       data: {

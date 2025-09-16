@@ -49,6 +49,23 @@ export default async (cycleId, omegaConfig, extraFields = []) => {
   const initiatives = omegaConfig.getInitiatives();
   const stages = omegaConfig.getStages();
   
+  // Get enhanced areas with teams from fake data generator if available
+  let enhancedAreas = {};
+  if (omegaConfig.isUsingFakeCycleData()) {
+    // Import FakeDataGenerator to get enhanced areas
+    const FakeDataGenerator = (await import('./fake-data-generator.js')).default;
+    const fakeDataGenerator = new FakeDataGenerator(omegaConfig);
+    enhancedAreas = fakeDataGenerator.getEnhancedAreas();
+  } else {
+    // Convert areas to objects with teams for real data
+    Object.entries(areas).forEach(([areaId, areaName]) => {
+      enhancedAreas[areaId] = {
+        name: areaName,
+        teams: []
+      };
+    });
+  }
+  
   return {
     // Core data
     roadmapItems,
@@ -61,7 +78,7 @@ export default async (cycleId, omegaConfig, extraFields = []) => {
     
     // Metadata
     assignees,
-    areas,
+    areas: enhancedAreas,
     initiatives,
     stages,
     

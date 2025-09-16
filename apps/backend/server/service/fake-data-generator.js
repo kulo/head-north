@@ -14,7 +14,11 @@ class FakeDataGenerator {
 
     // Get areas and initiatives from omega config
     const areasConfig = this.omegaConfig.getAreas();
-    this.areas = Object.entries(areasConfig).map(([id, name]) => ({ id, name }));
+    this.areas = Object.entries(areasConfig).map(([id, name]) => ({ 
+      id, 
+      name,
+      teams: this._generateTeamsForArea(id, name)
+    }));
 
     const initiativesConfig = this.omegaConfig.getInitiatives();
     this.initiatives = Object.entries(initiativesConfig).map(([id, name]) => ({ 
@@ -300,6 +304,51 @@ class FakeDataGenerator {
     }
     
     return sprints;
+  }
+
+  /**
+   * Generate teams for a specific area
+   * @param {string} areaId - The area ID
+   * @param {string} areaName - The area name
+   * @returns {Array} Array of teams for the area
+   * @private
+   */
+  _generateTeamsForArea(areaId, areaName) {
+    const teamTemplates = {
+      platform: [
+        { id: 'platform-frontend', name: 'Frontend Team', description: 'Frontend development team' },
+        { id: 'platform-backend', name: 'Backend Team', description: 'Backend services team' },
+        { id: 'platform-devops', name: 'DevOps Team', description: 'Infrastructure and deployment team' }
+      ],
+      resilience: [
+        { id: 'resilience-security', name: 'Security Team', description: 'Security and compliance team' },
+        { id: 'resilience-monitoring', name: 'Monitoring Team', description: 'System monitoring and alerting team' }
+      ],
+      sustainability: [
+        { id: 'sustainability-green', name: 'Green Tech Team', description: 'Sustainable technology initiatives' },
+        { id: 'sustainability-metrics', name: 'Metrics Team', description: 'Environmental impact measurement team' }
+      ]
+    };
+
+    return teamTemplates[areaId] || [
+      { id: `${areaId}-team1`, name: `${areaName} Team 1`, description: `Primary team for ${areaName}` },
+      { id: `${areaId}-team2`, name: `${areaName} Team 2`, description: `Secondary team for ${areaName}` }
+    ];
+  }
+
+  /**
+   * Get enhanced areas with teams
+   * @returns {object} Areas object with teams
+   */
+  getEnhancedAreas() {
+    const enhancedAreas = {};
+    this.areas.forEach(area => {
+      enhancedAreas[area.id] = {
+        name: area.name,
+        teams: area.teams
+      };
+    });
+    return enhancedAreas;
   }
 }
 

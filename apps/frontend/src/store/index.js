@@ -213,22 +213,30 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           
           // Extract and set metadata
           if (unifiedData.metadata) {
-            const { initiatives, assignees, areas, cycles } = unifiedData.metadata
+            const { initiatives, organisation, cycles } = unifiedData.metadata
             
             if (initiatives) {
               const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiatives)
               commit('SET_INITIATIVES', allInitiatives)
             }
             
-            if (assignees) {
-              commit('SET_ASSIGNEES', assignees.map(assignee => ({
-                id: assignee.accountId,
-                name: assignee.displayName
-              })))
-            }
-            
-            if (areas) {
-              commit('SET_AREAS', Object.entries(areas).map(([id, name]) => ({ id, name })))
+            if (organisation) {
+              // Extract assignees from organisation
+              if (organisation.assignees) {
+                commit('SET_ASSIGNEES', organisation.assignees.map(assignee => ({
+                  id: assignee.accountId,
+                  name: assignee.displayName
+                })))
+              }
+              
+              // Extract areas from organisation
+              if (organisation.areas) {
+                commit('SET_AREAS', Object.entries(organisation.areas).map(([id, areaData]) => ({ 
+                  id, 
+                  name: areaData.name || id,
+                  teams: areaData.teams || []
+                })))
+              }
             }
             
             if (cycles) {
