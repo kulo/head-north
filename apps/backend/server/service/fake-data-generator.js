@@ -64,27 +64,38 @@ class FakeDataGenerator {
     const roadmapItemKeys = Object.keys(this.roadmapItems);
     const statuses = ['To Do', 'In Progress', 'Done', 'Review'];
     const issueTypes = ['Story', 'Task', 'Bug', 'Epic', 'Release Item'];
-    const externalStages = ['S1', 'S2', 'S3', 'S3+']; // Valid external release stages
+    const stages = ['s0', 's1', 's2', 's3', 's3+']; // Stage progression order
 
-    // Generate issues for each roadmap item to ensure we have release items
+    // Get the current sprint data
+    const currentSprint = this.sprints.find(sprint => sprint.id === parseInt(sprintId));
+
+    // Generate issues for each roadmap item, but only include release items for this specific sprint
     roadmapItemKeys.forEach((roadmapItemKey, roadmapItemIndex) => {
       const roadmapItem = this.roadmapItems[roadmapItemKey];
       
-      // Generate 2-4 issues per roadmap item
-      const numIssues = Math.floor(Math.random() * 3) + 2;
+      // Get the release items for this roadmap item from the grouped data
+      const releaseItemsForRoadmapItem = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
       
-      for (let i = 0; i < numIssues; i++) {
+      // Filter release items that belong to this sprint
+      const releaseItemsInThisSprint = releaseItemsForRoadmapItem.filter(item => 
+        item.sprint && item.sprint.id === parseInt(sprintId)
+      );
+      
+      // Generate issues for release items in this sprint (at most 1 per roadmap item)
+      releaseItemsInThisSprint.forEach((releaseItem, i) => {
         const assignee = this.assignees[Math.floor(Math.random() * (this.assignees.length - 1)) + 1]; // Skip 'All Assignees'
-        const issueType = issueTypes[Math.floor(Math.random() * issueTypes.length)];
-        const issueIndex = roadmapItemIndex * 10 + i; // Ensure unique IDs
-        const releaseStage = externalStages[Math.floor(Math.random() * externalStages.length)];
+        const issueType = 'Release Item';
+        const issueIndex = roadmapItemIndex * 100 + parseInt(sprintId) * 10 + i; // Ensure unique IDs
 
         issues.push({
           id: `issue-${issueIndex}`,
           key: `ISSUE-${issueIndex}`,
           fields: {
-            summary: `${roadmapItem.summary} - ${issueType} ${i + 1} - (${releaseStage})`, // Encode release stage in summary
-            status: { name: statuses[Math.floor(Math.random() * statuses.length)] },
+            summary: releaseItem.summary, // Use the release item's summary with stage
+            status: { 
+              id: this._getStatusId(releaseItem.status),
+              name: releaseItem.status 
+            },
             assignee: assignee,
             effort: Math.floor(Math.random() * 8) + 1,
             externalRoadmap: 'Yes', // This needs to be 'Yes' for isExternal to return true
@@ -94,12 +105,19 @@ class FakeDataGenerator {
             area: roadmapItem.area,
             initiativeId: roadmapItem.initiativeId,
             url: `https://example.com/browse/ISSUE-${issueIndex}`,
+            // Add sprint information for proper status resolution
+            sprint: currentSprint ? {
+              id: currentSprint.id,
+              name: currentSprint.name,
+              startDate: currentSprint.startDate,
+              endDate: currentSprint.endDate
+            } : null,
             // Add additional fields for release items
             teams: [assignee.accountId],
             areaIds: [roadmapItem.area]
           }
         });
-      }
+      });
     });
     
     return issues;
@@ -111,34 +129,10 @@ class FakeDataGenerator {
 
   async getReleaseItemsGroupedByRoadmapItem() {
     const releaseItemsByRoadmapItem = {};
-    const externalStages = ['S1', 'S2', 'S3', 'S3+']; // Valid external release stages
     
-    // Create multiple release items for each roadmap item with different assignees and areas
+    // Create 1-3 release items for each roadmap item, distributed across different cycles
     Object.keys(this.roadmapItems).forEach(roadmapItemKey => {
-      const roadmapItem = this.roadmapItems[roadmapItemKey];
-      const releaseItems = [];
-      
-      // Create 3-5 release items per roadmap item
-      const numItems = Math.floor(Math.random() * 3) + 3;
-      
-      for (let i = 0; i < numItems; i++) {
-        const assignee = this.assignees[Math.floor(Math.random() * (this.assignees.length - 1)) + 1]; // Skip 'All Assignees'
-        const statuses = ['To Do', 'In Progress', 'Done', 'Review'];
-        const status = statuses[Math.floor(Math.random() * statuses.length)];
-        const releaseStage = externalStages[Math.floor(Math.random() * externalStages.length)];
-        
-        // Create simplified structure (like real Jira API does)
-        releaseItems.push({
-          id: `${roadmapItemKey}-RELEASE-${i + 1}`,
-          summary: `${roadmapItem.summary} - Release Item ${i + 1} - (${releaseStage})`, // Encode release stage in summary
-          closedSprints: [],
-          parent: roadmapItemKey,
-          status: status,
-          sprint: null
-        });
-      }
-      
-      releaseItemsByRoadmapItem[roadmapItemKey] = releaseItems;
+      releaseItemsByRoadmapItem[roadmapItemKey] = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
     });
     
     return releaseItemsByRoadmapItem;
@@ -147,6 +141,69 @@ class FakeDataGenerator {
   _getRandomStage() {
     const stages = ['development', 'testing', 'staging', 'production', 'review', 'planning'];
     return stages[Math.floor(Math.random() * stages.length)];
+  }
+
+  /**
+   * Get release items for a specific roadmap item
+   * @param {string} roadmapItemKey - The roadmap item key
+   * @returns {Array} Array of release items for the roadmap item
+   * @private
+   */
+  _getReleaseItemsForRoadmapItem(roadmapItemKey) {
+    const stages = ['s0', 's1', 's2', 's3', 's3+']; // Stage progression order
+    const sprints = this.sprints || [];
+    const roadmapItem = this.roadmapItems[roadmapItemKey];
+    const releaseItems = [];
+    
+    if (!roadmapItem) return releaseItems;
+    
+    // Generate 1-3 release items per roadmap item
+    const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items
+    
+    // Select random stages in progression order (s0 → s1 → s2 → s3 → s3+)
+    const selectedStages = stages.slice(0, numItems);
+    
+    for (let i = 0; i < numItems; i++) {
+      const assignee = this.assignees[Math.floor(Math.random() * (this.assignees.length - 1)) + 1]; // Skip 'All Assignees'
+      const statuses = ['To Do', 'In Progress', 'Done', 'Review'];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const releaseStage = selectedStages[i];
+      
+      // Assign to a random sprint (cycle) - each roadmap item gets different cycles
+      const sprint = sprints.length > 0 ? sprints[Math.floor(Math.random() * sprints.length)] : null;
+      
+      releaseItems.push({
+        id: `${roadmapItemKey}-RELEASE-${i + 1}`,
+        summary: `${roadmapItem.summary} - Release Item ${i + 1} - (${releaseStage})`, // Encode release stage in summary
+        closedSprints: [],
+        parent: roadmapItemKey,
+        status: status,
+        sprint: sprint ? {
+          id: sprint.id,
+          name: sprint.name,
+          startDate: sprint.startDate,
+          endDate: sprint.endDate
+        } : null
+      });
+    }
+    
+    return releaseItems;
+  }
+
+  /**
+   * Get status ID for a given status name
+   * @param {string} statusName - The status name
+   * @returns {string} The status ID
+   * @private
+   */
+  _getStatusId(statusName) {
+    const statusMap = {
+      'To Do': '10001',
+      'In Progress': '10002', 
+      'Done': '10003',
+      'Review': '10004'
+    };
+    return statusMap[statusName] || '10001';
   }
 
   getAssignees() {

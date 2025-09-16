@@ -18,7 +18,7 @@ export function resolveStatus(issueFields, sprint, omegaConfig) {
   const statusId = issueFields.status.id;
   const jiraConfig = omegaConfig.getJiraConfig();
 
-  if(issueFields.sprint && new Date(sprint.start) < new Date(issueFields.sprint.startDate)) {
+  if(issueFields.sprint && sprint && sprint.start && new Date(sprint.start) < new Date(issueFields.sprint.startDate)) {
     return jiraConfig.statusMappings[omegaConfig.getItemStatusValues().POSTPONED]; // POSTPONED_STATUS_ID
   }
   return jiraConfig.statusMappings[statusId] || omegaConfig.getItemStatusValues().TODO;
