@@ -168,7 +168,13 @@ class CycleDataService {
    */
   async getAllInitiatives(cycleId = null) {
     const data = await this.getOverviewForCycle(cycleId)
-    return data.metadata?.initiatives || []
+    const initiatives = data.metadata?.initiatives || {}
+    
+    // Convert initiatives object to array format
+    return Object.entries(initiatives).map(([id, name]) => ({
+      id,
+      name
+    }))
   }
 
 

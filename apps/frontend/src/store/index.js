@@ -216,7 +216,12 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
             const { initiatives, organisation, cycles } = unifiedData.metadata
             
             if (initiatives) {
-              const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiatives)
+              // Convert initiatives object to array format
+              const initiativesArray = Object.entries(initiatives).map(([id, name]) => ({
+                id,
+                name
+              }))
+              const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray)
               commit('SET_INITIATIVES', allInitiatives)
             }
             
