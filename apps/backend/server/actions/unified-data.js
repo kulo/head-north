@@ -51,15 +51,7 @@ export default async (context) => {
 
     const response = {
       metadata: {
-        cycles: {
-          active: cycle,
-          ordered: cycles,
-          byState: {
-            active: cycles.filter(c => c.state === 'active'),
-            closed: cycles.filter(c => c.state === 'closed'),
-            future: cycles.filter(c => c.state === 'future')
-          }
-        },
+        cycles,
         stages,
         areas,
         assignees,

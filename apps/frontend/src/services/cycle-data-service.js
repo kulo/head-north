@@ -298,7 +298,7 @@ class CycleDataService {
    */
   async getAllCycles() {
     const data = await this._getRoadmapData()
-    return data.metadata?.cycles?.ordered || []
+    return data.metadata?.cycles || []
   }
 
   /**
@@ -325,6 +325,59 @@ class CycleDataService {
     return this._request(`/unified-data?${params.toString()}`)
   }
 
+  /**
+   * Get active cycles from the unified data
+   * @returns {Promise<Array>} Array of active cycles
+   */
+  async getActiveCycles() {
+    const data = await this._getRoadmapData()
+    const cycles = data.metadata?.cycles || []
+    return cycles.filter(cycle => cycle.state === 'active')
+  }
+
+  /**
+   * Get the oldest active cycle from the unified data
+   * @returns {Promise<object|null>} The oldest active cycle or null if none found
+   */
+  async getActiveCycle() {
+    const activeCycles = await this.getActiveCycles()
+    if (activeCycles.length === 0) return null
+    
+    // Sort by start date and return the oldest (first) one
+    return activeCycles.sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0]
+  }
+
+  /**
+   * Get cycles by state from the unified data
+   * @param {string} state - The state to filter by ('active', 'closed', 'future')
+   * @returns {Promise<Array>} Array of cycles with the specified state
+   */
+  async getCyclesByState(state) {
+    const data = await this._getRoadmapData()
+    const cycles = data.metadata?.cycles || []
+    return cycles.filter(cycle => cycle.state === state)
+  }
+
+  /**
+   * Get ordered cycles from the unified data
+   * @param {string} sortBy - The field to sort by ('startDate', 'name', 'id')
+   * @returns {Promise<Array>} Array of cycles sorted by the specified field
+   */
+  async getOrderedCycles(sortBy = 'startDate') {
+    const data = await this._getRoadmapData()
+    const cycles = data.metadata?.cycles || []
+    
+    return [...cycles].sort((a, b) => {
+      if (sortBy === 'startDate') {
+        return new Date(a.startDate) - new Date(b.startDate)
+      } else if (sortBy === 'name') {
+        return a.name.localeCompare(b.name)
+      } else if (sortBy === 'id') {
+        return a.id - b.id
+      }
+      return 0
+    })
+  }
 
   /**
    * Clear all caches (useful for testing or when data needs to be refreshed)

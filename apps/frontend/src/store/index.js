@@ -232,7 +232,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
             }
             
             if (cycles) {
-              commit('SET_CYCLES', cycles.ordered || [])
+              commit('SET_CYCLES', cycles)
             }
           }
           

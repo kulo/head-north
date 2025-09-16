@@ -90,13 +90,17 @@ export default {
     // Use the unified filtering getter from the store
     const filteredRoadmapData = computed(() => store.getters.filteredRoadmapData)
     
-    // Extract cycles from unified data structure
+    // Extract cycles from unified data structure using new transformation methods
     const orderedSprints = computed(() => {
-      return roadmapData.value?.metadata?.cycles?.ordered || []
+      if (!roadmapData.value?.metadata?.cycles) return []
+      return [...roadmapData.value.metadata.cycles].sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
     })
     
     const activeSprint = computed(() => {
-      return roadmapData.value?.metadata?.cycles?.active || null
+      if (!roadmapData.value?.metadata?.cycles) return null
+      const activeCycles = roadmapData.value.metadata.cycles.filter(cycle => cycle.state === 'active')
+      if (activeCycles.length === 0) return null
+      return activeCycles.sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0]
     })
     
     const initiativeIds = computed(() => {
