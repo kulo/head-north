@@ -18,7 +18,7 @@
       </div>
       <div v-else>
         <a-row :gutter="20">
-          <a-col :span="4" :offset="index === 0 ? 6 : 0" :class="{ active: sprint.id === roadmapData.activeSprint.id}" v-for="(sprint, index) in roadmapData.orderedSprints" :key="sprint.id">
+          <a-col :span="4" :offset="index === 0 ? 6 : 0" :class="{ active: sprint.id === activeSprint?.id}" v-for="(sprint, index) in orderedSprints" :key="sprint.id">
             <p style="text-align: center">{{ sprint.name }}</p>
           </a-col>
         </a-row>
@@ -37,7 +37,7 @@
                 <span>{{ initiativeName(row.initiativeId) || `Initiative: ${row.initiativeId}` }}</span>
               </template>
               <roadmap-item-overview 
-                :orderedSprints="roadmapData.orderedSprints" 
+                :orderedSprints="orderedSprints" 
                 :roadmapItem="roadmapItem" 
                 :itemIndex="itemIndex" 
                 v-for="(roadmapItem, itemIndex) in (row.roadmapItems || [])" 
@@ -89,6 +89,15 @@ export default {
     
     // Use the unified filtering getter from the store
     const filteredRoadmapData = computed(() => store.getters.filteredRoadmapData)
+    
+    // Extract cycles from unified data structure
+    const orderedSprints = computed(() => {
+      return roadmapData.value?.metadata?.cycles?.ordered || []
+    })
+    
+    const activeSprint = computed(() => {
+      return roadmapData.value?.metadata?.cycles?.active || null
+    })
     
     const initiativeIds = computed(() => {
       return initiatives.value.map(x => x.id);
@@ -155,6 +164,8 @@ export default {
       initiativeIds,
       activeInitiativeIds,
       areas,
+      orderedSprints,
+      activeSprint,
       fetchRoadmap
     }
   }

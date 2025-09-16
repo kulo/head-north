@@ -51,7 +51,6 @@ export default async (context) => {
 
     const response = {
       metadata: {
-        type: 'unified',
         cycles: {
           active: cycle,
           ordered: cycles,

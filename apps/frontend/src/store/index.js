@@ -47,7 +47,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       
       // Unified filtering getters using the filtering utilities
       filteredRoadmapData: (state) => {
-        if (!state.roadmapData || !state.roadmapData.roadmapItems) {
+        if (!state.roadmapData || !state.roadmapData.data || !state.roadmapData.data.initiatives) {
           return []
         }
         
@@ -57,8 +57,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           stages: state.selectedStages
         })
         
-        // Return just the roadmapItems array for the template
-        return filteredData.roadmapItems || []
+        // Return the initiatives array for the template
+        return filteredData.data?.initiatives || filteredData.initiatives || []
       },
       
       currentCycleOverviewData: (state) => {
@@ -205,36 +205,35 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           commit('SET_LOADING', true)
           commit('SET_ERROR', null)
           
-          // Fetch data from API service
-          const data = await cycleDataService.getCyclesRoadmap()
+          // Fetch unified data from API service
+          const unifiedData = await cycleDataService.getUnifiedData()
           
-          // Transform API data to match our store structure
-          const transformedData = {
-            orderedSprints: data.sprints || [],
-            roadmapItems: data.groupedRoadmapItems && Object.keys(data.groupedRoadmapItems).length > 0 
-              ? Object.entries(data.groupedRoadmapItems).map(([initiativeId, roadmapItems]) => ({
-                  initiativeId: initiativeId, // Keep as string to match initiative IDs
-                  roadmapItems: roadmapItems || []
-                }))
-              : [],
-            activeSprint: data.sprint || null
-          }
+          // Store the unified data directly
+          commit('SET_ROADMAP_DATA', unifiedData)
           
-          commit('SET_ROADMAP_DATA', transformedData)
-          
-          // Also set initiatives and assignees from the API response
-          if (data.initiatives) {
-            const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(data.initiatives)
-            commit('SET_INITIATIVES', allInitiatives)
-          }
-          if (data.assignees) {
-            commit('SET_ASSIGNEES', data.assignees.map(assignee => ({
-              id: assignee.accountId,
-              name: assignee.displayName
-            })))
-          }
-          if (data.area) {
-            commit('SET_AREAS', Object.entries(data.area).map(([id, name]) => ({ id, name })))
+          // Extract and set metadata
+          if (unifiedData.metadata) {
+            const { initiatives, assignees, areas, cycles } = unifiedData.metadata
+            
+            if (initiatives) {
+              const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiatives)
+              commit('SET_INITIATIVES', allInitiatives)
+            }
+            
+            if (assignees) {
+              commit('SET_ASSIGNEES', assignees.map(assignee => ({
+                id: assignee.accountId,
+                name: assignee.displayName
+              })))
+            }
+            
+            if (areas) {
+              commit('SET_AREAS', Object.entries(areas).map(([id, name]) => ({ id, name })))
+            }
+            
+            if (cycles) {
+              commit('SET_CYCLES', cycles.ordered || [])
+            }
           }
           
         } catch (error) {
