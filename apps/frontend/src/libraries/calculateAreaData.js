@@ -44,22 +44,14 @@ const createAreaPredicate = (area, predicate) => {
 
 export const calculateAreaData = 
   (unifiedData, releaseItemPredicate = () => true, initiativePredicate = () => true) => {
-  // Extract data from unified structure
-  const initiatives = unifiedData.data?.initiatives || {};
+  // Extract data from unified structure - both initiatives and areas are now arrays
+  const initiativesArray = unifiedData.data?.initiatives || [];
   const organisation = unifiedData.metadata?.organisation || {};
-  const areas = organisation.areas || {};
+  const areas = organisation.areas || [];
   
-  // Convert initiatives object to array format
-  const initiativesArray = Object.entries(initiatives).map(([id, initiativeData]) => ({
-    id,
-    initiative: initiativeData.initiative,
-    initiativeId: initiativeData.initiativeId,
-    roadmapItems: initiativeData.roadmapItems || []
-  }));
-
-  // Convert areas to mapping format for backward compatibility
-  const areaMapping = Object.entries(areas).reduce((acc, [id, areaData]) => {
-    acc[id] = areaData.name || id;
+  // Convert areas array to mapping format for backward compatibility
+  const areaMapping = areas.reduce((acc, area) => {
+    acc[area.id] = area.name || area.id;
     return acc;
   }, {});
 

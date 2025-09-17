@@ -213,13 +213,13 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           
           // Extract and set metadata
           if (unifiedData.metadata) {
-            const { initiatives, organisation, cycles } = unifiedData.metadata
+            const { organisation, cycles } = unifiedData.metadata
             
-            if (initiatives) {
-              // Convert initiatives object to array format
-              const initiativesArray = Object.entries(initiatives).map(([id, name]) => ({
-                id,
-                name
+            // Extract initiatives from data.initiatives (array format)
+            if (unifiedData.data?.initiatives) {
+              const initiativesArray = unifiedData.data.initiatives.map(init => ({
+                id: init.initiativeId,
+                name: init.initiative
               }))
               const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray)
               commit('SET_INITIATIVES', allInitiatives)
@@ -234,14 +234,14 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
                 })))
               }
               
-              // Extract areas from organisation
-              if (organisation.areas) {
-                commit('SET_AREAS', Object.entries(organisation.areas).map(([id, areaData]) => ({ 
-                  id, 
-                  name: areaData.name || id,
-                  teams: areaData.teams || []
-                })))
-              }
+            // Extract areas from organisation - now an array
+            if (organisation.areas) {
+              commit('SET_AREAS', organisation.areas.map(area => ({ 
+                id: area.id,
+                name: area.name || area.id,
+                teams: area.teams || []
+              })))
+            }
             }
             
             if (cycles) {
@@ -326,21 +326,20 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // Extract data from unified structure
           const cycles = unifiedData.metadata?.cycles || [];
           const stages = unifiedData.metadata?.stages || [];
-          const initiatives = unifiedData.metadata?.initiatives || {};
           const organisation = unifiedData.metadata?.organisation || {};
           const assignees = organisation.assignees || [];
           
-          // Convert initiatives object to array format
-          const initiativesArray = Object.entries(initiatives).map(([id, name]) => ({
-            id,
-            name
-          }));
+          // Initiatives are already in array format in data.initiatives
+          const initiativesArray = unifiedData.data?.initiatives?.map(init => ({
+            id: init.initiativeId,
+            name: init.initiative
+          })) || [];
 
-          // Get areas from organisation
-          const areas = Object.entries(organisation.areas || {}).map(([id, areaData]) => ({ 
-            id, 
-            name: areaData.name || id,
-            teams: areaData.teams || []
+          // Get areas from organisation - now an array
+          const areas = (organisation.areas || []).map(area => ({ 
+            id: area.id,
+            name: area.name || area.id,
+            teams: area.teams || []
           }));
 
           // Find active cycle

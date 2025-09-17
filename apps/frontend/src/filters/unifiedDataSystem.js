@@ -323,13 +323,8 @@ export const filterUnifiedData = (unifiedData, filters) => {
     return unifiedData
   }
 
-  // Convert initiatives object to array for filtering
-  const initiativesArray = Object.entries(unifiedData.data.initiatives).map(([id, initiativeData]) => ({
-    id,
-    ...initiativeData
-  }))
-
-  let filteredInitiatives = initiativesArray
+  // Initiatives is already an array in the unified data structure
+  let filteredInitiatives = unifiedData.data.initiatives
 
   // Initiative filtering
   if (filters.initiatives && filters.initiatives.length > 0) {
@@ -440,21 +435,11 @@ export const filterUnifiedData = (unifiedData, filters) => {
     .filter(initiative => initiative.roadmapItems.length > 0)
   }
 
-  // Convert filtered initiatives back to object format
-  const filteredInitiativesObject = filteredInitiatives.reduce((acc, initiative) => {
-    acc[initiative.id] = {
-      initiative: initiative.initiative,
-      initiativeId: initiative.initiativeId,
-      roadmapItems: initiative.roadmapItems
-    }
-    return acc
-  }, {})
-
   const result = {
     ...unifiedData,
     data: {
       ...unifiedData.data,
-      initiatives: filteredInitiativesObject
+      initiatives: filteredInitiatives
     }
   }
 

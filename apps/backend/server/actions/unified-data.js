@@ -49,12 +49,18 @@ export default async (context) => {
       }))
     }));
 
+    // Convert areas object to array for consistency
+    const areasArray = Object.entries(areas).map(([id, areaData]) => ({
+      id,
+      ...areaData
+    }));
+
     const response = {
       metadata: {
         cycles,
         stages,
         organisation: {
-          areas,
+          areas: areasArray,
           assignees
         },
         initiatives: configInitiatives
