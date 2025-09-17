@@ -319,28 +319,49 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       async fetchCycleOverviewData({ state, commit }) {
         commit('CLEAR_ERROR')
         try {
-          // Use API service with cycle ID parameter
+          // Use unified data service
           const cycleId = state.selectedCycle ? state.selectedCycle.id : null
-          const areaDataset = await cycleDataService.getOverviewForCycle(cycleId);
-          const sprints = areaDataset.sprints;
-          const stages = areaDataset.stages;
-          const cycleData = areaDataset.devCycleData;
-          const assignees = cycleData.assignees;
-          const areaData = calculateAreaData(cycleData);
+          const unifiedData = await cycleDataService.getOverviewForCycle(cycleId);
+          
+          // Extract data from unified structure
+          const cycles = unifiedData.metadata?.cycles || [];
+          const stages = unifiedData.metadata?.stages || [];
+          const initiatives = unifiedData.metadata?.initiatives || {};
+          const organisation = unifiedData.metadata?.organisation || {};
+          const assignees = organisation.assignees || [];
+          
+          // Convert initiatives object to array format
+          const initiativesArray = Object.entries(initiatives).map(([id, name]) => ({
+            id,
+            name
+          }));
 
-          commit('SET_CYCLE_OVERVIEW_DATA', areaData);
+          // Get areas from organisation
+          const areas = Object.entries(organisation.areas || {}).map(([id, areaData]) => ({ 
+            id, 
+            name: areaData.name || id,
+            teams: areaData.teams || []
+          }));
+
+          // Find active cycle
+          const activeCycle = cycles.find(cycle => cycle.state === 'active') || cycles[0];
+
+          commit('SET_CYCLE_OVERVIEW_DATA', {}); // Will be populated by calculateAreaData
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
-          commit('SET_CYCLES', sprints);
-          commit('SET_SELECTED_CYCLE', cycleData.cycle);
+          commit('SET_CYCLES', cycles);
+          commit('SET_SELECTED_CYCLE', activeCycle);
 
-          const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(cycleData.initiatives);
-          const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(assignees);
+          const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray);
+          const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(assignees.map(assignee => ({
+            id: assignee.accountId,
+            name: assignee.displayName
+          })));
           const allStages = [{ name: 'All Stages', id: 'all' }].concat(stages);
           const allReleaseFilters = [{ name: 'All Releases', value: 'all' }].concat(state.releaseFilters || []);
 
           commit('SET_INITIATIVES', allInitiatives);
           commit('SET_ASSIGNEES', allAssignees);
-          commit('SET_AREAS', areaData);
+          commit('SET_AREAS', areas);
           commit('SET_STAGES', allStages);
           commit('SET_RELEASE_FILTERS', allReleaseFilters);
 
@@ -362,9 +383,9 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
 
           // Set current cycle overview data for display
           const currentAreaId = state.selectedArea || 'overview';
-          const currentCycleOverviewData = areaData[currentAreaId] || {
-            cycle: cycleData.cycle,
-            initiatives: cycleData.initiatives
+          const currentCycleOverviewData = {
+            cycle: activeCycle,
+            initiatives: initiativesArray
           };
           commit('SET_CURRENT_CYCLE_OVERVIEW_DATA', currentCycleOverviewData);
 
