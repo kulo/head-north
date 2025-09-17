@@ -87,14 +87,6 @@ export default {
   setup(props, { emit }) {
     const store = useStore()
     
-    // DEBUG: Log the roadmap item data
-    console.log('🔍 DEBUG: RoadmapItemListItem received roadmapItem:', props.roadmapItem)
-    console.log('🔍 DEBUG: roadmapItem keys:', props.roadmapItem ? Object.keys(props.roadmapItem) : 'no roadmapItem')
-    console.log('🔍 DEBUG: roadmapItem.releaseItems:', props.roadmapItem.releaseItems)
-    console.log('🔍 DEBUG: releaseItems length:', props.roadmapItem.releaseItems?.length)
-    console.log('🔍 DEBUG: roadmapItem.name:', props.roadmapItem.name)
-    console.log('🔍 DEBUG: roadmapItem.owner:', props.roadmapItem.owner)
-    console.log('🔍 DEBUG: roadmapItem.progress:', props.roadmapItem.progress)
     
     const validationEnabled = computed(() => store.state.validationEnabled)
     const popoverVisible = ref(false)

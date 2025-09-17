@@ -42,9 +42,14 @@ export default async (context) => {
       initiative: roadmapItems[0]?.initiative || initiativeId,
       roadmapItems: roadmapItems.map(item => ({
         id: item.id,
-        name: item.name,
+        name: item.summary || item.name || `Roadmap Item ${item.id}`, // Map summary to name
         area: item.area,
         theme: item.theme,
+        owner: 'Unassigned', // TODO: Get from actual data
+        progress: Math.floor(Math.random() * 100), // TODO: Calculate from actual data
+        weeks: Math.floor(Math.random() * 8) + 1, // TODO: Calculate from actual data
+        url: item.url || `https://example.com/browse/${item.id}`,
+        validations: item.validations || [],
         releaseItems: item.sprints?.flatMap(sprint => sprint.releaseItems) || []
       }))
     }));

@@ -61,32 +61,24 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         return filteredData.data?.initiatives || filteredData.initiatives || []
       },
       
-      currentCycleOverviewData: (state) => {
-        const rawData = state.currentCycleOverviewData;
-        console.log('🔍 DEBUG: currentCycleOverviewData getter - rawData:', rawData);
-        console.log('🔍 DEBUG: rawData.initiatives:', rawData?.initiatives);
-        console.log('🔍 DEBUG: first raw initiative:', rawData?.initiatives?.[0]);
-        console.log('🔍 DEBUG: first raw initiative keys:', rawData?.initiatives?.[0] ? Object.keys(rawData.initiatives[0]) : 'no first item');
-        
-        if (!rawData || !rawData.initiatives) {
-          return rawData;
-        }
+  currentCycleOverviewData: (state) => {
+    const rawData = state.currentCycleOverviewData;
+    
+    if (!rawData || !rawData.initiatives) {
+      return rawData;
+    }
 
-        const filteredInitiatives = applyFilters(rawData.initiatives, {
-          area: state.selectedArea,
-          initiatives: state.selectedInitiatives,
-          stages: state.selectedStages
-        });
+    const filteredInitiatives = applyFilters(rawData.initiatives, {
+      area: state.selectedArea,
+      initiatives: state.selectedInitiatives,
+      stages: state.selectedStages
+    });
 
-        console.log('🔍 DEBUG: filteredInitiatives:', filteredInitiatives);
-        console.log('🔍 DEBUG: first filtered initiative:', filteredInitiatives[0]);
-        console.log('🔍 DEBUG: first initiative keys:', filteredInitiatives[0] ? Object.keys(filteredInitiatives[0]) : 'no first item');
-
-        return {
-          ...rawData,
-          initiatives: filteredInitiatives
-        };
-      },
+    return {
+      ...rawData,
+      initiatives: filteredInitiatives
+    };
+  },
       validationSummary: (state) => state.validationSummary,
       initiativeName: (state) => (initiativeId) => {
         const initiative = state.initiatives.find(i => i.id === initiativeId)
