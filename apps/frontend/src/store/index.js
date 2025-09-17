@@ -338,11 +338,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           const organisation = unifiedData.metadata?.organisation || {};
           const assignees = organisation.assignees || [];
           
-          // Initiatives are already in array format in data.initiatives
-          const initiativesArray = unifiedData.data?.initiatives?.map(init => ({
-            id: init.initiativeId,
-            name: init.initiative
-          })) || [];
+          // Use the full initiatives data directly - don't map to simplified structure
+          const initiativesArray = unifiedData.data?.initiatives || [];
 
           // Get areas from organisation - now an array
           const areas = (organisation.areas || []).map(area => ({ 
@@ -367,7 +364,10 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           commit('SET_CYCLES', cycles);
           commit('SET_SELECTED_CYCLE', activeCycle);
 
-          const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray);
+          const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray.map(init => ({
+            id: init.initiativeId,
+            name: init.initiative
+          })));
           const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(assignees.map(assignee => ({
             id: assignee.accountId,
             name: assignee.displayName
