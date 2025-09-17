@@ -13,8 +13,12 @@ import { calculateAreaData } from '@/libraries/calculateAreaData.js'
  * @returns {Object} Filtered area data
  */
 export const applyFiltersWithPredicates = (unifiedData, filters) => {
-  const { releaseItemPredicate, initiativePredicate } = createFilterPredicates(filters)
-  return calculateAreaData(unifiedData, releaseItemPredicate, initiativePredicate)
+  console.log('🔍 DEBUG: applyFiltersWithPredicates called - FILTERING DISABLED')
+  console.log('🔍 DEBUG: unifiedData:', unifiedData)
+  console.log('🔍 DEBUG: filters:', filters)
+  
+  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
+  return calculateAreaData(unifiedData, () => true, () => true)
 }
 
 /**
@@ -24,36 +28,12 @@ export const applyFiltersWithPredicates = (unifiedData, filters) => {
  * @returns {Array} Filtered items
  */
 export const applyFiltersImperative = (items, filters) => {
-  if (!items) return items
-
-  let filtered = items
-
-  // Area filtering
-  if (filters.area && filters.area !== 'all') {
-    filtered = filterByAreaImperative(filtered, filters.area)
-  }
-
-  // Initiative filtering
-  if (filters.initiatives && filters.initiatives.length > 0) {
-    const isAllSelected = filters.initiatives.some(init => 
-      init && (init.id === 'all' || init.value === 'all')
-    )
-    if (!isAllSelected) {
-      filtered = filterByInitiativesImperative(filtered, filters.initiatives)
-    }
-  }
-
-  // Stage filtering
-  if (filters.stages && filters.stages.length > 0) {
-    const isAllSelected = filters.stages.some(stage => 
-      stage && (stage.id === 'all' || stage.value === 'all')
-    )
-    if (!isAllSelected) {
-      filtered = filterByStagesImperative(filtered, filters.stages)
-    }
-  }
-
-  return filtered
+  console.log('🔍 DEBUG: applyFiltersImperative called - FILTERING DISABLED')
+  console.log('🔍 DEBUG: items length:', items?.length)
+  console.log('🔍 DEBUG: filters:', filters)
+  
+  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
+  return items
 }
 
 /**
@@ -195,19 +175,11 @@ const filterByStagesImperative = (items, selectedStages) => {
  * @returns {Array|Object} Filtered data
  */
 export const applyFilters = (data, filters) => {
-  if (!data) return data
-
-  // If it's cycle data (has initiatives property), use predicate-based approach
-  if (data.initiatives && Array.isArray(data.initiatives)) {
-    return applyFiltersWithPredicates(data, filters)
-  }
-
-  // If it's an array of items, use imperative approach
-  if (Array.isArray(data)) {
-    return applyFiltersImperative(data, filters)
-  }
-
-  // Fallback to original data
+  console.log('🔍 DEBUG: applyFilters (unifiedFiltering) called - FILTERING DISABLED')
+  console.log('🔍 DEBUG: data type:', data ? Object.keys(data) : 'null')
+  console.log('🔍 DEBUG: filters:', filters)
+  
+  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
   return data
 }
 

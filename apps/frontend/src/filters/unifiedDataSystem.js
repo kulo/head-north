@@ -290,13 +290,26 @@ export const transformUnifiedToCycleOverview = (unifiedData) => {
  * @returns {UnifiedData} Filtered unified data
  */
 export const filterUnifiedData = (unifiedData, filters) => {
+  console.log('🔍 DEBUG: filterUnifiedData called with filters:', filters)
+  console.log('🔍 DEBUG: unifiedData.data.initiatives length:', unifiedData.data.initiatives?.length)
+  
   if (!unifiedData || !unifiedData.data?.initiatives) {
+    console.log('🔍 DEBUG: No unifiedData or initiatives, returning as-is')
     return unifiedData
   }
 
   // Validate input
   validateUnifiedData(unifiedData, false)
   
+  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
+  // Return the data as-is without any filtering
+  console.log('🔍 DEBUG: FILTERING DISABLED - returning all data')
+  console.log('🔍 DEBUG: First initiative roadmap items count:', unifiedData.data.initiatives[0]?.roadmapItems?.length)
+  console.log('🔍 DEBUG: First roadmap item release items count:', unifiedData.data.initiatives[0]?.roadmapItems?.[0]?.releaseItems?.length)
+  
+  return unifiedData
+
+  /* ORIGINAL FILTERING LOGIC - COMMENTED OUT FOR DEBUGGING
   if (!filters) {
     return unifiedData
   }
@@ -425,6 +438,7 @@ export const filterUnifiedData = (unifiedData, filters) => {
   validateUnifiedData(result)
   
   return result
+  */
 }
 
 /**
@@ -441,6 +455,16 @@ export const filterUnifiedData = (unifiedData, filters) => {
  * @returns {any} Filtered data in the same format as input
  */
 export const applyFilters = (data, filters) => {
+  console.log('🔍 DEBUG: applyFilters called with data type:', data ? Object.keys(data) : 'null')
+  console.log('🔍 DEBUG: applyFilters called with filters:', filters)
+  
+  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
+  // Return the data as-is without any filtering
+  console.log('🔍 DEBUG: FILTERING DISABLED in applyFilters - returning all data')
+  
+  return data
+
+  /* ORIGINAL FILTERING LOGIC - COMMENTED OUT FOR DEBUGGING
   if (!data) return data
 
   try {
@@ -501,6 +525,7 @@ export const applyFilters = (data, filters) => {
     console.error('Filters:', filters)
     throw error
   }
+  */
 }
 
 export default {
