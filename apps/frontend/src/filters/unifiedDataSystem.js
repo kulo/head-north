@@ -139,49 +139,27 @@ const validateObject = (value, fieldName) => {
 export const validateUnifiedData = (data, strict = true) => {
   validateObject(data, 'unifiedData')
   
-  // Validate metadata
+  // Validate metadata structure
   validateObject(data.metadata, 'metadata')
-  validateString(data.metadata.type, 'metadata.type')
   
-  if (!['roadmap', 'cycle-overview'].includes(data.metadata.type)) {
-    throw new Error(`Invalid metadata.type: expected 'roadmap' or 'cycle-overview', got '${data.metadata.type}'`)
-  }
+  // Validate data structure
+  validateObject(data.data, 'data')
+  validateArray(data.data.initiatives, 'data.initiatives')
   
-  // Validate initiatives
-  validateArray(data.initiatives, 'initiatives')
-  
-  data.initiatives.forEach((initiative, index) => {
-    validateObject(initiative, `initiatives[${index}]`)
-    validateString(initiative.initiativeId, `initiatives[${index}].initiativeId`)
+  // Validate each initiative
+  data.data.initiatives.forEach((initiative, index) => {
+    validateObject(initiative, `data.initiatives[${index}]`)
+    validateString(initiative.initiativeId, `data.initiatives[${index}].initiativeId`)
+    validateString(initiative.initiative, `data.initiatives[${index}].initiative`)
+    validateArray(initiative.roadmapItems, `data.initiatives[${index}].roadmapItems`)
     
-    // initiative field is optional - some data structures don't have it
-    if (initiative.initiative !== undefined) {
-      validateString(initiative.initiative, `initiatives[${index}].initiative`)
-    } else if (strict) {
-      // In strict mode, we expect the initiative field to be present
-      console.warn(`Warning: initiatives[${index}].initiative is undefined, using fallback`)
-    }
-    
-    validateArray(initiative.roadmapItems, `initiatives[${index}].roadmapItems`)
-    
+    // Validate each roadmap item
     initiative.roadmapItems.forEach((roadmapItem, itemIndex) => {
-      validateObject(roadmapItem, `initiatives[${index}].roadmapItems[${itemIndex}]`)
-      
-      // For roadmap items, we need at least one identifier (id, name, summary, or title)
-      const hasIdentifier = roadmapItem.id || roadmapItem.name || roadmapItem.summary || roadmapItem.title
-      if (!hasIdentifier) {
-        console.warn(`Warning: roadmap item at initiatives[${index}].roadmapItems[${itemIndex}] has no identifier (id, name, summary, or title)`)
-      }
-      
-      // Only validate name if it exists
-      if (roadmapItem.name !== undefined) {
-        validateString(roadmapItem.name, `initiatives[${index}].roadmapItems[${itemIndex}].name`)
-      }
-      
-      // Only validate releaseItems if it exists
-      if (roadmapItem.releaseItems !== undefined) {
-        validateArray(roadmapItem.releaseItems, `initiatives[${index}].roadmapItems[${itemIndex}].releaseItems`)
-      }
+      validateObject(roadmapItem, `data.initiatives[${index}].roadmapItems[${itemIndex}]`)
+      validateString(roadmapItem.id, `data.initiatives[${index}].roadmapItems[${itemIndex}].id`)
+      validateString(roadmapItem.area, `data.initiatives[${index}].roadmapItems[${itemIndex}].area`)
+      validateString(roadmapItem.theme, `data.initiatives[${index}].roadmapItems[${itemIndex}].theme`)
+      validateArray(roadmapItem.releaseItems, `data.initiatives[${index}].roadmapItems[${itemIndex}].releaseItems`)
     })
   })
 }
