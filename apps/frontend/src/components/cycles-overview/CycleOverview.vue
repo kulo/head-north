@@ -128,7 +128,22 @@ export default {
     
     const loading = computed(() => store.state.loading)
     const error = computed(() => store.state.error)
-    const cycleOverviewData = computed(() => store.getters.currentCycleOverviewData)
+    const cycleOverviewData = computed(() => {
+      const data = store.getters.currentCycleOverviewData
+      console.log('🔍 DEBUG: CycleOverview cycleOverviewData:', data)
+      if (data && data.initiatives) {
+        console.log('🔍 DEBUG: initiatives count:', data.initiatives.length)
+        data.initiatives.forEach((init, index) => {
+          console.log(`🔍 DEBUG: initiative[${index}]:`, init.initiativeId, 'roadmapItems:', init.roadmapItems?.length)
+          if (init.roadmapItems) {
+            init.roadmapItems.forEach((roadmap, rIndex) => {
+              console.log(`🔍 DEBUG: roadmap[${rIndex}]:`, roadmap.id, 'releaseItems:', roadmap.releaseItems?.length)
+            })
+          }
+        })
+      }
+      return data
+    })
     const isOverviewPage = computed(() => store.getters.selectedPageName === 'Cycle Overview')
     
     
