@@ -138,6 +138,10 @@ export default {
           if (init.roadmapItems) {
             init.roadmapItems.forEach((roadmap, rIndex) => {
               console.log(`🔍 DEBUG: roadmap[${rIndex}]:`, roadmap.id, 'releaseItems:', roadmap.releaseItems?.length)
+              console.log(`🔍 DEBUG: roadmap[${rIndex}] keys:`, Object.keys(roadmap))
+              console.log(`🔍 DEBUG: roadmap[${rIndex}] name:`, roadmap.name)
+              console.log(`🔍 DEBUG: roadmap[${rIndex}] owner:`, roadmap.owner)
+              console.log(`🔍 DEBUG: roadmap[${rIndex}] progress:`, roadmap.progress)
             })
           }
         })
