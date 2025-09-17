@@ -501,8 +501,12 @@ export const applyFilters = (data, filters) => {
 
     // If it's just an array of initiatives, filter directly
     if (Array.isArray(data)) {
+      console.log('🔍 DEBUG: applyFilters received array, first item:', data[0])
+      console.log('🔍 DEBUG: first item keys:', data[0] ? Object.keys(data[0]) : 'no first item')
+      
       // Check if this looks like roadmap data (has initiativeId and roadmapItems)
       if (data.length > 0 && data[0].initiativeId && data[0].roadmapItems) {
+        console.log('🔍 DEBUG: Detected roadmap data structure')
         const unified = {
           metadata: { type: 'roadmap', cycle: null, sprints: [], activeSprint: null },
           initiatives: data
@@ -511,7 +515,7 @@ export const applyFilters = (data, filters) => {
         return filtered.initiatives
       } else {
         // This might be a different data structure, return as-is for now
-        console.warn('Unknown array data structure, returning as-is:', data)
+        console.warn('🔍 DEBUG: Unknown array data structure, returning as-is:', data)
         return data
       }
     }
