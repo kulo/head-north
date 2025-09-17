@@ -43,19 +43,40 @@ const createAreaPredicate = (area, predicate) => {
 }
 
 export const calculateAreaData = 
-  (cycleData, releaseItemPredicate = () => true, initiativePredicate = () => true) => {
-  const areaMapping = cycleData.area;
+  (unifiedData, releaseItemPredicate = () => true, initiativePredicate = () => true) => {
+  // Extract data from unified structure
+  const initiatives = unifiedData.data?.initiatives || {};
+  const organisation = unifiedData.metadata?.organisation || {};
+  const areas = organisation.areas || {};
+  
+  // Convert initiatives object to array format
+  const initiativesArray = Object.entries(initiatives).map(([id, initiativeData]) => ({
+    id,
+    initiative: initiativeData.initiative,
+    initiativeId: initiativeData.initiativeId,
+    roadmapItems: initiativeData.roadmapItems || []
+  }));
+
+  // Convert areas to mapping format for backward compatibility
+  const areaMapping = Object.entries(areas).reduce((acc, [id, areaData]) => {
+    acc[id] = areaData.name || id;
+    return acc;
+  }, {});
+
   const predicates = createPredicates(areaMapping, releaseItemPredicate);
 
   const areaData = {};
   for(const { id, releaseItemPredicate } of predicates) {
-    const initiatives = cycleData.initiatives
+    const filteredInitiatives = initiativesArray
       .filter(initiativePredicate)
       .map(filterRoadmapItems(releaseItemPredicate, areaMapping))
       .filter(hasRoadmapItems);
 
-    if(initiatives.length !== 0) {
-      areaData[id] = new AreaData().applyData({ ...cycleData, initiatives });
+    if(filteredInitiatives.length !== 0) {
+      areaData[id] = new AreaData().applyData({ 
+        ...unifiedData, 
+        initiatives: filteredInitiatives 
+      });
     }
   }
 

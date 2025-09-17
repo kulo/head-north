@@ -312,7 +312,7 @@ export const transformUnifiedToCycleOverview = (unifiedData) => {
  * @returns {UnifiedData} Filtered unified data
  */
 export const filterUnifiedData = (unifiedData, filters) => {
-  if (!unifiedData || !unifiedData.initiatives) {
+  if (!unifiedData || !unifiedData.data?.initiatives) {
     return unifiedData
   }
 
@@ -323,7 +323,13 @@ export const filterUnifiedData = (unifiedData, filters) => {
     return unifiedData
   }
 
-  let filteredInitiatives = unifiedData.initiatives
+  // Convert initiatives object to array for filtering
+  const initiativesArray = Object.entries(unifiedData.data.initiatives).map(([id, initiativeData]) => ({
+    id,
+    ...initiativeData
+  }))
+
+  let filteredInitiatives = initiativesArray
 
   // Initiative filtering
   if (filters.initiatives && filters.initiatives.length > 0) {
@@ -434,9 +440,22 @@ export const filterUnifiedData = (unifiedData, filters) => {
     .filter(initiative => initiative.roadmapItems.length > 0)
   }
 
+  // Convert filtered initiatives back to object format
+  const filteredInitiativesObject = filteredInitiatives.reduce((acc, initiative) => {
+    acc[initiative.id] = {
+      initiative: initiative.initiative,
+      initiativeId: initiative.initiativeId,
+      roadmapItems: initiative.roadmapItems
+    }
+    return acc
+  }, {})
+
   const result = {
     ...unifiedData,
-    initiatives: filteredInitiatives
+    data: {
+      ...unifiedData.data,
+      initiatives: filteredInitiativesObject
+    }
   }
 
   // Validate the result
@@ -464,7 +483,7 @@ export const applyFilters = (data, filters) => {
   try {
 
     // If it's already unified data, filter directly
-    if (data.metadata && data.initiatives) {
+    if (data.metadata && data.data?.initiatives) {
       const filtered = filterUnifiedData(data, filters)
       return filtered
     }

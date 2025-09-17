@@ -8,13 +8,13 @@ import { calculateAreaData } from '@/libraries/calculateAreaData.js'
 
 /**
  * Apply filters using the predicate-based approach (for calculateAreaData)
- * @param {Object} cycleData - Cycle data object
+ * @param {Object} unifiedData - Unified data object
  * @param {Object} filters - Filter configuration
  * @returns {Object} Filtered area data
  */
-export const applyFiltersWithPredicates = (cycleData, filters) => {
+export const applyFiltersWithPredicates = (unifiedData, filters) => {
   const { releaseItemPredicate, initiativePredicate } = createFilterPredicates(filters)
-  return calculateAreaData(cycleData, releaseItemPredicate, initiativePredicate)
+  return calculateAreaData(unifiedData, releaseItemPredicate, initiativePredicate)
 }
 
 /**

@@ -346,7 +346,9 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // Find active cycle
           const activeCycle = cycles.find(cycle => cycle.state === 'active') || cycles[0];
 
-          commit('SET_CYCLE_OVERVIEW_DATA', {}); // Will be populated by calculateAreaData
+          // Calculate area data using the unified data structure
+          const areaData = calculateAreaData(unifiedData);
+          commit('SET_CYCLE_OVERVIEW_DATA', areaData);
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
           commit('SET_CYCLES', cycles);
           commit('SET_SELECTED_CYCLE', activeCycle);
