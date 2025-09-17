@@ -65,6 +65,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         const rawData = state.currentCycleOverviewData;
         console.log('🔍 DEBUG: currentCycleOverviewData getter - rawData:', rawData);
         console.log('🔍 DEBUG: rawData.initiatives:', rawData?.initiatives);
+        console.log('🔍 DEBUG: first raw initiative:', rawData?.initiatives?.[0]);
+        console.log('🔍 DEBUG: first raw initiative keys:', rawData?.initiatives?.[0] ? Object.keys(rawData.initiatives[0]) : 'no first item');
         
         if (!rawData || !rawData.initiatives) {
           return rawData;
@@ -77,6 +79,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         });
 
         console.log('🔍 DEBUG: filteredInitiatives:', filteredInitiatives);
+        console.log('🔍 DEBUG: first filtered initiative:', filteredInitiatives[0]);
+        console.log('🔍 DEBUG: first initiative keys:', filteredInitiatives[0] ? Object.keys(filteredInitiatives[0]) : 'no first item');
 
         return {
           ...rawData,
