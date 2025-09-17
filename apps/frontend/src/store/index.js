@@ -63,6 +63,9 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       
       currentCycleOverviewData: (state) => {
         const rawData = state.currentCycleOverviewData;
+        console.log('🔍 DEBUG: currentCycleOverviewData getter - rawData:', rawData);
+        console.log('🔍 DEBUG: rawData.initiatives:', rawData?.initiatives);
+        
         if (!rawData || !rawData.initiatives) {
           return rawData;
         }
@@ -72,6 +75,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           initiatives: state.selectedInitiatives,
           stages: state.selectedStages
         });
+
+        console.log('🔍 DEBUG: filteredInitiatives:', filteredInitiatives);
 
         return {
           ...rawData,
@@ -345,9 +350,15 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // Find active cycle
           const activeCycle = cycles.find(cycle => cycle.state === 'active') || cycles[0];
 
-          // Calculate area data using the unified data structure
-          const areaData = calculateAreaData(unifiedData);
-          commit('SET_CYCLE_OVERVIEW_DATA', areaData);
+          // For Cycle Overview, we need the initiatives directly, not area data
+          // The Cycle Overview component expects: { cycle, initiatives: [...] }
+          const cycleOverviewData = {
+            cycle: activeCycle,
+            initiatives: unifiedData.data?.initiatives || []
+          };
+          
+          console.log('🔍 DEBUG: Setting cycle overview data:', cycleOverviewData);
+          commit('SET_CYCLE_OVERVIEW_DATA', cycleOverviewData);
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
           commit('SET_CYCLES', cycles);
           commit('SET_SELECTED_CYCLE', activeCycle);
