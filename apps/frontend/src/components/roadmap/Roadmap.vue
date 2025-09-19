@@ -18,8 +18,8 @@
       </div>
       <div v-else>
         <a-row :gutter="20">
-          <a-col :span="4" :offset="index === 0 ? 6 : 0" :class="{ active: sprint.id === activeSprint?.id}" v-for="(sprint, index) in orderedSprints" :key="sprint.id">
-            <p style="text-align: center">{{ sprint.name }}</p>
+          <a-col :span="4" :offset="index === 0 ? 6 : 0" :class="{ active: cycle.id === activeCycle?.id}" v-for="(cycle, index) in orderedCycles" :key="cycle.id">
+            <p style="text-align: center">{{ cycle.name }}</p>
           </a-col>
         </a-row>
         <a-collapse 
@@ -37,7 +37,7 @@
                 <span>{{ initiativeName(row.initiativeId) || `Initiative: ${row.initiativeId}` }}</span>
               </template>
               <roadmap-item-overview 
-                :orderedSprints="orderedSprints" 
+                :orderedCycles="orderedCycles" 
                 :roadmapItem="roadmapItem" 
                 :itemIndex="itemIndex" 
                 v-for="(roadmapItem, itemIndex) in (row.roadmapItems || [])" 
@@ -91,12 +91,12 @@ export default {
     const filteredRoadmapData = computed(() => store.getters.filteredRoadmapData)
     
     // Extract cycles from unified data structure using new transformation methods
-    const orderedSprints = computed(() => {
+    const orderedCycles = computed(() => {
       if (!roadmapData.value?.metadata?.cycles) return []
       return [...roadmapData.value.metadata.cycles].sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
     })
     
-    const activeSprint = computed(() => {
+    const activeCycle = computed(() => {
       if (!roadmapData.value?.metadata?.cycles) return null
       const activeCycles = roadmapData.value.metadata.cycles.filter(cycle => cycle.state === 'active')
       if (activeCycles.length === 0) return null
@@ -168,8 +168,8 @@ export default {
       initiativeIds,
       activeInitiativeIds,
       areas,
-      orderedSprints,
-      activeSprint,
+      orderedCycles,
+      activeCycle,
       fetchRoadmap
     }
   }

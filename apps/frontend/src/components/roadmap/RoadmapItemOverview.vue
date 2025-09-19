@@ -14,9 +14,9 @@
           </a-tooltip>
         </div>
       </a-col>
-      <a-col :span="4" class="sprint-release-items" v-for="sprint in orderedSprints" :key="sprint.id">
-        <template v-if="getReleaseItemsForSprint(sprint.id).length > 0">
-          <a-row class="release-item" v-for="releaseItem in getReleaseItemsForSprint(sprint.id)" :key="releaseItem.ticketId">
+      <a-col :span="4" class="cycle-release-items" v-for="cycle in orderedCycles" :key="cycle.id">
+        <template v-if="getReleaseItemsForCycle(cycle.id).length > 0">
+          <a-row class="release-item" v-for="releaseItem in getReleaseItemsForCycle(cycle.id)" :key="releaseItem.ticketId">
             <p>
               <a :href="releaseItem.url" class="jira-link" target="_blank">
                 {{ releaseItem.name }}
@@ -35,7 +35,7 @@
 <script>
 export default {
   name: "roadmap-item-overview",
-  props: ['roadmapItem', 'orderedSprints', 'itemIndex'],
+  props: ['roadmapItem', 'orderedCycles', 'itemIndex'],
   computed: {
     validations() {
       return this.roadmapItem.validations;
@@ -55,14 +55,14 @@ export default {
     }
   },
   methods: {
-    getReleaseItemsForSprint(sprintId) {
+    getReleaseItemsForCycle(cycleId) {
       if (!this.roadmapItem.releaseItems) {
         return [];
       }
       
-      // Filter release items that belong to this sprint
+      // Filter release items that belong to this cycle
       return this.roadmapItem.releaseItems.filter(releaseItem => 
-        releaseItem.sprint && releaseItem.sprint.id === sprintId
+        releaseItem.cycle && releaseItem.cycle.id === cycleId
       );
     }
   }

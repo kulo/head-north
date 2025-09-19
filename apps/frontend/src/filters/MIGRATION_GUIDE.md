@@ -52,7 +52,7 @@ unifiedData: {
   metadata: {
     type: 'roadmap' | 'cycle-overview',
     cycle: {...} | null,
-    sprints: [...],
+    cycles: [...],
     activeSprint: {...} | null
   },
   initiatives: [

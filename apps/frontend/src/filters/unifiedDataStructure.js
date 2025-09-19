@@ -24,7 +24,7 @@ export const UNIFIED_DATA_STRUCTURE = {
       progress: 'number',
       // ... other cycle properties
     },
-    sprints: [
+    cycles: [
       {
         id: 'string',
         name: 'string',
@@ -87,7 +87,7 @@ export const transformRoadmapToUnified = (roadmapData) => {
     metadata: {
       type: 'roadmap',
       cycle: null, // Roadmap doesn't have cycle data
-      sprints: roadmapData.orderedSprints || [],
+      cycles: roadmapData.orderedSprints || [],
       activeSprint: roadmapData.activeSprint || null
     },
     initiatives: roadmapData.roadmapItems || []
@@ -102,7 +102,7 @@ export const transformCycleOverviewToUnified = (cycleOverviewData) => {
     metadata: {
       type: 'cycle-overview',
       cycle: cycleOverviewData.cycle || null,
-      sprints: [], // Cycle overview doesn't have sprints
+      cycles: [], // Cycle overview doesn't have cycles
       activeSprint: null
     },
     initiatives: cycleOverviewData.initiatives || []
@@ -114,7 +114,7 @@ export const transformCycleOverviewToUnified = (cycleOverviewData) => {
  */
 export const transformUnifiedToRoadmap = (unifiedData) => {
   return {
-    orderedSprints: unifiedData.metadata.sprints,
+    orderedSprints: unifiedData.metadata.cycles,
     activeSprint: unifiedData.metadata.activeSprint,
     roadmapItems: unifiedData.initiatives
   }

@@ -159,9 +159,9 @@ describe('Vuex Store', () => {
   describe('getters', () => {
     test('releaseOverviewData should return correct data', () => {
       const mockData = {
-        orderedSprints: [],
+        orderedCycles: [],
         roadmapItems: [],
-        activeSprint: null
+        activeCycle: null
       };
       store.commit('SET_RELEASE_OVERVIEW_DATA', mockData);
       expect(store.getters.releaseOverviewData).toEqual(mockData);

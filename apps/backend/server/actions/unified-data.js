@@ -12,7 +12,7 @@ export default async (context) => {
   const omegaConfig = context.omegaConfig;
   
   // Get parameters
-  const cycleId = context.params.id || context.query.cycleId || context.query.sprintId;
+  const cycleId = context.params.id || context.query.cycleId;
   const filters = context.query.filters ? JSON.parse(context.query.filters) : {};
   
   logger.default.info('building unified data', { cycleId, filters });
@@ -53,9 +53,9 @@ export default async (context) => {
         releaseItems: item.sprints?.flatMap(sprint => 
           (sprint.releaseItems || []).map(releaseItem => ({
             ...releaseItem,
-            sprint: {
+            cycle: {
               id: sprint.sprintId,
-              name: `Sprint ${sprint.sprintId}` // TODO: Get actual sprint name
+              name: `Cycle ${sprint.sprintId}` // TODO: Get actual cycle name
             }
           }))
         ) || []

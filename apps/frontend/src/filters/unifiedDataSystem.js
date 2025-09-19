@@ -30,7 +30,7 @@ import { UnifiedData, Cycle, Initiative, RoadmapItem, ReleaseItem } from '@omega
  */
 
 /**
- * @typedef {Object} Sprint
+ * @typedef {Object} Cycle
  * @property {string} id
  * @property {string} name
  * @property {string} startDate
@@ -76,8 +76,8 @@ import { UnifiedData, Cycle, Initiative, RoadmapItem, ReleaseItem } from '@omega
  * @property {Object} metadata
  * @property {'roadmap'|'cycle-overview'} metadata.type
  * @property {Cycle|null} metadata.cycle
- * @property {Sprint[]} metadata.sprints
- * @property {Sprint|null} metadata.activeSprint
+ * @property {Cycle[]} metadata.cycles
+ * @property {Cycle|null} metadata.activeCycle
  * @property {Initiative[]} initiatives
  */
 
@@ -195,8 +195,8 @@ export const transformRoadmapToUnified = (roadmapData) => {
     metadata: {
       type: 'roadmap',
       cycle: null, // Roadmap doesn't have cycle data
-      sprints: roadmapData.orderedSprints || [],
-      activeSprint: roadmapData.activeSprint || null
+      cycles: roadmapData.orderedCycles || [],
+      activeCycle: roadmapData.activeCycle || null
     },
     initiatives: initiatives
   }
@@ -221,8 +221,8 @@ export const transformCycleOverviewToUnified = (cycleOverviewData) => {
     metadata: {
       type: 'cycle-overview',
       cycle: cycleOverviewData.cycle || null,
-      sprints: [], // Cycle overview doesn't have sprints
-      activeSprint: null
+      cycles: [], // Cycle overview doesn't have cycles
+      activeCycle: null
     },
     initiatives: cycleOverviewData.initiatives || []
   }
@@ -253,8 +253,8 @@ export const transformUnifiedToRoadmap = (unifiedData) => {
   }))
 
   return {
-    orderedSprints: unifiedData.metadata.sprints,
-    activeSprint: unifiedData.metadata.activeSprint,
+    orderedCycles: unifiedData.metadata.cycles,
+    activeCycle: unifiedData.metadata.activeCycle,
     roadmapItems: roadmapItems
   }
 }
@@ -487,8 +487,8 @@ export const applyFilters = (data, filters) => {
       // Handle empty roadmap data
       if (data.roadmapItems.length === 0) {
         return {
-          orderedSprints: data.orderedSprints || [],
-          activeSprint: data.activeSprint || null,
+          orderedCycles: data.orderedCycles || [],
+          activeCycle: data.activeCycle || null,
           roadmapItems: []
         }
       }
@@ -508,7 +508,7 @@ export const applyFilters = (data, filters) => {
       if (data.length > 0 && data[0].initiativeId && data[0].roadmapItems) {
         console.log('🔍 DEBUG: Detected roadmap data structure')
         const unified = {
-          metadata: { type: 'roadmap', cycle: null, sprints: [], activeSprint: null },
+          metadata: { type: 'roadmap', cycle: null, cycles: [], activeCycle: null },
           initiatives: data
         }
         const filtered = filterUnifiedData(unified, filters)

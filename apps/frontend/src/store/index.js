@@ -12,9 +12,9 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       error: null,
       // Roadmap data
       roadmapData: {
-        orderedSprints: [],
+        orderedCycles: [],
         roadmapItems: [],
-        activeSprint: null
+        activeCycle: null
       },
       // Cycle overview data
       cycleOverviewData: null,
@@ -189,12 +189,12 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       async _ensureSelectedCycle({ commit, state }) {
         let cycleId = state.selectedCycle?.id
         
-        // If no cycle selected, get active sprint and set it
+        // If no cycle selected, get active cycle and set it
         if (!cycleId) {
-          const activeSprint = await cycleDataService.getActiveSprint()
-          if (activeSprint) {
-            cycleId = activeSprint.id
-            commit('SET_SELECTED_CYCLE', activeSprint)
+          const activeCycle = await cycleDataService.getActiveCycle()
+          if (activeCycle) {
+            cycleId = activeCycle.id
+            commit('SET_SELECTED_CYCLE', activeCycle)
           }
         }
         

@@ -127,9 +127,9 @@ class CycleDataService {
 
 
   /**
-   * Get overview data for a specific cycle/sprint
+   * Get overview data for a specific cycle
    * This is the main data source for the Area component
-   * @param {string|number} cycleId - The cycle or sprint ID to get overview for
+   * @param {string|number} cycleId - The cycle ID to get overview for
    * @returns {Promise<object>} Cycle overview data with devCycleData
    */
   async getOverviewForCycle(cycleId) {
@@ -152,18 +152,18 @@ class CycleDataService {
   }
 
   /**
-   * Get the currently active sprint
-   * @returns {Promise<object|null>} Active sprint data or null if none found
+   * Get the currently active cycle
+   * @returns {Promise<object|null>} Active cycle data or null if none found
    */
-  async getActiveSprint() {
+  async getActiveCycle() {
     const data = await this._getUnifiedData()
-    return data.activeSprint || data.sprints?.find(sprint => sprint.active) || null
+    return data.activeCycle || data.cycles?.find(cycle => cycle.active) || null
   }
 
 
   /**
    * Get all initiatives from the unified data
-   * @param {string|number} cycleId - The cycle or sprint ID to get initiatives for
+   * @param {string|number} cycleId - The cycle ID to get initiatives for
    * @returns {Promise<Array>} Array of initiatives with id and name properties
    */
   async getAllInitiatives(cycleId = null) {
@@ -231,7 +231,7 @@ class CycleDataService {
 
   /**
    * Get all areas from appropriate data source with config fallbacks
-   * @param {string|number} cycleId - The cycle or sprint ID to get areas for
+   * @param {string|number} cycleId - The cycle ID to get areas for
    * @returns {Promise<Array>} Array of areas with id and name properties
    */
   async getAllAreas(cycleId = null) {

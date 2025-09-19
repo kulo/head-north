@@ -19,9 +19,9 @@ describe('Unified Data System', () => {
   // Test data
   const mockRoadmapData = {
     orderedSprints: [
-      { id: 'sprint1', name: 'Sprint 1', startDate: '2024-01-01', endDate: '2024-01-14' }
+      { id: 'cycle1', name: 'Sprint 1', startDate: '2024-01-01', endDate: '2024-01-14' }
     ],
-    activeSprint: { id: 'sprint1', name: 'Sprint 1' },
+    activeSprint: { id: 'cycle1', name: 'Sprint 1' },
     roadmapItems: [
       {
         initiativeId: 'init1',
@@ -103,8 +103,8 @@ describe('Unified Data System', () => {
     metadata: {
       type: 'roadmap',
       cycle: null,
-      sprints: [{ id: 'sprint1', name: 'Sprint 1', startDate: '2024-01-01', endDate: '2024-01-14' }],
-      activeSprint: { id: 'sprint1', name: 'Sprint 1' }
+      cycles: [{ id: 'cycle1', name: 'Sprint 1', startDate: '2024-01-01', endDate: '2024-01-14' }],
+      activeSprint: { id: 'cycle1', name: 'Sprint 1' }
     },
     initiatives: [
       {
@@ -168,7 +168,7 @@ describe('Unified Data System', () => {
       
       expect(result.metadata.type).toBe('roadmap')
       expect(result.metadata.cycle).toBeNull()
-      expect(result.metadata.sprints).toEqual(mockRoadmapData.orderedSprints)
+      expect(result.metadata.cycles).toEqual(mockRoadmapData.orderedSprints)
       expect(result.metadata.activeSprint).toEqual(mockRoadmapData.activeSprint)
       expect(result.initiatives).toEqual(mockRoadmapData.roadmapItems)
     })
@@ -192,7 +192,7 @@ describe('Unified Data System', () => {
       
       expect(result.metadata.type).toBe('cycle-overview')
       expect(result.metadata.cycle).toEqual(mockCycleOverviewData.cycle)
-      expect(result.metadata.sprints).toEqual([])
+      expect(result.metadata.cycles).toEqual([])
       expect(result.metadata.activeSprint).toBeNull()
       expect(result.initiatives).toEqual(mockCycleOverviewData.initiatives)
     })
@@ -214,7 +214,7 @@ describe('Unified Data System', () => {
     it('should transform unified data back to roadmap format', () => {
       const result = transformUnifiedToRoadmap(mockUnifiedData)
       
-      expect(result.orderedSprints).toEqual(mockUnifiedData.metadata.sprints)
+      expect(result.orderedSprints).toEqual(mockUnifiedData.metadata.cycles)
       expect(result.activeSprint).toEqual(mockUnifiedData.metadata.activeSprint)
       expect(result.roadmapItems).toEqual(mockUnifiedData.initiatives)
     })
