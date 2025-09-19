@@ -68,24 +68,18 @@ export default async (context) => {
       ...areaData
     }));
 
+    // Simplified response structure - frontend works directly with this data
     const response = {
-      metadata: {
-        cycles,
-        stages,
-        organisation: {
-          areas: areasArray,
-          assignees
-        },
-        initiatives: configInitiatives
-      },
-      data: {
-        initiatives: unifiedInitiatives
-      }
+      cycles,
+      stages,
+      areas: areasArray,
+      assignees,
+      initiatives: unifiedInitiatives
     };
 
     // Apply server-side filtering if requested
     if (Object.keys(filters).length > 0) {
-      response.data = applyServerSideFilters(response.data, filters);
+      response = applyServerSideFilters(response, filters);
     }
 
     context.body = response;

@@ -185,9 +185,9 @@ class CycleDataService {
    * @private
    */
   _extractAreasFromData(data) {
-    // Handle unified data structure (metadata.organisation.areas is now an array)
-    if (data.metadata?.organisation?.areas && Array.isArray(data.metadata.organisation.areas)) {
-      return data.metadata.organisation.areas.map(area => area.id) // Get area IDs
+    // Handle simplified data structure (areas is now directly available)
+    if (data.areas && Array.isArray(data.areas)) {
+      return data.areas.map(area => area.id) // Get area IDs
     }
     
     return []
@@ -239,9 +239,9 @@ class CycleDataService {
       // Get areas from unified data source
       const sourceData = await this._getCycleData()
       
-      // Extract areas directly from backend data (now an array with id and name)
-      if (sourceData.metadata?.organisation?.areas && Array.isArray(sourceData.metadata.organisation.areas)) {
-        return sourceData.metadata.organisation.areas.map(area => ({
+      // Extract areas directly from simplified backend data
+      if (sourceData.areas && Array.isArray(sourceData.areas)) {
+        return sourceData.areas.map(area => ({
           id: area.id,
           name: area.name || area.id
         }))
@@ -261,7 +261,7 @@ class CycleDataService {
    */
   async getAllCycles() {
     const data = await this._getCycleData()
-    return data.metadata?.cycles || []
+    return data.cycles || []
   }
 
   /**
@@ -270,7 +270,7 @@ class CycleDataService {
    */
   async getAllStages() {
     const data = await this._getCycleData()
-    return data.metadata?.stages || []
+    return data.stages || []
   }
 
   /**

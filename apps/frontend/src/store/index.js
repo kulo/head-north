@@ -45,11 +45,11 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       
       // Unified filtering getters using the filtering utilities
       filteredRoadmapData: (state) => {
-        if (!state.roadmapData || !state.roadmapData.data || !state.roadmapData.data.initiatives) {
+        if (!state.roadmapData || !state.roadmapData.initiatives) {
           return []
         }
         
-        const filteredData = applyFilters(state.roadmapData.data.initiatives, {
+        const filteredData = applyFilters(state.roadmapData.initiatives, {
           area: state.selectedArea,
           initiatives: state.selectedInitiatives,
           stages: state.selectedStages
@@ -204,42 +204,37 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // Store the cycle data directly
           commit('SET_ROADMAP_DATA', cycleData)
           
-          // Extract and set metadata
-          if (cycleData.metadata) {
-            const { organisation, cycles } = cycleData.metadata
-            
-            // Extract initiatives from data.initiatives (array format)
-            if (cycleData.data?.initiatives) {
-              const initiativesArray = cycleData.data.initiatives.map(init => ({
-                id: init.initiativeId,
-                name: init.initiative
-              }))
-              const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray)
-              commit('SET_INITIATIVES', allInitiatives)
-            }
-            
-            if (organisation) {
-              // Extract assignees from organisation
-              if (organisation.assignees) {
-                commit('SET_ASSIGNEES', organisation.assignees.map(assignee => ({
-                  id: assignee.accountId,
-                  name: assignee.displayName
-                })))
-              }
-              
-            // Extract areas from organisation - now an array
-            if (organisation.areas) {
-              commit('SET_AREAS', organisation.areas.map(area => ({ 
-                id: area.id,
-                name: area.name || area.id,
-                teams: area.teams || []
-              })))
-            }
-            }
-            
-            if (cycles) {
-              commit('SET_CYCLES', cycles)
-            }
+          // Extract and set data directly from simplified structure
+          if (cycleData.cycles) {
+            commit('SET_CYCLES', cycleData.cycles)
+          }
+          
+          if (cycleData.stages) {
+            commit('SET_STAGES', cycleData.stages)
+          }
+          
+          if (cycleData.areas) {
+            commit('SET_AREAS', cycleData.areas.map(area => ({ 
+              id: area.id,
+              name: area.name || area.id,
+              teams: area.teams || []
+            })))
+          }
+          
+          if (cycleData.assignees) {
+            commit('SET_ASSIGNEES', cycleData.assignees.map(assignee => ({
+              id: assignee.accountId,
+              name: assignee.displayName
+            })))
+          }
+          
+          if (cycleData.initiatives) {
+            const initiativesArray = cycleData.initiatives.map(init => ({
+              id: init.initiativeId,
+              name: init.initiative
+            }))
+            const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray)
+            commit('SET_INITIATIVES', allInitiatives)
           }
           
         } catch (error) {
@@ -313,17 +308,16 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           const cycleId = state.selectedCycle ? state.selectedCycle.id : null
           const cycleData = await cycleDataService.getOverviewForCycle(cycleId);
           
-          // Extract data from cycle structure
-          const cycles = cycleData.metadata?.cycles || [];
-          const stages = cycleData.metadata?.stages || [];
-          const organisation = cycleData.metadata?.organisation || {};
-          const assignees = organisation.assignees || [];
+          // Extract data from simplified cycle structure
+          const cycles = cycleData.cycles || [];
+          const stages = cycleData.stages || [];
+          const assignees = cycleData.assignees || [];
           
           // Use the full initiatives data directly - don't map to simplified structure
-          const initiativesArray = cycleData.data?.initiatives || [];
+          const initiativesArray = cycleData.initiatives || [];
 
-          // Get areas from organisation - now an array
-          const areas = (organisation.areas || []).map(area => ({ 
+          // Get areas from simplified structure
+          const areas = (cycleData.areas || []).map(area => ({ 
             id: area.id,
             name: area.name || area.id,
             teams: area.teams || []
@@ -336,7 +330,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // The Cycle Overview component expects: { cycle, initiatives: [...] }
           const cycleOverviewData = {
             cycle: activeCycle,
-            initiatives: cycleData.data?.initiatives || []
+            initiatives: cycleData.initiatives || []
           };
           
           console.log('🔍 DEBUG: Setting cycle overview data:', cycleOverviewData);
