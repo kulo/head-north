@@ -21,8 +21,8 @@ The unified data system eliminates the need for different filtering approaches b
 ```javascript
 // Roadmap Data
 roadmapData: {
-  orderedSprints: [...],
-  activeSprint: {...},
+  orderedCycles: [...],
+  activeCycle: {...},
   roadmapItems: [
     {
       initiativeId: "init1",
@@ -53,7 +53,7 @@ unifiedData: {
     type: 'roadmap' | 'cycle-overview',
     cycle: {...} | null,
     cycles: [...],
-    activeSprint: {...} | null
+    activeCycle: {...} | null
   },
   initiatives: [
     {

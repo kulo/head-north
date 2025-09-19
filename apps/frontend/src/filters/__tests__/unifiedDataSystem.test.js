@@ -18,10 +18,10 @@ import {
 describe('Unified Data System', () => {
   // Test data
   const mockRoadmapData = {
-    orderedSprints: [
-      { id: 'cycle1', name: 'Sprint 1', startDate: '2024-01-01', endDate: '2024-01-14' }
+    orderedCycles: [
+      { id: 'cycle1', name: 'Cycle 1', startDate: '2024-01-01', endDate: '2024-01-14' }
     ],
-    activeSprint: { id: 'cycle1', name: 'Sprint 1' },
+    activeCycle: { id: 'cycle1', name: 'Cycle 1' },
     roadmapItems: [
       {
         initiativeId: 'init1',
@@ -103,8 +103,8 @@ describe('Unified Data System', () => {
     metadata: {
       type: 'roadmap',
       cycle: null,
-      cycles: [{ id: 'cycle1', name: 'Sprint 1', startDate: '2024-01-01', endDate: '2024-01-14' }],
-      activeSprint: { id: 'cycle1', name: 'Sprint 1' }
+      cycles: [{ id: 'cycle1', name: 'Cycle 1', startDate: '2024-01-01', endDate: '2024-01-14' }],
+      activeCycle: { id: 'cycle1', name: 'Cycle 1' }
     },
     initiatives: [
       {
@@ -168,13 +168,13 @@ describe('Unified Data System', () => {
       
       expect(result.metadata.type).toBe('roadmap')
       expect(result.metadata.cycle).toBeNull()
-      expect(result.metadata.cycles).toEqual(mockRoadmapData.orderedSprints)
-      expect(result.metadata.activeSprint).toEqual(mockRoadmapData.activeSprint)
+      expect(result.metadata.cycles).toEqual(mockRoadmapData.orderedCycles)
+      expect(result.metadata.activeCycle).toEqual(mockRoadmapData.activeCycle)
       expect(result.initiatives).toEqual(mockRoadmapData.roadmapItems)
     })
 
     it('should handle empty roadmap data', () => {
-      const emptyData = { orderedSprints: [], activeSprint: null, roadmapItems: [] }
+      const emptyData = { orderedCycles: [], activeCycle: null, roadmapItems: [] }
       const result = transformRoadmapToUnified(emptyData)
       
       expect(result.metadata.type).toBe('roadmap')
@@ -193,7 +193,7 @@ describe('Unified Data System', () => {
       expect(result.metadata.type).toBe('cycle-overview')
       expect(result.metadata.cycle).toEqual(mockCycleOverviewData.cycle)
       expect(result.metadata.cycles).toEqual([])
-      expect(result.metadata.activeSprint).toBeNull()
+      expect(result.metadata.activeCycle).toBeNull()
       expect(result.initiatives).toEqual(mockCycleOverviewData.initiatives)
     })
 
@@ -214,8 +214,8 @@ describe('Unified Data System', () => {
     it('should transform unified data back to roadmap format', () => {
       const result = transformUnifiedToRoadmap(mockUnifiedData)
       
-      expect(result.orderedSprints).toEqual(mockUnifiedData.metadata.cycles)
-      expect(result.activeSprint).toEqual(mockUnifiedData.metadata.activeSprint)
+      expect(result.orderedCycles).toEqual(mockUnifiedData.metadata.cycles)
+      expect(result.activeCycle).toEqual(mockUnifiedData.metadata.activeCycle)
       expect(result.roadmapItems).toEqual(mockUnifiedData.initiatives)
     })
 
@@ -332,7 +332,7 @@ describe('Unified Data System', () => {
       const filters = { area: 'frontend' }
       const result = applyFilters(mockRoadmapData, filters)
       
-      expect(result.orderedSprints).toEqual(mockRoadmapData.orderedSprints)
+      expect(result.orderedCycles).toEqual(mockRoadmapData.orderedCycles)
       expect(result.roadmapItems).toHaveLength(1)
     })
 
