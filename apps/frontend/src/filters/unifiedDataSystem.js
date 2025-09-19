@@ -7,6 +7,7 @@
  */
 
 import { UnifiedData, Cycle, Initiative, RoadmapItem, ReleaseItem } from '@omega/shared-types'
+import { filterByArea } from './areaFilter.js'
 
 /**
  * @typedef {Object} Cycle
@@ -500,28 +501,10 @@ export const applyFilters = (data, filters) => {
     return data
   }
 
-  // Apply area filtering
+  // Apply area filtering using the dedicated areaFilter function
   if (Array.isArray(data)) {
-    console.log('🔍 DEBUG: Applying area filter to array data')
-    return data.map(initiative => {
-      if (!initiative.roadmapItems || !Array.isArray(initiative.roadmapItems)) {
-        return { ...initiative, roadmapItems: [] }
-      }
-      
-      const filteredRoadmapItems = initiative.roadmapItems.filter(roadmapItem => {
-        const areaMatch = roadmapItem.area && 
-          roadmapItem.area.toLowerCase() === filters.area.toLowerCase()
-        const themeMatch = roadmapItem.theme && 
-          roadmapItem.theme.toLowerCase() === filters.area.toLowerCase()
-        
-        return areaMatch || themeMatch
-      })
-      
-      return {
-        ...initiative,
-        roadmapItems: filteredRoadmapItems
-      }
-    }).filter(initiative => initiative.roadmapItems.length > 0)
+    console.log('🔍 DEBUG: Applying area filter to array data using filterByArea')
+    return filterByArea(data, filters.area)
   }
 
   return data
