@@ -2,7 +2,31 @@ import { createStore } from 'vuex'
 import { CycleDataService } from '@/services/index.js'
 import { calculateAreaData } from '@/libraries/calculateAreaData.js'
 import { logger } from '@omega-one/shared-utils'
-import { applyFilters } from '@/filters/unifiedDataSystem.js'
+import { filterByArea } from '@/filters/areaFilter.js'
+import { filterByInitiatives } from '@/filters/initiativesFilter.js'
+
+// Simple filtering function that works with the simplified data structure
+const applyFilters = (data, filters) => {
+  if (!data || !Array.isArray(data)) {
+    return data
+  }
+
+  let filteredData = data
+
+  // Apply area filtering if specified
+  if (filters && filters.area && filters.area !== 'all') {
+    filteredData = filterByArea(filteredData, filters.area)
+  }
+
+  // Apply initiative filtering if specified
+  if (filters && filters.initiatives && filters.initiatives.length > 0) {
+    filteredData = filterByInitiatives(filteredData, filters.initiatives)
+  }
+
+  // TODO: Add stage filtering when needed
+
+  return filteredData
+}
 
 // Store factory function that accepts dependencies
 export default function createAppStore(cycleDataService, omegaConfig, router) {
