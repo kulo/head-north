@@ -8,6 +8,7 @@
 
 import { UnifiedData, Cycle, Initiative, RoadmapItem, ReleaseItem } from '@omega/shared-types'
 import { filterByArea } from './areaFilter.js'
+import { filterByInitiatives } from './initiativesFilter.js'
 
 /**
  * @typedef {Object} Cycle
@@ -495,19 +496,33 @@ export const applyFilters = (data, filters) => {
   console.log('🔍 DEBUG: applyFilters called with data type:', data ? Object.keys(data) : 'null')
   console.log('🔍 DEBUG: applyFilters called with filters:', filters)
   
-  // Enable area filtering for roadmap view
-  if (!filters || !filters.area || filters.area === 'all') {
-    console.log('🔍 DEBUG: No area filter or all areas selected, returning all data')
+  if (!data || !Array.isArray(data)) {
+    console.log('🔍 DEBUG: No data or not an array, returning data as-is')
     return data
   }
 
-  // Apply area filtering using the dedicated areaFilter function
-  if (Array.isArray(data)) {
-    console.log('🔍 DEBUG: Applying area filter to array data using filterByArea')
-    return filterByArea(data, filters.area)
+  let filteredData = data
+
+  // Apply area filtering if specified
+  if (filters && filters.area && filters.area !== 'all') {
+    console.log('🔍 DEBUG: Applying area filter using filterByArea')
+    filteredData = filterByArea(filteredData, filters.area)
   }
 
-  return data
+  // Apply initiative filtering if specified
+  if (filters && filters.initiatives && filters.initiatives.length > 0) {
+    console.log('🔍 DEBUG: Applying initiative filter using filterByInitiatives')
+    filteredData = filterByInitiatives(filteredData, filters.initiatives)
+  }
+
+  // Apply stage filtering if specified
+  if (filters && filters.stages && filters.stages.length > 0) {
+    console.log('🔍 DEBUG: Stage filtering not yet implemented')
+    // TODO: Implement stage filtering
+  }
+
+  console.log('🔍 DEBUG: Filtering complete, returning filtered data')
+  return filteredData
 
   /* ORIGINAL FILTERING LOGIC - COMMENTED OUT FOR DEBUGGING
   if (!data) return data
