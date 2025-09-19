@@ -43,7 +43,6 @@ export default async (context) => {
       roadmapItems: roadmapItems.map(item => ({
         id: item.id,
         name: item.summary || item.name || `Roadmap Item ${item.id}`, // Map summary to name
-        summary: item.summary || item.name || `Roadmap Item ${item.id}`, // Keep summary for roadmap view
         area: item.area,
         theme: item.theme,
         owner: 'Unassigned', // TODO: Get from actual data
@@ -51,13 +50,15 @@ export default async (context) => {
         weeks: Math.floor(Math.random() * 8) + 1, // TODO: Calculate from actual data
         url: item.url || `https://example.com/browse/${item.id}`,
         validations: item.validations || [],
-        // For cycle overview: provide releaseItems directly
-        releaseItems: item.sprints?.flatMap(sprint => sprint.releaseItems) || [],
-        // For roadmap view: provide sprints structure
-        sprints: item.sprints?.map(sprint => ({
-          sprintId: sprint.sprintId,
-          releaseItems: sprint.releaseItems || []
-        })) || []
+        releaseItems: item.sprints?.flatMap(sprint => 
+          (sprint.releaseItems || []).map(releaseItem => ({
+            ...releaseItem,
+            sprint: {
+              id: sprint.sprintId,
+              name: `Sprint ${sprint.sprintId}` // TODO: Get actual sprint name
+            }
+          }))
+        ) || []
       }))
     }));
 

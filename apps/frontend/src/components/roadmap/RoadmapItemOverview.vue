@@ -4,7 +4,7 @@
       <a-col :span="6" class="roadmap-item">
         <p>
           <a :href="roadmapItem.url" class="jira-link" target="_blank">
-            {{ roadmapItem.summary }}
+            {{ roadmapItem.name }}
             <span class="link-icon">🔗</span>
           </a>
         </p>
@@ -56,12 +56,14 @@ export default {
   },
   methods: {
     getReleaseItemsForSprint(sprintId) {
-      if (!this.roadmapItem.sprints) {
+      if (!this.roadmapItem.releaseItems) {
         return [];
       }
       
-      const sprintData = this.roadmapItem.sprints.find(sprint => sprint.sprintId === sprintId);
-      return sprintData ? sprintData.releaseItems : [];
+      // Filter release items that belong to this sprint
+      return this.roadmapItem.releaseItems.filter(releaseItem => 
+        releaseItem.sprint && releaseItem.sprint.id === sprintId
+      );
     }
   }
 }
