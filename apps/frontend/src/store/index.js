@@ -51,14 +51,14 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           return []
         }
         
-        const filteredData = applyFilters(state.roadmapData, {
+        const filteredData = applyFilters(state.roadmapData.data.initiatives, {
           area: state.selectedArea,
           initiatives: state.selectedInitiatives,
           stages: state.selectedStages
         })
         
-        // Return the initiatives array for the template
-        return filteredData.data?.initiatives || filteredData.initiatives || []
+        // Return the filtered initiatives array
+        return filteredData || []
       },
       
   currentCycleOverviewData: (state) => {

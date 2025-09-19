@@ -29,14 +29,19 @@ export default {
   name: 'AreaSelector',
   setup() {
     const store = useStore()
-    const selectedArea = ref('all')
+    const selectedArea = computed({
+      get: () => store.state.selectedArea || 'all',
+      set: (value) => {
+        // Dispatch action to filter by area
+        store.dispatch('setSelectedArea', value === 'all' ? null : value)
+      }
+    })
     
     const areas = computed(() => store.state.areas)
     
     const handleAreaChange = (value) => {
+      // The computed setter will handle the store update
       selectedArea.value = value
-      // Dispatch action to filter by area
-      store.dispatch('setSelectedArea', value === 'all' ? null : value)
     }
     
     onMounted(() => {
