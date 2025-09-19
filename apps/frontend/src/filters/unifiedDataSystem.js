@@ -494,10 +494,36 @@ export const applyFilters = (data, filters) => {
   console.log('🔍 DEBUG: applyFilters called with data type:', data ? Object.keys(data) : 'null')
   console.log('🔍 DEBUG: applyFilters called with filters:', filters)
   
-  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
-  // Return the data as-is without any filtering
-  console.log('🔍 DEBUG: FILTERING DISABLED in applyFilters - returning all data')
-  
+  // Enable area filtering for roadmap view
+  if (!filters || !filters.area || filters.area === 'all') {
+    console.log('🔍 DEBUG: No area filter or all areas selected, returning all data')
+    return data
+  }
+
+  // Apply area filtering
+  if (Array.isArray(data)) {
+    console.log('🔍 DEBUG: Applying area filter to array data')
+    return data.map(initiative => {
+      if (!initiative.roadmapItems || !Array.isArray(initiative.roadmapItems)) {
+        return { ...initiative, roadmapItems: [] }
+      }
+      
+      const filteredRoadmapItems = initiative.roadmapItems.filter(roadmapItem => {
+        const areaMatch = roadmapItem.area && 
+          roadmapItem.area.toLowerCase() === filters.area.toLowerCase()
+        const themeMatch = roadmapItem.theme && 
+          roadmapItem.theme.toLowerCase() === filters.area.toLowerCase()
+        
+        return areaMatch || themeMatch
+      })
+      
+      return {
+        ...initiative,
+        roadmapItems: filteredRoadmapItems
+      }
+    }).filter(initiative => initiative.roadmapItems.length > 0)
+  }
+
   return data
 
   /* ORIGINAL FILTERING LOGIC - COMMENTED OUT FOR DEBUGGING

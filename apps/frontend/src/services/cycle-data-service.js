@@ -185,9 +185,9 @@ class CycleDataService {
    * @private
    */
   _extractAreasFromData(data) {
-    // Handle unified data structure (metadata.organisation.areas)
-    if (data.metadata?.organisation?.areas && typeof data.metadata.organisation.areas === 'object') {
-      return Object.keys(data.metadata.organisation.areas) // Get area IDs
+    // Handle unified data structure (metadata.organisation.areas is now an array)
+    if (data.metadata?.organisation?.areas && Array.isArray(data.metadata.organisation.areas)) {
+      return data.metadata.organisation.areas.map(area => area.id) // Get area IDs
     }
     
     return []
@@ -239,14 +239,16 @@ class CycleDataService {
       // Get areas from unified data source
       const sourceData = await this._getUnifiedData()
       
-      // Extract areas from backend data
-      const backendAreas = this._extractAreasFromData(sourceData)
+      // Extract areas directly from backend data (now an array with id and name)
+      if (sourceData.metadata?.organisation?.areas && Array.isArray(sourceData.metadata.organisation.areas)) {
+        return sourceData.metadata.organisation.areas.map(area => ({
+          id: area.id,
+          name: area.name || area.id
+        }))
+      }
       
-      // Get config areas for translations
-      const configAreas = this._getConfigAreas()
-      
-      // Create union with proper fallbacks
-      return this._createAreaUnion(backendAreas, configAreas)
+      // Fallback to config areas if backend data is not available
+      return this._getConfigAreas()
     } catch (error) {
       // Fallback to config only if backend fails
       return this._getConfigAreas()
