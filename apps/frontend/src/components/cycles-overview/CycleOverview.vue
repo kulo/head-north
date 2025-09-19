@@ -10,7 +10,6 @@
         <initiative-selector></initiative-selector>
         <area-selector></area-selector>
         <assignee-selector></assignee-selector>
-        <release-selector></release-selector>
         <stage-selector></stage-selector>
         <validation-selector></validation-selector>
       </div>
@@ -99,7 +98,6 @@ import CycleSelector from "../selectors/CycleSelector.vue"
 import AreaSelector from "../selectors/AreaSelector.vue"
 import StageSelector from "../selectors/StageSelector.vue"
 import InitiativeSelector from "../selectors/InitiativeSelector.vue"
-import ReleaseSelector from "../selectors/ReleaseSelector.vue"
 import AssigneeSelector from "../selectors/AssigneeSelector.vue"
 import GlobalInitiativeProgress from "./GlobalInitiativeProgress.vue"
 import InitiativeChart from "./InitiativeChart.vue"
@@ -116,7 +114,6 @@ export default {
     AreaSelector,
     InitiativeSelector,
     StageSelector,
-    ReleaseSelector,
     AssigneeSelector,
     GlobalInitiativeProgress,
     InitiativeChart,

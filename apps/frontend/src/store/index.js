@@ -25,7 +25,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       areas: [],
       cycles: [],
       stages: [],
-      releaseFilters: [],
       pages: {
         all: [],
         current: {}
@@ -36,7 +35,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       selectedArea: null,
       selectedCycle: null,
       selectedStages: [],
-      selectedReleaseFilters: [],
       // Validation
       validationEnabled: false,
       validationSummary: []
@@ -143,9 +141,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       SET_STAGES(state, stages) {
         state.stages = stages
       },
-      SET_RELEASE_FILTERS(state, filters) {
-        state.releaseFilters = filters
-      },
       SET_SELECTED_CYCLE(state, cycle) {
         state.selectedCycle = cycle
       },
@@ -154,9 +149,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       },
       setSelectedStages(state, stages) {
         state.selectedStages = stages
-      },
-      SET_SELECTED_RELEASE_FILTERS(state, filters) {
-        state.selectedReleaseFilters = filters
       },
       TOGGLE_VALIDATION(state) {
         state.validationEnabled = !state.validationEnabled
@@ -304,9 +296,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         commit('SET_SELECTED_ASSIGNEES', assignees)
       },
       
-      setSelectedReleaseFilters({ commit }, filters) {
-        commit('SET_SELECTED_RELEASE_FILTERS', filters)
-      },
       
       setSelectedStages({ commit }, stages) {
         commit('SET_SELECTED_STAGES', stages)
@@ -365,13 +354,11 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
             name: assignee.displayName
           })));
           const allStages = [{ name: 'All Stages', id: 'all' }].concat(stages);
-          const allReleaseFilters = [{ name: 'All Releases', value: 'all' }].concat(state.releaseFilters || []);
 
           commit('SET_INITIATIVES', allInitiatives);
           commit('SET_ASSIGNEES', allAssignees);
           commit('SET_AREAS', areas);
           commit('SET_STAGES', allStages);
-          commit('SET_RELEASE_FILTERS', allReleaseFilters);
 
           if (!state.selectedInitiatives || state.selectedInitiatives.length === 0) {
             commit('SET_SELECTED_INITIATIVES', [allInitiatives[0]]);
@@ -385,9 +372,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
             commit('SET_SELECTED_STAGES', [allStages[0]]);
           }
 
-          if (!state.selectedReleaseFilters || state.selectedReleaseFilters.length === 0) {
-            commit('SET_SELECTED_RELEASE_FILTERS', [allReleaseFilters[0]]);
-          }
 
           // Set current cycle overview data for display
           const currentAreaId = state.selectedArea || 'overview';
@@ -432,16 +416,6 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         }
       },
       
-      async fetchReleaseFilters({ commit }) {
-        try {
-          // Import release filters from local library instead of API call
-          const { releaseFilters } = await import('@/filters/release-filters.js')
-          commit('SET_RELEASE_FILTERS', releaseFilters)
-        } catch (error) {
-          const errorMessage = error?.message || error?.toString() || 'Unknown error'
-          commit('SET_ERROR', errorMessage)
-        }
-      },
       
       // Change page
       changePage({ commit, state }, pageId) {
