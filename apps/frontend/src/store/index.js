@@ -199,18 +199,18 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           commit('SET_ERROR', null)
           
           // Fetch unified data from API service
-          const unifiedData = await cycleDataService.getUnifiedData()
+          const cycleData = await cycleDataService.getCycleData()
           
-          // Store the unified data directly
-          commit('SET_ROADMAP_DATA', unifiedData)
+          // Store the cycle data directly
+          commit('SET_ROADMAP_DATA', cycleData)
           
           // Extract and set metadata
-          if (unifiedData.metadata) {
-            const { organisation, cycles } = unifiedData.metadata
+          if (cycleData.metadata) {
+            const { organisation, cycles } = cycleData.metadata
             
             // Extract initiatives from data.initiatives (array format)
-            if (unifiedData.data?.initiatives) {
-              const initiativesArray = unifiedData.data.initiatives.map(init => ({
+            if (cycleData.data?.initiatives) {
+              const initiativesArray = cycleData.data.initiatives.map(init => ({
                 id: init.initiativeId,
                 name: init.initiative
               }))
@@ -311,16 +311,16 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         try {
           // Use unified data service
           const cycleId = state.selectedCycle ? state.selectedCycle.id : null
-          const unifiedData = await cycleDataService.getOverviewForCycle(cycleId);
+          const cycleData = await cycleDataService.getOverviewForCycle(cycleId);
           
-          // Extract data from unified structure
-          const cycles = unifiedData.metadata?.cycles || [];
-          const stages = unifiedData.metadata?.stages || [];
-          const organisation = unifiedData.metadata?.organisation || {};
+          // Extract data from cycle structure
+          const cycles = cycleData.metadata?.cycles || [];
+          const stages = cycleData.metadata?.stages || [];
+          const organisation = cycleData.metadata?.organisation || {};
           const assignees = organisation.assignees || [];
           
           // Use the full initiatives data directly - don't map to simplified structure
-          const initiativesArray = unifiedData.data?.initiatives || [];
+          const initiativesArray = cycleData.data?.initiatives || [];
 
           // Get areas from organisation - now an array
           const areas = (organisation.areas || []).map(area => ({ 
@@ -336,7 +336,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // The Cycle Overview component expects: { cycle, initiatives: [...] }
           const cycleOverviewData = {
             cycle: activeCycle,
-            initiatives: unifiedData.data?.initiatives || []
+            initiatives: cycleData.data?.initiatives || []
           };
           
           console.log('🔍 DEBUG: Setting cycle overview data:', cycleOverviewData);

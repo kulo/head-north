@@ -4,7 +4,7 @@ import pkg from 'lodash';
 const { uniqBy, uniq, groupBy, pick } = pkg;
 
 /**
- * Collect unified data for both roadmap and cycle overview views
+ * Collect cycle data for both roadmap and cycle overview views
  * This replaces the need for separate collect-cycle-overview-data.js and collect-roadmap-data.js
  */
 export default async (cycleId, omegaConfig, extraFields = []) => {

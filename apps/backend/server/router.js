@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { registerApiRoutes } from './utils/route-registry.js';
-import getUnifiedData from './actions/unified-data.js';
+import getCycleData from './actions/cycle-data.js';
 
 /**
  * Create router with OmegaConfig dependency injection
@@ -25,21 +25,21 @@ function createRouter(omegaConfig) {
     },
     {
       method: 'GET',
-      path: '/unified-data',
-      handler: 'unifiedData',
-      description: 'Unified data endpoint with single data structure for all views'
+      path: '/cycle-data',
+      handler: 'cycleData',
+      description: 'Cycle data endpoint with single data structure for all views'
     },
     {
       method: 'GET',
-      path: '/unified-data/:id',
-      handler: 'unifiedData',
-      description: 'Unified data endpoint for specific cycle with single data structure'
+      path: '/cycle-data/:id',
+      handler: 'cycleData',
+      description: 'Cycle data endpoint for specific cycle with single data structure'
     }
   ];
 
   // Define route handlers
   const handlers = {
-    unifiedData: getUnifiedData
+    cycleData: getCycleData
   };
 
   // Register API routes

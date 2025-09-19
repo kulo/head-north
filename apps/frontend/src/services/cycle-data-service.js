@@ -52,11 +52,11 @@ class CycleDataService {
   }
 
   /**
-   * Get unified data with caching
-   * @returns {Promise<object>} The unified data
+   * Get cycle data with caching
+   * @returns {Promise<object>} The cycle data
    * @private
    */
-  async _getUnifiedData() {
+  async _getCycleData() {
     // Check if unified cache is still valid
     if (this._isCacheValid()) {
       return this._unifiedCache
@@ -133,8 +133,8 @@ class CycleDataService {
    * @returns {Promise<object>} Cycle overview data with devCycleData
    */
   async getOverviewForCycle(cycleId) {
-    // Use unified cache - all data is available in the unified structure
-    const data = await this._getUnifiedData()
+    // Use cycle cache - all data is available in the cycle structure
+    const data = await this._getCycleData()
     
     // If a specific cycle is requested, we could filter the data here
     // For now, return the full unified data as it contains all cycles
@@ -148,7 +148,7 @@ class CycleDataService {
    */
   async getCyclesRoadmap() {
     // Use unified cache - all data is available in the unified structure
-    return this._getUnifiedData()
+    return this._getCycleData()
   }
 
   /**
@@ -156,7 +156,7 @@ class CycleDataService {
    * @returns {Promise<object|null>} Active cycle data or null if none found
    */
   async getActiveCycle() {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     return data.activeCycle || data.cycles?.find(cycle => cycle.active) || null
   }
 
@@ -237,7 +237,7 @@ class CycleDataService {
   async getAllAreas(cycleId = null) {
     try {
       // Get areas from unified data source
-      const sourceData = await this._getUnifiedData()
+      const sourceData = await this._getCycleData()
       
       // Extract areas directly from backend data (now an array with id and name)
       if (sourceData.metadata?.organisation?.areas && Array.isArray(sourceData.metadata.organisation.areas)) {
@@ -260,7 +260,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of cycles
    */
   async getAllCycles() {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     return data.metadata?.cycles || []
   }
 
@@ -269,7 +269,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of stages
    */
   async getAllStages() {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     return data.metadata?.stages || []
   }
 
@@ -278,7 +278,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of all teams across all areas
    */
   async getAllTeams() {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     const areas = data.metadata?.organisation?.areas || {}
     
     const allTeams = []
@@ -303,7 +303,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of teams for the specified area
    */
   async getTeamsForArea(areaId) {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     const areas = data.metadata?.organisation?.areas || {}
     const area = areas[areaId]
     
@@ -323,7 +323,7 @@ class CycleDataService {
    * @returns {Promise<object>} Organisation data structure
    */
   async getOrganisationData() {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     return data.metadata?.organisation || {
       areas: {},
       assignees: []
@@ -335,7 +335,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of assignees
    */
   async getAllAssignees() {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     const assignees = data.metadata?.organisation?.assignees || []
     return assignees.map(assignee => ({
       id: assignee.accountId,
@@ -344,16 +344,16 @@ class CycleDataService {
   }
 
   /**
-   * Get unified data directly from the unified endpoint
+   * Get cycle data directly from the cycle-data endpoint
    * This is the new preferred method for getting data
    * @param {string|number} cycleId - Optional cycle ID
    * @param {object} filters - Optional filters to apply
-   * @returns {Promise<object>} Unified data structure
+   * @returns {Promise<object>} Cycle data structure
    */
-  async getUnifiedData(cycleId = null, filters = {}) {
+  async getCycleData(cycleId = null, filters = {}) {
     // If no specific cycle or filters, use cached data
     if (!cycleId && Object.keys(filters).length === 0) {
-      return this._getUnifiedData()
+      return this._getCycleData()
     }
     
     // For specific cycles or filters, make a direct API call
@@ -361,7 +361,7 @@ class CycleDataService {
     if (cycleId) params.set('cycleId', cycleId.toString())
     if (Object.keys(filters).length > 0) params.set('filters', JSON.stringify(filters))
     
-    return this._request(`/unified-data?${params.toString()}`)
+    return this._request(`/cycle-data?${params.toString()}`)
   }
 
   /**
@@ -369,7 +369,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of active cycles
    */
   async getActiveCycles() {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     const cycles = data.metadata?.cycles || []
     return cycles.filter(cycle => cycle.state === 'active')
   }
@@ -392,7 +392,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of cycles with the specified state
    */
   async getCyclesByState(state) {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     const cycles = data.metadata?.cycles || []
     return cycles.filter(cycle => cycle.state === state)
   }
@@ -403,7 +403,7 @@ class CycleDataService {
    * @returns {Promise<Array>} Array of cycles sorted by the specified field
    */
   async getOrderedCycles(sortBy = 'startDate') {
-    const data = await this._getUnifiedData()
+    const data = await this._getCycleData()
     const cycles = data.metadata?.cycles || []
     
     return [...cycles].sort((a, b) => {

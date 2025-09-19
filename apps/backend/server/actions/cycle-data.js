@@ -1,11 +1,11 @@
-import collectUnifiedData from '../service/collect-unified-data.js';
+import collectCycleData from '../service/collect-cycle-data.js';
 import buildOverview from '../calculator/generate-overview.js';
 import { logger } from '@omega-one/shared-utils';
 import pkg from "lodash";
 const { groupBy } = pkg;
 
 /**
- * Unified data endpoint that serves both roadmap and cycle overview data
+ * Cycle data endpoint that serves both roadmap and cycle overview data
  * This replaces the need for separate cycle-overview.js and cycles-roadmap.js actions
  */
 export default async (context) => {
@@ -15,7 +15,7 @@ export default async (context) => {
   const cycleId = context.params.id || context.query.cycleId;
   const filters = context.query.filters ? JSON.parse(context.query.filters) : {};
   
-  logger.default.info('building unified data', { cycleId, filters });
+  logger.default.info('building cycle data', { cycleId, filters });
 
   try {
     // Collect all necessary data
@@ -30,7 +30,7 @@ export default async (context) => {
       initiatives: configInitiatives, 
       stages,
       teams 
-    } = await collectUnifiedData(cycleId, omegaConfig);
+    } = await collectCycleData(cycleId, omegaConfig);
 
     // Build unified data structure that both views can use
     const roadmapData = buildOverview(issues, issuesByRoadmapItems, roadmapItems, cycles, omegaConfig);
