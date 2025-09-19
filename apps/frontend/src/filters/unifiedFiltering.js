@@ -175,11 +175,40 @@ const filterByStagesImperative = (items, selectedStages) => {
  * @returns {Array|Object} Filtered data
  */
 export const applyFilters = (data, filters) => {
-  console.log('🔍 DEBUG: applyFilters (unifiedFiltering) called - FILTERING DISABLED')
+  console.log('🔍 DEBUG: applyFilters (unifiedFiltering) called')
   console.log('🔍 DEBUG: data type:', data ? Object.keys(data) : 'null')
   console.log('🔍 DEBUG: filters:', filters)
   
-  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
+  // Enable area filtering for roadmap view
+  if (!filters || !filters.area || filters.area === 'all') {
+    console.log('🔍 DEBUG: No area filter or all areas selected, returning all data')
+    return data
+  }
+
+  // Apply area filtering
+  if (Array.isArray(data)) {
+    console.log('🔍 DEBUG: Applying area filter to array data')
+    return data.map(initiative => {
+      if (!initiative.roadmapItems || !Array.isArray(initiative.roadmapItems)) {
+        return { ...initiative, roadmapItems: [] }
+      }
+      
+      const filteredRoadmapItems = initiative.roadmapItems.filter(roadmapItem => {
+        const areaMatch = roadmapItem.area && 
+          roadmapItem.area.toLowerCase() === filters.area.toLowerCase()
+        const themeMatch = roadmapItem.theme && 
+          roadmapItem.theme.toLowerCase() === filters.area.toLowerCase()
+        
+        return areaMatch || themeMatch
+      })
+      
+      return {
+        ...initiative,
+        roadmapItems: filteredRoadmapItems
+      }
+    }).filter(initiative => initiative.roadmapItems.length > 0)
+  }
+
   return data
 }
 

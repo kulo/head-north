@@ -301,13 +301,49 @@ export const filterUnifiedData = (unifiedData, filters) => {
   // Validate input
   validateUnifiedData(unifiedData, false)
   
-  // TEMPORARILY DISABLE ALL FILTERING FOR DEBUGGING
-  // Return the data as-is without any filtering
-  console.log('🔍 DEBUG: FILTERING DISABLED - returning all data')
-  console.log('🔍 DEBUG: First initiative roadmap items count:', unifiedData.data.initiatives[0]?.roadmapItems?.length)
-  console.log('🔍 DEBUG: First roadmap item release items count:', unifiedData.data.initiatives[0]?.roadmapItems?.[0]?.releaseItems?.length)
+  // Enable area filtering for roadmap view
+  if (!filters || Object.keys(filters).length === 0) {
+    console.log('🔍 DEBUG: No filters provided, returning all data')
+    return unifiedData
+  }
+
+  // Initiatives is already an array in the unified data structure
+  let filteredInitiatives = unifiedData.data.initiatives
+
+  // Area filtering for roadmap view
+  if (filters.area && filters.area !== 'all') {
+    console.log('🔍 DEBUG: Applying area filter:', filters.area)
+    filteredInitiatives = filteredInitiatives.map(initiative => {
+      if (!initiative.roadmapItems || !Array.isArray(initiative.roadmapItems)) {
+        return { ...initiative, roadmapItems: [] }
+      }
+      
+      const filteredRoadmapItems = initiative.roadmapItems.filter(roadmapItem => {
+        // Check area match (case-insensitive)
+        const areaMatch = roadmapItem.area && 
+          roadmapItem.area.toLowerCase() === filters.area.toLowerCase()
+        const themeMatch = roadmapItem.theme && 
+          roadmapItem.theme.toLowerCase() === filters.area.toLowerCase()
+        
+        return areaMatch || themeMatch
+      })
+      
+      return {
+        ...initiative,
+        roadmapItems: filteredRoadmapItems
+      }
+    }).filter(initiative => initiative.roadmapItems.length > 0)
+  }
+
+  console.log('🔍 DEBUG: Filtered initiatives count:', filteredInitiatives.length)
   
-  return unifiedData
+  return {
+    ...unifiedData,
+    data: {
+      ...unifiedData.data,
+      initiatives: filteredInitiatives
+    }
+  }
 
   /* ORIGINAL FILTERING LOGIC - COMMENTED OUT FOR DEBUGGING
   if (!filters) {
