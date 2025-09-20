@@ -65,15 +65,15 @@ class CycleDataService {
     // Clear cache if invalid
     this._clearCache()
     
-    // Fetch fresh data from unified endpoint
+    // Fetch fresh data from cycle-data endpoint
     const endpoints = this.config.getEndpoints()
-    const unifiedData = await this._request(endpoints.UNIFIED_DATA)
+    const cycleData = await this._request(endpoints.CYCLE_DATA)
     
-    // Cache the unified data
-    this._unifiedCache = unifiedData
+    // Cache the cycle data
+    this._unifiedCache = cycleData
     this._setCacheTimestamp()
     
-    return unifiedData
+    return cycleData
   }
 
   /**
@@ -97,7 +97,7 @@ class CycleDataService {
 
     const requestOptions = { ...defaultOptions, ...options }
 
-    let lastError
+    const errors = []
     for (let attempt = 1; attempt <= this._apiRetries; attempt++) {
       try {
         const response = await fetch(url, requestOptions)
@@ -109,7 +109,12 @@ class CycleDataService {
         const data = await response.json()
         return data
       } catch (error) {
-        lastError = error
+        const errorInfo = {
+          attempt,
+          error: error.message || error.toString(),
+          timestamp: new Date().toISOString()
+        }
+        errors.push(errorInfo)
         logger.service.warnSafe(`API request attempt ${attempt} failed`, error, { attempt })
         
         if (attempt < this._apiRetries) {
@@ -120,9 +125,10 @@ class CycleDataService {
       }
     }
 
-    // TODO actually show all errors and not just the last
-    const finalErrorMessage = lastError?.message || lastError?.toString() || 'Unknown error'
-    throw new Error(`API request failed after ${this._apiRetries} attempts: ${finalErrorMessage}`)
+    // Show all errors that occurred during retry attempts
+    const errorSummary = errors.map(e => `Attempt ${e.attempt}: ${e.error}`).join('; ')
+    const finalErrorMessage = `API request failed after ${this._apiRetries} attempts. Errors: ${errorSummary}`
+    throw new Error(finalErrorMessage)
   }
 
 
@@ -168,12 +174,12 @@ class CycleDataService {
    */
   async getAllInitiatives(cycleId = null) {
     const data = await this.getOverviewForCycle(cycleId)
-    const initiatives = data.metadata?.initiatives || {}
+    const initiatives = data.initiatives || []
     
-    // Convert initiatives object to array format
-    return Object.entries(initiatives).map(([id, name]) => ({
-      id,
-      name
+    // Convert initiatives array to the expected format
+    return initiatives.map(init => ({
+      id: init.initiativeId,
+      name: init.initiative
     }))
   }
 
@@ -279,16 +285,16 @@ class CycleDataService {
    */
   async getAllTeams() {
     const data = await this._getCycleData()
-    const areas = data.metadata?.organisation?.areas || {}
+    const areas = data.areas || []
     
     const allTeams = []
-    Object.entries(areas).forEach(([areaId, areaData]) => {
+    areas.forEach(areaData => {
       if (areaData.teams && Array.isArray(areaData.teams)) {
         areaData.teams.forEach(team => {
           allTeams.push({
             ...team,
-            areaId,
-            areaName: areaData.name || areaId
+            areaId: areaData.id,
+            areaName: areaData.name || areaData.id
           })
         })
       }
@@ -304,8 +310,8 @@ class CycleDataService {
    */
   async getTeamsForArea(areaId) {
     const data = await this._getCycleData()
-    const areas = data.metadata?.organisation?.areas || {}
-    const area = areas[areaId]
+    const areas = data.areas || []
+    const area = areas.find(a => a.id === areaId)
     
     if (!area || !area.teams) {
       return []
@@ -324,9 +330,9 @@ class CycleDataService {
    */
   async getOrganisationData() {
     const data = await this._getCycleData()
-    return data.metadata?.organisation || {
-      areas: {},
-      assignees: []
+    return {
+      areas: data.areas || [],
+      assignees: data.assignees || []
     }
   }
 
@@ -336,7 +342,7 @@ class CycleDataService {
    */
   async getAllAssignees() {
     const data = await this._getCycleData()
-    const assignees = data.metadata?.organisation?.assignees || []
+    const assignees = data.assignees || []
     return assignees.map(assignee => ({
       id: assignee.accountId,
       name: assignee.displayName
@@ -370,7 +376,7 @@ class CycleDataService {
    */
   async getActiveCycles() {
     const data = await this._getCycleData()
-    const cycles = data.metadata?.cycles || []
+    const cycles = data.cycles || []
     return cycles.filter(cycle => cycle.state === 'active')
   }
 
@@ -393,7 +399,7 @@ class CycleDataService {
    */
   async getCyclesByState(state) {
     const data = await this._getCycleData()
-    const cycles = data.metadata?.cycles || []
+    const cycles = data.cycles || []
     return cycles.filter(cycle => cycle.state === state)
   }
 
@@ -404,7 +410,7 @@ class CycleDataService {
    */
   async getOrderedCycles(sortBy = 'startDate') {
     const data = await this._getCycleData()
-    const cycles = data.metadata?.cycles || []
+    const cycles = data.cycles || []
     
     return [...cycles].sort((a, b) => {
       if (sortBy === 'startDate') {

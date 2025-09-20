@@ -1,5 +1,5 @@
 'use strict';
-const collectCycleOverviewData = require('../server/service/collect-cycle-overview-data');
+const collectCycleData = require('../server/service/collect-cycle-data');
 const parseJiraIssues = require('../server/calculator/parse-jira-issues');
 const { jiraHost } = require('../server/config');
 
@@ -9,7 +9,7 @@ const logTicketId = (ticketId) => {
 };
 
 (async () => {
-  const { projects, issues } = await collectCycleOverviewData();
+  const { roadmapItems, issues } = await collectCycleData();
 
   console.log('Release Item without labels: ');
   const issuesWithLabels = issues.filter(issue => {
@@ -27,7 +27,7 @@ const logTicketId = (ticketId) => {
   });
   issuesWithoutTeam.forEach(issue => logTicketId(issue.key));
 
-  const usedProjects = Object.entries(projects).filter(([projectId, value]) => {
+  const usedProjects = Object.entries(roadmapItems).filter(([projectId, value]) => {
     return issues.some(issue => {
       return issue.fields?.parent?.key === projectId
     })

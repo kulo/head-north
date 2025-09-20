@@ -4,6 +4,8 @@ import { calculateAreaData } from '@/libraries/calculateAreaData.js'
 import { logger } from '@omega-one/shared-utils'
 import { filterByArea } from '@/filters/areaFilter.js'
 import { filterByInitiatives } from '@/filters/initiativesFilter.js'
+import { filterByStages } from '@/filters/stagesFilter.js'
+import { filterByAssignees } from '@/filters/assigneeFilter.js'
 
 // Simple filtering function that works with the simplified data structure
 const applyFilters = (data, filters) => {
@@ -23,7 +25,15 @@ const applyFilters = (data, filters) => {
     filteredData = filterByInitiatives(filteredData, filters.initiatives)
   }
 
-  // TODO: Add stage filtering when needed
+  // Apply stage filtering if specified
+  if (filters && filters.stages && filters.stages.length > 0) {
+    filteredData = filterByStages(filteredData, filters.stages)
+  }
+
+  // Apply assignee filtering if specified
+  if (filters && filters.assignees && filters.assignees.length > 0) {
+    filteredData = filterByAssignees(filteredData, filters.assignees)
+  }
 
   return filteredData
 }
@@ -76,7 +86,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         const filteredData = applyFilters(state.roadmapData.initiatives, {
           area: state.selectedArea,
           initiatives: state.selectedInitiatives,
-          stages: state.selectedStages
+          stages: state.selectedStages,
+          assignees: state.selectedAssignees
         })
         
         // Return the filtered initiatives array
@@ -93,7 +104,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
     const filteredInitiatives = applyFilters(rawData.initiatives, {
       area: state.selectedArea,
       initiatives: state.selectedInitiatives,
-      stages: state.selectedStages
+      stages: state.selectedStages,
+      assignees: state.selectedAssignees
     });
 
     return {

@@ -21,7 +21,7 @@ export default async (cycleId, omegaConfig, extraFields = []) => {
     end: sprint.end,
     delivery: sprint.delivery,
     state: sprint.state,
-    progress: 0, // TODO: Calculate progress
+    progress: 0, // Will be calculated after we have issues data
     isActive: sprint.state === 'active',
     description: null
   }));
@@ -66,6 +66,28 @@ export default async (cycleId, omegaConfig, extraFields = []) => {
     });
   }
   
+  // Calculate progress for each cycle based on issue completion
+  const cyclesWithProgress = cycles.map(cycle => {
+    // Get issues for this specific cycle
+    const cycleIssues = allIssues.filter(issue => {
+      // Check if issue belongs to this cycle
+      return issue.fields.sprint && issue.fields.sprint.id === cycle.id;
+    });
+    
+    if (cycleIssues.length === 0) {
+      return { ...cycle, progress: 0 };
+    }
+    
+    // Count completed issues (status === 'done')
+    const completedIssues = cycleIssues.filter(issue => {
+      const status = issue.fields.status.name.toLowerCase();
+      return status === 'done' || status === 'completed' || status === 'closed';
+    });
+    
+    const progress = Math.round((completedIssues.length / cycleIssues.length) * 100);
+    return { ...cycle, progress };
+  });
+  
   return {
     // Core data
     roadmapItems,
@@ -73,8 +95,8 @@ export default async (cycleId, omegaConfig, extraFields = []) => {
     issuesByRoadmapItems: releaseItemsByRoadmapItem,
     
     // Cycle data
-    cycle: activeCycle,
-    cycles,
+    cycle: cyclesWithProgress.find(cycle => cycle.isActive) || cyclesWithProgress[0],
+    cycles: cyclesWithProgress,
     
     // Metadata
     assignees,

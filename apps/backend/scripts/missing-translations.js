@@ -1,4 +1,4 @@
-const collectCycleOverviewData = require('../server/service/collect-cycle-overview-data');
+const collectCycleData = require('../server/service/collect-cycle-data');
 const { jiraLabelTranslations: labelTranslations } = require('../server/config');
 const { uniq } = require('lodash');
 
@@ -10,7 +10,7 @@ const getLabels = (labels, prefix) => {
 };
 
 (async () => {
-  const { projects, issues } = await collectCycleOverviewData();
+  const { roadmapItems, issues } = await collectCycleData();
 
   const isssuesWithLabels = issues.filter(issue => {
     return issue.fields.labels.length !== 0;
@@ -32,7 +32,7 @@ const getLabels = (labels, prefix) => {
     return !Object.keys(labelTranslations.area).includes(label);
   }).forEach((label) => console.log(label));
 
-  const usedProjects = Object.entries(projects).filter(([projectId, value]) => {
+  const usedProjects = Object.entries(roadmapItems).filter(([projectId, value]) => {
     return issues.some(issue => issue.fields.parent && issue.fields.parent.key === projectId);
   });
 
