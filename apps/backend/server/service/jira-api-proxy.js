@@ -35,6 +35,15 @@ class JiraApiProxy {
   }
 
   /**
+   * Get all sprints
+   * @returns {Promise<Object>} Sprint data with sprints array
+   */
+  async getAllSprints() {
+    const dataSource = this._getDataSource();
+    return await dataSource.getAllSprints();
+  }
+
+  /**
    * Get sprint by ID
    * @param {string|number} sprintId - Sprint ID to retrieve
    * @returns {Promise<Object>} Sprint data with sprints array

@@ -27,13 +27,7 @@ function createRouter(omegaConfig) {
       method: 'GET',
       path: '/cycle-data',
       handler: 'cycleData',
-      description: 'Cycle data endpoint with single data structure for all views'
-    },
-    {
-      method: 'GET',
-      path: '/cycle-data/:id',
-      handler: 'cycleData',
-      description: 'Cycle data endpoint for specific cycle with single data structure'
+      description: 'Cycle data endpoint with unified data structure for all views'
     }
   ];
 

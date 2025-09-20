@@ -33,6 +33,21 @@ class FakeDataGenerator {
     this.sprints = this._generateSprints();
   }
 
+  async getAllSprints() {
+    const sprintsResponse = this.sprints.map(s => ({
+      name: s.name,
+      end: s.endDate,
+      start: s.startDate,
+      delivery: s.startDate,
+      id: s.id,
+      state: s.state
+    }));
+
+    return {
+      sprints: sprintsResponse
+    };
+  }
+
   async getSprintById(sprintId) {
     const sprint = sprintId 
       ? this.sprints.find(s => s.id === parseInt(sprintId)) || this.sprints[0]

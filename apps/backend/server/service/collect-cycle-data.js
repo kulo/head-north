@@ -7,11 +7,11 @@ const { uniqBy, uniq, groupBy, pick } = pkg;
  * Collect cycle data for both roadmap and cycle overview views
  * This replaces the need for separate collect-cycle-overview-data.js and collect-roadmap-data.js
  */
-export default async (cycleId, omegaConfig, extraFields = []) => {
+export default async (omegaConfig, extraFields = []) => {
   const jiraApi = new JiraApiProxy(omegaConfig);
   
-  // Get sprint data from Jira (sprint terminology stays in Jira domain)
-  const { sprint, sprints } = await jiraApi.getSprintById(cycleId);
+  // Get all sprint data from Jira (sprint terminology stays in Jira domain)
+  const { sprints } = await jiraApi.getAllSprints();
   
   // Convert sprints to cycles for our domain
   const cycles = sprints.map(sprint => ({
@@ -29,14 +29,13 @@ export default async (cycleId, omegaConfig, extraFields = []) => {
   const activeCycle = cycles.find(cycle => cycle.isActive) || cycles[0];
   
   // Get all necessary data in parallel
-  const [roadmapItems, issues, releaseItemsByRoadmapItem] = await Promise.all([
+  const [roadmapItems, releaseItemsByRoadmapItem] = await Promise.all([
     jiraApi.getRoadmapItems(),
-    cycleId ? jiraApi.getIssuesForSprint(cycleId, extraFields) : null,
     jiraApi.getReleaseItemsGroupedByRoadmapItem()
   ]);
   
-  // Get issues for all cycles if no specific cycle requested
-  const allIssues = cycleId ? [issues] : await Promise.all(
+  // Get issues for all cycles
+  const allIssues = await Promise.all(
     sprints.map(({ id }) => jiraApi.getIssuesForSprint(id, extraFields))
   );
   
@@ -95,7 +94,6 @@ export default async (cycleId, omegaConfig, extraFields = []) => {
     issuesByRoadmapItems: releaseItemsByRoadmapItem,
     
     // Cycle data
-    cycle: cyclesWithProgress.find(cycle => cycle.isActive) || cyclesWithProgress[0],
     cycles: cyclesWithProgress,
     
     // Metadata

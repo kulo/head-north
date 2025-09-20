@@ -11,11 +11,7 @@ const { groupBy } = pkg;
 export default async (context) => {
   const omegaConfig = context.omegaConfig;
   
-  // Get parameters
-  const cycleId = context.params.id || context.query.cycleId;
-  const filters = context.query.filters ? JSON.parse(context.query.filters) : {};
-  
-  logger.default.info('building cycle data', { cycleId, filters });
+  logger.default.info('building cycle data');
 
   try {
     // Collect all necessary data
@@ -30,7 +26,7 @@ export default async (context) => {
       initiatives: configInitiatives, 
       stages,
       teams 
-    } = await collectCycleData(cycleId, omegaConfig);
+    } = await collectCycleData(omegaConfig);
 
     // Build unified data structure that both views can use
     const roadmapData = buildOverview(issues, issuesByRoadmapItems, roadmapItems, cycles, omegaConfig);
@@ -90,21 +86,14 @@ export default async (context) => {
       ...areaData
     }));
 
-    // Simplified response structure - frontend works directly with this data
-    const response = {
+    // Return all data - filtering is handled client-side
+    context.body = {
       cycles,
       stages,
       areas: areasArray,
       assignees,
       initiatives: unifiedInitiatives
     };
-
-    // Apply server-side filtering if requested
-    if (Object.keys(filters).length > 0) {
-      response = applyServerSideFilters(response, filters);
-    }
-
-    context.body = response;
 
   } catch (error) {
     logger.default.error('Error building unified data', error);
@@ -118,152 +107,3 @@ export default async (context) => {
 };
 
 
-/**
- * Apply server-side filtering to the data
- * This is a placeholder for future server-side filtering implementation
- */
-const applyServerSideFilters = (data, filters) => {
-  if (!filters || Object.keys(filters).length === 0) {
-    return data;
-  }
-
-  let filteredData = { ...data };
-
-  // Apply area filtering
-  if (filters.area && filters.area !== 'all') {
-    filteredData = filterByArea(filteredData, filters.area);
-  }
-
-  // Apply initiative filtering
-  if (filters.initiatives && filters.initiatives.length > 0) {
-    filteredData = filterByInitiatives(filteredData, filters.initiatives);
-  }
-
-  // Apply stage filtering
-  if (filters.stages && filters.stages.length > 0) {
-    filteredData = filterByStages(filteredData, filters.stages);
-  }
-
-  return filteredData;
-};
-
-// Server-side filter implementations (adapted from frontend filters)
-
-const filterByArea = (data, selectedArea) => {
-  if (!selectedArea || selectedArea === 'all') {
-    return data;
-  }
-
-  const filteredInitiatives = data.initiatives.map(initiative => {
-    const filteredRoadmapItems = initiative.roadmapItems.map(roadmapItem => {
-      const filteredReleaseItems = roadmapItem.releaseItems ? roadmapItem.releaseItems.filter(releaseItem => {
-        // Check direct area match (case-insensitive)
-        if (releaseItem.area && releaseItem.area.toLowerCase() === selectedArea.toLowerCase()) {
-          return true;
-        }
-        
-        // Check areaIds array match
-        if (releaseItem.areaIds && Array.isArray(releaseItem.areaIds)) {
-          return releaseItem.areaIds.some(areaId => 
-            areaId && areaId.toLowerCase() === selectedArea.toLowerCase()
-          );
-        }
-        
-        return false;
-      }) : [];
-      
-      // Only keep roadmap items that have matching release items after area filtering
-      if (filteredReleaseItems.length > 0) {
-        return { ...roadmapItem, releaseItems: filteredReleaseItems };
-      }
-      
-      return null;
-    }).filter(item => item !== null);
-
-    // Only keep initiatives that have matching roadmap items after filtering
-    if (filteredRoadmapItems.length > 0) {
-      return { ...initiative, roadmapItems: filteredRoadmapItems };
-    }
-    
-    return null;
-  }).filter(item => item !== null);
-
-  return { ...data, initiatives: filteredInitiatives };
-};
-
-const filterByInitiatives = (data, selectedInitiatives) => {
-  if (!selectedInitiatives || selectedInitiatives.length === 0) {
-    return data;
-  }
-
-  // Check if "All" is selected
-  const isAllSelected = selectedInitiatives.some(init => 
-    init && (init.id === 'all' || init.value === 'all')
-  );
-  
-  if (isAllSelected) {
-    return data;
-  }
-
-  // Filter by selected initiative IDs
-  const selectedInitiativeIds = selectedInitiatives
-    .filter(init => init && init.id)
-    .map(init => String(init.id));
-
-  const filteredInitiatives = data.initiatives.filter(initiative => 
-    selectedInitiativeIds.includes(String(initiative.initiativeId))
-  );
-
-  return { ...data, initiatives: filteredInitiatives };
-};
-
-const filterByStages = (data, selectedStages) => {
-  if (!selectedStages || selectedStages.length === 0) {
-    return data;
-  }
-
-  // Check if "All" is selected
-  const isAllSelected = selectedStages.some(stage => 
-    stage && (stage.id === 'all' || stage.value === 'all')
-  );
-  
-  if (isAllSelected) {
-    return data;
-  }
-
-  // Filter by selected stage values/IDs
-  const selectedStageValues = selectedStages
-    .filter(stage => stage && (stage.value || stage.id || stage.name))
-    .map(stage => stage.value || stage.id || stage.name)
-    .filter(value => value !== 'all');
-
-  const filteredInitiatives = data.initiatives.map(initiative => {
-    const filteredRoadmapItems = initiative.roadmapItems.map(roadmapItem => {
-      // Only filter release items by stage - roadmap items don't have stages
-      const filteredReleaseItems = roadmapItem.releaseItems ? roadmapItem.releaseItems.filter(releaseItem => {
-        // Check if release item stage matches any selected stage
-        if (releaseItem.stage && selectedStageValues.includes(releaseItem.stage)) {
-          return true;
-        }
-        
-        return false;
-      }) : [];
-      
-      // Only keep roadmap items that have matching release items after stage filtering
-      if (filteredReleaseItems.length > 0) {
-        return { ...roadmapItem, releaseItems: filteredReleaseItems };
-      }
-      
-      return null;
-    }).filter(item => item !== null);
-
-    // Only keep initiatives that have matching roadmap items after filtering
-    if (filteredRoadmapItems.length > 0) {
-      return { ...initiative, roadmapItems: filteredRoadmapItems };
-    }
-    
-    return null;
-  }).filter(item => item !== null);
-
-  return { ...data, initiatives: filteredInitiatives };
-};

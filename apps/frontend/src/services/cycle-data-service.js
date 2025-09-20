@@ -133,17 +133,15 @@ class CycleDataService {
 
 
   /**
-   * Get overview data for a specific cycle
+   * Get overview data for all cycles
    * This is the main data source for the Area component
-   * @param {string|number} cycleId - The cycle ID to get overview for
-   * @returns {Promise<object>} Cycle overview data with devCycleData
+   * @returns {Promise<object>} Cycle overview data with all cycles
    */
-  async getOverviewForCycle(cycleId) {
+  async getOverviewForCycle() {
     // Use cycle cache - all data is available in the cycle structure
     const data = await this._getCycleData()
     
-    // If a specific cycle is requested, we could filter the data here
-    // For now, return the full unified data as it contains all cycles
+    // Return the full unified data as it contains all cycles
     return data
   }
 
@@ -352,22 +350,11 @@ class CycleDataService {
   /**
    * Get cycle data directly from the cycle-data endpoint
    * This is the new preferred method for getting data
-   * @param {string|number} cycleId - Optional cycle ID
-   * @param {object} filters - Optional filters to apply
    * @returns {Promise<object>} Cycle data structure
    */
-  async getCycleData(cycleId = null, filters = {}) {
-    // If no specific cycle or filters, use cached data
-    if (!cycleId && Object.keys(filters).length === 0) {
-      return this._getCycleData()
-    }
-    
-    // For specific cycles or filters, make a direct API call
-    const params = new URLSearchParams()
-    if (cycleId) params.set('cycleId', cycleId.toString())
-    if (Object.keys(filters).length > 0) params.set('filters', JSON.stringify(filters))
-    
-    return this._request(`/cycle-data?${params.toString()}`)
+  async getCycleData() {
+    // Always use cached data since we fetch all data at once
+    return this._getCycleData()
   }
 
   /**

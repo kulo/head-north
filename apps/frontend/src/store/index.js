@@ -341,8 +341,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         commit('CLEAR_ERROR')
         try {
           // Use unified data service
-          const cycleId = state.selectedCycle ? state.selectedCycle.id : null
-          const cycleData = await cycleDataService.getOverviewForCycle(cycleId);
+          const cycleData = await cycleDataService.getOverviewForCycle();
           
           // Extract data from simplified cycle structure
           const cycles = cycleData.cycles || [];
