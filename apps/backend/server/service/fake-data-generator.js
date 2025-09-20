@@ -33,46 +33,10 @@ class FakeDataGenerator {
     this.sprints = this._generateSprints();
   }
 
-  async getAllSprints() {
-    const sprintsResponse = this.sprints.map(s => ({
-      name: s.name,
-      end: s.endDate,
-      start: s.startDate,
-      delivery: s.startDate,
-      id: s.id,
-      state: s.state
-    }));
-
-    return {
-      sprints: sprintsResponse
-    };
+  async getSprintsData() {
+    return { sprints: this.sprints };
   }
 
-  async getSprintById(sprintId) {
-    const sprint = sprintId 
-      ? this.sprints.find(s => s.id === parseInt(sprintId)) || this.sprints[0]
-      : this.sprints[0];
-    
-    const sprintResponse = {
-      name: sprint.name,
-      end: sprint.endDate,
-      start: sprint.startDate,
-      delivery: sprint.startDate,
-      id: sprint.id,
-      state: sprint.state
-    };
-
-    const sprintsResponse = this.sprints.map(s => ({
-      name: s.name,
-      end: s.endDate,
-      start: s.startDate,
-      delivery: s.startDate,
-      id: s.id,
-      state: s.state
-    }));
-
-    return { sprint: sprintResponse, sprints: sprintsResponse };
-  }
 
   async getIssuesForSprint(sprintId, extraFields = []) {
     const issues = [];
@@ -138,19 +102,65 @@ class FakeDataGenerator {
     return issues;
   }
 
-  async getRoadmapItems() {
+  async getRoadmapItemsData() {
     return this.roadmapItems;
   }
 
-  async getReleaseItemsGroupedByRoadmapItem() {
-    const releaseItemsByRoadmapItem = {};
+
+  async getReleaseItemsData() {
+    const allReleaseItems = [];
     
     // Create 1-3 release items for each roadmap item, distributed across different cycles
     Object.keys(this.roadmapItems).forEach(roadmapItemKey => {
-      releaseItemsByRoadmapItem[roadmapItemKey] = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
+      const releaseItems = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
+      // Add roadmapItemId foreign key to each release item
+      releaseItems.forEach(item => {
+        allReleaseItems.push({
+          ...item,
+          roadmapItemId: roadmapItemKey,
+          cycleId: item.sprint?.id || null
+        });
+      });
     });
     
-    return releaseItemsByRoadmapItem;
+    return allReleaseItems;
+  }
+
+
+  /**
+   * Get simulated issues for a sprint
+   */
+  _getIssuesForSprint(sprintId) {
+    const issues = [];
+    
+    // Create some simulated issues for this sprint
+    Object.keys(this.roadmapItems).forEach(roadmapItemKey => {
+      const roadmapItem = this.roadmapItems[roadmapItemKey];
+      const releaseItems = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
+      
+      releaseItems.forEach((item, index) => {
+        if (item.sprint?.id === sprintId) {
+          issues.push({
+            id: item.id,
+            key: item.id,
+            fields: {
+              summary: item.summary,
+              description: `Description for ${item.summary}`,
+              status: { id: this._getStatusId(item.status), name: item.status },
+              effort: item.effort || 0,
+              assignee: item.assignee ? { displayName: item.assignee, accountId: item.assignee.toLowerCase().replace(' ', '.') } : null,
+              labels: roadmapItem.labels || [],
+              parent: { key: roadmapItemKey }
+            },
+            parent: roadmapItemKey,
+            created: new Date().toISOString(),
+            updated: new Date().toISOString()
+          });
+        }
+      });
+    });
+    
+    return issues;
   }
 
   _getRandomStage() {
@@ -193,6 +203,9 @@ class FakeDataGenerator {
         closedSprints: [],
         parent: roadmapItemKey,
         status: status,
+        assignee: assignee,
+        effort: Math.floor(Math.random() * 8) + 1,
+        stage: releaseStage,
         sprint: sprint ? {
           id: sprint.id,
           name: sprint.name,

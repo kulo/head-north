@@ -81,11 +81,7 @@ export default {
     const initiatives = computed(() => store.state.initiatives)
     const selectedInitiatives = computed(() => store.state.selectedInitiatives)
     const selectedArea = computed(() => store.state.selectedArea)
-    const areas = computed(() => {
-      const areasData = store.state.areas || []
-      console.log('Areas data:', areasData)
-      return areasData
-    })
+    const areas = computed(() => store.state.areas || [])
     
     // Use the unified filtering getter from the store
     const filteredRoadmapData = computed(() => store.getters.filteredRoadmapData)

@@ -174,11 +174,8 @@ class CycleDataService {
     const data = await this.getOverviewForCycle(cycleId)
     const initiatives = data.initiatives || []
     
-    // Convert initiatives array to the expected format
-    return initiatives.map(init => ({
-      id: init.initiativeId,
-      name: init.initiative
-    }))
+    // Return initiatives as they are (already in correct format from backend)
+    return initiatives
   }
 
 

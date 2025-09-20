@@ -55,7 +55,6 @@ export default {
     }, { immediate: true })
     
     const handleCycleChange = (cycleId) => {
-      console.log('Cycle changed to ID:', cycleId) // Debug log
       selectedCycleId.value = cycleId
       
       // Find the cycle object by ID

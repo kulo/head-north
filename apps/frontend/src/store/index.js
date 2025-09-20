@@ -6,6 +6,11 @@ import { filterByArea } from '@/filters/areaFilter.js'
 import { filterByInitiatives } from '@/filters/initiativesFilter.js'
 import { filterByStages } from '@/filters/stagesFilter.js'
 import { filterByAssignees } from '@/filters/assigneeFilter.js'
+import { 
+  transformForCycleOverview, 
+  transformForRoadmap, 
+  calculateCycleProgress 
+} from '@/utils/dataTransformations.js'
 
 // Simple filtering function that works with the simplified data structure
 const applyFilters = (data, filters) => {
@@ -234,48 +239,49 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           commit('SET_LOADING', true)
           commit('SET_ERROR', null)
           
-          // Fetch unified data from API service
-          const cycleData = await cycleDataService.getCycleData()
+          // Fetch raw data from API service
+          const rawData = await cycleDataService.getCycleData()
           
-          // Store the cycle data directly
-          commit('SET_ROADMAP_DATA', cycleData)
+          // Transform raw data for roadmap view
+          const roadmapData = transformForRoadmap(rawData)
           
-          // Extract and set data directly from simplified structure
-          if (cycleData.cycles) {
-            commit('SET_CYCLES', cycleData.cycles)
+          // Store the transformed roadmap data
+          commit('SET_ROADMAP_DATA', roadmapData)
+          
+                // Extract and set metadata from raw data
+                if (rawData.cycles) {
+                  // Calculate cycle progress with release items
+                  const cyclesWithProgress = calculateCycleProgress(rawData.cycles, rawData.releaseItems || [])
+                  commit('SET_CYCLES', cyclesWithProgress)
+                }
+          
+          if (rawData.stages) {
+            commit('SET_STAGES', rawData.stages)
           }
           
-          if (cycleData.stages) {
-            commit('SET_STAGES', cycleData.stages)
-          }
-          
-          if (cycleData.areas) {
-            commit('SET_AREAS', cycleData.areas.map(area => ({ 
+          if (rawData.areas) {
+            commit('SET_AREAS', rawData.areas.map(area => ({ 
               id: area.id,
               name: area.name || area.id,
               teams: area.teams || []
             })))
           }
           
-          if (cycleData.assignees) {
-            commit('SET_ASSIGNEES', cycleData.assignees.map(assignee => ({
+          if (rawData.assignees) {
+            commit('SET_ASSIGNEES', rawData.assignees.map(assignee => ({
               id: assignee.accountId,
               name: assignee.displayName
             })))
           }
           
-          if (cycleData.initiatives) {
-            const initiativesArray = cycleData.initiatives.map(init => ({
-              id: init.initiativeId,
-              name: init.initiative
-            }))
-            const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray)
+          if (rawData.initiatives) {
+            const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(rawData.initiatives)
             commit('SET_INITIATIVES', allInitiatives)
           }
           
         } catch (error) {
           const errorMessage = error?.message || error?.toString() || 'Unknown error'
-          logger.error.errorSafe('Failed to fetch release overview', error)
+          logger.error.errorSafe('Failed to fetch roadmap data', error)
           commit('SET_ERROR', errorMessage)
         } finally {
           commit('SET_LOADING', false)
@@ -340,65 +346,75 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       async fetchCycleOverviewData({ state, commit }) {
         commit('CLEAR_ERROR')
         try {
-          // Use unified data service
-          const cycleData = await cycleDataService.getOverviewForCycle();
+          // Fetch raw data from API service
+          const rawData = await cycleDataService.getCycleData();
           
-          // Extract data from simplified cycle structure
-          const cycles = cycleData.cycles || [];
-          const stages = cycleData.stages || [];
-          const assignees = cycleData.assignees || [];
+          // Transform raw data for cycle overview view
+          const cycleOverviewData = transformForCycleOverview(rawData);
           
-          // Use the full initiatives data directly - don't map to simplified structure
-          const initiativesArray = cycleData.initiatives || [];
-
-          // Get areas from simplified structure
-          const areas = (cycleData.areas || []).map(area => ({ 
-            id: area.id,
-            name: area.name || area.id,
-            teams: area.teams || []
-          }));
-
+          // Calculate cycle progress with release items
+          const cyclesWithProgress = calculateCycleProgress(rawData.cycles || [], rawData.releaseItems || []);
+          
           // Find active cycle
-          const activeCycle = cycles.find(cycle => cycle.state === 'active') || cycles[0];
+          const activeCycle = cyclesWithProgress.find(cycle => cycle.state === 'active') || cyclesWithProgress[0];
 
-          // For Cycle Overview, we need the initiatives directly, not area data
-          // The Cycle Overview component expects: { cycle, initiatives: [...] }
-          const cycleOverviewData = {
+          // Set the cycle overview data with active cycle
+          const finalCycleOverviewData = {
             cycle: activeCycle,
-            initiatives: cycleData.initiatives || []
+            initiatives: cycleOverviewData.initiatives
           };
           
-          console.log('🔍 DEBUG: Setting cycle overview data:', cycleOverviewData);
-          commit('SET_CYCLE_OVERVIEW_DATA', cycleOverviewData);
+          commit('SET_CYCLE_OVERVIEW_DATA', finalCycleOverviewData);
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
-          commit('SET_CYCLES', cycles);
+          commit('SET_CYCLES', cyclesWithProgress);
           commit('SET_SELECTED_CYCLE', activeCycle);
 
-          const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(initiativesArray.map(init => ({
-            id: init.initiativeId,
-            name: init.initiative
-          })));
-          const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(assignees.map(assignee => ({
-            id: assignee.accountId,
-            name: assignee.displayName
-          })));
-          const allStages = [{ name: 'All Stages', id: 'all' }].concat(stages);
-
-          commit('SET_INITIATIVES', allInitiatives);
-          commit('SET_ASSIGNEES', allAssignees);
-          commit('SET_AREAS', areas);
-          commit('SET_STAGES', allStages);
+          // Set metadata from raw data
+          if (rawData.initiatives) {
+            const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(rawData.initiatives);
+            commit('SET_INITIATIVES', allInitiatives);
+          }
+          
+          if (rawData.assignees) {
+            const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(rawData.assignees.map(assignee => ({
+              id: assignee.accountId,
+              name: assignee.displayName
+            })));
+            commit('SET_ASSIGNEES', allAssignees);
+          }
+          
+          if (rawData.areas) {
+            const areas = rawData.areas.map(area => ({ 
+              id: area.id,
+              name: area.name || area.id,
+              teams: area.teams || []
+            }));
+            commit('SET_AREAS', areas);
+          }
+          
+          let allStages = [];
+          if (rawData.stages) {
+            allStages = [{ name: 'All Stages', id: 'all' }].concat(rawData.stages);
+            commit('SET_STAGES', allStages);
+          }
 
           if (!state.selectedInitiatives || state.selectedInitiatives.length === 0) {
+            const allInitiatives = [{ name: 'All Initiatives', id: 'all' }].concat(rawData.initiatives || []);
             commit('SET_SELECTED_INITIATIVES', [allInitiatives[0]]);
           }
 
           if (!state.selectedAssignees || state.selectedAssignees.length === 0) {
+            const allAssignees = [{ name: 'All Assignees', id: 'all' }].concat(rawData.assignees?.map(assignee => ({
+              id: assignee.accountId,
+              name: assignee.displayName
+            })) || []);
             commit('SET_SELECTED_ASSIGNEES', [allAssignees[0]]);
           }
 
           if (!state.selectedStages || state.selectedStages.length === 0) {
-            commit('SET_SELECTED_STAGES', [allStages[0]]);
+            if (allStages.length > 0) {
+              commit('SET_SELECTED_STAGES', [allStages[0]]);
+            }
           }
 
 
@@ -406,7 +422,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           const currentAreaId = state.selectedArea || 'overview';
           const currentCycleOverviewData = {
             cycle: activeCycle,
-            initiatives: initiativesArray
+            initiatives: cycleOverviewData.initiatives
           };
           commit('SET_CURRENT_CYCLE_OVERVIEW_DATA', currentCycleOverviewData);
 

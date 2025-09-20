@@ -61,8 +61,10 @@ export default {
       }
       
       // Filter release items that belong to this cycle
+      // Ensure type consistency for comparison
       return this.roadmapItem.releaseItems.filter(releaseItem => 
-        releaseItem.cycle && releaseItem.cycle.id === cycleId
+        releaseItem.cycle && 
+        releaseItem.cycle.id === cycleId
       );
     }
   }

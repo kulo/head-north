@@ -35,51 +35,41 @@ class JiraApiProxy {
   }
 
   /**
-   * Get all sprints
-   * @returns {Promise<Object>} Sprint data with sprints array
+   * Get sprints data (raw)
+   * @returns {Promise<Object>} Raw sprint data
    */
-  async getAllSprints() {
+  async getSprintsData() {
     const dataSource = this._getDataSource();
-    return await dataSource.getAllSprints();
+    return await dataSource.getSprintsData();
   }
 
   /**
-   * Get sprint by ID
-   * @param {string|number} sprintId - Sprint ID to retrieve
-   * @returns {Promise<Object>} Sprint data with sprints array
+   * Get roadmap items data (raw)
+   * @returns {Promise<Object>} Raw roadmap items data
    */
-  async getSprintById(sprintId) {
+  async getRoadmapItemsData() {
     const dataSource = this._getDataSource();
-    return await dataSource.getSprintById(sprintId);
+    return await dataSource.getRoadmapItemsData();
   }
 
   /**
-   * Get issues for a specific sprint
+   * Get release items data (raw)
+   * @returns {Promise<Array>} Raw release items data
+   */
+  async getReleaseItemsData() {
+    const dataSource = this._getDataSource();
+    return await dataSource.getReleaseItemsData();
+  }
+
+  /**
+   * Get issues for a specific sprint (raw)
    * @param {string|number} sprintId - Sprint ID
    * @param {Array} extraFields - Additional fields to retrieve
-   * @returns {Promise<Array>} Array of issues
+   * @returns {Promise<Array>} Raw issues data
    */
   async getIssuesForSprint(sprintId, extraFields = []) {
     const dataSource = this._getDataSource();
     return await dataSource.getIssuesForSprint(sprintId, extraFields);
-  }
-
-  /**
-   * Get all roadmap items
-   * @returns {Promise<Object>} Object with roadmap item data keyed by roadmap item ID
-   */
-  async getRoadmapItems() {
-    const dataSource = this._getDataSource();
-    return await dataSource.getRoadmapItems();
-  }
-
-  /**
-   * Get release items grouped by roadmap item
-   * @returns {Promise<Object>} Object with release items grouped by parent roadmap item
-   */
-  async getReleaseItemsGroupedByRoadmapItem() {
-    const dataSource = this._getDataSource();
-    return await dataSource.getReleaseItemsGroupedByRoadmapItem();
   }
 
   /**

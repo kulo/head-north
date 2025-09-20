@@ -1,25 +1,21 @@
 import collectCycleData from '../service/collect-cycle-data.js';
-import buildOverview from '../calculator/generate-overview.js';
 import { logger } from '@omega-one/shared-utils';
-import pkg from "lodash";
-const { groupBy } = pkg;
 
 /**
- * Get cycle data endpoint that serves both roadmap and cycle overview data
- * This replaces the need for separate cycle-overview.js and cycles-roadmap.js actions
+ * Get cycle data endpoint that provides raw data for frontend transformation
+ * Backend responsibility: Data validation and basic normalization only
+ * Frontend responsibility: All presentation logic and calculations
  */
 export const getCycleData = async (context) => {
   const omegaConfig = context.omegaConfig;
   
-  logger.default.info('building cycle data');
+  logger.default.info('fetching raw cycle data');
 
   try {
-    // Collect all necessary data
+    // Collect raw data from Jira
     const { 
       roadmapItems, 
-      issues, 
-      issuesByRoadmapItems, 
-      cycle, 
+      releaseItems,  // ← Changed from issues
       cycles, 
       assignees, 
       areas, 
@@ -28,57 +24,8 @@ export const getCycleData = async (context) => {
       teams 
     } = await collectCycleData(omegaConfig);
 
-    // Build unified data structure that both views can use
-    const roadmapData = buildOverview(issues, issuesByRoadmapItems, roadmapItems, cycles, omegaConfig);
-    const groupedInitiatives = groupBy(roadmapData, x => x.initiativeId);
-    
-    // Convert to unified structure
-    const unifiedInitiatives = Object.entries(groupedInitiatives).map(([initiativeId, roadmapItems]) => ({
-      initiativeId,
-      initiative: roadmapItems[0]?.initiative || initiativeId,
-      roadmapItems: roadmapItems.map(item => {
-        // Calculate progress from release items
-        const allReleaseItems = item.sprints?.flatMap(sprint => sprint.releaseItems || []) || [];
-        const completedItems = allReleaseItems.filter(ri => ri.status === 'done').length;
-        const totalItems = allReleaseItems.length;
-        const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
-        
-        // Calculate total weeks from effort
-        const totalWeeks = allReleaseItems.reduce((sum, ri) => sum + (ri.effort || 0), 0);
-        
-        // Get primary owner from most recent release item
-        const primaryOwner = allReleaseItems.length > 0 
-          ? allReleaseItems[allReleaseItems.length - 1].assignee || 'Unassigned'
-          : 'Unassigned';
-        
-        // Get cycle names from cycles data
-        const getCycleName = (sprintId) => {
-          const cycle = cycles.find(c => c.id === sprintId);
-          return cycle ? cycle.name : `Cycle ${sprintId}`;
-        };
-        
-        return {
-          id: item.id,
-          name: item.summary || item.name || `Roadmap Item ${item.id}`, // Map summary to name
-          area: item.area,
-          theme: item.theme,
-          owner: primaryOwner,
-          progress: progress,
-          weeks: totalWeeks,
-          url: item.url || `https://example.com/browse/${item.id}`,
-          validations: item.validations || [],
-          releaseItems: item.sprints?.flatMap(sprint => 
-            (sprint.releaseItems || []).map(releaseItem => ({
-              ...releaseItem,
-              cycle: {
-                id: sprint.sprintId,
-                name: getCycleName(sprint.sprintId)
-              }
-            }))
-          ) || []
-        };
-      })
-    }));
+    // Basic data validation - fail fast on invalid data
+    validateRawData({ cycles, roadmapItems, releaseItems, assignees, areas, stages, initiatives: configInitiatives });
 
     // Convert areas object to array for consistency
     const areasArray = Object.entries(areas).map(([id, areaData]) => ({
@@ -86,24 +33,75 @@ export const getCycleData = async (context) => {
       ...areaData
     }));
 
-    // Return all data - filtering is handled client-side
+    // Return raw data - all transformations handled in frontend
     context.body = {
       cycles,
-      stages,
-      areas: areasArray,
+      roadmapItems,
+      releaseItems,  // ← Changed from issues
       assignees,
-      initiatives: unifiedInitiatives
+      areas: areasArray,
+      initiatives: configInitiatives,
+      stages,
+      teams
     };
 
   } catch (error) {
-    logger.default.error('Error building unified data', error);
+    logger.default.error('Error fetching raw cycle data', error);
     context.status = 500;
     context.body = {
       success: false,
       error: error.message,
-      message: 'Failed to build unified data'
+      message: 'Failed to fetch cycle data'
     };
   }
 };
+
+/**
+ * Validate raw data structure - fail fast on invalid data
+ */
+function validateRawData(data) {
+  const { cycles, roadmapItems, releaseItems, assignees, areas, stages, initiatives } = data;
+
+  // Validate required arrays exist
+  if (!Array.isArray(cycles)) {
+    throw new Error('Invalid cycles data: expected array');
+  }
+  if (!Array.isArray(roadmapItems)) {
+    throw new Error('Invalid roadmapItems data: expected array');
+  }
+  if (!Array.isArray(releaseItems)) {  // ← Changed from issues
+    throw new Error('Invalid releaseItems data: expected array');
+  }
+  if (!Array.isArray(assignees)) {
+    throw new Error('Invalid assignees data: expected array');
+  }
+  if (!Array.isArray(stages)) {
+    throw new Error('Invalid stages data: expected array');
+  }
+  if (typeof initiatives !== 'object' || initiatives === null) {
+    throw new Error('Invalid initiatives data: expected object');
+  }
+
+  // Validate areas (can be object or array)
+  if (typeof areas !== 'object' || areas === null) {
+    throw new Error('Invalid areas data: expected object');
+  }
+
+  // Validate cycles have required fields
+  cycles.forEach((cycle, index) => {
+    if (!cycle.id || !cycle.name) {
+      throw new Error(`Invalid cycle at index ${index}: missing id or name`);
+    }
+  });
+
+  // Validate assignees have required fields
+  assignees.forEach((assignee, index) => {
+    if (!assignee.accountId || !assignee.displayName) {
+      throw new Error(`Invalid assignee at index ${index}: missing accountId or displayName`);
+    }
+  });
+
+  logger.default.info(`Raw data validation passed: ${roadmapItems?.length || 0} roadmap items, ${releaseItems?.length || 0} release items, ${cycles?.length || 0} cycles`);
+}
 
 

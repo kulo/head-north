@@ -49,7 +49,7 @@
         <div class="roadmap-item-name">
           <a :href="roadmapItem.url" class="jira-link" target="_blank" @click.stop>
             {{ roadmapItem.name }}
-            <a-icon type="link" />
+            <span>🔗</span>
           </a>
         </div>
         <div class="roadmap-item-owner">{{ roadmapItem.owner }}</div>

@@ -70,7 +70,7 @@
         <h3>
           <a :href="selectedIssue.url" class="jira-link" target="_blank">
             {{ selectedIssue.ticketId + ': ' + selectedIssue.name }}
-            <a-icon type="link" />
+            <span>🔗</span>
           </a>
         </h3>
         <a-divider />
@@ -79,7 +79,7 @@
           <li v-for="validation in selectedIssue.validations" :key="validation.label">
             <a :href="validation.reference" target="_blank">
               {{ validation.label }}
-              <a-icon type="link" />
+              <span>🔗</span>
             </a>
           </li>
         </ul>
@@ -151,8 +151,7 @@ const cycleOverviewData = computed(() => {
         store.dispatch('fetchAssignees'),
         store.dispatch('fetchAreas'),
         store.dispatch('fetchCycles'),
-        store.dispatch('fetchStages'),
-        store.dispatch('fetchReleaseFilters')
+        store.dispatch('fetchStages')
       ])
     })
 
