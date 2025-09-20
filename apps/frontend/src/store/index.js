@@ -55,6 +55,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         roadmapItems: [],
         activeCycle: null
       },
+      // Raw cycles data
+      cycles: [],
       // Cycle overview data
       cycleOverviewData: null,
       currentCycleOverviewData: null,
@@ -81,6 +83,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
     getters: {
       roadmapData: (state) => state.roadmapData,
       cycleOverviewData: (state) => state.cycleOverviewData,
+      cycles: (state) => state.cycles,
       
       // Unified filtering getters using the filtering utilities
       filteredRoadmapData: (state) => {
@@ -88,11 +91,10 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           return []
         }
         
+        // Roadmap view only supports initiatives and areas filtering
         const filteredData = applyFilters(state.roadmapData.initiatives, {
           area: state.selectedArea,
-          initiatives: state.selectedInitiatives,
-          stages: state.selectedStages,
-          assignees: state.selectedAssignees
+          initiatives: state.selectedInitiatives
         })
         
         // Return the filtered initiatives array
@@ -151,6 +153,9 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       },
       SET_ROADMAP_DATA(state, data) {
         state.roadmapData = data
+      },
+      SET_CYCLES(state, cycles) {
+        state.cycles = cycles
       },
       SET_INITIATIVES(state, initiatives) {
         state.initiatives = initiatives

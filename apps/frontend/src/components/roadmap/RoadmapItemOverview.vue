@@ -14,20 +14,20 @@
           </a-tooltip>
         </div>
       </a-col>
-      <a-col :span="4" class="cycle-release-items" v-for="cycle in orderedCycles" :key="cycle.id">
-        <template v-if="getReleaseItemsForCycle(cycle.id).length > 0">
-          <a-row class="release-item" v-for="releaseItem in getReleaseItemsForCycle(cycle.id)" :key="releaseItem.ticketId">
-            <p>
-              <a :href="releaseItem.url" class="jira-link" target="_blank">
-                {{ releaseItem.name }}
-              </a>
-              <span v-if="releaseItem.stage" :class="{ [releaseItem.stage]: true, 'project-popover__release-item__stage': true }">
-                    {{ releaseItem.stage }}
-              </span>
-            </p>
-          </a-row>
-        </template>
-      </a-col>
+          <a-col :span="4" class="cycle-release-items" v-for="cycle in orderedCycles" :key="cycle.id">
+            <template v-if="getReleaseItemsForCycle(cycle.id).length > 0">
+              <a-row class="release-item" v-for="releaseItem in getReleaseItemsForCycle(cycle.id)" :key="releaseItem.id">
+                <p>
+                  <a :href="releaseItem.url" class="jira-link" target="_blank">
+                    {{ releaseItem.name }}
+                  </a>
+                  <span v-if="releaseItem.stage" :class="{ [releaseItem.stage]: true, 'project-popover__release-item__stage': true }">
+                        {{ releaseItem.stage }}
+                  </span>
+                </p>
+              </a-row>
+            </template>
+          </a-col>
     </a-row>
   </div>
 </template>
@@ -61,12 +61,12 @@ export default {
       }
       
       // Filter release items that belong to this cycle
-      // Ensure type consistency for comparison
+      // Use == for type coercion to handle string/number mismatches
       return this.roadmapItem.releaseItems.filter(releaseItem => 
         releaseItem.cycle && 
-        releaseItem.cycle.id === cycleId
+        releaseItem.cycle.id == cycleId
       );
     }
-  }
+  },
 }
 </script>

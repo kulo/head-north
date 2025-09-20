@@ -86,10 +86,11 @@ export default {
     // Use the unified filtering getter from the store
     const filteredRoadmapData = computed(() => store.getters.filteredRoadmapData)
     
-    // Extract cycles from simplified data structure
+    // Extract cycles from store
     const orderedCycles = computed(() => {
-      if (!roadmapData.value?.cycles) return []
-      return [...roadmapData.value.cycles].sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+      const cycles = store.getters.cycles
+      if (!cycles || cycles.length === 0) return []
+      return [...cycles].sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
     })
     
     const activeCycle = computed(() => {
