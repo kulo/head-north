@@ -5,6 +5,7 @@
 
 import pkg from 'lodash';
 const { groupBy } = pkg;
+import { calculateReleaseItemProgress, calculateCycleMetadata, aggregateProgressMetrics } from './cycleCalculations.js';
 
 /**
  * Calculate progress percentage for release items
@@ -46,7 +47,23 @@ export const getPrimaryOwner = (releaseItems) => {
   }
 
   const lastItem = releaseItems[releaseItems.length - 1];
-  return lastItem.assignee || 'Unassigned';
+  
+  // Handle both object and string assignee formats
+  if (!lastItem.assignee) {
+    return 'Unassigned';
+  }
+  
+  // If assignee is an object with displayName property
+  if (typeof lastItem.assignee === 'object' && lastItem.assignee.displayName) {
+    return lastItem.assignee.displayName;
+  }
+  
+  // If assignee is already a string
+  if (typeof lastItem.assignee === 'string') {
+    return lastItem.assignee;
+  }
+  
+  return 'Unassigned';
 };
 
 /**
@@ -114,7 +131,7 @@ export const transformRoadmapItem = (item, cycles) => {
 /**
  * Transform raw data for cycle overview view
  * @param {Object} rawData - Raw data from backend
- * @returns {Object} Transformed data for cycle overview
+ * @returns {Object} Transformed data for cycle overview with full calculations
  */
 export const transformForCycleOverview = (rawData) => {
   if (!rawData || typeof rawData !== 'object') {
@@ -131,8 +148,9 @@ export const transformForCycleOverview = (rawData) => {
     });
   }
   
-  // Group roadmap items by initiative
+  // Group roadmap items by initiative and calculate progress
   const groupedInitiatives = {};
+  const cycleMetrics = [];
   
   roadmapItems.forEach(item => {
     const initiativeId = item.initiativeId || 'unassigned';
@@ -140,21 +158,37 @@ export const transformForCycleOverview = (rawData) => {
       groupedInitiatives[initiativeId] = {
         initiativeId,
         initiative: initiativesLookup[initiativeId] || initiativeId,
-        roadmapItems: []
+        name: initiativesLookup[initiativeId] || initiativeId,
+        roadmapItems: [],
+        // Initialize initiative-level metrics
+        weeks: 0,
+        weeksDone: 0,
+        weeksInProgress: 0,
+        weeksTodo: 0,
+        weeksNotToDo: 0,
+        weeksCancelled: 0,
+        weeksPostponed: 0,
+        releaseItemsCount: 0,
+        releaseItemsDoneCount: 0,
+        progress: 0,
+        progressWithInProgress: 0,
+        progressByReleaseItems: 0,
+        percentageNotToDo: 0
       };
     }
     
     // Find release items for this roadmap item using foreign key
     const itemReleaseItems = releaseItems.filter(ri => ri.roadmapItemId === item.id);
     
-    groupedInitiatives[initiativeId].roadmapItems.push({
+    // Calculate progress metrics for this roadmap item
+    const roadmapItemMetrics = calculateReleaseItemProgress(itemReleaseItems);
+    
+    const roadmapItem = {
       id: item.id,
       name: item.summary || item.name || `Roadmap Item ${item.id}`,
       area: item.area,
       theme: item.theme,
       owner: getPrimaryOwner(itemReleaseItems),
-      progress: calculateProgress(itemReleaseItems),
-      weeks: calculateTotalWeeks(itemReleaseItems),
       url: item.url || `https://example.com/browse/${item.id}`,
       validations: item.validations || {},
       releaseItems: itemReleaseItems.map(releaseItem => ({
@@ -163,13 +197,43 @@ export const transformForCycleOverview = (rawData) => {
           id: releaseItem.cycleId,
           name: getCycleName(cycles, releaseItem.cycleId)
         }
-      }))
-    });
+      })),
+      // Add calculated metrics
+      ...roadmapItemMetrics
+    };
+    
+    groupedInitiatives[initiativeId].roadmapItems.push(roadmapItem);
+    
+    // Aggregate metrics to initiative level
+    const initiative = groupedInitiatives[initiativeId];
+    initiative.weeks += roadmapItemMetrics.weeks;
+    initiative.weeksDone += roadmapItemMetrics.weeksDone;
+    initiative.weeksInProgress += roadmapItemMetrics.weeksInProgress;
+    initiative.weeksTodo += roadmapItemMetrics.weeksTodo;
+    initiative.weeksNotToDo += roadmapItemMetrics.weeksNotToDo;
+    initiative.weeksCancelled += roadmapItemMetrics.weeksCancelled;
+    initiative.weeksPostponed += roadmapItemMetrics.weeksPostponed;
+    initiative.releaseItemsCount += roadmapItemMetrics.releaseItemsCount;
+    initiative.releaseItemsDoneCount += roadmapItemMetrics.releaseItemsDoneCount;
+    
+    // Add to cycle metrics
+    cycleMetrics.push(roadmapItemMetrics);
   });
+
+  // Calculate final initiative-level percentages
+  Object.values(groupedInitiatives).forEach(initiative => {
+    initiative.progress = initiative.weeks > 0 ? Math.round((initiative.weeksDone / initiative.weeks) * 100) : 0;
+    initiative.progressWithInProgress = initiative.weeks > 0 ? Math.round(((initiative.weeksDone + initiative.weeksInProgress) / initiative.weeks) * 100) : 0;
+    initiative.progressByReleaseItems = initiative.releaseItemsCount > 0 ? Math.round((initiative.releaseItemsDoneCount / initiative.releaseItemsCount) * 100) : 0;
+    initiative.percentageNotToDo = initiative.weeks > 0 ? Math.round((initiative.weeksNotToDo / initiative.weeks) * 100) : 0;
+  });
+
+  // Sort initiatives by weeks (largest first)
+  const sortedInitiatives = Object.values(groupedInitiatives).sort((a, b) => b.weeks - a.weeks);
 
   return {
     cycles: cycles || [],
-    initiatives: Object.values(groupedInitiatives)
+    initiatives: sortedInitiatives
   };
 };
 
@@ -238,7 +302,7 @@ export const transformForRoadmap = (rawData) => {
  * Calculate cycle progress based on release items
  * @param {Array} cycles - Array of cycles
  * @param {Array} releaseItems - Array of release items
- * @returns {Array} Cycles with calculated progress
+ * @returns {Array} Cycles with calculated progress and metadata
  */
 export const calculateCycleProgress = (cycles, releaseItems) => {
   if (!Array.isArray(cycles) || !Array.isArray(releaseItems)) {
@@ -250,16 +314,68 @@ export const calculateCycleProgress = (cycles, releaseItems) => {
     const cycleReleaseItems = releaseItems.filter(ri => ri.cycleId === cycle.id);
 
     if (cycleReleaseItems.length === 0) {
-      return { ...cycle, progress: 0 };
+      const cycleMetadata = calculateCycleMetadata(cycle);
+      return { 
+        ...cycle, 
+        progress: 0,
+        progressWithInProgress: 0,
+        progressByReleaseItems: 0,
+        weeks: 0,
+        weeksDone: 0,
+        weeksInProgress: 0,
+        weeksTodo: 0,
+        weeksNotToDo: 0,
+        weeksCancelled: 0,
+        weeksPostponed: 0,
+        releaseItemsCount: 0,
+        releaseItemsDoneCount: 0,
+        percentageNotToDo: 0,
+        ...cycleMetadata
+      };
     }
 
-    // Count completed release items
-    const completedItems = cycleReleaseItems.filter(ri => {
-      const status = ri.status?.toLowerCase();
-      return status === 'done' || status === 'completed' || status === 'closed';
-    });
+    // Calculate comprehensive progress metrics
+    const cycleMetrics = calculateReleaseItemProgress(cycleReleaseItems);
+    const cycleMetadata = calculateCycleMetadata(cycle);
 
-    const progress = Math.round((completedItems.length / cycleReleaseItems.length) * 100);
-    return { ...cycle, progress };
+    return { 
+      ...cycle, 
+      ...cycleMetrics,
+      ...cycleMetadata
+    };
   });
+};
+
+/**
+ * Calculate cycle-level data for a specific cycle with all initiatives
+ * @param {Object} cycle - Cycle object
+ * @param {Array} initiatives - Array of initiatives with calculated metrics
+ * @returns {Object} Cycle with aggregated data
+ */
+export const calculateCycleData = (cycle, initiatives) => {
+  if (!cycle || !Array.isArray(initiatives)) {
+    return cycle;
+  }
+
+  // Aggregate all initiative metrics
+  const initiativeMetrics = initiatives.map(initiative => ({
+    weeks: initiative.weeks || 0,
+    weeksDone: initiative.weeksDone || 0,
+    weeksInProgress: initiative.weeksInProgress || 0,
+    weeksTodo: initiative.weeksTodo || 0,
+    weeksNotToDo: initiative.weeksNotToDo || 0,
+    weeksCancelled: initiative.weeksCancelled || 0,
+    weeksPostponed: initiative.weeksPostponed || 0,
+    releaseItemsCount: initiative.releaseItemsCount || 0,
+    releaseItemsDoneCount: initiative.releaseItemsDoneCount || 0
+  }));
+
+  const aggregatedMetrics = aggregateProgressMetrics(initiativeMetrics);
+  const cycleMetadata = calculateCycleMetadata(cycle);
+
+  return {
+    ...cycle,
+    ...aggregatedMetrics,
+    ...cycleMetadata
+  };
 };

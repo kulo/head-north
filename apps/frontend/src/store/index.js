@@ -1,6 +1,5 @@
 import { createStore } from 'vuex'
 import { CycleDataService } from '@/services/index.js'
-import { calculateAreaData } from '@/libraries/calculateAreaData.js'
 import { logger } from '@omega-one/shared-utils'
 import { filterByArea } from '@/filters/areaFilter.js'
 import { filterByInitiatives } from '@/filters/initiativesFilter.js'
@@ -10,7 +9,8 @@ import { filterByCycle } from '@/filters/cycleFilter.js'
 import { 
   transformForCycleOverview, 
   transformForRoadmap, 
-  calculateCycleProgress 
+  calculateCycleProgress,
+  calculateCycleData
 } from '@/utils/dataTransformations.js'
 
 /**
@@ -168,8 +168,12 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       cycle: state.selectedCycle
     });
 
+    // Recalculate cycle data based on filtered initiatives
+    const recalculatedCycle = calculateCycleData(rawData.cycle, filteredInitiatives);
+
     return {
       ...rawData,
+      cycle: recalculatedCycle,
       initiatives: filteredInitiatives
     };
   },
@@ -433,9 +437,12 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
             displayCycle = selectBestCycle(cyclesWithProgress);
           }
 
+          // Calculate cycle data with aggregated metrics
+          const cycleWithData = calculateCycleData(displayCycle, cycleOverviewData.initiatives);
+          
           // Set the cycle overview data with selected cycle
           const finalCycleOverviewData = {
-            cycle: displayCycle,
+            cycle: cycleWithData,
             initiatives: cycleOverviewData.initiatives
           };
           
@@ -496,7 +503,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // Set current cycle overview data for display
           const currentAreaId = state.selectedArea || 'overview';
           const currentCycleOverviewData = {
-            cycle: displayCycle,
+            cycle: cycleWithData,
             initiatives: cycleOverviewData.initiatives
           };
           commit('SET_CURRENT_CYCLE_OVERVIEW_DATA', currentCycleOverviewData);

@@ -20,18 +20,17 @@
   --color-gray-900: #1a1a1a; /* Darkest gray */
   
   /* Status Colors */
-  --color-success: #32d17e; /* Green for success */
-  --color-warning: #ffa500; /* Orange for warnings */
-  --color-error: #e63939; /* Red for errors */
-  --color-info: #64a0b0; /* Blue for info */
+  --color-success: #8DC601; /* Green for success */
+  --color-warning: #FFB843; /* Orange for warnings */
+  --color-error: #FF8264; /* Red for errors */
+  --color-info: #d3d3d3; /* Blue for info */
   
   /* Legacy color mappings for gradual migration */
   --color-legacy-bg: #0a132d;
-  --color-legacy-text: #eee;
-  --color-legacy-accent: #64a0b0;
+  --color-legacy-text: #ffffff;
+  --color-legacy-accent: #808080;
 
   /* Prewave Main Application Color System */
-  --color-*: initial;
   
   --color-neutral-white: #FFFFFF;
   --color-neutral-50: #F7F7F7;
@@ -130,7 +129,6 @@
   --color-teal-250: #CBF5F2;
   --color-teal-50: #E9F6F4;
   
-  --color-focus: #0148FF;
 
   --spacing: 0.0625rem;
 
@@ -218,25 +216,32 @@ body {
 }
 
 .color1 {
-  color: var(--color-success);
+  color: var(--color-low-risk-750);
 }
 
 .color2 {
-  color: var(--color-highlight);
+  color: var(--color-low-risk-500);
 }
 
 .color3 {
-  color: var(--color-info);
+  color: var(--color-low-risk-250);
 }
 
 .color4 {
-  color: var(--color-gray-600);
+  color: var(--color-yellow-250);
 }
 
 .color5 {
-  color: var(--color-gray-500);
+  color: var(--color-yellow-500);
 }
 
+.color6 {
+  color: var(--color-warning-mid-risk-500);
+}
+
+.color6 {
+  color: var(--color-warning-mid-risk-750);
+}
 /* Font declarations - Using Helvetica Neue as primary font */
 /* Helvetica Neue is a system font, so no @font-face declarations needed */
 
@@ -575,7 +580,7 @@ body {
   flex-wrap: nowrap;
   white-space: nowrap;
   overflow-x: auto;
-  background: transparent;
+  background: #000000;
   padding: 10px 0;
   margin-bottom: 20px;
   position: sticky;
@@ -858,6 +863,7 @@ body {
 
 .release-item-container-column__initiative,
 .release-item-container-column__project {
+  color: var(--color-yellow-950);
   align-items: center;
   display: flex;
   height: 60px;
@@ -975,8 +981,20 @@ body {
   height: 4px;
   border-radius: 2px;
   width: var(--percentage-with-in-progress);
-  background: url(../stripe4.gif) center center repeat-x;
+  background: repeating-linear-gradient(
+    45deg,
+    #9AA40D 0px,
+    #9AA40D 10px,
+    #C7D229 10px,
+    #C7D229 20px
+  );
   opacity: 0.8;
+  animation: stripe-move 2s linear infinite;
+}
+
+@keyframes stripe-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 0; }
 }
 
 .progress-line div {
@@ -1217,6 +1235,7 @@ body {
     font-size: 50px;
     line-height: 50px;
     font-weight: bold;
+    color: var(--color-highlight)
 }
 
 .global-initiatives__progress__big-title {
@@ -1254,14 +1273,20 @@ body {
 
 .global-initiatives__progress__bar .global-initiatives__progress__bar_inprogress {
   width: var(--percentage-with-in-progress);
-  background: var(--color-success);
-  background: url(../stripe7.gif) center center repeat-x;
+  background: repeating-linear-gradient(
+    45deg,
+    #9AA40D 0px,
+    #9AA40D 10px,
+    #C7D229 10px,
+    #C7D229 20px
+  );
   opacity: 0.8;
+  animation: stripe-move 2s linear infinite;
 }
 
 .global-initiatives__progress__bar .global-initiatives__progress__bar_done {
   width: var(--percentage);
-  background: var(--color-success);
+  background: var(--color-highlight);
 }
 
 .global-initiatives__progress__bar .global-initiatives__progress__bar_nottodo {
@@ -1367,7 +1392,7 @@ body {
 }
 
 .jira-link {
-  color: var(--color-highlight);
+  color: var(--color-text-primary);
   text-decoration: none;
 }
 
@@ -1504,7 +1529,7 @@ body {
 
 /* Jira Link Styles */
 .jira-link {
-  color: var(--color-highlight);
+  color: var(--color-text-primary);
   text-decoration: none;
 }
 
@@ -1864,6 +1889,7 @@ ant-dropdown-menu-vertical
 }
 
 .roadmap-item-name {
+  color: var(--color-text-primary);
   font-weight: bold;
   margin-bottom: 5px;
 }

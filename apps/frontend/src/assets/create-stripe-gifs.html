@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stripe Pattern Generator</title>
+    <style>
+        body {
+            background: #000;
+            margin: 0;
+            padding: 20px;
+        }
+        .stripe-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .stripe-pattern {
+            height: 20px;
+            background: repeating-linear-gradient(
+                45deg,
+                #9AA40D 0px,
+                #9AA40D 10px,
+                #C7D229 10px,
+                #C7D229 20px
+            );
+            animation: move 2s linear infinite;
+        }
+        .stripe-pattern-1 {
+            animation-duration: 1s;
+        }
+        .stripe-pattern-2 {
+            animation-duration: 1.5s;
+        }
+        .stripe-pattern-3 {
+            animation-duration: 2s;
+        }
+        .stripe-pattern-4 {
+            animation-duration: 2.5s;
+        }
+        .stripe-pattern-5 {
+            animation-duration: 3s;
+        }
+        .stripe-pattern-6 {
+            animation-duration: 3.5s;
+        }
+        .stripe-pattern-7 {
+            animation-duration: 4s;
+        }
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 0; }
+        }
+        .label {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="stripe-container">
+        <div class="label">stripe1.gif (1s duration)</div>
+        <div class="stripe-pattern stripe-pattern-1"></div>
+        
+        <div class="label">stripe2.gif (1.5s duration)</div>
+        <div class="stripe-pattern stripe-pattern-2"></div>
+        
+        <div class="label">stripe3.gif (2s duration)</div>
+        <div class="stripe-pattern stripe-pattern-3"></div>
+        
+        <div class="label">stripe4.gif (2.5s duration)</div>
+        <div class="stripe-pattern stripe-pattern-4"></div>
+        
+        <div class="label">stripe5.gif (3s duration)</div>
+        <div class="stripe-pattern stripe-pattern-5"></div>
+        
+        <div class="label">stripe6.gif (3.5s duration)</div>
+        <div class="stripe-pattern stripe-pattern-6"></div>
+        
+        <div class="label">stripe7.gif (4s duration)</div>
+        <div class="stripe-pattern stripe-pattern-7"></div>
+    </div>
+    
+    <script>
+        // Instructions for creating GIFs
+        console.log(`
+To create the GIF files from these patterns:
+
+1. Open this HTML file in a browser
+2. Use a screen recording tool or GIF capture tool to record each stripe pattern
+3. Or use an online tool like:
+   - https://ezgif.com/video-to-gif
+   - https://www.screentogif.com/
+   - https://giphy.com/create/gifmaker
+
+4. Capture each stripe pattern individually and save as:
+   - stripe1.gif (1s duration)
+   - stripe2.gif (1.5s duration) 
+   - stripe3.gif (2s duration)
+   - stripe4.gif (2.5s duration)
+   - stripe5.gif (3s duration)
+   - stripe6.gif (3.5s duration)
+   - stripe7.gif (4s duration)
+
+5. Replace the existing stripe*.gif files in the assets folder
+
+Alternative: Use CSS instead of GIFs by updating the CSS to use the stripe pattern directly.
+        `);
+    </script>
+</body>
+</html>

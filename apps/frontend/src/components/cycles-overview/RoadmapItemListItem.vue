@@ -10,7 +10,6 @@
     <a-popover 
       v-model:open="popoverVisible"
       placement="topLeft" 
-      :title="roadmapItem.name"
       overlay-class-name="roadmap-popover"
       trigger="click"
       :mouse-enter-delay="0"
@@ -49,7 +48,6 @@
         <div class="roadmap-item-name">
           <a :href="roadmapItem.url" class="jira-link" target="_blank" @click.stop>
             {{ roadmapItem.name }}
-            <span>🔗</span>
           </a>
         </div>
         <div class="roadmap-item-owner">{{ roadmapItem.owner }}</div>
