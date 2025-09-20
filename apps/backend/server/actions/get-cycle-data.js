@@ -5,10 +5,10 @@ import pkg from "lodash";
 const { groupBy } = pkg;
 
 /**
- * Cycle data endpoint that serves both roadmap and cycle overview data
+ * Get cycle data endpoint that serves both roadmap and cycle overview data
  * This replaces the need for separate cycle-overview.js and cycles-roadmap.js actions
  */
-export default async (context) => {
+export const getCycleData = async (context) => {
   const omegaConfig = context.omegaConfig;
   
   logger.default.info('building cycle data');

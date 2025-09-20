@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 import { registerApiRoutes } from './utils/route-registry.js';
-import getCycleData from './actions/cycle-data.js';
+import { getCycleData } from './actions/get-cycle-data.js';
 
 /**
  * Create router with OmegaConfig dependency injection
