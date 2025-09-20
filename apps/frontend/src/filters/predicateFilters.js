@@ -105,6 +105,40 @@ export const createStagesPredicate = (selectedStages) => {
 }
 
 /**
+ * Create a predicate that filters by cycle
+ * @param {string|Object} selectedCycle - Selected cycle ID or cycle object
+ * @returns {Function} Predicate function
+ */
+export const createCyclePredicate = (selectedCycle) => {
+  if (selectedCycle === null || selectedCycle === undefined) {
+    console.error('createCyclePredicate: No cycle provided. Client code must ensure a valid cycle is passed.')
+    return () => false // Reject all items
+  }
+
+  // Extract cycle ID from cycle object or use the value directly
+  const cycleId = typeof selectedCycle === 'object' ? selectedCycle.id : selectedCycle
+  
+  if (!cycleId || cycleId === 'all' || cycleId === '') {
+    console.error('createCyclePredicate: Invalid cycle ID provided. Client code must ensure a valid cycle ID is passed.')
+    return () => false // Reject all items
+  }
+
+  return (releaseItem) => {
+    // Check cycleId match
+    if (releaseItem.cycleId && releaseItem.cycleId === cycleId) {
+      return true
+    }
+    
+    // Check if release item belongs to the selected cycle through sprint
+    if (releaseItem.sprint && releaseItem.sprint.id === cycleId) {
+      return true
+    }
+    
+    return false
+  }
+}
+
+/**
  * Combine multiple predicates using AND logic
  * @param {...Function} predicates - Predicate functions to combine
  * @returns {Function} Combined predicate function
@@ -119,14 +153,26 @@ export const combinePredicates = (...predicates) => {
  * @param {string} filters.area - Area filter
  * @param {Array} filters.initiatives - Initiatives filter
  * @param {Array} filters.stages - Stages filter
+ * @param {string|Object} filters.cycle - Cycle filter
  * @returns {Object} Object containing releaseItemPredicate and initiativePredicate
  */
 export const createFilterPredicates = (filters) => {
-  const releaseItemPredicate = combinePredicates(
+  // Handle null or undefined filters
+  if (!filters) {
+    filters = {}
+  }
+
+  // Only include cycle predicate if cycle filter is provided
+  const predicates = [
     createAreaPredicate(filters.area),
     createStagesPredicate(filters.stages)
-  )
+  ]
 
+  if (filters.cycle !== undefined) {
+    predicates.push(createCyclePredicate(filters.cycle))
+  }
+
+  const releaseItemPredicate = combinePredicates(...predicates)
   const initiativePredicate = createInitiativesPredicate(filters.initiatives)
 
   return {
@@ -139,6 +185,7 @@ export default {
   createAreaPredicate,
   createInitiativesPredicate,
   createStagesPredicate,
+  createCyclePredicate,
   combinePredicates,
   createFilterPredicates
 }

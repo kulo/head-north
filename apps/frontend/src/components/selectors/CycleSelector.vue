@@ -43,14 +43,11 @@ export default {
       selectedCycleId.value = newValue?.id || newValue?.name || null
     }, { immediate: true })
     
-    // Watch for cycles to be loaded and set default if no cycle is selected
+    // Watch for cycles to be loaded and ensure a cycle is selected
     watch(() => store.state.cycles, (newCycles) => {
       if (newCycles && newCycles.length > 0 && !selectedCycle.value) {
-        // If no cycle is selected but cycles are available, select the first one
-        const firstCycle = newCycles[0]
-        const firstCycleId = firstCycle.id || firstCycle.name
-        selectedCycleId.value = firstCycleId
-        store.dispatch('fetchCycle', firstCycle)
+        // Let the store handle cycle selection via _ensureSelectedCycle
+        store.dispatch('_ensureSelectedCycle')
       }
     }, { immediate: true })
     
@@ -59,6 +56,7 @@ export default {
       
       // Find the cycle object by ID
       const cycle = cycles.value.find(c => (c.id || c.name) === cycleId)
+      
       if (cycle) {
         store.dispatch('fetchCycle', cycle)
       }

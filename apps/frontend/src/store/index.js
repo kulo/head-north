@@ -6,11 +6,58 @@ import { filterByArea } from '@/filters/areaFilter.js'
 import { filterByInitiatives } from '@/filters/initiativesFilter.js'
 import { filterByStages } from '@/filters/stagesFilter.js'
 import { filterByAssignees } from '@/filters/assigneeFilter.js'
+import { filterByCycle } from '@/filters/cycleFilter.js'
 import { 
   transformForCycleOverview, 
   transformForRoadmap, 
   calculateCycleProgress 
 } from '@/utils/dataTransformations.js'
+
+/**
+ * Determines the best cycle to select based on availability and priority
+ * Priority: active cycles (oldest first) -> future cycles (oldest first) -> closed cycles (oldest first)
+ * @param {Array} cycles - Array of available cycles
+ * @returns {Object|null} Selected cycle or null if no cycles available
+ */
+const selectBestCycle = (cycles) => {
+  if (!cycles || !Array.isArray(cycles) || cycles.length === 0) {
+    return null
+  }
+
+  // Sort cycles by start date (oldest first)
+  const sortedCycles = [...cycles].sort((a, b) => {
+    const dateA = new Date(a.start || a.delivery || 0)
+    const dateB = new Date(b.start || b.delivery || 0)
+    return dateA - dateB
+  })
+
+  // 1. Try to find active cycles (oldest first)
+  const activeCycles = sortedCycles.filter(cycle => cycle.state === 'active')
+  if (activeCycles.length > 0) {
+    return activeCycles[0] // Oldest active cycle
+  }
+
+  // 2. Try to find future cycles (oldest first)
+  const futureCycles = sortedCycles.filter(cycle => {
+    const cycleDate = new Date(cycle.start || cycle.delivery || 0)
+    const now = new Date()
+    return cycleDate > now && cycle.state !== 'closed' && cycle.state !== 'completed'
+  })
+  if (futureCycles.length > 0) {
+    return futureCycles[0] // Oldest future cycle
+  }
+
+  // 3. Fall back to closed cycles (oldest first)
+  const closedCycles = sortedCycles.filter(cycle => 
+    cycle.state === 'closed' || cycle.state === 'completed'
+  )
+  if (closedCycles.length > 0) {
+    return closedCycles[0] // Oldest closed cycle
+  }
+
+  // 4. Last resort: return the first cycle (oldest by our sort)
+  return sortedCycles[0]
+}
 
 // Simple filtering function that works with the simplified data structure
 const applyFilters = (data, filters) => {
@@ -38,6 +85,11 @@ const applyFilters = (data, filters) => {
   // Apply assignee filtering if specified
   if (filters && filters.assignees && filters.assignees.length > 0) {
     filteredData = filterByAssignees(filteredData, filters.assignees)
+  }
+
+  // Apply cycle filtering if specified
+  if (filters && filters.cycle) {
+    filteredData = filterByCycle(filteredData, filters.cycle)
   }
 
   return filteredData
@@ -112,7 +164,8 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       area: state.selectedArea,
       initiatives: state.selectedInitiatives,
       stages: state.selectedStages,
-      assignees: state.selectedAssignees
+      assignees: state.selectedAssignees,
+      cycle: state.selectedCycle
     });
 
     return {
@@ -227,12 +280,26 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
       async _ensureSelectedCycle({ commit, state }) {
         let cycleId = state.selectedCycle?.id
         
-        // If no cycle selected, get active cycle and set it
+        // If no cycle selected, determine the best cycle to select
         if (!cycleId) {
-          const activeCycle = await cycleDataService.getActiveCycle()
-          if (activeCycle) {
-            cycleId = activeCycle.id
-            commit('SET_SELECTED_CYCLE', activeCycle)
+          // First try to get cycles from state if available
+          let cycles = state.cycles
+          
+          // If no cycles in state, fetch them
+          if (!cycles || cycles.length === 0) {
+            try {
+              cycles = await cycleDataService.getAllCycles()
+            } catch (error) {
+              console.error('Failed to fetch cycles for selection:', error)
+              return null
+            }
+          }
+          
+          // Select the best cycle using our dedicated function
+          const bestCycle = selectBestCycle(cycles)
+          if (bestCycle) {
+            cycleId = bestCycle.id
+            commit('SET_SELECTED_CYCLE', bestCycle)
           }
         }
         
@@ -360,19 +427,22 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // Calculate cycle progress with release items
           const cyclesWithProgress = calculateCycleProgress(rawData.cycles || [], rawData.releaseItems || []);
           
-          // Find active cycle
-          const activeCycle = cyclesWithProgress.find(cycle => cycle.state === 'active') || cyclesWithProgress[0];
+          // Use currently selected cycle if available, otherwise select the best cycle
+          let displayCycle = state.selectedCycle;
+          if (!displayCycle) {
+            displayCycle = selectBestCycle(cyclesWithProgress);
+          }
 
-          // Set the cycle overview data with active cycle
+          // Set the cycle overview data with selected cycle
           const finalCycleOverviewData = {
-            cycle: activeCycle,
+            cycle: displayCycle,
             initiatives: cycleOverviewData.initiatives
           };
           
           commit('SET_CYCLE_OVERVIEW_DATA', finalCycleOverviewData);
           commit('SET_SELECTED_AREA_BY_PATH', router?.currentRoute);
           commit('SET_CYCLES', cyclesWithProgress);
-          commit('SET_SELECTED_CYCLE', activeCycle);
+          commit('SET_SELECTED_CYCLE', displayCycle);
 
           // Set metadata from raw data
           if (rawData.initiatives) {
@@ -426,7 +496,7 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           // Set current cycle overview data for display
           const currentAreaId = state.selectedArea || 'overview';
           const currentCycleOverviewData = {
-            cycle: activeCycle,
+            cycle: displayCycle,
             initiatives: cycleOverviewData.initiatives
           };
           commit('SET_CURRENT_CYCLE_OVERVIEW_DATA', currentCycleOverviewData);
@@ -444,7 +514,11 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
           const data = await cycleDataService.getAllCycles()
           commit('SET_CYCLES', data)
           if (data.length > 0) {
-            commit('SET_SELECTED_CYCLE', data[0])
+            // Select the best cycle using our dedicated function
+            const bestCycle = selectBestCycle(data)
+            if (bestCycle) {
+              commit('SET_SELECTED_CYCLE', bestCycle)
+            }
           }
         } catch (error) {
           const errorMessage = error?.message || error?.toString() || 'Unknown error'
@@ -452,8 +526,10 @@ export default function createAppStore(cycleDataService, omegaConfig, router) {
         }
       },
       
-      fetchCycle({ commit }, cycle) {
+      fetchCycle({ commit, dispatch }, cycle) {
         commit('SET_SELECTED_CYCLE', cycle)
+        // Refresh cycle overview data when cycle changes
+        dispatch('fetchCycleOverviewData')
       },
       
       async fetchStages({ commit }) {

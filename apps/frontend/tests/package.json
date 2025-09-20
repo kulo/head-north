@@ -8,20 +8,30 @@
     "test:coverage": "jest --coverage"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.3",
     "@vue/test-utils": "^2.4.0",
+    "@vue/vue3-jest": "^29.2.6",
+    "babel-jest": "^29.7.0",
     "jest": "^29.0.0",
+    "jest-environment-jsdom": "^30.1.2",
     "vue": "^3.4.0",
     "vuex": "^4.0.0"
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "moduleFileExtensions": ["js", "vue"],
+    "moduleFileExtensions": [
+      "js",
+      "vue"
+    ],
     "transform": {
       "^.+\\.vue$": "@vue/vue3-jest",
       "^.+\\.js$": "babel-jest"
     },
-    "moduleNameMapping": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    }
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/../src/$1"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(.*\\.mjs$))"
+    ]
   }
 }
