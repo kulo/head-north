@@ -1,13 +1,16 @@
+import { Context } from 'koa';
 import collectCycleData from '../service/collect-cycle-data.js';
 import { logger } from '@omega-one/shared-utils';
+import type { OmegaConfig } from '@omega/shared-config';
+import type { RawData } from '@omega/shared-types';
 
 /**
  * Get cycle data endpoint that provides raw data for frontend transformation
  * Backend responsibility: Data validation and basic normalization only
  * Frontend responsibility: All presentation logic and calculations
  */
-export const getCycleData = async (context) => {
-  const omegaConfig = context.omegaConfig;
+export const getCycleData = async (context: Context): Promise<void> => {
+  const omegaConfig = context.omegaConfig as OmegaConfig;
   
   logger.default.info('fetching raw cycle data');
 
@@ -21,16 +24,26 @@ export const getCycleData = async (context) => {
       areas, 
       initiatives: configInitiatives, 
       stages,
-      teams 
+      teams
     } = await collectCycleData(omegaConfig);
 
     // Basic data validation - fail fast on invalid data
-    validateRawData({ cycles, roadmapItems, releaseItems, assignees, areas, stages, initiatives: configInitiatives });
+    validateRawData({ 
+      cycles, 
+      sprints: [], 
+      roadmapItems, 
+      releaseItems, 
+      issues: [], 
+      assignees, 
+      areas, 
+      stages, 
+      initiatives: configInitiatives 
+    });
 
     // Convert areas object to array for consistency
     const areasArray = Object.entries(areas).map(([id, areaData]) => ({
-      id,
-      ...areaData
+      ...areaData,
+      id
     }));
 
     // Return raw data - all transformations handled in frontend
@@ -50,7 +63,7 @@ export const getCycleData = async (context) => {
     context.status = 500;
     context.body = {
       success: false,
-      error: error.message,
+      error: (error as Error).message,
       message: 'Failed to fetch cycle data'
     };
   }
@@ -59,7 +72,7 @@ export const getCycleData = async (context) => {
 /**
  * Validate raw data structure - fail fast on invalid data
  */
-function validateRawData(data) {
+function validateRawData(data: RawData): void {
   const { cycles, roadmapItems, releaseItems, assignees, areas, stages, initiatives } = data;
 
   // Validate required arrays exist
@@ -103,5 +116,3 @@ function validateRawData(data) {
 
   logger.default.info(`Raw data validation passed: ${roadmapItems?.length || 0} roadmap items, ${releaseItems?.length || 0} release items, ${cycles?.length || 0} cycles`);
 }
-
-

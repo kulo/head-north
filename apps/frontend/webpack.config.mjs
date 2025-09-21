@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 
 export default {
-  entry: './src/main.js',
+  entry: './src/main.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -24,14 +24,22 @@ export default {
         loader: 'vue-loader'
       },
       {
-        test: /\.js$/,
+        test: /\.(js|ts)$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env']
+            }
+          },
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true
+            }
           }
-        }
+        ]
       },
       {
         test: /\.css$/,
@@ -74,7 +82,7 @@ export default {
       '@': path.resolve(__dirname, 'src'),
       'vue': 'vue/dist/vue.esm-bundler.js'
     },
-    extensions: ['.js', '.vue', '.json']
+    extensions: ['.js', '.ts', '.vue', '.json']
   },
   devServer: {
     static: {

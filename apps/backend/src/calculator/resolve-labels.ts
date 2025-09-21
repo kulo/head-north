@@ -1,11 +1,14 @@
 import {translateLabelWithoutFallback, getLabelsWithPrefix} from "./parse-common.js";
+import type { OmegaConfig } from '@omega/shared-config';
 
 class LabelResolver {
-  constructor(validationDictionary) {
+  private validationDictionary: any;
+
+  constructor(validationDictionary: any) {
     this.validationDictionary = validationDictionary;
   }
 
-  static collectInitiative(project, omegaConfig) {
+  static collectInitiative(project: any, omegaConfig: OmegaConfig) {
     const fallbackInitiative = 'uncategorized';
     const initiative = this.parseInitiative(project.labels);
 
@@ -29,7 +32,7 @@ class LabelResolver {
     return { value: translatedInitiative, id: initiative, validations: [] };
   }
 
-  static collectTheme(project, omegaConfig) {
+  static collectTheme(project: any, omegaConfig: OmegaConfig) {
     const theme = this.parseTheme(project.labels);
     if (!theme) {
       return { value: undefined, validations: [omegaConfig.getValidationDictionary().roadmapItem.missingThemeLabel] };
@@ -43,13 +46,13 @@ class LabelResolver {
     return { value: translatedTheme, validations: [] };
   }
 
-  static collectArea(project, omegaConfig) {
+  static collectArea(project: any, omegaConfig: OmegaConfig) {
     const areaIds = this.parseArea(project.labels);
     if(areaIds.length === 0) {
       return { value: [], validations: [omegaConfig.getValidationDictionary().roadmapItem.missingAreaLabel] };
     }
 
-    const areas = areaIds.map((area) => {
+    const areas = areaIds.map((area: string) => {
       const translatedArea =  translateLabelWithoutFallback('area', area, omegaConfig);
 
       if (!translatedArea) {
@@ -65,18 +68,17 @@ class LabelResolver {
     };
   }
 
-  static parseTheme(labels) {
+  static parseTheme(labels: string[]): string | undefined {
     return getLabelsWithPrefix(labels, 'theme').shift();
   }
 
-  static parseInitiative(labels) {
+  static parseInitiative(labels: string[]): string | undefined {
     return getLabelsWithPrefix(labels, 'initiative').shift();
   }
 
-  static parseArea(labels) {
+  static parseArea(labels: string[]): string[] {
     return getLabelsWithPrefix(labels, 'area');
   }
 }
 
 export default LabelResolver;
-

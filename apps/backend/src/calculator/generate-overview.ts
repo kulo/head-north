@@ -2,20 +2,21 @@ import { ReleaseItemParser } from './release-item-parser.js';
 import { RoadmapItemParser } from './roadmap-item-parser.js';
 import { resolveStage, isReleasableStage, isFinalReleaseStage } from './resolve-stage.js';
 import { resolveStatus } from './resolve-status.js';
+import type { OmegaConfig } from '@omega/shared-config';
 
-const hasAnyReleaseItem = (x) => x.releaseItems.length > 0;
+const hasAnyReleaseItem = (x: any) => x.releaseItems.length > 0;
 
 // Helper functions (moved from resolve-sprint.js)
-const isScheduledForFuture = (issueFields) => {
+const isScheduledForFuture = (issueFields: any): boolean => {
   return !!issueFields.sprint && new Date() < new Date(issueFields.sprint.endDate);
 };
 
-const isInBacklog = (issueFields, omegaConfig) => {
+const isInBacklog = (issueFields: any, omegaConfig: OmegaConfig): boolean => {
   const status = resolveStatus(issueFields, null, omegaConfig);
   return omegaConfig.isFutureStatus(status) && !issueFields.sprint;
 };
 
-const validateGTMPlan = (releaseItems, omegaConfig) => {
+const validateGTMPlan = (releaseItems: any[], omegaConfig: OmegaConfig) => {
   if(!releaseItems) return {};
   const releaseItemStates = releaseItems.map(releaseItem => {
     const stage = resolveStage(releaseItem.summary, omegaConfig);
@@ -38,13 +39,12 @@ const validateGTMPlan = (releaseItems, omegaConfig) => {
   };
 }
 
-
-export default (issues, issuesByRoadmapItems, roadmapItems, sprints, omegaConfig) => {
+export default (issues: any[], issuesByRoadmapItems: any, roadmapItems: any, sprints: any[], omegaConfig: OmegaConfig): any => {
   const roadmapItemParser = new RoadmapItemParser(roadmapItems, omegaConfig);
   const releaseItemsPerSprintGroups = issues.map((issueList, index) => {
     const currentSprint = sprints[index];
     const parser = new ReleaseItemParser(currentSprint, omegaConfig);
-    const releaseItems = issueList.map(issue => parser.parse(issue));
+    const releaseItems = issueList.map((issue: any) => parser.parse(issue));
 
     return {
       sprintId: currentSprint.id,
@@ -65,11 +65,11 @@ export default (issues, issuesByRoadmapItems, roadmapItems, sprints, omegaConfig
       validations:validateGTMPlan(issuesByRoadmapItems[id], omegaConfig),
       sprints: releaseItemsPerSprintGroups.map((releaseItems) => {
         const releaseItemsForRoadmapItem = releaseItems.releaseItems
-          .filter(item => item.projectId === id);
+          .filter((item: any) => item.projectId === id);
         const { releaseItems: parsedReleaseItems } = roadmapItemParser.parse(id, releaseItemsForRoadmapItem);
         return {
           ...releaseItems,
-          releaseItems: parsedReleaseItems.filter(item => item.isExternal)
+          releaseItems: parsedReleaseItems.filter((item: any) => item.isExternal)
         };
       }).filter(hasAnyReleaseItem)
     };

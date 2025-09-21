@@ -23,6 +23,29 @@
     "sourceMap": true,
     "composite": true,
     "incremental": true,
-    "tsBuildInfoFile": ".tsbuildinfo"
-  }
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./apps/frontend/src/*"],
+      "@omega/shared-types": ["./packages/shared-types"],
+      "@omega/shared-utils": ["./packages/shared-utils"],
+      "@omega/shared-config": ["./packages/shared-config"]
+    }
+  },
+  "include": [
+    "apps/**/*",
+    "packages/**/*",
+    "tools/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "references": [
+    { "path": "./packages/shared-types" }
+  ]
 }

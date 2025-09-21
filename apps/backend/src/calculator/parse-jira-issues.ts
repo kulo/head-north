@@ -3,9 +3,16 @@ const { groupBy, omit, get } = pkg;
 import { ReleaseItemParser } from './release-item-parser.js';
 import { RoadmapItemParser } from './roadmap-item-parser.js';
 import { translateLabel } from './parse-common.js';
+import type { OmegaConfig } from '@omega/shared-config';
 
 class IssueParser {
-  constructor(issues, roadmapItems, sprint, omegaConfig) {
+  private issues: any[];
+  private roadmapItems: any;
+  private omegaConfig: OmegaConfig;
+  private _releaseItemParser: ReleaseItemParser;
+  private _roadmapItemParser: RoadmapItemParser;
+
+  constructor(issues: any[], roadmapItems: any, sprint: any, omegaConfig: OmegaConfig) {
     this.issues = issues;
     this.roadmapItems = roadmapItems;
     this.omegaConfig = omegaConfig;
@@ -20,17 +27,17 @@ class IssueParser {
     return this._groupByInitiatives(roadmapItems);
   }
 
-  _groupByRoadmapItems(parsed) {
+  private _groupByRoadmapItems(parsed: any[]) {
     const grouped = groupBy(parsed, (releaseItem) => releaseItem.projectId);
 
     return Object.values(grouped).map((roadmapItemGroup) => {
       const projectId = roadmapItemGroup[0].projectId;
-      const releaseItems = roadmapItemGroup.map(releaseItem => omit(releaseItem, ['projectId']));
+      const releaseItems = roadmapItemGroup.map(releaseItem => omit(releaseItem, ['projectId'])) as any[];
       return this._roadmapItemParser.parse(projectId, releaseItems);
     });
   }
 
-  _groupByInitiatives(roadmapItems) {
+  private _groupByInitiatives(roadmapItems: any[]) {
     const virtualId = 'virtual';
     const virtualLabel = translateLabel('theme', virtualId, this.omegaConfig);
     const virtuals = roadmapItems.filter(roadmapItem => roadmapItem.theme === virtualLabel);
@@ -60,6 +67,6 @@ class IssueParser {
   }
 }
 
-export default (issues, roadmapItems, sprint, omegaConfig) => {
+export default (issues: any[], roadmapItems: any, sprint: any, omegaConfig: OmegaConfig) => {
   return (new IssueParser(issues, roadmapItems, sprint, omegaConfig)).parse();
 }

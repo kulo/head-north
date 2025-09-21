@@ -27,32 +27,47 @@
  *   const endpoints = config.getEndpoints()
  */
 
-// Removed import of label-translations.js - now using integrated configuration
-import validationDictionary from './validation-dictionary.js'
-import JiraConfig from './jira-config.js'
-import { getEnvVarWithFallback } from './utils.js'
+import validationDictionary from './validation-dictionary.js';
+import JiraConfig from './jira-config.js';
+import { getEnvVarWithFallback } from './utils.js';
+import type { 
+  ProcessEnv, 
+  ConfigOverrides, 
+  OmegaConfigData, 
+  CommonConfig, 
+  FrontendConfig, 
+  BackendConfig,
+  JiraConfig as JiraConfigType,
+  Page,
+  ValidationRules
+} from './types.js';
 
 export default class OmegaConfig {
-  constructor({ processEnv = {}, overrides = {} })  {
-    this.processEnv = processEnv
-    this.overrides = overrides
+  private processEnv: ProcessEnv;
+  private overrides: ConfigOverrides;
+  private environment: string;
+  private config: OmegaConfigData;
+
+  constructor({ processEnv = {}, overrides = {} }: { processEnv?: ProcessEnv; overrides?: ConfigOverrides } = {}) {
+    this.processEnv = processEnv;
+    this.overrides = overrides;
     
     // Extract environment from overrides or processEnv, with fallback
-    this.environment = overrides.environment || processEnv.NODE_ENV || 'development'
+    this.environment = overrides.environment || processEnv.NODE_ENV || 'development';
     
     // Initialize configuration
-    this.config = this._initializeConfig()
+    this.config = this._initializeConfig();
     
     // Apply overrides
-    this._applyOverrides()
+    this._applyOverrides();
   }
 
   /**
    * Initialize configuration based on environment
    * @private
    */
-  _initializeConfig() {
-    const config = {
+  private _initializeConfig(): OmegaConfigData {
+    const config: OmegaConfigData = {
       // Environment
       environment: this.environment,
       
@@ -180,8 +195,8 @@ export default class OmegaConfig {
           CYCLE_OVERVIEW: { id: 'cycle-overview', path: '/cycles/overview', name: 'Cycle Overview' },
           ROADMAP: { id: 'roadmap', path: '/cycles/roadmap', name: 'Roadmap' }
         },
-        getAllPages() {
-          return Object.values(this.pages)
+        getAllPages(): Page[] {
+          return Object.values(this.pages);
         }
       },
       
@@ -189,38 +204,34 @@ export default class OmegaConfig {
       backend: {
         // Will be populated if processEnv is provided
       }
-      
-    }
+    };
 
     // Add backend-specific configuration if processEnv is provided
     if (this.processEnv && Object.keys(this.processEnv).length > 0) {
       // Server Configuration
-      config.backend.port = getEnvVarWithFallback(this.processEnv, 'PORT', '3000', 'Server port')
-      config.backend.maxRetry = getEnvVarWithFallback(this.processEnv, 'MAX_RETRY', '3', 'Max retry count')
-      config.backend.delayBetweenRetry = getEnvVarWithFallback(this.processEnv, 'DELAY_BETWEEN_RETRY', '2', 'Retry delay')
+      config.backend.port = getEnvVarWithFallback(this.processEnv, 'PORT', '3000', 'Server port');
+      config.backend.maxRetry = getEnvVarWithFallback(this.processEnv, 'MAX_RETRY', '3', 'Max retry count');
+      config.backend.delayBetweenRetry = getEnvVarWithFallback(this.processEnv, 'DELAY_BETWEEN_RETRY', '2', 'Retry delay');
       
       // Jira Configuration (backend-specific) - using JiraConfig class
-      const useFakeData = this._getUseFakeData()
+      const useFakeData = this._getUseFakeData();
       // Update the common config with the actual useFakeData value
-      config.common.development.useFakeData = useFakeData
-      const jiraConfig = new JiraConfig(this.processEnv, useFakeData)
-      config.backend.jira = jiraConfig.getConfig()
-      config.backend.useFakeData = useFakeData
+      config.common.development.useFakeData = useFakeData;
+      const jiraConfig = new JiraConfig(this.processEnv, useFakeData);
+      config.backend.jira = jiraConfig.getConfig();
+      config.backend.useFakeData = useFakeData;
     }
 
-    return config
+    return config;
   }
-
-
-  
 
   /**
    * Apply configuration overrides
    * @private
    */
-  _applyOverrides() {
+  private _applyOverrides(): void {
     if (this.overrides) {
-      this.config = this._deepMerge(this.config, this.overrides)
+      this.config = this._deepMerge(this.config, this.overrides);
     }
   }
 
@@ -228,34 +239,34 @@ export default class OmegaConfig {
    * Deep merge objects
    * @private
    */
-  _deepMerge(target, source) {
-    const result = { ...target }
+  private _deepMerge(target: any, source: any): any {
+    const result = { ...target };
     
     for (const key in source) {
       if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        result[key] = this._deepMerge(target[key] || {}, source[key])
+        result[key] = this._deepMerge(target[key] || {}, source[key]);
       } else {
-        result[key] = source[key]
+        result[key] = source[key];
       }
     }
     
-    return result
+    return result;
   }
 
   /**
    * Check if fake data should be used
    * @private
    */
-  _getUseFakeData() {
-    const useFakeData = getEnvVarWithFallback(this.processEnv, 'USE_FAKE_DATA', 'false', 'Fake data mode')
-    return useFakeData === 'true' || useFakeData === '1' || useFakeData === true
+  private _getUseFakeData(): boolean {
+    const useFakeData = getEnvVarWithFallback(this.processEnv, 'USE_FAKE_DATA', 'false', 'Fake data mode');
+    return useFakeData === 'true' || useFakeData === '1';
   }
 
   /**
    * Get backend host based on environment
    * @private
    */
-  _getBackendHost() {
+  private _getBackendHost(): string {
     // Check for environment variable first
     const envBackendHost = this.processEnv.API_HOST || this.processEnv.REACT_APP_API_HOST;
     if (envBackendHost) {
@@ -263,344 +274,341 @@ export default class OmegaConfig {
     }
     
     // Fall back to environment-specific defaults
-    const environmentConfig = this.config.common.environments[this.environment];
+    const environmentConfig = this.config.common.environments[this.environment as keyof typeof this.config.common.environments];
     if (environmentConfig && environmentConfig.backendHost) {
       return environmentConfig.backendHost;
     }
     
     // Final fallback to development
-    return this.config.common.environments.development.backendHost;
+    return this.config.common.environments.development.backendHost || 'http://localhost:3000';
   }
+
   /**
    * Get configuration value by key
-   * @param {string} key - Configuration key (supports dot notation)
-   * @returns {any} Configuration value
+   * @param key - Configuration key (supports dot notation)
+   * @returns Configuration value
    */
-  get(key) {
-    return key.split('.').reduce((obj, k) => obj?.[k], this.config)
+  get(key: string): any {
+    return key.split('.').reduce((obj: any, k) => obj?.[k], this.config);
   }
 
   /**
    * Set configuration value by key
-   * @param {string} key - Configuration key (supports dot notation)
-   * @param {any} value - Configuration value
+   * @param key - Configuration key (supports dot notation)
+   * @param value - Configuration value
    */
-  set(key, value) {
-    const keys = key.split('.')
-    const lastKey = keys.pop()
+  set(key: string, value: any): void {
+    const keys = key.split('.');
+    const lastKey = keys.pop()!;
     const target = keys.reduce((obj, k) => {
-      if (!obj[k]) obj[k] = {}
-      return obj[k]
-    }, this.config)
-    target[lastKey] = value
+      if (!obj[k]) obj[k] = {};
+      return obj[k];
+    }, this.config as any);
+    target[lastKey] = value;
   }
 
   /**
    * Get full configuration object
-   * @returns {object} Full configuration
+   * @returns Full configuration
    */
-  getConfig() {
-    return this.config
+  getConfig(): OmegaConfigData {
+    return this.config;
   }
 
   /**
    * Get backend host
-   * @returns {string} Backend host URL
+   * @returns Backend host URL
    */
-  getHost() {
-    return this._getBackendHost()
+  getHost(): string {
+    return this._getBackendHost();
   }
-
 
   /**
    * Get full URL for backend endpoint
-   * @param {string} endpoint - Backend endpoint path
-   * @returns {string} Full backend URL
+   * @param endpoint - Backend endpoint path
+   * @returns Full backend URL
    */
-  getUrl(endpoint) {
-    return `${this._getBackendHost()}${endpoint}`
+  getUrl(endpoint: string): string {
+    return `${this._getBackendHost()}${endpoint}`;
   }
 
   /**
    * Get API endpoints
-   * @returns {object} API endpoints configuration
+   * @returns API endpoints configuration
    */
-  getEndpoints() {
+  getEndpoints(): { HEALTH_CHECK: string; CYCLE_DATA: string } {
     return {
       HEALTH_CHECK: '/healthcheck',
       CYCLE_DATA: '/cycle-data',
-    }
+    };
   }
 
   /**
    * Get cache configuration
-   * @returns {object} Cache configuration
+   * @returns Cache configuration
    */
-  getCacheConfig() {
-    return this.config.common.cache
+  getCacheConfig(): { ttl: number } {
+    return this.config.common.cache;
   }
 
   /**
    * Get cache TTL
-   * @returns {number} Cache TTL in milliseconds
+   * @returns Cache TTL in milliseconds
    */
-  getCacheTTL() {
-    return this.config.common.cache.ttl
+  getCacheTTL(): number {
+    return this.config.common.cache.ttl;
   }
 
   /**
    * Get Jira configuration
-   * @returns {object} Jira configuration
+   * @returns Jira configuration
    */
-  getJiraConfig() {
-    return this.config.backend.jira
+  getJiraConfig(): JiraConfigType | undefined {
+    return this.config.backend.jira;
   }
 
   /**
    * Check if fake cycle data is being used or whether are real data backend is used that is e.g. accesssing JIRA.
    * 
-   * @returns {boolean} True if fake data is enabled
+   * @returns True if fake data is enabled
    */
-  isUsingFakeCycleData() {
-    return this.config.common.development.useFakeData || false
+  isUsingFakeCycleData(): boolean {
+    return this.config.common.development.useFakeData || false;
   }
 
   /**
    * Get stages configuration
-   * @returns {array} Stages configuration
+   * @returns Stages configuration
    */
-  getStages() {
-    return this.config.common.releaseStrategy.stages || []
+  getStages(): Array<{ name: string; value: string }> {
+    return this.config.common.releaseStrategy.stages || [];
   }
 
   /**
    * Get stage categories configuration
-   * @returns {object} Stage categories configuration
+   * @returns Stage categories configuration
    */
-  getStageCategories() {
-    return this.config.common.releaseStrategy.stageCategories || {}
+  getStageCategories(): { finalReleaseStage: string[]; releasableStage: string[]; externalStages: string[] } {
+    return this.config.common.releaseStrategy.stageCategories || { finalReleaseStage: [], releasableStage: [], externalStages: [] };
   }
 
   /**
    * Get current environment configuration
-   * @returns {object} Current environment configuration
+   * @returns Current environment configuration
    */
-  getEnvironmentConfig() {
-    return this.config.common.environments[this.environment] || this.config.common.environments.development
+  getEnvironmentConfig(): { backendHost: string | null; timeout: number; retries: number; retryDelay: number } {
+    return this.config.common.environments[this.environment as keyof typeof this.config.common.environments] || this.config.common.environments.development;
   }
 
   /**
    * Get organization configuration
-   * @returns {object} Organization configuration (areas and teams)
+   * @returns Organization configuration (areas and teams)
    */
-  getOrganisationConfig() {
-    return this.config.common.organisation
+  getOrganisationConfig(): { areas: Record<string, string>; teams: Record<string, string> } {
+    return this.config.common.organisation;
   }
 
   /**
    * Get areas configuration
-   * @returns {object} Areas configuration
+   * @returns Areas configuration
    */
-  getAreas() {
-    return this.config.common.organisation.areas
+  getAreas(): Record<string, string> {
+    return this.config.common.organisation.areas;
   }
 
   /**
    * Get teams configuration
-   * @returns {object} Teams configuration
+   * @returns Teams configuration
    */
-  getTeams() {
-    return this.config.common.organisation.teams
+  getTeams(): Record<string, string> {
+    return this.config.common.organisation.teams;
   }
 
   /**
    * Get product strategy configuration
-   * @returns {object} Product strategy configuration (themes, initiatives)
+   * @returns Product strategy configuration (themes, initiatives)
    */
-  getProductStrategyConfig() {
-    return this.config.common.productStrategy
+  getProductStrategyConfig(): { themes: Record<string, string>; initiatives: Record<string, string> } {
+    return this.config.common.productStrategy;
   }
 
   /**
    * Get themes configuration
-   * @returns {object} Themes configuration
+   * @returns Themes configuration
    */
-  getThemes() {
-    return this.config.common.productStrategy.themes
+  getThemes(): Record<string, string> {
+    return this.config.common.productStrategy.themes;
   }
 
   /**
    * Get initiatives configuration
-   * @returns {object} Initiatives configuration
+   * @returns Initiatives configuration
    */
-  getInitiatives() {
-    return this.config.common.productStrategy.initiatives
+  getInitiatives(): Record<string, string> {
+    return this.config.common.productStrategy.initiatives;
   }
-
 
   /**
    * Check if a stage is a final release stage
-   * @param {string} stage - Stage value to check
-   * @returns {boolean} True if stage is final release
+   * @param stage - Stage value to check
+   * @returns True if stage is final release
    */
-  isFinalReleaseStage(stage) {
-    return this.config.common.releaseStrategy.stageCategories.finalReleaseStage.includes(stage)
+  isFinalReleaseStage(stage: string): boolean {
+    return this.config.common.releaseStrategy.stageCategories.finalReleaseStage.includes(stage);
   }
 
   /**
    * Check if a stage is releasable
-   * @param {string} stage - Stage value to check
-   * @returns {boolean} True if stage is releasable
+   * @param stage - Stage value to check
+   * @returns True if stage is releasable
    */
-  isReleasableStage(stage) {
-    return this.config.common.releaseStrategy.stageCategories.releasableStage.includes(stage)
+  isReleasableStage(stage: string): boolean {
+    return this.config.common.releaseStrategy.stageCategories.releasableStage.includes(stage);
   }
 
   /**
    * Check if a stage is external
-   * @param {string} stage - Stage value to check
-   * @returns {boolean} True if stage is external
+   * @param stage - Stage value to check
+   * @returns True if stage is external
    */
-  isExternalStage(stage) {
-    return this.config.common.releaseStrategy.stageCategories.externalStages.includes(stage)
+  isExternalStage(stage: string): boolean {
+    return this.config.common.releaseStrategy.stageCategories.externalStages.includes(stage);
   }
 
   /**
    * Get release strategy configuration
-   * @returns {object} Release strategy configuration
+   * @returns Release strategy configuration
    */
-  getReleaseStrategyConfig() {
-    return this.config.common.releaseStrategy
+  getReleaseStrategyConfig(): { stages: Array<{ name: string; value: string }>; stageCategories: { finalReleaseStage: string[]; releasableStage: string[]; externalStages: string[] }; noPrereleaseAllowedLabel: string } {
+    return this.config.common.releaseStrategy;
   }
 
   /**
    * Get no prerelease allowed label
-   * @returns {string} No prerelease allowed label
+   * @returns No prerelease allowed label
    */
-  getNoPrereleaseAllowedLabel() {
-    return this.config.common.releaseStrategy.noPrereleaseAllowedLabel
+  getNoPrereleaseAllowedLabel(): string {
+    return this.config.common.releaseStrategy.noPrereleaseAllowedLabel;
   }
 
   /**
    * Get item status configuration
-   * @returns {object} Item status configuration
+   * @returns Item status configuration
    */
-  getItemStatusConfig() {
-    return this.config.common.itemStatuses
+  getItemStatusConfig(): { values: { TODO: string; IN_PROGRESS: string; DONE: string; CANCELLED: string; POSTPONED: string }; categories: { finished: string[]; active: string[]; future: string[] } } {
+    return this.config.common.itemStatuses;
   }
 
   /**
    * Get item status values
-   * @returns {object} Item status values
+   * @returns Item status values
    */
-  getItemStatusValues() {
-    return this.config.common.itemStatuses.values
+  getItemStatusValues(): { TODO: string; IN_PROGRESS: string; DONE: string; CANCELLED: string; POSTPONED: string } {
+    return this.config.common.itemStatuses.values;
   }
 
   /**
    * Get item status categories
-   * @returns {object} Item status categories
+   * @returns Item status categories
    */
-  getItemStatusCategories() {
-    return this.config.common.itemStatuses.categories
+  getItemStatusCategories(): { finished: string[]; active: string[]; future: string[] } {
+    return this.config.common.itemStatuses.categories;
   }
 
   /**
    * Check if status is finished
-   * @param {string} status - Status value
-   * @returns {boolean} True if status is finished
+   * @param status - Status value
+   * @returns True if status is finished
    */
-  isFinishedStatus(status) {
-    return this.config.common.itemStatuses.categories.finished.includes(status)
+  isFinishedStatus(status: string): boolean {
+    return this.config.common.itemStatuses.categories.finished.includes(status);
   }
 
   /**
    * Check if status is active
-   * @param {string} status - Status value
-   * @returns {boolean} True if status is active
+   * @param status - Status value
+   * @returns True if status is active
    */
-  isActiveStatus(status) {
-    return this.config.common.itemStatuses.categories.active.includes(status)
+  isActiveStatus(status: string): boolean {
+    return this.config.common.itemStatuses.categories.active.includes(status);
   }
 
   /**
    * Check if status is future
-   * @param {string} status - Status value
-   * @returns {boolean} True if status is future
+   * @param status - Status value
+   * @returns True if status is future
    */
-  isFutureStatus(status) {
-    return this.config.common.itemStatuses.categories.future.includes(status)
+  isFutureStatus(status: string): boolean {
+    return this.config.common.itemStatuses.categories.future.includes(status);
   }
 
   /**
    * Get frontend configuration
-   * @returns {object} Frontend configuration
+   * @returns Frontend configuration
    */
-  getFrontendConfig() {
-    return this.config.frontend
+  getFrontendConfig(): FrontendConfig {
+    return this.config.frontend;
   }
 
   /**
    * Get backend configuration
-   * @returns {object} Backend configuration
+   * @returns Backend configuration
    */
-  getBackendConfig() {
-    return this.config.backend
+  getBackendConfig(): BackendConfig {
+    return this.config.backend;
   }
 
   /**
    * Get common configuration (shared between frontend and backend)
-   * @returns {object} Common configuration
+   * @returns Common configuration
    */
-  getCommonConfig() {
-    return this.config.common
+  getCommonConfig(): CommonConfig {
+    return this.config.common;
   }
-
 
   /**
    * Get label translations (legacy method for backward compatibility)
-   * @returns {object} Label translations in legacy format
+   * @returns Label translations in legacy format
    */
-  getLabelTranslations() {
+  getLabelTranslations(): { areas: Record<string, string>; teams: Record<string, string>; themes: Record<string, string>; initiatives: Record<string, string> } {
     return {
       areas: this.getAreas(),
       teams: this.getTeams(),
       themes: this.getThemes(),
       initiatives: this.getInitiatives()
-    }
+    };
   }
 
   /**
    * Get validation dictionary
-   * @returns {object} Validation dictionary
+   * @returns Validation dictionary
    */
-  getValidationDictionary() {
-    return validationDictionary
+  getValidationDictionary(): ValidationRules {
+    return validationDictionary;
   }
 
   /**
    * Get a specific page by ID
-   * @param {string} pageId - Page ID (e.g., 'CYCLE_OVERVIEW')
-   * @returns {object} Page configuration object
+   * @param pageId - Page ID (e.g., 'CYCLE_OVERVIEW')
+   * @returns Page configuration object
    */
-  getPage(pageId) {
-    return this.config.frontend.pages[pageId]
+  getPage(pageId: string): Page | undefined {
+    return this.config.frontend.pages[pageId as keyof typeof this.config.frontend.pages];
   }
-
 
   /**
    * Check if running in development mode
-   * @returns {boolean} True if development mode
+   * @returns True if development mode
    */
-  isDevelopment() {
-    return this.environment === 'development'
+  isDevelopment(): boolean {
+    return this.environment === 'development';
   }
 
   /**
    * Check if running in production mode
-   * @returns {boolean} True if production mode
+   * @returns True if production mode
    */
-  isProduction() {
-    return this.environment === 'production'
+  isProduction(): boolean {
+    return this.environment === 'production';
   }
 }

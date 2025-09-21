@@ -2,12 +2,18 @@
   "name": "@omega/shared-types",
   "version": "1.0.0",
   "description": "Shared TypeScript types for Omega applications",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "echo 'No build step needed for types'",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
     "test": "echo 'No tests for types package'"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=22.0.0",
@@ -16,7 +22,8 @@
   "keywords": [
     "types",
     "omega",
-    "shared"
+    "shared",
+    "typescript"
   ],
   "author": "Prewave Team",
   "license": "UNLICENSED"

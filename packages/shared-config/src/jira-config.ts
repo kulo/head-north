@@ -3,21 +3,26 @@
  * Handles JIRA-specific configuration including status mappings and field definitions
  */
 
-import { getRequiredEnvVar, getEnvVarWithFallback } from './utils.js'
+import { getRequiredEnvVar, getEnvVarWithFallback } from './utils.js';
+import type { ProcessEnv, JiraConfig as JiraConfigType } from './types.js';
 
 export default class JiraConfig {
-  constructor(processEnv = {}, useFakeData = false) {
-    this.processEnv = processEnv
-    this.useFakeData = useFakeData
-    this.config = this._initializeConfig()
+  private processEnv: ProcessEnv;
+  private useFakeData: boolean;
+  private config: JiraConfigType;
+
+  constructor(processEnv: ProcessEnv = {}, useFakeData: boolean = false) {
+    this.processEnv = processEnv;
+    this.useFakeData = useFakeData;
+    this.config = this._initializeConfig();
   }
 
   /**
    * Initialize JIRA configuration
    * @private
    */
-  _initializeConfig() {
-    const config = {
+  private _initializeConfig(): JiraConfigType {
+    const config: JiraConfigType = {
       // JIRA Status Mappings
       statusMappings: {
         // JIRA Status IDs to Omega Status Values
@@ -39,51 +44,64 @@ export default class JiraConfig {
       limits: {
         maxResults: 1000,               // Maximum results per API call
         maxIssuesPerRequest: 100        // Maximum issues per request
+      },
+
+      // Placeholder fields - will be set below
+      fields: {
+        epic: '',
+        sprint: '',
+        storyPoints: ''
+      },
+
+      // Placeholder connection - will be set below
+      connection: {
+        user: null,
+        token: null,
+        host: null,
+        boardId: -1
       }
-    }
+    };
 
     // Configure JIRA fields and connection based on useFakeData setting
     if (this.useFakeData) {
       // When using fake data, provide default values for JIRA configuration
-      // TODO: do we ned this fake data at all? will this ever be called in a case without real jira data?
+      // TODO: do we need this fake data at all? will this ever be called in a case without real jira data?
       config.fields = {
         epic: getEnvVarWithFallback(this.processEnv, 'JIRA_EPIC_FIELD', 'customfield_10014', 'Jira epic field'),
         sprint: getEnvVarWithFallback(this.processEnv, 'JIRA_SPRINT_FIELD', 'customfield_10020', 'Jira sprint field'),
         storyPoints: getEnvVarWithFallback(this.processEnv, 'JIRA_STORY_POINTS_FIELD', 'customfield_10016', 'Jira story points field')
-      }
+      };
 
       config.connection = {
         user: null,
         token: null,
         host: null,
         boardId: -1
-      }
+      };
     } else {
       // When not using fake data, require all JIRA configuration
       config.fields = {
         epic: getRequiredEnvVar(this.processEnv, 'JIRA_EPIC_FIELD', 'Jira epic field is required'),
         sprint: getRequiredEnvVar(this.processEnv, 'JIRA_SPRINT_FIELD', 'Jira sprint field is required'),
         storyPoints: getRequiredEnvVar(this.processEnv, 'JIRA_STORY_POINTS_FIELD', 'Jira story points field is required')
-      }
+      };
 
       config.connection = {
         user: getRequiredEnvVar(this.processEnv, 'JIRA_USER', 'Jira user is required'),
         token: getRequiredEnvVar(this.processEnv, 'JIRA_TOKEN', 'Jira token is required'),
         host: getRequiredEnvVar(this.processEnv, 'JIRA_HOST', 'Jira host is required'),
         boardId: parseInt(getRequiredEnvVar(this.processEnv, 'JIRA_BOARD_ID', 'Jira board ID is required'))
-      }
+      };
     }
 
-    return config
+    return config;
   }
-
-
 
   /**
    * Get complete JIRA configuration
-   * @returns {object} Complete JIRA configuration
+   * @returns Complete JIRA configuration
    */
-  getConfig() {
-    return this.config
+  getConfig(): JiraConfigType {
+    return this.config;
   }
 }

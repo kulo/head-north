@@ -3,11 +3,18 @@
   "version": "1.0.0",
   "description": "Shared utilities for Omega One",
   "type": "module",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "pino": "^8.16.0"
   },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
   "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
     "test": "node --test"
   }
 }
