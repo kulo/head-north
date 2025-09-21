@@ -17,25 +17,23 @@
         No roadmap data available
       </div>
       <div v-else>
-        <a-row :gutter="20">
-          <a-col :span="4" :offset="index === 0 ? 6 : 0" :class="{ active: cycle.id === activeCycle?.id}" v-for="(cycle, index) in orderedCycles" :key="cycle.id">
-            <p style="text-align: center">{{ cycle.name }}</p>
-          </a-col>
-        </a-row>
-        <a-collapse 
-          v-model:activeKey="activeInitiativeIds" 
-          class="initiative-collapse"
-          :expandIconPosition="'right'"
-        >
+        
+        <div class="roadmap-table">
           <template v-for="(row, index) in filteredRoadmapData" :key="row?.initiativeId || index">
-            <a-collapse-panel 
-              v-if="row && row.initiativeId"
-              :key="row.initiativeId" 
-              class="initiative-panel"
-            >
-              <template #header>
-                <span>{{ initiativeName(row.initiativeId) || `Initiative: ${row.initiativeId}` }}</span>
-              </template>
+            <template v-if="row && row.initiativeId">
+              <!-- Initiative header row -->
+              <a-row class="roadmap-initiative-header-row">
+                <a-col :span="6">
+                  <div class="roadmap-initiative-header-name">
+                    {{ initiativeName(row.initiativeId) || `Initiative: ${row.initiativeId}` }}
+                  </div>
+                </a-col>
+                <a-col :span="4" v-for="cycle in orderedCycles" :key="cycle.id">
+                  <div class="roadmap-initiative-header-cycle">{{ cycle.name }}</div>
+                </a-col>
+              </a-row>
+              
+              <!-- Roadmap items for this initiative -->
               <roadmap-item-overview 
                 :orderedCycles="orderedCycles" 
                 :roadmapItem="roadmapItem" 
@@ -43,9 +41,9 @@
                 v-for="(roadmapItem, itemIndex) in (row.roadmapItems || [])" 
                 :key="roadmapItem.id"
               ></roadmap-item-overview>
-            </a-collapse-panel>
+            </template>
           </template>
-        </a-collapse>
+        </div>
       </div>
     </a-layout-content>
   </div>
@@ -104,34 +102,6 @@ export default {
       return initiatives.value.map(x => x.id);
     })
     
-    // Create a reactive reference for the active initiative IDs (for v-model)
-    const activeInitiativeIds = ref([])
-    
-    // Watch for changes in filtered roadmap data to auto-expand all panels
-    // Only expand on initial load, not on every filter change
-    let isInitialLoad = true
-    let hasExpandedInitially = false
-    
-    watch(filteredRoadmapData, (newData) => {
-      if (newData && newData.length > 0) {
-        const initiativeIds = newData
-          .filter(row => row && row.initiativeId)
-          .map(row => row.initiativeId)
-        
-        // Only auto-expand on initial load, not on filter changes
-        if (isInitialLoad && !hasExpandedInitially) {
-          // Use a longer delay to ensure DOM is fully ready
-          setTimeout(() => {
-            activeInitiativeIds.value = [...initiativeIds]
-            isInitialLoad = false
-            hasExpandedInitially = true
-          }, 500)
-        }
-        // On filter changes, preserve current expanded state
-      } else {
-        activeInitiativeIds.value = []
-      }
-    }, { immediate: true })
 
     const fetchRoadmap = async () => {
       await store.dispatch('fetchRoadmap')
@@ -163,7 +133,6 @@ export default {
       error,
       initiatives,
       initiativeIds,
-      activeInitiativeIds,
       areas,
       orderedCycles,
       activeCycle,
