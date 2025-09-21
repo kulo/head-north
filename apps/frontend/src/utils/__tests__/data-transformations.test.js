@@ -12,7 +12,7 @@ import {
   transformForCycleOverview,
   transformForRoadmap,
   calculateCycleProgress
-} from '../dataTransformations.js';
+} from '../data-transformations.js';
 
 describe('Data Transformations', () => {
   describe('calculateProgress', () => {

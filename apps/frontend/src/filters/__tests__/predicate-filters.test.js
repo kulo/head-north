@@ -5,7 +5,7 @@ import {
   createCyclePredicate,
   combinePredicates,
   createFilterPredicates 
-} from '../predicateFilters.js';
+} from '../predicate-filters.js';
 
 describe('predicateFilters', () => {
   const mockReleaseItem = {

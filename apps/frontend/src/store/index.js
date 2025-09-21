@@ -1,17 +1,17 @@
 import { createStore } from 'vuex'
 import { CycleDataService } from '@/services/index.js'
 import { logger } from '@omega-one/shared-utils'
-import { filterByArea } from '@/filters/areaFilter.js'
-import { filterByInitiatives } from '@/filters/initiativesFilter.js'
-import { filterByStages } from '@/filters/stagesFilter.js'
-import { filterByAssignees } from '@/filters/assigneeFilter.js'
-import { filterByCycle } from '@/filters/cycleFilter.js'
+import { filterByArea } from '@/filters/area-filter.js'
+import { filterByInitiatives } from '@/filters/initiatives-filter.js'
+import { filterByStages } from '@/filters/stages-filter.js'
+import { filterByAssignees } from '@/filters/assignee-filter.js'
+import { filterByCycle } from '@/filters/cycle-filter.js'
 import { 
   transformForCycleOverview, 
   transformForRoadmap, 
   calculateCycleProgress,
   calculateCycleData
-} from '@/utils/dataTransformations.js'
+} from '@/utils/data-transformations.js'
 
 /**
  * Determines the best cycle to select based on availability and priority
