@@ -5,7 +5,7 @@
 
 import pkg from 'lodash';
 const { groupBy } = pkg;
-import { calculateReleaseItemProgress, calculateCycleMetadata, aggregateProgressMetrics } from './cycle-calculations.js';
+import { calculateReleaseItemProgress, calculateCycleMetadata, aggregateProgressMetrics } from '../calculations/cycle-calculations.js';
 
 /**
  * Calculate progress percentage for release items

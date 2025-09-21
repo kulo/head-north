@@ -11,7 +11,7 @@ import {
   transformForRoadmap, 
   calculateCycleProgress,
   calculateCycleData
-} from '@/utils/data-transformations.js'
+} from '@/lib/transformers/data-transformations.js'
 
 /**
  * Determines the best cycle to select based on availability and priority
