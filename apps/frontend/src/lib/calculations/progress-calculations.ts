@@ -1,4 +1,4 @@
-import CycleProgressData from "../models/cycle-progress-data.js";
+import CycleProgressData from "../models/cycle-progress-data";
 
 const uniq = (list) => [...new Set(list)];
 

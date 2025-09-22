@@ -1,4 +1,4 @@
-export default function (status) {
+export default function (status: string): string {
     if (status == "todo") return "health-normal"
     else if (status == "inprogress") return "health-good"
     else if (status == "done") return "health-best"

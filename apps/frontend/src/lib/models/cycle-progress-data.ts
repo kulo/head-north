@@ -1,8 +1,85 @@
-import { STATUS } from '@/lib/constants/status-constants.js'
+import { STATUS } from '@/lib/constants/status-constants'
+
+interface Cycle {
+  name: string
+  start: string
+  delivery: string
+  end: string
+  progress: number
+  progressWithInProgress: number
+  progressByReleaseItems: number
+  weeks: number
+  weeksDone: number
+  weeksInProgress: number
+  weeksNotToDo: number
+  weeksCancelled: number
+  weeksPostponed: number
+  releaseItemsCount: number
+  releaseItemsDoneCount: number
+  percentageNotToDo: number
+  startMonth?: string
+  endMonth?: string
+  daysFromStartOfCycle?: number
+  daysInCycle?: number
+  currentDayPercentage?: number
+  weeksTodo?: number
+}
+
+interface RoadmapItem {
+  area: string
+  name: string
+  owner: string
+  ticketId: string
+  validations: any[]
+  aggregatedValidations: any[]
+  startDate: string
+  releaseItemsCount: number
+  releaseItemsDoneCount: number
+  weeks: number
+  weeksDone: number
+  weeksInProgress: number
+  weeksTodo: number
+  weeksNotToDo: number
+  weeksCancelled: number
+  weeksPostponed: number
+  progress: number
+  progressWithInProgress: number
+  progressByReleaseItems: number
+  percentageNotToDo: number
+  releaseItems: any[]
+  url: string
+  isPartOfReleaseNarrative: boolean
+  isReleaseAtRisk: boolean
+  isCrossCloud: boolean
+}
+
+interface Initiative {
+  name: string
+  initiative: string
+  initiativeId: string
+  releaseItemsCount: number
+  releaseItemsDoneCount: number
+  weeks: number
+  weeksDone: number
+  weeksInProgress: number
+  weeksNotToDo: number
+  weeksCancelled: number
+  weeksPostponed: number
+  progress: number
+  progressWithInProgress: number
+  progressByReleaseItems: number
+  percentageNotToDo: number
+  roadmapItems: RoadmapItem[]
+  weeksTodo?: number
+}
+
+interface CycleProgressDataInput {
+  cycle?: Cycle
+  initiatives?: Initiative[]
+}
 
 export default class CycleProgressData {
-
-  cycle = {
+  cycle: Cycle = {
     name: "",
     start: "1975-01-01",
     delivery: "1975-01-01",
@@ -21,14 +98,14 @@ export default class CycleProgressData {
     percentageNotToDo: 0
   }
 
-  initiatives = []
+  initiatives: Initiative[] = []
 
-  constructor({ cycle, initiatives } = {}) {
+  constructor({ cycle, initiatives }: CycleProgressDataInput = {}) {
     if (cycle) this.cycle = cycle
     if (initiatives) this.initiatives = initiatives
   }
 
-  applyData(data) {
+  applyData(data: { cycle: Cycle; initiatives: Initiative[] }): CycleProgressData {
     Object.assign(this.cycle, data.cycle)
 
     this.initiatives = data.initiatives.map((initiative) => {
@@ -159,11 +236,11 @@ export default class CycleProgressData {
     return this
   }
 
-  normalize(number) {
+  normalize(number: number): number {
     return Math.round(number*10)/10
   }
 
-  roundToTwoDigit(number) {
+  roundToTwoDigit(number: number): number {
     return Math.round(number * 100) / 100
   }
 }

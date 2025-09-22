@@ -3,14 +3,24 @@
  * Filters items by selected initiatives
  */
 
+interface Initiative {
+  id?: string
+  value?: string
+}
+
+interface Item {
+  initiativeId?: string
+  initiatives?: Initiative[]
+}
+
 /**
  * Filter items by selected initiatives
  * 
- * @param {Array} items - Array of items to filter
- * @param {Array} selectedInitiatives - Array of selected initiatives
- * @returns {Array} Filtered items
+ * @param items - Array of items to filter
+ * @param selectedInitiatives - Array of selected initiatives
+ * @returns Filtered items
  */
-export const filterByInitiatives = (items, selectedInitiatives) => {
+export const filterByInitiatives = (items: Item[], selectedInitiatives: Initiative[]): Item[] => {
   if (!selectedInitiatives || selectedInitiatives.length === 0) {
     return items
   }

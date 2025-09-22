@@ -1,4 +1,4 @@
-import { filterByCycle } from '../cycle-filter.js';
+import { filterByCycle } from '../cycle-filter';
 
 describe('cycleFilter', () => {
   const mockData = [

@@ -3,14 +3,39 @@
  * Filters items by selected stages
  */
 
+interface RoadmapItem {
+  id: string
+  releaseItems?: ReleaseItem[]
+}
+
+interface ReleaseItem {
+  stage?: string
+}
+
+interface Initiative {
+  initiativeId: string
+  roadmapItems: RoadmapItem[]
+}
+
+interface Item {
+  roadmapItems?: RoadmapItem[]
+  initiatives?: Initiative[]
+}
+
+interface Stage {
+  id?: string
+  value?: string
+  name?: string
+}
+
 /**
  * Filter items by selected stages
  * 
- * @param {Array} items - Array of items to filter
- * @param {Array} selectedStages - Array of selected stages
- * @returns {Array} Filtered items
+ * @param items - Array of items to filter
+ * @param selectedStages - Array of selected stages
+ * @returns Filtered items
  */
-export const filterByStages = (items, selectedStages) => {
+export const filterByStages = (items: Item[], selectedStages: Stage[]): Item[] => {
   if (!selectedStages || selectedStages.length === 0) {
     return items
   }

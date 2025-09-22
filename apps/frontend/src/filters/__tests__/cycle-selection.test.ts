@@ -1,5 +1,5 @@
 import { createStore } from 'vuex';
-import createAppStore from '../../store/index.js';
+import createAppStore from '../../store/index';
 
 // Mock the CycleDataService
 const mockCycleDataService = {

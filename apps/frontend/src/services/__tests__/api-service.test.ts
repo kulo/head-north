@@ -3,7 +3,7 @@
  * Unit tests for the API service functionality
  */
 
-import { CycleDataService } from '../index.js'
+import { CycleDataService } from '../index'
 import { OmegaConfig } from '@omega/shared-config'
 
 // Mock fetch globally

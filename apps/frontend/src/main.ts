@@ -12,7 +12,7 @@ import VueApexCharts from 'vue3-apexcharts'
 
 // Create services
 const omegaConfig = new OmegaConfig({
-  overrides: { environment: (import.meta as any).env?.MODE || 'development' }
+  overrides: { environment: import.meta.env?.MODE || 'development' }
 })
 const cycleDataService = new CycleDataService(omegaConfig)
 
@@ -26,7 +26,7 @@ const store = createAppStore(cycleDataService, omegaConfig, router) // Create st
 app.use(store)
 
 app.use(Antd)
-app.use(VueApexCharts as any)
+app.use(VueApexCharts)
 
 // Mount the app
 try {
@@ -34,6 +34,6 @@ try {
   
   logger.default.info('Omega One frontend started successfully!')
 } catch (error) {
-  const errorMessage = (error as Error)?.message || error?.toString() || 'Unknown error'
+  const errorMessage = error?.message || error?.toString() || 'Unknown error'
   logger.error.errorSafe('Error mounting Vue app', error)
 }

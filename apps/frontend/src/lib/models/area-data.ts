@@ -1,4 +1,4 @@
-import { STATUS } from '@/lib/constants/status-constants.js'
+import { STATUS } from '@/lib/constants/status-constants'
 
 export default class CycleProgressData {
 

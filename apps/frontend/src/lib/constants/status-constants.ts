@@ -13,10 +13,10 @@ export const STATUS = {
 
 /**
  * Normalize status string to match our constants
- * @param {string} status - Raw status string
- * @returns {string} Normalized status
+ * @param status - Raw status string
+ * @returns Normalized status
  */
-export const normalizeStatus = (status) => {
+export const normalizeStatus = (status: string): string => {
   if (!status || typeof status !== 'string') {
     return STATUS.TODO
   }
@@ -46,30 +46,30 @@ export const normalizeStatus = (status) => {
 
 /**
  * Check if a status represents completed work
- * @param {string} status - Status to check
- * @returns {boolean} True if status represents completed work
+ * @param status - Status to check
+ * @returns True if status represents completed work
  */
-export const isCompletedStatus = (status) => {
+export const isCompletedStatus = (status: string): boolean => {
   const normalized = normalizeStatus(status)
   return normalized === STATUS.DONE
 }
 
 /**
  * Check if a status represents work in progress
- * @param {string} status - Status to check
- * @returns {boolean} True if status represents work in progress
+ * @param status - Status to check
+ * @returns True if status represents work in progress
  */
-export const isInProgressStatus = (status) => {
+export const isInProgressStatus = (status: string): boolean => {
   const normalized = normalizeStatus(status)
   return normalized === STATUS.IN_PROGRESS
 }
 
 /**
  * Check if a status represents work that won't be done
- * @param {string} status - Status to check
- * @returns {boolean} True if status represents cancelled or postponed work
+ * @param status - Status to check
+ * @returns True if status represents cancelled or postponed work
  */
-export const isNotToDoStatus = (status) => {
+export const isNotToDoStatus = (status: string): boolean => {
   const normalized = normalizeStatus(status)
   return normalized === STATUS.CANCELLED || normalized === STATUS.POSTPONED
 }

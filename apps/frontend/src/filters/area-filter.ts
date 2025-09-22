@@ -1,35 +1,42 @@
 /**
- * Cycle filtering utilities
- * Filters items by cycle (case-insensitive)
+ * Area filtering utilities
+ * Filters items by area (case-insensitive)
  * Works with both roadmap and cycle-overview data structures
  */
+
+interface RoadmapItem {
+  id: string
+  area?: string
+  releaseItems?: ReleaseItem[]
+}
+
+interface ReleaseItem {
+  area?: string
+  cycleId?: string
+  sprint?: { id: string }
+}
+
+interface Initiative {
+  initiativeId: string
+  roadmapItems: RoadmapItem[]
+}
+
+interface Item {
+  roadmapItems?: RoadmapItem[]
+  initiatives?: Initiative[]
+}
 
 /**
- * Filter items by cycle
+ * Filter items by area (case-insensitive)
  * Works with both roadmap and cycle-overview data structures
  * 
- * @param {Array} items - Array of items to filter
- * @param {string|Object} selectedCycle - Selected cycle ID or cycle object to filter by
- * @returns {Array} Filtered items
+ * @param items - Array of items to filter
+ * @param selectedArea - Selected area to filter by
+ * @returns Filtered items
  */
-export const filterByCycle = (items, selectedCycle) => {
-  if (selectedCycle === null || selectedCycle === undefined) {
-    console.error('filterByCycle: No cycle provided. Client code must ensure a valid cycle is passed.')
-    return []
-  }
-
-  // Extract cycle ID from cycle object or use the value directly
-  const cycleId = typeof selectedCycle === 'object' ? selectedCycle.id : selectedCycle
-  
-  if (!cycleId || cycleId === 'all' || cycleId === '') {
-    console.error('filterByCycle: Invalid cycle ID provided. Client code must ensure a valid cycle ID is passed.')
-    return []
-  }
-
-  // Handle null or invalid data
-  if (!items || !Array.isArray(items)) {
-    console.error('filterByCycle: Invalid items data provided. Expected an array.')
-    return []
+export const filterByArea = (items: Item[], selectedArea: string): Item[] => {
+  if (!selectedArea || selectedArea === 'all') {
+    return items
   }
 
   return items.map(item => {
@@ -38,13 +45,13 @@ export const filterByCycle = (items, selectedCycle) => {
     
     const filteredRoadmapItems = roadmapItems.map(roadmapItem => {
       const filteredReleaseItems = roadmapItem.releaseItems ? roadmapItem.releaseItems.filter(releaseItem => {
-        // Check cycleId match
-        if (releaseItem.cycleId && releaseItem.cycleId === cycleId) {
+        // Check direct area match (case-insensitive)
+        if (releaseItem.area && releaseItem.area.toLowerCase() === selectedArea.toLowerCase()) {
           return true
         }
         
-        // Check if release item belongs to the selected cycle through sprint
-        if (releaseItem.sprint && releaseItem.sprint.id === cycleId) {
+        // Check area from roadmap item (case-insensitive)
+        if (roadmapItem.area && roadmapItem.area.toLowerCase() === selectedArea.toLowerCase()) {
           return true
         }
         
@@ -52,8 +59,9 @@ export const filterByCycle = (items, selectedCycle) => {
       }) : []
       
       const hasMatchingReleaseItems = filteredReleaseItems.length > 0
+      const hasDirectAreaMatch = roadmapItem.area && roadmapItem.area.toLowerCase() === selectedArea.toLowerCase()
       
-      if (hasMatchingReleaseItems) {
+      if (hasMatchingReleaseItems || hasDirectAreaMatch) {
         return { ...roadmapItem, releaseItems: filteredReleaseItems }
       }
       
@@ -89,4 +97,4 @@ export const filterByCycle = (items, selectedCycle) => {
   })
 }
 
-export default filterByCycle
+export default filterByArea

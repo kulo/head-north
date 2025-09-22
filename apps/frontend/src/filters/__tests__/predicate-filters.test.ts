@@ -4,8 +4,8 @@ import {
   createStagesPredicate, 
   createCyclePredicate,
   combinePredicates,
-  createFilterPredicates 
-} from '../predicate-filters.js';
+  createFilterPredicates
+} from '../predicate-filters';
 
 describe('predicateFilters', () => {
   const mockReleaseItem = {

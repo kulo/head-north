@@ -3,14 +3,41 @@
  * Filters items by selected assignees
  */
 
+interface RoadmapItem {
+  id: string
+  releaseItems?: ReleaseItem[]
+}
+
+interface ReleaseItem {
+  assignee?: {
+    accountId?: string
+    id?: string
+  }
+}
+
+interface Initiative {
+  initiativeId: string
+  roadmapItems: RoadmapItem[]
+}
+
+interface Item {
+  roadmapItems?: RoadmapItem[]
+  initiatives?: Initiative[]
+}
+
+interface Assignee {
+  id?: string
+  value?: string
+}
+
 /**
  * Filter items by selected assignees
  * 
- * @param {Array} items - Array of items to filter
- * @param {Array} selectedAssignees - Array of selected assignees
- * @returns {Array} Filtered items
+ * @param items - Array of items to filter
+ * @param selectedAssignees - Array of selected assignees
+ * @returns Filtered items
  */
-export const filterByAssignees = (items, selectedAssignees) => {
+export const filterByAssignees = (items: Item[], selectedAssignees: Assignee[]): Item[] => {
   if (!selectedAssignees || selectedAssignees.length === 0) {
     return items
   }

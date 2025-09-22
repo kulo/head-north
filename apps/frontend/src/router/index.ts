@@ -1,10 +1,10 @@
-import { createRouter, createWebHistory, Router } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import CycleOverview from '@/components/cycles-overview/CycleOverview.vue'
 import Roadmap from '@/components/roadmap/Roadmap.vue'
 import type { OmegaConfig } from '@omega/shared-config'
 
 // Router factory function that accepts OmegaConfig
-export default function createAppRouter(omegaConfig: OmegaConfig): Router {
+export default function createAppRouter(omegaConfig: OmegaConfig) {
   const pages = omegaConfig.getFrontendConfig().pages
 
   const routes = [

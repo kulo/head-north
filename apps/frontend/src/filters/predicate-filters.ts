@@ -3,17 +3,51 @@
  * Provides composable predicate functions that can be combined
  */
 
+interface ReleaseItem {
+  area?: string
+  areaIds?: string[]
+  initiativeId?: string
+  assignee?: {
+    accountId?: string
+    id?: string
+  }
+  stage?: string
+  cycleId?: string
+  sprint?: { id: string }
+}
+
+interface Initiative {
+  id?: string
+  value?: string
+}
+
+interface Assignee {
+  id?: string
+  value?: string
+}
+
+interface Stage {
+  id?: string
+  value?: string
+  name?: string
+}
+
+interface Cycle {
+  id: string
+  name?: string
+}
+
 /**
  * Create a predicate that filters by area
- * @param {string} selectedArea - Selected area to filter by
- * @returns {Function} Predicate function
+ * @param selectedArea - Selected area to filter by
+ * @returns Predicate function
  */
-export const createAreaPredicate = (selectedArea) => {
+export const createAreaPredicate = (selectedArea: string) => {
   if (!selectedArea || selectedArea === 'all') {
     return () => true // No filtering
   }
 
-  return (releaseItem) => {
+  return (releaseItem: ReleaseItem): boolean => {
     // Check direct area match (case-insensitive)
     if (releaseItem.area && releaseItem.area.toLowerCase() === selectedArea.toLowerCase()) {
       return true
@@ -32,10 +66,10 @@ export const createAreaPredicate = (selectedArea) => {
 
 /**
  * Create a predicate that filters by initiatives
- * @param {Array} selectedInitiatives - Array of selected initiatives
- * @returns {Function} Predicate function
+ * @param selectedInitiatives - Array of selected initiatives
+ * @returns Predicate function
  */
-export const createInitiativesPredicate = (selectedInitiatives) => {
+export const createInitiativesPredicate = (selectedInitiatives: Initiative[]) => {
   if (!selectedInitiatives || selectedInitiatives.length === 0) {
     return () => true // No filtering
   }
@@ -55,7 +89,7 @@ export const createInitiativesPredicate = (selectedInitiatives) => {
     .map(init => String(init.id))
     .filter(id => id !== 'all')
 
-  return (item) => {
+  return (item: any): boolean => {
     if (item.initiativeId) {
       // Roadmap structure
       return selectedInitiativeIds.includes(String(item.initiativeId))
@@ -71,10 +105,10 @@ export const createInitiativesPredicate = (selectedInitiatives) => {
 
 /**
  * Create a predicate that filters by stages
- * @param {Array} selectedStages - Array of selected stages
- * @returns {Function} Predicate function
+ * @param selectedStages - Array of selected stages
+ * @returns Predicate function
  */
-export const createStagesPredicate = (selectedStages) => {
+export const createStagesPredicate = (selectedStages: Stage[]) => {
   if (!selectedStages || selectedStages.length === 0) {
     return () => true // No filtering
   }
@@ -94,7 +128,7 @@ export const createStagesPredicate = (selectedStages) => {
     .map(stage => stage.value || stage.id || stage.name)
     .filter(value => value !== 'all')
 
-  return (releaseItem) => {
+  return (releaseItem: ReleaseItem): boolean => {
     // Only filter release items by stage - roadmap items don't have stages
     if (releaseItem.stage && selectedStageValues.includes(releaseItem.stage)) {
       return true
@@ -106,10 +140,10 @@ export const createStagesPredicate = (selectedStages) => {
 
 /**
  * Create a predicate that filters by cycle
- * @param {string|Object} selectedCycle - Selected cycle ID or cycle object
- * @returns {Function} Predicate function
+ * @param selectedCycle - Selected cycle ID or cycle object
+ * @returns Predicate function
  */
-export const createCyclePredicate = (selectedCycle) => {
+export const createCyclePredicate = (selectedCycle: string | Cycle) => {
   if (selectedCycle === null || selectedCycle === undefined) {
     console.error('createCyclePredicate: No cycle provided. Client code must ensure a valid cycle is passed.')
     return () => false // Reject all items
@@ -123,7 +157,7 @@ export const createCyclePredicate = (selectedCycle) => {
     return () => false // Reject all items
   }
 
-  return (releaseItem) => {
+  return (releaseItem: ReleaseItem): boolean => {
     // Check cycleId match
     if (releaseItem.cycleId && releaseItem.cycleId === cycleId) {
       return true
@@ -140,23 +174,26 @@ export const createCyclePredicate = (selectedCycle) => {
 
 /**
  * Combine multiple predicates using AND logic
- * @param {...Function} predicates - Predicate functions to combine
- * @returns {Function} Combined predicate function
+ * @param predicates - Predicate functions to combine
+ * @returns Combined predicate function
  */
-export const combinePredicates = (...predicates) => {
-  return (item) => predicates.every(predicate => predicate(item))
+export const combinePredicates = (...predicates: Array<(item: any) => boolean>) => {
+  return (item: any): boolean => predicates.every(predicate => predicate(item))
+}
+
+interface FilterConfig {
+  area?: string
+  initiatives?: Initiative[]
+  stages?: Stage[]
+  cycle?: string | Cycle
 }
 
 /**
  * Create a composite predicate from filter configuration
- * @param {Object} filters - Filter configuration object
- * @param {string} filters.area - Area filter
- * @param {Array} filters.initiatives - Initiatives filter
- * @param {Array} filters.stages - Stages filter
- * @param {string|Object} filters.cycle - Cycle filter
- * @returns {Object} Object containing releaseItemPredicate and initiativePredicate
+ * @param filters - Filter configuration object
+ * @returns Object containing releaseItemPredicate and initiativePredicate
  */
-export const createFilterPredicates = (filters) => {
+export const createFilterPredicates = (filters: FilterConfig) => {
   // Handle null or undefined filters
   if (!filters) {
     filters = {}

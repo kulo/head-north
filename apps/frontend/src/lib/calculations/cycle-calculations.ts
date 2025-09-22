@@ -3,7 +3,7 @@
  * Extracted from CycleProgressData class for reuse across the application
  */
 
-import { STATUS, normalizeStatus, isCompletedStatus, isInProgressStatus, isNotToDoStatus } from '../constants/status-constants.js'
+import { STATUS, normalizeStatus, isCompletedStatus, isInProgressStatus, isNotToDoStatus } from '../constants/status-constants'
 
 /**
  * Normalize a number to one decimal place

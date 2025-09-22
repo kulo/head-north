@@ -8,30 +8,56 @@
 
 import { logger } from '@omega-one/shared-utils'
 import type { OmegaConfig } from '@omega/shared-config'
-import type { 
-  Cycle, 
-  RoadmapItem, 
-  ReleaseItem, 
-  Area, 
-  Initiative, 
-  Assignee, 
-  CycleData,
-  Team 
-} from '@omega/shared-types'
 
-interface AreaWithTeams {
+interface Cycle {
   id: string
   name: string
-  teams: Team[]
+  start?: string
+  delivery?: string
+  end?: string
+  state?: string
+}
+
+interface Initiative {
+  id: string
+  name: string
+}
+
+interface Assignee {
+  accountId: string
+  displayName: string
+}
+
+interface Area {
+  id: string
+  name: string
+  teams?: string[]
+}
+
+interface Stage {
+  id: string
+  name: string
+}
+
+interface RawData {
+  cycles: Cycle[]
+  roadmapItems: any[]
+  releaseItems: any[]
+  assignees: Assignee[]
+  areas: Area[]
+  initiatives: Initiative[]
+  stages: Stage[]
+  teams?: any[]
 }
 
 class CycleDataService {
   private config: OmegaConfig
-  private _unifiedCache: CycleData | null = null
-  private _cacheTimestamp: number | null = null
+  private _unifiedCache: RawData | null
+  private _cacheTimestamp: number | null
   private _cacheTTL: number
   private _apiTimeout: number
   private _apiRetries: number
+  private _apiAttempts: number
 
   constructor(omegaConfig: OmegaConfig) {
     if (!omegaConfig) {
@@ -40,9 +66,12 @@ class CycleDataService {
     this.config = omegaConfig
     
     // Unified cache management - single cache for all data
+    this._unifiedCache = null
+    this._cacheTimestamp = null
     this._cacheTTL = this.config.getCacheTTL()
     this._apiTimeout = this.config.getEnvironmentConfig().timeout
     this._apiRetries = this.config.getEnvironmentConfig().retries
+    this._apiAttempts = this.config.getEnvironmentConfig().attempts
   }
 
   /**
@@ -59,7 +88,7 @@ class CycleDataService {
    * Clear unified cache
    * @private
    */
-  private _clearCache(): void {
+  _clearCache() {
     this._unifiedCache = null
     this._cacheTimestamp = null
   }
@@ -68,19 +97,19 @@ class CycleDataService {
    * Set cache timestamp when any data is cached
    * @private
    */
-  private _setCacheTimestamp(): void {
+  _setCacheTimestamp() {
     this._cacheTimestamp = Date.now()
   }
 
   /**
    * Get cycle data with caching
-   * @returns The cycle data
+   * @returns {Promise<object>} The cycle data
    * @private
    */
-  private async _getCycleData(): Promise<CycleData> {
+  async _getCycleData() {
     // Check if unified cache is still valid
     if (this._isCacheValid()) {
-      return this._unifiedCache!
+      return this._unifiedCache
     }
     
     // Clear cache if invalid
@@ -99,24 +128,26 @@ class CycleDataService {
 
   /**
    * Make an HTTP request with error handling and retry logic
-   * @param endpoint - The API endpoint
-   * @param options - Fetch options
-   * @returns The response data
+   * @param {string} endpoint - The API endpoint
+   * @param {object} options - Fetch options
+   * @returns {Promise<any>} The response data
    */
-  private async _request(endpoint: string, options: RequestInit = {}): Promise<any> {
+  async _request(endpoint, options = {}) {
     const url = this.config.getUrl(endpoint)
     
-    const defaultOptions: RequestInit = {
+
+    const defaultOptions = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      }
+      },
+      timeout: this._apiTimeout
     }
 
     const requestOptions = { ...defaultOptions, ...options }
 
-    const errors: Array<{ attempt: number; error: string; timestamp: string }> = []
+    const errors = []
     for (let attempt = 1; attempt <= this._apiRetries; attempt++) {
       try {
         const response = await fetch(url, requestOptions)
@@ -130,7 +161,7 @@ class CycleDataService {
       } catch (error) {
         const errorInfo = {
           attempt,
-          error: (error as Error).message || error?.toString() || 'Unknown error',
+          error: error.message || error.toString(),
           timestamp: new Date().toISOString()
         }
         errors.push(errorInfo)
@@ -150,12 +181,13 @@ class CycleDataService {
     throw new Error(finalErrorMessage)
   }
 
+
   /**
    * Get overview data for all cycles
    * This is the main data source for the Area component
-   * @returns Cycle overview data with all cycles
+   * @returns {Promise<object>} Cycle overview data with all cycles
    */
-  async getOverviewForCycle(): Promise<CycleData> {
+  async getOverviewForCycle() {
     // Use cycle cache - all data is available in the cycle structure
     const data = await this._getCycleData()
     
@@ -166,47 +198,44 @@ class CycleDataService {
   /**
    * Get cycles roadmap data showing past, current, and future cycles
    * Used by the Roadmap component
-   * @returns Cycles roadmap data
+   * @returns {Promise<object>} Cycles roadmap data
    */
-  async getCyclesRoadmap(): Promise<CycleData> {
+  async getCyclesRoadmap() {
     // Use unified cache - all data is available in the unified structure
     return this._getCycleData()
   }
 
   /**
    * Get the currently active cycle
-   * @returns Active cycle data or null if none found
+   * @returns {Promise<object|null>} Active cycle data or null if none found
    */
-  async getActiveCycle(): Promise<Cycle | null> {
+  async getActiveCycle() {
     const data = await this._getCycleData()
-    return data.cycles?.find(cycle => cycle.isActive) || null
+    return data.activeCycle || data.cycles?.find(cycle => cycle.active) || null
   }
+
 
   /**
    * Get all initiatives from the unified data
-   * @param cycleId - The cycle ID to get initiatives for
-   * @returns Array of initiatives with id and name properties
+   * @param {string|number} cycleId - The cycle ID to get initiatives for
+   * @returns {Promise<Array>} Array of initiatives with id and name properties
    */
-  async getAllInitiatives(cycleId: string | null = null): Promise<Array<{ id: string; name: string }>> {
-    const data = await this.getOverviewForCycle()
+  async getAllInitiatives(cycleId = null) {
+    const data = await this.getOverviewForCycle(cycleId)
     const initiatives = data.initiatives || []
     
     // Return initiatives as they are (already in correct format from backend)
     return initiatives
-      .filter(initiative => initiative.id || initiative.initiativeId)
-      .map(initiative => ({
-        id: initiative.id || initiative.initiativeId!,
-        name: initiative.name || initiative.initiative || 'Unknown Initiative'
-      }))
   }
+
 
   /**
    * Extract area IDs from unified data
-   * @param data - Unified data from backend
-   * @returns Array of area IDs
+   * @param {object} data - Unified data from backend
+   * @returns {Array<string>} Array of area IDs
    * @private
    */
-  private _extractAreasFromData(data: CycleData): string[] {
+  _extractAreasFromData(data) {
     // Handle simplified data structure (areas is now directly available)
     if (data.areas && Array.isArray(data.areas)) {
       return data.areas.map(area => area.id) // Get area IDs
@@ -217,23 +246,23 @@ class CycleDataService {
 
   /**
    * Get config areas for translations
-   * @returns Array of config areas
+   * @returns {Array<{id: string, name: string}>} Array of config areas
    * @private
    */
-  private _getConfigAreas(): Array<{ id: string; name: string }> {
+  _getConfigAreas() {
     const config = this.config.getAreas()
     return Object.entries(config).map(([id, name]) => ({ id, name }))
   }
 
   /**
    * Create union of backend areas and config areas with proper fallbacks
-   * @param backendAreaIds - Area IDs from backend
-   * @param configAreas - Config areas with translations
-   * @returns Union of areas with fallbacks
+   * @param {Array<string>} backendAreaIds - Area IDs from backend
+   * @param {Array<{id: string, name: string}>} configAreas - Config areas with translations
+   * @returns {Array<{id: string, name: string}>} Union of areas with fallbacks
    * @private
    */
-  private _createAreaUnion(backendAreaIds: string[], configAreas: Array<{ id: string; name: string }>): Array<{ id: string; name: string }> {
-    const areaMap = new Map<string, string>()
+  _createAreaUnion(backendAreaIds, configAreas) {
+    const areaMap = new Map()
     
     // Add config areas first (for translations)
     configAreas.forEach(area => {
@@ -253,10 +282,10 @@ class CycleDataService {
 
   /**
    * Get all areas from appropriate data source with config fallbacks
-   * @param cycleId - The cycle ID to get areas for
-   * @returns Array of areas with id and name properties
+   * @param {string|number} cycleId - The cycle ID to get areas for
+   * @returns {Promise<Array>} Array of areas with id and name properties
    */
-  async getAllAreas(cycleId: string | null = null): Promise<Array<{ id: string; name: string }>> {
+  async getAllAreas(cycleId = null) {
     try {
       // Get areas from unified data source
       const sourceData = await this._getCycleData()
@@ -279,34 +308,34 @@ class CycleDataService {
 
   /**
    * Get all cycles from the unified data
-   * @returns Array of cycles
+   * @returns {Promise<Array>} Array of cycles
    */
-  async getAllCycles(): Promise<Cycle[]> {
+  async getAllCycles() {
     const data = await this._getCycleData()
     return data.cycles || []
   }
 
   /**
    * Get all stages from the unified data
-   * @returns Array of stages
+   * @returns {Promise<Array>} Array of stages
    */
-  async getAllStages(): Promise<any[]> {
+  async getAllStages() {
     const data = await this._getCycleData()
     return data.stages || []
   }
 
   /**
    * Get all teams from all areas in the organisation
-   * @returns Array of all teams across all areas
+   * @returns {Promise<Array>} Array of all teams across all areas
    */
-  async getAllTeams(): Promise<Team[]> {
+  async getAllTeams() {
     const data = await this._getCycleData()
     const areas = data.areas || []
     
-    const allTeams: Team[] = []
-    areas.forEach((areaData: any) => {
+    const allTeams = []
+    areas.forEach(areaData => {
       if (areaData.teams && Array.isArray(areaData.teams)) {
-        areaData.teams.forEach((team: any) => {
+        areaData.teams.forEach(team => {
           allTeams.push({
             ...team,
             areaId: areaData.id,
@@ -321,19 +350,19 @@ class CycleDataService {
 
   /**
    * Get teams for a specific area
-   * @param areaId - The area ID to get teams for
-   * @returns Array of teams for the specified area
+   * @param {string} areaId - The area ID to get teams for
+   * @returns {Promise<Array>} Array of teams for the specified area
    */
-  async getTeamsForArea(areaId: string): Promise<Team[]> {
+  async getTeamsForArea(areaId) {
     const data = await this._getCycleData()
     const areas = data.areas || []
     const area = areas.find(a => a.id === areaId)
     
-    if (!area || !(area as any).teams) {
+    if (!area || !area.teams) {
       return []
     }
     
-    return (area as any).teams.map((team: any) => ({
+    return area.teams.map(team => ({
       ...team,
       areaId,
       areaName: area.name || areaId
@@ -342,9 +371,9 @@ class CycleDataService {
 
   /**
    * Get organisation data (areas with teams and assignees)
-   * @returns Organisation data structure
+   * @returns {Promise<object>} Organisation data structure
    */
-  async getOrganisationData(): Promise<{ areas: Area[]; assignees: Assignee[] }> {
+  async getOrganisationData() {
     const data = await this._getCycleData()
     return {
       areas: data.areas || [],
@@ -354,9 +383,9 @@ class CycleDataService {
 
   /**
    * Get all assignees from the organisation
-   * @returns Array of assignees
+   * @returns {Promise<Array>} Array of assignees
    */
-  async getAllAssignees(): Promise<Array<{ id: string; name: string }>> {
+  async getAllAssignees() {
     const data = await this._getCycleData()
     const assignees = data.assignees || []
     return assignees.map(assignee => ({
@@ -368,29 +397,41 @@ class CycleDataService {
   /**
    * Get cycle data directly from the cycle-data endpoint
    * This is the new preferred method for getting data
-   * @returns Cycle data structure
+   * @returns {Promise<object>} Cycle data structure
    */
-  async getCycleData(): Promise<CycleData> {
+  async getCycleData() {
     // Always use cached data since we fetch all data at once
     return this._getCycleData()
   }
 
   /**
    * Get active cycles from the unified data
-   * @returns Array of active cycles
+   * @returns {Promise<Array>} Array of active cycles
    */
-  async getActiveCycles(): Promise<Cycle[]> {
+  async getActiveCycles() {
     const data = await this._getCycleData()
     const cycles = data.cycles || []
     return cycles.filter(cycle => cycle.state === 'active')
   }
 
   /**
-   * Get cycles by state from the unified data
-   * @param state - The state to filter by ('active', 'closed', 'future')
-   * @returns Array of cycles with the specified state
+   * Get the oldest active cycle from the unified data
+   * @returns {Promise<object|null>} The oldest active cycle or null if none found
    */
-  async getCyclesByState(state: string): Promise<Cycle[]> {
+  async getActiveCycle() {
+    const activeCycles = await this.getActiveCycles()
+    if (activeCycles.length === 0) return null
+    
+    // Sort by start date and return the oldest (first) one
+    return activeCycles.sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0]
+  }
+
+  /**
+   * Get cycles by state from the unified data
+   * @param {string} state - The state to filter by ('active', 'closed', 'future')
+   * @returns {Promise<Array>} Array of cycles with the specified state
+   */
+  async getCyclesByState(state) {
     const data = await this._getCycleData()
     const cycles = data.cycles || []
     return cycles.filter(cycle => cycle.state === state)
@@ -398,20 +439,20 @@ class CycleDataService {
 
   /**
    * Get ordered cycles from the unified data
-   * @param sortBy - The field to sort by ('start', 'name', 'id')
-   * @returns Array of cycles sorted by the specified field
+   * @param {string} sortBy - The field to sort by ('startDate', 'name', 'id')
+   * @returns {Promise<Array>} Array of cycles sorted by the specified field
    */
-  async getOrderedCycles(sortBy: string = 'start'): Promise<Cycle[]> {
+  async getOrderedCycles(sortBy = 'startDate') {
     const data = await this._getCycleData()
     const cycles = data.cycles || []
     
     return [...cycles].sort((a, b) => {
-      if (sortBy === 'start') {
-        return new Date(a.start).getTime() - new Date(b.start).getTime()
+      if (sortBy === 'startDate') {
+        return new Date(a.startDate) - new Date(b.startDate)
       } else if (sortBy === 'name') {
         return a.name.localeCompare(b.name)
       } else if (sortBy === 'id') {
-        return a.id.localeCompare(b.id)
+        return a.id - b.id
       }
       return 0
     })
@@ -420,8 +461,8 @@ class CycleDataService {
   /**
    * Clear all caches (useful for testing or when data needs to be refreshed)
    */
-  clearCache(): void {
-    this._clearCache()
+  clearCache() {
+    this._clearAllCaches()
   }
 }
 
