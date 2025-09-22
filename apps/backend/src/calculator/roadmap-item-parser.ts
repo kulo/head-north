@@ -1,8 +1,8 @@
 import pkg from 'lodash';
 const { map, reduce, uniq, property } = pkg;
-import { getJiraLink, getLabelsWithPrefix, translateLabelWithoutFallback } from './parse-common.js';
+import { getJiraLink, getLabelsWithPrefix, translateLabelWithoutFallback } from './parse-common';
 import { logger } from '@omega-one/shared-utils';
-import LabelResolver from './resolve-labels.js';
+import LabelResolver from './resolve-labels';
 import type { OmegaConfig } from '@omega/shared-config';
 import type { 
   RoadmapItem, 

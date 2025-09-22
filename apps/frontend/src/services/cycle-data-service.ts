@@ -192,10 +192,12 @@ class CycleDataService {
     const initiatives = data.initiatives || []
     
     // Return initiatives as they are (already in correct format from backend)
-    return initiatives.map(initiative => ({
-      id: initiative.id || initiative.initiativeId,
-      name: initiative.name || initiative.initiative
-    }))
+    return initiatives
+      .filter(initiative => initiative.id || initiative.initiativeId)
+      .map(initiative => ({
+        id: initiative.id || initiative.initiativeId!,
+        name: initiative.name || initiative.initiative || 'Unknown Initiative'
+      }))
   }
 
   /**

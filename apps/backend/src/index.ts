@@ -3,7 +3,7 @@ import createRouter from './router.js';
 import cors from '@koa/cors';
 import { OmegaConfig } from '@omega/shared-config';
 import { logger } from '@omega-one/shared-utils';
-import errorHandler from './error-handler.js';
+import errorHandler from './error-handler';
 
 // Create OmegaConfig instance for backend
 const omegaConfig = new OmegaConfig({ 

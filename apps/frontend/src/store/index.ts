@@ -1,17 +1,17 @@
 import { createStore, Store } from 'vuex'
-import { CycleDataService } from '@/services/index.js'
+import { CycleDataService } from '@/services/index'
 import { logger } from '@omega-one/shared-utils'
-import { filterByArea } from '@/filters/area-filter.js'
-import { filterByInitiatives } from '@/filters/initiatives-filter.js'
-import { filterByStages } from '@/filters/stages-filter.js'
-import { filterByAssignees } from '@/filters/assignee-filter.js'
-import { filterByCycle } from '@/filters/cycle-filter.js'
+import { filterByArea } from '@/filters/area-filter'
+import { filterByInitiatives } from '@/filters/initiatives-filter'
+import { filterByStages } from '@/filters/stages-filter'
+import { filterByAssignees } from '@/filters/assignee-filter'
+import { filterByCycle } from '@/filters/cycle-filter'
 import { 
   transformForCycleOverview, 
   transformForRoadmap, 
   calculateCycleProgress,
   calculateCycleData
-} from '@/lib/transformers/data-transformations.js'
+} from '@/lib/transformers/data-transformations'
 import type { OmegaConfig } from '@omega/shared-config'
 import type { Router } from 'vue-router'
 import type { Cycle, RoadmapItem, ReleaseItem, Area, Initiative, Assignee } from '@omega/shared-types'

@@ -1,6 +1,6 @@
 import Router from '@koa/router';
-import { registerApiRoutes } from './utils/route-registry.js';
-import { getCycleData } from './actions/get-cycle-data.js';
+import { registerApiRoutes } from './utils/route-registry';
+import { getCycleData } from './actions/get-cycle-data';
 import type { OmegaConfig } from '@omega/shared-config';
 
 /**

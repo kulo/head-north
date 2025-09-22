@@ -3,10 +3,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import OmegaConfig from '../omega-config.js'
+import OmegaConfig from '../omega-config'
 
 describe('OmegaConfig', () => {
-  let config
+  let config: OmegaConfig
 
   beforeEach(() => {
     // Mock process.env for Node.js environment
@@ -20,12 +20,12 @@ describe('OmegaConfig', () => {
         JIRA_TOKEN: 'test-token',
         JIRA_HOST: 'https://test.atlassian.net'
       }
-    }
+    } as any
   })
 
   afterEach(() => {
     // Clean up
-    delete global.process
+    delete (global as any).process
   })
 
   describe('Constructor', () => {

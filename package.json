@@ -50,6 +50,8 @@
     "clean:install": "npm run clean && npm run install:all"
   },
   "devDependencies": {
+    "@types/koa": "^3.0.0",
+    "@types/koa-router": "^7.4.8",
     "@types/node": "^24.5.2",
     "concurrently": "^7.6.0",
     "typescript": "^5.9.2"

@@ -1,7 +1,7 @@
-import { resolveStatus } from './resolve-status.js';
-import { getJiraLink, translateLabel, getLabelsWithPrefix, translateLabelWithoutFallback } from './parse-common.js';
+import { resolveStatus } from './resolve-status';
+import { getJiraLink, translateLabel, getLabelsWithPrefix, translateLabelWithoutFallback } from './parse-common';
 import { logger } from '@omega-one/shared-utils';
-import { resolveStage } from './resolve-stage.js';
+import { resolveStage } from './resolve-stage';
 import type { OmegaConfig } from '@omega/shared-config';
 import type { 
   JiraIssue, 

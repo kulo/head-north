@@ -1,7 +1,7 @@
-import { ReleaseItemParser } from './release-item-parser.js';
-import { RoadmapItemParser } from './roadmap-item-parser.js';
-import { resolveStage, isReleasableStage, isFinalReleaseStage } from './resolve-stage.js';
-import { resolveStatus } from './resolve-status.js';
+import { ReleaseItemParser } from './release-item-parser';
+import { RoadmapItemParser } from './roadmap-item-parser';
+import { resolveStage, isReleasableStage, isFinalReleaseStage } from './resolve-stage';
+import { resolveStatus } from './resolve-status';
 import type { OmegaConfig } from '@omega/shared-config';
 
 const hasAnyReleaseItem = (x: any) => x.releaseItems.length > 0;

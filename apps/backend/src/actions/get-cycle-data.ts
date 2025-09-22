@@ -1,5 +1,5 @@
 import { Context } from 'koa';
-import collectCycleData from '../service/collect-cycle-data.js';
+import collectCycleData from '../service/collect-cycle-data';
 import { logger } from '@omega-one/shared-utils';
 import type { OmegaConfig } from '@omega/shared-config';
 import type { RawData } from '@omega/shared-types';

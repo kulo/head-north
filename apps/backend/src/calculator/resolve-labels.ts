@@ -1,4 +1,4 @@
-import {translateLabelWithoutFallback, getLabelsWithPrefix} from "./parse-common.js";
+import {translateLabelWithoutFallback, getLabelsWithPrefix} from "./parse-common";
 import type { OmegaConfig } from '@omega/shared-config';
 
 class LabelResolver {

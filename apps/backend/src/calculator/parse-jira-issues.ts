@@ -1,8 +1,8 @@
 import pkg from 'lodash';
 const { groupBy, omit, get } = pkg;
-import { ReleaseItemParser } from './release-item-parser.js';
-import { RoadmapItemParser } from './roadmap-item-parser.js';
-import { translateLabel } from './parse-common.js';
+import { ReleaseItemParser } from './release-item-parser';
+import { RoadmapItemParser } from './roadmap-item-parser';
+import { translateLabel } from './parse-common';
 import type { OmegaConfig } from '@omega/shared-config';
 
 class IssueParser {

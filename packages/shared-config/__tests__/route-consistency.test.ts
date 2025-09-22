@@ -3,7 +3,7 @@
  * Tests to ensure frontend and backend use the same API paths
  */
 
-import { API_ENDPOINTS } from '../index.js';
+import { API_ENDPOINTS } from '../index';
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 
@@ -57,7 +57,7 @@ describe('Route Consistency', () => {
     it('should be able to import route registry', async () => {
       // This test ensures the route registry can be imported
       // and that it uses the same API_ENDPOINTS
-      const { registerApiRoutes, API_ENDPOINTS: registryEndpoints } = await import('../../../apps/backend/server/utils/route-registry.js');
+      const { registerApiRoutes, API_ENDPOINTS: registryEndpoints } = await import('../../../apps/backend/src/utils/route-registry');
       
       assert.ok(registerApiRoutes);
       assert.strictEqual(typeof registerApiRoutes, 'function');
@@ -65,7 +65,7 @@ describe('Route Consistency', () => {
     });
 
     it('should have consistent endpoint definitions', async () => {
-      const { API_ENDPOINTS: registryEndpoints } = await import('../../../apps/backend/server/utils/route-registry.js');
+      const { API_ENDPOINTS: registryEndpoints } = await import('../../../apps/backend/src/utils/route-registry');
       
       // Check that all endpoints are defined in both places
       Object.keys(API_ENDPOINTS).forEach(key => {
@@ -75,3 +75,4 @@ describe('Route Consistency', () => {
     });
   });
 });
+

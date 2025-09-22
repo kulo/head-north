@@ -1,6 +1,6 @@
-import { ReleaseItemParser } from '../calculator/release-item-parser.js';
-import { RoadmapItemParser } from '../calculator/roadmap-item-parser.js';
-import JiraApiProxy from './jira-api-proxy.js';
+import { ReleaseItemParser } from '../calculator/release-item-parser';
+import { RoadmapItemParser } from '../calculator/roadmap-item-parser';
+import JiraApiProxy from './jira-api-proxy';
 import { logger } from '@omega-one/shared-utils';
 import pkg from 'lodash';
 const { uniqBy } = pkg;
@@ -156,7 +156,7 @@ export default async (omegaConfig: OmegaConfig, extraFields: string[] = []): Pro
   let enhancedAreas: Record<string, Area> = {};
   if (omegaConfig.isUsingFakeCycleData()) {
     // Import FakeDataGenerator to get enhanced areas
-    const FakeDataGenerator = (await import('./fake-data-generator.js')).default;
+    const FakeDataGenerator = (await import('./fake-data-generator')).default;
     const fakeDataGenerator = new FakeDataGenerator(omegaConfig);
     const enhancedAreasData = fakeDataGenerator.getEnhancedAreas();
     enhancedAreas = Object.fromEntries(

@@ -3,7 +3,7 @@
  * Unit tests for the shared configuration package
  */
 
-import { getApiConfig, getApiUrl, getEnvironmentConfig, API_ENDPOINTS } from '../index.js';
+import { getApiConfig, getApiUrl, getEnvironmentConfig, API_ENDPOINTS } from '../index';
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
@@ -71,3 +71,4 @@ describe('Shared Config', () => {
     });
   });
 });
+

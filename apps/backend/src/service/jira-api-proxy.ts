@@ -1,5 +1,5 @@
-import JiraAPI from './jira-api.js';
-import FakeDataGenerator from './fake-data-generator.js';
+import JiraAPI from './jira-api';
+import FakeDataGenerator from './fake-data-generator';
 import { logger } from '@omega-one/shared-utils';
 import type { OmegaConfig } from '@omega/shared-config';
 
