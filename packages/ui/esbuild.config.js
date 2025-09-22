@@ -1,6 +1,5 @@
 import esbuild from "esbuild";
 import { readdirSync } from "fs";
-import { join } from "path";
 
 const isDev = process.env.NODE_ENV === "development";
 
