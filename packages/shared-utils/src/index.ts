@@ -1,4 +1,4 @@
-export * from './logger.js';
+export * from "./logger.js";
 
 // Shared utility functions for Omega applications
 
@@ -7,7 +7,9 @@ export * from './logger.js';
  * @param date - Date to format
  * @returns Formatted date string
  */
-export function formatDate(date: Date | string | null | undefined): string | null {
+export function formatDate(
+  date: Date | string | null | undefined,
+): string | null {
   if (!date) return null;
   const d = new Date(date);
   return d.toISOString();
@@ -30,12 +32,12 @@ export function calculateProgress(completed: number, total: number): number {
  * @returns Cloned object
  */
 export function deepClone<T>(obj: T): T {
-  if (obj === null || typeof obj !== 'object') return obj;
+  if (obj === null || typeof obj !== "object") return obj;
   if (obj instanceof Date) return new Date(obj.getTime()) as T;
-  if (obj instanceof Array) return obj.map(item => deepClone(item)) as T;
-  if (typeof obj === 'object') {
+  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as T;
+  if (typeof obj === "object") {
     const cloned = {} as T;
-    Object.keys(obj).forEach(key => {
+    Object.keys(obj).forEach((key) => {
       (cloned as any)[key] = deepClone((obj as any)[key]);
     });
     return cloned;
@@ -59,8 +61,9 @@ export function isValidEmail(email: string): boolean {
  * @returns Random ID
  */
 export function generateId(length: number = 8): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -75,7 +78,7 @@ export function generateId(length: number = 8): string {
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | undefined;
   return function executedFunction(...args: Parameters<T>) {

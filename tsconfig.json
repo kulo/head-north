@@ -35,17 +35,8 @@
       "@omega/shared-config": ["./packages/shared-config"]
     }
   },
-  "include": [
-    "apps/**/*",
-    "packages/**/*",
-    "tools/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
+  "include": ["apps/**/*", "packages/**/*", "tools/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
   "references": [
     { "path": "./packages/shared-types" },
     { "path": "./packages/shared-config" },

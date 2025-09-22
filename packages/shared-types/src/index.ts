@@ -54,7 +54,7 @@ export interface Area {
 // Cycle/Sprint Types (Cycles replace Sprints in non-Jira code)
 // ============================================================================
 
-export type CycleState = 'active' | 'closed' | 'future' | 'completed';
+export type CycleState = "active" | "closed" | "future" | "completed";
 
 export interface Cycle {
   id: string;
@@ -234,7 +234,7 @@ export interface ParsedReleaseItem {
 // Enhanced Unified Data Structure
 // ============================================================================
 
-export type DataType = 'roadmap' | 'cycle-overview';
+export type DataType = "roadmap" | "cycle-overview";
 
 export interface UnifiedDataMetadata {
   type: DataType;
@@ -256,7 +256,8 @@ export interface UnifiedData {
 // API Response Types
 // ============================================================================
 
-export interface CycleApiResponse extends ApiResponse<Cycle | CycleCollection> {}
+export interface CycleApiResponse
+  extends ApiResponse<Cycle | CycleCollection> {}
 
 export interface UnifiedApiResponse extends ApiResponse<UnifiedData> {}
 
@@ -321,7 +322,7 @@ export interface OmegaConfig {
   jiraBaseUrl: string;
   jiraUsername: string;
   jiraApiToken: string;
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
 }
 
 // ============================================================================

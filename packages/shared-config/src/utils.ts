@@ -2,7 +2,7 @@
  * Shared utility functions for configuration classes
  */
 
-import type { ProcessEnv } from './types.js';
+import type { ProcessEnv } from "./types.js";
 
 /**
  * Get required environment variable
@@ -12,7 +12,11 @@ import type { ProcessEnv } from './types.js';
  * @returns Environment variable value
  * @throws Error if environment variable is missing
  */
-export function getRequiredEnvVar(processEnv: ProcessEnv, key: string, errorMessage: string): string {
+export function getRequiredEnvVar(
+  processEnv: ProcessEnv,
+  key: string,
+  errorMessage: string,
+): string {
   const value = processEnv[key];
   if (!value) {
     throw new Error(`${errorMessage}. Missing environment variable: ${key}`);
@@ -28,10 +32,17 @@ export function getRequiredEnvVar(processEnv: ProcessEnv, key: string, errorMess
  * @param description - Description for logging
  * @returns Environment variable value or fallback
  */
-export function getEnvVarWithFallback(processEnv: ProcessEnv, key: string, fallback: string, description: string): string {
+export function getEnvVarWithFallback(
+  processEnv: ProcessEnv,
+  key: string,
+  fallback: string,
+  description: string,
+): string {
   const value = processEnv[key];
   if (!value) {
-    console.warn(`⚠️  Using fallback for ${description}: ${key}=${fallback} (set ${key} environment variable for production)`);
+    console.warn(
+      `⚠️  Using fallback for ${description}: ${key}=${fallback} (set ${key} environment variable for production)`,
+    );
     return fallback;
   }
   return value;

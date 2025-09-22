@@ -1,21 +1,25 @@
 # Omega One - Development Cycle Dashboard
 
-This is the unified monorepo containing both the Omega frontend and backend services, previously maintained as separate repositories.
+This is the unified monorepo containing both the Omega frontend and backend services, reorganized into a modern, idiomatic Node.js & TypeScript structure.
 
 ## 🏗️ Structure
 
 ```
 omega-one/
 ├── apps/
-│   ├── frontend/      # Vue.js frontend application 
-│   └── backend/       # Node.js/Koa backend service 
+│   ├── web/           # Vue.js web application (port 8080)
+│   └── api/           # Node.js/Koa API service (port 3000)
 ├── packages/
-│   ├── shared-types/  # Shared TypeScript types and interfaces
-│   ├── shared-utils/  # Shared utility functions
-│   └── shared-config/ # Shared configuration files
+│   ├── types/         # Shared TypeScript types and interfaces
+│   ├── utils/         # Shared utility functions
+│   ├── config/        # Shared configuration files
+│   └── ui/            # Shared UI components
 ├── tools/
 │   ├── eslint-config/ # Shared ESLint configuration
+│   ├── prettier-config/ # Shared Prettier configuration
 │   └── typescript-config/ # Shared TypeScript configuration
+├── scripts/
+│   └── validate-env.js # Environment validation script
 ├── package.json       # Root package.json with workspace configuration
 └── README.md          # This file
 ```
@@ -23,30 +27,34 @@ omega-one/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 20.x LTS
+
+- Node.js 22.x LTS
 - npm 10.x
 
 ### Installation
+
 ```bash
-# Install all dependencies for both frontend and backend
+# Install all dependencies
 npm run install:all
 
 # Or install individually
-npm run install:frontend
-npm run install:backend
+npm run install:web     # Web application
+npm run install:api     # API service
 ```
 
 ### Development
+
 ```bash
-# Run both frontend and backend in development mode
+# Run both applications in development mode
 npm run dev
 
 # Or run individually
-npm run dev:frontend    # Frontend on http://localhost:8080
-npm run dev:backend     # Backend on http://localhost:3000
+npm run dev:web         # Web app on http://localhost:8080
+npm run dev:api         # API on http://localhost:3000
 ```
 
 ### Production
+
 ```bash
 # Build both applications
 npm run build
@@ -57,20 +65,23 @@ npm run start
 
 ## 📦 Workspace Commands
 
-### Frontend (Vue.js)
-- `npm run dev:frontend` - Start development server
-- `npm run build:frontend` - Build for production
-- `npm run test:frontend` - Run frontend tests
-- `npm run lint:frontend` - Lint frontend code
+### Web Application (Vue.js)
 
-### Backend (Node.js/Koa)
-- `npm run dev:backend` - Start backend in development mode
-- `npm run start:backend` - Start backend in production mode
-- `npm run test:backend` - Run backend tests
-- `npm run lint:backend` - Lint backend code
+- `npm run dev:web` - Start development server
+- `npm run build:web` - Build for production
+- `npm run test:web` - Run web app tests
+- `npm run lint:web` - Lint web app code
+
+### API Service (Node.js/Koa)
+
+- `npm run dev:api` - Start API in development mode
+- `npm run start:api` - Start API in production mode
+- `npm run test:api` - Run API tests
+- `npm run lint:api` - Lint API code
 
 ### Global Commands
-- `npm run dev` - Start both frontend and backend in development
+
+- `npm run dev` - Start both applications in development
 - `npm run build` - Build both applications
 - `npm run test` - Run all tests
 - `npm run lint` - Lint all code
@@ -81,47 +92,85 @@ npm run start
 
 The monorepo includes several shared packages for code reuse and consistency:
 
-### Shared Types (`packages/shared-types/`)
-Common TypeScript types and interfaces used across frontend and backend.
+### Types (`packages/types/`)
 
-### Shared Utils (`packages/shared-utils/`)
-Utility functions that can be used by both frontend and backend applications.
+Common TypeScript types and interfaces used across web app and API service.
 
-### Shared Config (`packages/shared-config/`)
-**Single Source of Truth** for all API endpoints and configuration settings. Ensures frontend and backend always use the same API paths and configuration values. Includes:
+### Utils (`packages/utils/`)
+
+Utility functions that can be used by both web app and API service applications.
+
+### Config (`packages/config/`)
+
+**Single Source of Truth** for all API endpoints and configuration settings. Ensures web app and API service always use the same API paths and configuration values. Includes:
+
 - API endpoint definitions
 - Environment-specific configurations
 - Route consistency validation
 - Cross-platform configuration management
 
+### UI (`packages/ui/`)
+
+Shared Vue.js components that can be reused across different parts of the web application.
+
 ### Tools
+
 - **ESLint Config** (`tools/eslint-config/`): Shared ESLint configuration
 - **TypeScript Config** (`tools/typescript-config/`): Shared TypeScript configuration
+
+## 🛠️ Development Tools
+
+### Code Quality
+
+- **ESLint**: Configured for TypeScript and Vue.js
+- **Prettier**: Code formatting with shared configuration
+- **Husky**: Git hooks for pre-commit linting
+- **lint-staged**: Run linters on staged files only
+
+### Environment Validation
+
+- `npm run validate:env` - Validates required environment variables
+- `npm run dev:with-check` - Starts development with environment validation
+
+### Package Development
+
+```bash
+# Watch mode for shared packages
+npm run dev:packages
+
+# Individual package development
+npm run dev:types    # Watch types package
+npm run dev:utils    # Watch utils package
+npm run dev:config   # Watch config package
+npm run dev:ui       # Watch UI package
+```
 
 ## 🔧 Individual Package Management
 
 Each workspace maintains its own `package.json` and can be managed independently:
 
 ```bash
-# Work in frontend directory
-cd apps/frontend
+# Work in web app directory
+cd apps/web
 npm install <package>
 npm run <script>
 
-# Work in backend directory
-cd apps/backend
+# Work in API directory
+cd apps/api
 npm install <package>
 npm run <script>
 
 # Work in shared packages
-cd packages/shared-types
+cd packages/types
 npm install <package>
 ```
 
 ## 🐳 Docker Support
 
 ### Backend Docker
+
 The backend includes Docker support:
+
 ```bash
 cd apps/backend
 make build    # Build Docker image
@@ -129,7 +178,9 @@ make start    # Run Docker container
 ```
 
 ### Frontend Build
+
 The frontend can be built and served statically:
+
 ```bash
 cd apps/frontend
 npm run build
@@ -139,11 +190,14 @@ npm run build
 ## 🚀 Deployment
 
 ### Cloud Build (Backend)
+
 The backend includes Google Cloud Build configuration:
+
 - `cloudbuild-production.yaml` - Production deployment
 - `minikube-manifest.yaml` - Local Kubernetes deployment
 
 ### Frontend Deployment
+
 The frontend builds to static files in `dist/` directory and can be deployed to any static hosting service.
 
 ## 🔍 Development Workflow

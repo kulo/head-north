@@ -7,40 +7,40 @@ This package provides a unified configuration system for the Omega application. 
 ### Basic Usage
 
 ```javascript
-import { OmegaConfig } from '@omega/shared-config'
+import { OmegaConfig } from "@omega/shared-config";
 
 // Create configuration instance
-const config = new OmegaConfig('development')
+const config = new OmegaConfig("development");
 
 // Access configuration
-const apiHost = config.getHost()
-const endpoints = config.getEndpoints()
-const cacheTTL = config.getCacheTTL()
+const apiHost = config.getHost();
+const endpoints = config.getEndpoints();
+const cacheTTL = config.getCacheTTL();
 ```
 
 ### Environment-Specific Configuration
 
 ```javascript
 // Development environment
-const devConfig = new OmegaConfig('development')
+const devConfig = new OmegaConfig("development");
 
 // Production environment
-const prodConfig = new OmegaConfig('production')
+const prodConfig = new OmegaConfig("production");
 
 // Test environment
-const testConfig = new OmegaConfig('test')
+const testConfig = new OmegaConfig("test");
 ```
 
 ### Configuration Overrides
 
 ```javascript
-const config = new OmegaConfig('development', {
+const config = new OmegaConfig("development", {
   // Override specific settings
-  customSetting: 'value',
+  customSetting: "value",
   cache: {
-    ttl: 10 * 60 * 1000 // 10 minutes
-  }
-})
+    ttl: 10 * 60 * 1000, // 10 minutes
+  },
+});
 ```
 
 ## API Reference
@@ -110,34 +110,34 @@ The configuration includes:
 ### Backend Usage
 
 ```javascript
-import { OmegaConfig } from '@omega/shared-config'
+import { OmegaConfig } from "@omega/shared-config";
 
-const config = new OmegaConfig(process.env.NODE_ENV || 'development')
+const config = new OmegaConfig(process.env.NODE_ENV || "development");
 
 // Get server configuration
-const port = config.get('port')
-const jiraConfig = config.getJiraConfig()
+const port = config.get("port");
+const jiraConfig = config.getJiraConfig();
 
 // Get API endpoints
-const endpoints = config.getEndpoints()
+const endpoints = config.getEndpoints();
 ```
 
 ### Frontend Usage
 
 ```javascript
-import { OmegaConfig } from '@omega/shared-config'
+import { OmegaConfig } from "@omega/shared-config";
 
-const environment = import.meta.env?.MODE || 'development'
+const environment = import.meta.env?.MODE || "development";
 const config = new OmegaConfig(environment, {
-  devMode: environment === 'development'
-})
+  devMode: environment === "development",
+});
 
 // Get API configuration
-const apiHost = config.getHost()
-const cacheTTL = config.getCacheTTL()
+const apiHost = config.getHost();
+const cacheTTL = config.getCacheTTL();
 
 // Check environment
 if (config.isDevelopment()) {
-  console.log('Running in development mode')
+  console.log("Running in development mode");
 }
 ```

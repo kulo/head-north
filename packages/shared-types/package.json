@@ -1,5 +1,5 @@
 {
-  "name": "@omega/shared-types",
+  "name": "@omega/types",
   "version": "1.0.0",
   "description": "Shared TypeScript types for Omega applications",
   "type": "module",
@@ -7,12 +7,13 @@
   "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "node esbuild.config.js",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "echo 'No tests for types package'"
   },
   "devDependencies": {
+    "esbuild": "^0.25.10",
     "typescript": "^5.0.0"
   },
   "engines": {
