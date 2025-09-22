@@ -98,14 +98,36 @@ export interface CycleCollection {
 export interface Initiative {
   id: string;
   name: string;
-  initiativeId?: string;
-  initiative?: string;
+  initiativeId: string;
+  initiative: string;
   roadmapItems?: RoadmapItem[];
+  weeks?: number;
+  weeksDone?: number;
+  weeksInProgress?: number;
+  weeksNotToDo?: number;
+  weeksCancelled?: number;
+  weeksTodo?: number;
+  progress?: number;
+  progressWithInProgress?: number;
+  progressByReleaseItems?: number;
+  releaseItemsCount?: number;
+  releaseItemsDoneCount?: number;
+  percentageNotToDo?: number;
+  startMonth?: string;
+  endMonth?: string;
+  daysFromStartOfCycle?: number;
+  daysInCycle?: number;
+  currentDayPercentage?: number;
 }
 
 export interface Assignee {
   accountId: string;
   displayName: string;
+}
+
+export interface Stage {
+  id: string;
+  name: string;
 }
 
 // ============================================================================
@@ -156,6 +178,7 @@ export interface RoadmapItem {
   initiativeId?: string | null;
   isExternal?: boolean;
   crew?: string;
+  projectId?: string;
   url?: string;
   validations?: any[];
   releaseItems?: ReleaseItem[];
