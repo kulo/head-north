@@ -8,47 +8,15 @@
 
 import { logger } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
-
-interface Cycle {
-  id: string;
-  name: string;
-  start?: string;
-  delivery?: string;
-  end?: string;
-  state?: string;
-}
-
-interface Initiative {
-  id: string;
-  name: string;
-}
-
-interface Assignee {
-  accountId: string;
-  displayName: string;
-}
-
-interface Area {
-  id: string;
-  name: string;
-  teams?: string[];
-}
-
-interface Stage {
-  id: string;
-  name: string;
-}
-
-interface RawData {
-  cycles: Cycle[];
-  roadmapItems: any[];
-  releaseItems: any[];
-  assignees: Assignee[];
-  areas: Area[];
-  initiatives: Initiative[];
-  stages: Stage[];
-  teams?: any[];
-}
+import type {
+  Cycle,
+  CycleWithProgress,
+  Initiative,
+  Assignee,
+  Area,
+  Stage,
+  RawData,
+} from "@omega/types";
 
 class CycleDataService {
   private config: OmegaConfig;
@@ -212,23 +180,12 @@ class CycleDataService {
   }
 
   /**
-   * Get the currently active cycle
-   * @returns {Promise<object|null>} Active cycle data or null if none found
-   */
-  async getActiveCycle() {
-    const data = await this._getCycleData();
-    return (
-      data.activeCycle || data.cycles?.find((cycle) => cycle.active) || null
-    );
-  }
-
-  /**
    * Get all initiatives from the unified data
    * @param {string|number} cycleId - The cycle ID to get initiatives for
    * @returns {Promise<Array>} Array of initiatives with id and name properties
    */
   async getAllInitiatives(cycleId = null) {
-    const data = await this.getOverviewForCycle(cycleId);
+    const data = await this.getOverviewForCycle();
     const initiatives = data.initiatives || [];
 
     // Return initiatives as they are (already in correct format from backend)
@@ -430,7 +387,8 @@ class CycleDataService {
 
     // Sort by start date and return the oldest (first) one
     return activeCycles.sort(
-      (a, b) => new Date(a.startDate) - new Date(b.startDate),
+      (a, b) =>
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
     )[0];
   }
 
@@ -456,11 +414,13 @@ class CycleDataService {
 
     return [...cycles].sort((a, b) => {
       if (sortBy === "startDate") {
-        return new Date(a.startDate) - new Date(b.startDate);
+        return (
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        );
       } else if (sortBy === "name") {
         return a.name.localeCompare(b.name);
       } else if (sortBy === "id") {
-        return a.id - b.id;
+        return (a.id as number) - (b.id as number);
       }
       return 0;
     });
@@ -470,7 +430,7 @@ class CycleDataService {
    * Clear all caches (useful for testing or when data needs to be refreshed)
    */
   clearCache() {
-    this._clearAllCaches();
+    this._clearCache();
   }
 }
 

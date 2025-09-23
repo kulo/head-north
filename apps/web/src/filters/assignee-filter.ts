@@ -3,31 +3,17 @@
  * Filters items by selected assignees
  */
 
-interface RoadmapItem {
-  id: string;
-  releaseItems?: ReleaseItem[];
-}
-
-interface ReleaseItem {
-  assignee?: {
-    accountId?: string;
-    id?: string;
-  };
-}
-
-interface Initiative {
-  initiativeId: string;
-  roadmapItems: RoadmapItem[];
-}
+import type {
+  RoadmapItem,
+  ReleaseItem,
+  Initiative,
+  Assignee,
+} from "@omega/types";
+import type { AssigneeFilter } from "@omega/ui";
 
 interface Item {
   roadmapItems?: RoadmapItem[];
   initiatives?: Initiative[];
-}
-
-interface Assignee {
-  id?: string;
-  value?: string;
 }
 
 /**
@@ -39,7 +25,7 @@ interface Assignee {
  */
 export const filterByAssignees = (
   items: Item[],
-  selectedAssignees: Assignee[],
+  selectedAssignees: AssigneeFilter[],
 ): Item[] => {
   if (!selectedAssignees || selectedAssignees.length === 0) {
     return items;
@@ -48,7 +34,7 @@ export const filterByAssignees = (
   // Check if "All" is selected
   const isAllSelected = selectedAssignees.some(
     (assignee) =>
-      assignee && (assignee.id === "all" || assignee.value === "all"),
+      assignee && (assignee.id === "all" || assignee.name === "all"),
   );
 
   if (isAllSelected) {

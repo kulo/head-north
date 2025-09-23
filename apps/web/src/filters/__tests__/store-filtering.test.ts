@@ -203,7 +203,7 @@ describe("Store Filtering", () => {
 
       // Set multiple filters
       store.commit("SET_SELECTED_AREA", "frontend");
-      store.commit("SET_SELECTED_STAGES", [{ value: "s1", name: "Stage 1" }]);
+      store.commit("SET_SELECTED_STAGES", [{ id: "s1", name: "Stage 1" }]);
       store.commit("SET_SELECTED_CYCLE", { id: "cycle1", name: "Cycle 1" });
 
       const filteredData = store.getters.currentCycleOverviewData;
@@ -227,7 +227,7 @@ describe("Store Filtering", () => {
 
       // Set filters that don't match any items
       store.commit("SET_SELECTED_AREA", "mobile");
-      store.commit("SET_SELECTED_STAGES", [{ value: "s3", name: "Stage 3" }]);
+      store.commit("SET_SELECTED_STAGES", [{ id: "s3", name: "Stage 3" }]);
 
       const filteredData = store.getters.currentCycleOverviewData;
 

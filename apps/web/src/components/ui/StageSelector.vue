@@ -9,12 +9,10 @@
     <a-select-option key="all" value="all"> All Stages </a-select-option>
     <a-select-option
       v-for="stage in filteredStages"
-      :key="stage.value || stage.id || stage.name"
-      :value="stage.value || stage.id || stage.name"
+      :key="stage.id"
+      :value="stage.id"
       :class="{
-        'stage-option-selected': isStageSelected(
-          stage.value || stage.id || stage.name,
-        ),
+        'stage-option-selected': isStageSelected(stage.id),
       }"
     >
       {{ stage.name }}
@@ -63,10 +61,8 @@ export default {
 
       // Convert IDs back to stage objects for the store
       const stageObjects = stageIds.map((id) => {
-        const stage = stages.value.find(
-          (stage) => (stage.value || stage.id || stage.name) === id,
-        );
-        return stage || { value: id, name: "Unknown Stage" };
+        const stage = stages.value.find((stage) => stage.id === id);
+        return stage || { id: id, name: "Unknown Stage" };
       });
 
       store.dispatch("setSelectedStages", stageObjects);

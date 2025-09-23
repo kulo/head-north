@@ -3,10 +3,8 @@
  * Filters items by selected initiatives
  */
 
-interface Initiative {
-  id?: string;
-  value?: string;
-}
+import type { Initiative } from "@omega/types";
+import type { InitiativeFilter } from "@omega/ui";
 
 interface Item {
   initiativeId?: string;
@@ -22,7 +20,7 @@ interface Item {
  */
 export const filterByInitiatives = (
   items: Item[],
-  selectedInitiatives: Initiative[],
+  selectedInitiatives: InitiativeFilter[],
 ): Item[] => {
   if (!selectedInitiatives || selectedInitiatives.length === 0) {
     return items;
@@ -30,7 +28,7 @@ export const filterByInitiatives = (
 
   // Check if "All" is selected
   const isAllSelected = selectedInitiatives.some(
-    (init) => init && (init.id === "all" || init.value === "all"),
+    (init) => init && (init.id === "all" || init.name === "all"),
   );
 
   if (isAllSelected) {

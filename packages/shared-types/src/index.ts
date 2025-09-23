@@ -10,11 +10,6 @@ export interface ApiResponse<T = any> {
   error: string | null;
   message: string | null;
 }
-
-// ============================================================================
-// JIRA Related Types
-// ============================================================================
-
 // ============================================================================
 // Release Related Types
 // ============================================================================
@@ -56,6 +51,7 @@ export interface Area {
 
 export type CycleState = "active" | "closed" | "future" | "completed";
 
+// Core cycle - immutable properties
 export interface Cycle {
   id: string;
   name: string;
@@ -63,19 +59,34 @@ export interface Cycle {
   end: string;
   delivery: string;
   state: CycleState;
-  progress: number;
   isActive: boolean;
   description?: string;
 }
 
-// Sprint interface for Jira domain (different from Cycle)
-export interface Sprint {
-  id: string | number;
-  name: string;
-  state: string;
-  startDate: string;
-  endDate: string;
+// Cycle with calculated progress data - extends core cycle
+export interface CycleWithProgress extends Cycle {
+  progress: number;
+  progressWithInProgress: number;
+  progressByReleaseItems: number;
+  weeks: number;
+  weeksDone: number;
+  weeksInProgress: number;
+  weeksNotToDo: number;
+  weeksCancelled: number;
+  weeksPostponed: number;
+  weeksTodo: number;
+  releaseItemsCount: number;
+  releaseItemsDoneCount: number;
+  percentageNotToDo: number;
+  startMonth: string;
+  endMonth: string;
+  daysFromStartOfCycle: number;
+  daysInCycle: number;
+  currentDayPercentage: number;
 }
+
+// Import Sprint from API types (Jira-specific)
+import type { Sprint } from "../../../apps/api/src/types";
 
 // ============================================================================
 // Cycle Collection Types
@@ -106,6 +117,7 @@ export interface Initiative {
   weeksInProgress?: number;
   weeksNotToDo?: number;
   weeksCancelled?: number;
+  weeksPostponed?: number;
   weeksTodo?: number;
   progress?: number;
   progressWithInProgress?: number;
@@ -280,7 +292,7 @@ export interface UnifiedData {
 // ============================================================================
 
 export interface CycleApiResponse
-  extends ApiResponse<Cycle | CycleCollection> {}
+  extends ApiResponse<CycleWithProgress | CycleCollection> {}
 
 export interface UnifiedApiResponse extends ApiResponse<UnifiedData> {}
 
@@ -366,7 +378,7 @@ export interface RawData {
 }
 
 export interface CycleData {
-  cycles: Cycle[];
+  cycles: CycleWithProgress[];
   roadmapItems: RoadmapItem[];
   releaseItems: ReleaseItem[];
   areas: Area[];
@@ -376,11 +388,11 @@ export interface CycleData {
 }
 
 // ============================================================================
-// Utility Types
+// Page and Navigation Types
 // ============================================================================
 
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
+export interface Page {
+  id: string;
+  name: string;
+  path: string;
+}

@@ -4,22 +4,7 @@
  * Works with both roadmap and cycle-overview data structures
  */
 
-interface RoadmapItem {
-  id: string;
-  area?: string;
-  releaseItems?: ReleaseItem[];
-}
-
-interface ReleaseItem {
-  area?: string;
-  cycleId?: string;
-  sprint?: { id: string };
-}
-
-interface Initiative {
-  initiativeId: string;
-  roadmapItems: RoadmapItem[];
-}
+import type { RoadmapItem, ReleaseItem, Initiative } from "@omega/types";
 
 interface Item {
   roadmapItems?: RoadmapItem[];

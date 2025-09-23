@@ -103,16 +103,12 @@ describe("predicateFilters", () => {
     });
 
     test("should match stage by stage property", () => {
-      const predicate = createStagesPredicate([
-        { value: "s1", name: "Stage 1" },
-      ]);
+      const predicate = createStagesPredicate([{ id: "s1", name: "Stage 1" }]);
       expect(predicate(mockReleaseItem)).toBe(true);
     });
 
     test("should return false for non-matching stage", () => {
-      const predicate = createStagesPredicate([
-        { value: "s2", name: "Stage 2" },
-      ]);
+      const predicate = createStagesPredicate([{ id: "s2", name: "Stage 2" }]);
       expect(predicate(mockReleaseItem)).toBe(false);
     });
   });
@@ -204,7 +200,7 @@ describe("predicateFilters", () => {
       const filters = {
         area: "frontend",
         initiatives: [{ id: 1, name: "Test Initiative" }],
-        stages: [{ value: "s1", name: "Stage 1" }],
+        stages: [{ id: "s1", name: "Stage 1" }],
         cycle: "cycle1",
       };
 

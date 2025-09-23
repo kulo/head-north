@@ -4,31 +4,12 @@
  * Works with both roadmap and cycle-overview data structures
  */
 
-interface RoadmapItem {
-  id: string;
-  area?: string;
-  releaseItems?: ReleaseItem[];
-}
-
-interface ReleaseItem {
-  area?: string;
-  cycleId?: string;
-  sprint?: { id: string };
-}
-
-interface Initiative {
-  initiativeId: string;
-  roadmapItems: RoadmapItem[];
-}
+import type { RoadmapItem, ReleaseItem, Initiative, Cycle } from "@omega/types";
+import type { CycleFilter } from "@omega/ui";
 
 interface Item {
   roadmapItems?: RoadmapItem[];
   initiatives?: Initiative[];
-}
-
-interface Cycle {
-  id: string;
-  name?: string;
 }
 
 /**
@@ -41,7 +22,7 @@ interface Cycle {
  */
 export const filterByCycle = (
   items: Item[],
-  selectedCycle: string | Cycle,
+  selectedCycle: string | CycleFilter,
 ): Item[] => {
   if (selectedCycle === null || selectedCycle === undefined) {
     console.error(

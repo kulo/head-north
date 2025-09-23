@@ -86,11 +86,11 @@ export default class OmegaConfig {
         releaseStrategy: {
           // Stages Configuration
           stages: [
-            { name: "Stage 0 - Pilot it", value: "s0" },
-            { name: "Stage 1 - Sell it", value: "s1" },
-            { name: "Stage 2 - Scale it", value: "s2" },
-            { name: "Stage 3 - Global Release", value: "s3" },
-            { name: "Enhancements", value: "s3+" },
+            { id: "s0", name: "Stage 0 - Pilot it" },
+            { id: "s1", name: "Stage 1 - Sell it" },
+            { id: "s2", name: "Stage 2 - Scale it" },
+            { id: "s3", name: "Stage 3 - Global Release" },
+            { id: "s3+", name: "Enhancements" },
           ],
 
           // Stage Categorization
@@ -420,7 +420,7 @@ export default class OmegaConfig {
    * Get stages configuration
    * @returns Stages configuration
    */
-  getStages(): Array<{ name: string; value: string }> {
+  getStages(): Array<{ id: string; name: string }> {
     return this.config.common.releaseStrategy.stages || [];
   }
 
@@ -551,7 +551,7 @@ export default class OmegaConfig {
    * @returns Release strategy configuration
    */
   getReleaseStrategyConfig(): {
-    stages: Array<{ name: string; value: string }>;
+    stages: Array<{ id: string; name: string }>;
     stageCategories: {
       finalReleaseStage: string[];
       releasableStage: string[];

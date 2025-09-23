@@ -1,77 +1,10 @@
 import { STATUS } from "@/lib/constants/status-constants";
-
-interface Cycle {
-  name: string;
-  start: string;
-  delivery: string;
-  end: string;
-  progress: number;
-  progressWithInProgress: number;
-  progressByReleaseItems: number;
-  weeks: number;
-  weeksDone: number;
-  weeksInProgress: number;
-  weeksNotToDo: number;
-  weeksCancelled: number;
-  weeksPostponed: number;
-  releaseItemsCount: number;
-  releaseItemsDoneCount: number;
-  percentageNotToDo: number;
-  startMonth?: string;
-  endMonth?: string;
-  daysFromStartOfCycle?: number;
-  daysInCycle?: number;
-  currentDayPercentage?: number;
-  weeksTodo?: number;
-}
-
-interface RoadmapItem {
-  area: string;
-  name: string;
-  owner: string;
-  ticketId: string;
-  validations: any[];
-  aggregatedValidations: any[];
-  startDate: string;
-  releaseItemsCount: number;
-  releaseItemsDoneCount: number;
-  weeks: number;
-  weeksDone: number;
-  weeksInProgress: number;
-  weeksTodo: number;
-  weeksNotToDo: number;
-  weeksCancelled: number;
-  weeksPostponed: number;
-  progress: number;
-  progressWithInProgress: number;
-  progressByReleaseItems: number;
-  percentageNotToDo: number;
-  releaseItems: any[];
-  url: string;
-  isPartOfReleaseNarrative: boolean;
-  isReleaseAtRisk: boolean;
-  isCrossCloud: boolean;
-}
-
-interface Initiative {
-  name: string;
-  initiative: string;
-  initiativeId: string;
-  releaseItemsCount: number;
-  releaseItemsDoneCount: number;
-  weeks: number;
-  weeksDone: number;
-  weeksInProgress: number;
-  weeksNotToDo: number;
-  weeksCancelled: number;
-  weeksPostponed: number;
-  progress: number;
-  progressWithInProgress: number;
-  progressByReleaseItems: number;
-  percentageNotToDo: number;
-  roadmapItems: RoadmapItem[];
-  weeksTodo?: number;
-}
+import type {
+  Cycle,
+  CycleWithProgress,
+  Initiative,
+  RoadmapItem,
+} from "@omega/types";
 
 interface CycleProgressDataInput {
   cycle?: Cycle;
@@ -79,11 +12,14 @@ interface CycleProgressDataInput {
 }
 
 export default class CycleProgressData {
-  cycle: Cycle = {
+  cycle: CycleWithProgress = {
+    id: "",
     name: "",
     start: "1975-01-01",
     delivery: "1975-01-01",
     end: "1975-01-01",
+    state: "future",
+    isActive: false,
     progress: 0,
     progressWithInProgress: 0,
     progressByReleaseItems: 0,
@@ -93,9 +29,15 @@ export default class CycleProgressData {
     weeksNotToDo: 0,
     weeksCancelled: 0,
     weeksPostponed: 0,
+    weeksTodo: 0,
     releaseItemsCount: 0,
     releaseItemsDoneCount: 0,
     percentageNotToDo: 0,
+    startMonth: "",
+    endMonth: "",
+    daysFromStartOfCycle: 0,
+    daysInCycle: 0,
+    currentDayPercentage: 0,
   };
 
   initiatives: Initiative[] = [];
@@ -106,7 +48,7 @@ export default class CycleProgressData {
   }
 
   applyData(data: {
-    cycle: Cycle;
+    cycle: CycleWithProgress;
     initiatives: Initiative[];
   }): CycleProgressData {
     Object.assign(this.cycle, data.cycle);
@@ -124,6 +66,7 @@ export default class CycleProgressData {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
+        weeksTodo: 0,
         progress: 0,
         progressWithInProgress: 0,
         progressByReleaseItems: 0,
@@ -216,28 +159,31 @@ export default class CycleProgressData {
             ) || 0;
 
           preparedInitiative.weeks = this.normalize(
-            preparedInitiative.weeks + preparedRoadmapItem.weeks,
+            (preparedInitiative.weeks || 0) + (preparedRoadmapItem.weeks || 0),
           );
           preparedInitiative.weeksDone = this.normalize(
-            preparedInitiative.weeksDone + preparedRoadmapItem.weeksDone,
+            (preparedInitiative.weeksDone || 0) +
+              (preparedRoadmapItem.weeksDone || 0),
           );
           preparedInitiative.weeksInProgress = this.normalize(
-            preparedInitiative.weeksInProgress +
-              preparedRoadmapItem.weeksInProgress,
+            (preparedInitiative.weeksInProgress || 0) +
+              (preparedRoadmapItem.weeksInProgress || 0),
           );
           preparedInitiative.weeksTodo = this.normalize(
-            preparedInitiative.weeksTodo + preparedRoadmapItem.weeksTodo,
+            (preparedInitiative.weeksTodo || 0) +
+              (preparedRoadmapItem.weeksTodo || 0),
           );
           preparedInitiative.weeksNotToDo = this.normalize(
-            preparedInitiative.weeksNotToDo + preparedRoadmapItem.weeksNotToDo,
+            (preparedInitiative.weeksNotToDo || 0) +
+              (preparedRoadmapItem.weeksNotToDo || 0),
           );
           preparedInitiative.weeksCancelled = this.normalize(
-            preparedInitiative.weeksCancelled +
-              preparedRoadmapItem.weeksCancelled,
+            (preparedInitiative.weeksCancelled || 0) +
+              (preparedRoadmapItem.weeksCancelled || 0),
           );
           preparedInitiative.weeksPostponed = this.normalize(
-            preparedInitiative.weeksPostponed +
-              preparedRoadmapItem.weeksPostponed,
+            (preparedInitiative.weeksPostponed || 0) +
+              (preparedRoadmapItem.weeksPostponed || 0),
           );
 
           preparedInitiative.releaseItemsCount +=
@@ -250,25 +196,28 @@ export default class CycleProgressData {
       );
 
       this.cycle.weeks = this.normalize(
-        this.cycle.weeks + preparedInitiative.weeks,
+        (this.cycle.weeks || 0) + (preparedInitiative.weeks || 0),
       );
       this.cycle.weeksDone = this.normalize(
-        this.cycle.weeksDone + preparedInitiative.weeksDone,
+        (this.cycle.weeksDone || 0) + (preparedInitiative.weeksDone || 0),
       );
       this.cycle.weeksInProgress = this.normalize(
-        this.cycle.weeksInProgress + preparedInitiative.weeksInProgress,
+        (this.cycle.weeksInProgress || 0) +
+          (preparedInitiative.weeksInProgress || 0),
       );
       this.cycle.weeksTodo = this.normalize(
-        this.cycle.weeksTodo + preparedInitiative.weeksTodo,
+        (this.cycle.weeksTodo || 0) + (preparedInitiative.weeksTodo || 0),
       );
       this.cycle.weeksNotToDo = this.normalize(
-        this.cycle.weeksNotToDo + preparedInitiative.weeksNotToDo,
+        (this.cycle.weeksNotToDo || 0) + (preparedInitiative.weeksNotToDo || 0),
       );
       this.cycle.weeksCancelled = this.normalize(
-        this.cycle.weeksCancelled + preparedInitiative.weeksCancelled,
+        (this.cycle.weeksCancelled || 0) +
+          (preparedInitiative.weeksCancelled || 0),
       );
       this.cycle.weeksPostponed = this.normalize(
-        this.cycle.weeksPostponed + preparedInitiative.weeksPostponed,
+        (this.cycle.weeksPostponed || 0) +
+          (preparedInitiative.weeksPostponed || 0),
       );
 
       this.cycle.releaseItemsCount += preparedInitiative.releaseItemsCount;
@@ -328,10 +277,15 @@ export default class CycleProgressData {
       month: "short",
     });
     this.cycle.daysFromStartOfCycle = Math.floor(
-      Math.abs(new Date(this.cycle.delivery) - new Date()) / 1000 / 86400,
+      Math.abs(new Date(this.cycle.delivery).getTime() - new Date().getTime()) /
+        1000 /
+        86400,
     );
     this.cycle.daysInCycle = Math.floor(
-      Math.abs(new Date(this.cycle.delivery) - new Date(this.cycle.end)) /
+      Math.abs(
+        new Date(this.cycle.delivery).getTime() -
+          new Date(this.cycle.end).getTime(),
+      ) /
         1000 /
         86400,
     );

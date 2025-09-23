@@ -3,39 +3,20 @@
  * Provides composable predicate functions that can be combined
  */
 
-interface ReleaseItem {
-  area?: string;
-  areaIds?: string[];
-  initiativeId?: string;
-  assignee?: {
-    accountId?: string;
-    id?: string;
-  };
-  stage?: string;
-  cycleId?: string;
-  sprint?: { id: string };
-}
-
-interface Initiative {
-  id?: string;
-  value?: string;
-}
-
-interface Assignee {
-  id?: string;
-  value?: string;
-}
-
-interface Stage {
-  id?: string;
-  value?: string;
-  name?: string;
-}
-
-interface Cycle {
-  id: string;
-  name?: string;
-}
+import type {
+  ReleaseItem,
+  Initiative,
+  Assignee,
+  Stage,
+  Cycle,
+} from "@omega/types";
+import type {
+  InitiativeFilter,
+  AssigneeFilter,
+  StageFilter,
+  CycleFilter,
+  FilterConfig,
+} from "@omega/ui";
 
 /**
  * Create a predicate that filters by area
@@ -76,7 +57,7 @@ export const createAreaPredicate = (selectedArea: string) => {
  * @returns Predicate function
  */
 export const createInitiativesPredicate = (
-  selectedInitiatives: Initiative[],
+  selectedInitiatives: InitiativeFilter[],
 ) => {
   if (!selectedInitiatives || selectedInitiatives.length === 0) {
     return () => true; // No filtering
@@ -84,7 +65,7 @@ export const createInitiativesPredicate = (
 
   // Check if "All" is selected
   const isAllSelected = selectedInitiatives.some(
-    (init) => init && (init.id === "all" || init.value === "all"),
+    (init) => init && (init.id === "all" || init.name === "all"),
   );
 
   if (isAllSelected) {
@@ -116,29 +97,29 @@ export const createInitiativesPredicate = (
  * @param selectedStages - Array of selected stages
  * @returns Predicate function
  */
-export const createStagesPredicate = (selectedStages: Stage[]) => {
+export const createStagesPredicate = (selectedStages: StageFilter[]) => {
   if (!selectedStages || selectedStages.length === 0) {
     return () => true; // No filtering
   }
 
   // Check if "All" is selected
   const isAllSelected = selectedStages.some(
-    (stage) => stage && (stage.id === "all" || stage.value === "all"),
+    (stage) => stage && (stage.id === "all" || stage.name === "all"),
   );
 
   if (isAllSelected) {
     return () => true; // No filtering
   }
 
-  // Get selected stage values/IDs
-  const selectedStageValues = selectedStages
-    .filter((stage) => stage && (stage.value || stage.id || stage.name))
-    .map((stage) => stage.value || stage.id || stage.name)
-    .filter((value) => value !== "all");
+  // Get selected stage IDs
+  const selectedStageIds = selectedStages
+    .filter((stage) => stage && stage.id)
+    .map((stage) => stage.id)
+    .filter((id) => id !== "all");
 
   return (releaseItem: ReleaseItem): boolean => {
     // Only filter release items by stage - roadmap items don't have stages
-    if (releaseItem.stage && selectedStageValues.includes(releaseItem.stage)) {
+    if (releaseItem.stage && selectedStageIds.includes(releaseItem.stage)) {
       return true;
     }
 
@@ -151,7 +132,7 @@ export const createStagesPredicate = (selectedStages: Stage[]) => {
  * @param selectedCycle - Selected cycle ID or cycle object
  * @returns Predicate function
  */
-export const createCyclePredicate = (selectedCycle: string | Cycle) => {
+export const createCyclePredicate = (selectedCycle: string | CycleFilter) => {
   if (selectedCycle === null || selectedCycle === undefined) {
     console.error(
       "createCyclePredicate: No cycle provided. Client code must ensure a valid cycle is passed.",
@@ -196,13 +177,6 @@ export const combinePredicates = (
   return (item: any): boolean =>
     predicates.every((predicate) => predicate(item));
 };
-
-interface FilterConfig {
-  area?: string;
-  initiatives?: Initiative[];
-  stages?: Stage[];
-  cycle?: string | Cycle;
-}
 
 /**
  * Create a composite predicate from filter configuration

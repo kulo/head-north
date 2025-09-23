@@ -3,29 +3,12 @@
  * Filters items by selected stages
  */
 
-interface RoadmapItem {
-  id: string;
-  releaseItems?: ReleaseItem[];
-}
-
-interface ReleaseItem {
-  stage?: string;
-}
-
-interface Initiative {
-  initiativeId: string;
-  roadmapItems: RoadmapItem[];
-}
+import type { RoadmapItem, ReleaseItem, Initiative, Stage } from "@omega/types";
+import type { StageFilter } from "@omega/ui";
 
 interface Item {
   roadmapItems?: RoadmapItem[];
   initiatives?: Initiative[];
-}
-
-interface Stage {
-  id?: string;
-  value?: string;
-  name?: string;
 }
 
 /**
@@ -37,7 +20,7 @@ interface Stage {
  */
 export const filterByStages = (
   items: Item[],
-  selectedStages: Stage[],
+  selectedStages: StageFilter[],
 ): Item[] => {
   if (!selectedStages || selectedStages.length === 0) {
     return items;
@@ -45,18 +28,18 @@ export const filterByStages = (
 
   // Check if "All" is selected
   const isAllSelected = selectedStages.some(
-    (stage) => stage && (stage.id === "all" || stage.value === "all"),
+    (stage) => stage && (stage.id === "all" || stage.name === "all"),
   );
 
   if (isAllSelected) {
     return items;
   }
 
-  // Filter by selected stage values/IDs
-  const selectedStageValues = selectedStages
-    .filter((stage) => stage && (stage.value || stage.id || stage.name))
-    .map((stage) => stage.value || stage.id || stage.name)
-    .filter((value) => value !== "all");
+  // Filter by selected stage IDs
+  const selectedStageIds = selectedStages
+    .filter((stage) => stage && stage.id)
+    .map((stage) => stage.id)
+    .filter((id) => id !== "all");
 
   return items
     .map((item) => {
@@ -74,7 +57,7 @@ export const filterByStages = (
                 // Check if release item stage matches any selected stage
                 if (
                   releaseItem.stage &&
-                  selectedStageValues.includes(releaseItem.stage)
+                  selectedStageIds.includes(releaseItem.stage)
                 ) {
                   return true;
                 }

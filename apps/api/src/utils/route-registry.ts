@@ -5,22 +5,7 @@
 
 import { Context } from "koa";
 import { logger } from "@omega/utils";
-
-export interface RouteDefinition {
-  method: string;
-  path: string;
-  handler: string | ((context: Context) => Promise<void> | void);
-  description: string;
-}
-
-export interface RouteHandlers {
-  [key: string]: (context: Context) => Promise<void> | void;
-}
-
-export interface RouteOptions {
-  logRoutes?: boolean;
-  prefix?: string;
-}
+import type { RouteDefinition, RouteHandlers, RouteOptions } from "../types";
 
 /**
  * Register API routes using provided route definitions

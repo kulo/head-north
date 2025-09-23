@@ -1,5 +1,7 @@
 // Type definitions for shared-config package
 
+import type { Page, Stage } from "@omega/types";
+
 export interface ProcessEnv {
   [key: string]: string | undefined;
 }
@@ -10,11 +12,6 @@ export interface ConfigOverrides {
     host?: string;
   };
   [key: string]: any;
-}
-
-export interface Stage {
-  name: string;
-  value: string;
 }
 
 export interface StageCategories {
@@ -82,12 +79,6 @@ export interface CommonConfig {
   environments: Environments;
   organisation: Organisation;
   productStrategy: ProductStrategy;
-}
-
-export interface Page {
-  id: string;
-  path: string;
-  name: string;
 }
 
 export interface FrontendConfig {

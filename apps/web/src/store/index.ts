@@ -14,87 +14,21 @@ import {
 } from "@/lib/transformers/data-transformations";
 import type { OmegaConfig } from "@omega/config";
 import type { Router } from "vue-router";
-
-// Type definitions
-interface Cycle {
-  id: string;
-  name: string;
-  start?: string;
-  delivery?: string;
-  state: string;
-}
-
-interface Initiative {
-  id: string;
-  name: string;
-}
-
-interface Assignee {
-  id: string;
-  name: string;
-}
-
-interface Area {
-  id: string;
-  name: string;
-  teams?: string[];
-}
-
-interface Stage {
-  id: string;
-  name: string;
-  value?: string;
-}
-
-interface Page {
-  id: string;
-  name: string;
-  path: string;
-}
-
-interface RoadmapData {
-  orderedCycles: Cycle[];
-  roadmapItems: any[];
-  activeCycle: Cycle | null;
-  initiatives?: Initiative[];
-}
-
-interface CycleOverviewData {
-  cycle: any;
-  initiatives: Initiative[];
-}
-
-interface StoreState {
-  loading: boolean;
-  error: string | null;
-  roadmapData: RoadmapData;
-  cycles: Cycle[];
-  cycleOverviewData: CycleOverviewData | null;
-  currentCycleOverviewData: CycleOverviewData | null;
-  initiatives: Initiative[];
-  assignees: Assignee[];
-  areas: Area[];
-  stages: Stage[];
-  pages: {
-    all: Page[];
-    current: Page;
-  };
-  selectedInitiatives: Initiative[];
-  selectedAssignees: Assignee[];
-  selectedArea: string | null;
-  selectedCycle: Cycle | null;
-  selectedStages: Stage[];
-  validationEnabled: boolean;
-  validationSummary: any[];
-}
-
-interface Filters {
-  area?: string;
-  initiatives?: Initiative[];
-  stages?: Stage[];
-  assignees?: Assignee[];
-  cycle?: Cycle;
-}
+import type {
+  Cycle,
+  CycleWithProgress,
+  Initiative,
+  Assignee,
+  Area,
+  Stage,
+  Page,
+} from "@omega/types";
+import type {
+  RoadmapData,
+  CycleOverviewData,
+  StoreState,
+  Filters,
+} from "@omega/ui";
 
 /**
  * Determines the best cycle to select based on availability and priority
@@ -109,8 +43,8 @@ const selectBestCycle = (cycles: Cycle[]): Cycle | null => {
 
   // Sort cycles by start date (oldest first)
   const sortedCycles = [...cycles].sort((a, b) => {
-    const dateA = new Date(a.start || a.delivery || 0);
-    const dateB = new Date(b.start || b.delivery || 0);
+    const dateA = new Date(a.start || a.delivery || 0).getTime();
+    const dateB = new Date(b.start || b.delivery || 0).getTime();
     return dateA - dateB;
   });
 
@@ -205,7 +139,6 @@ export default function createAppStore(
       initiatives: [],
       assignees: [],
       areas: [],
-      cycles: [],
       stages: [],
       pages: {
         all: [],
@@ -289,14 +222,12 @@ export default function createAppStore(
       },
 
       isStageSelected: (state) => (stageId) => {
-        return state.selectedStages.some(
-          (stage) => (stage.value || stage.id || stage.name) === stageId,
-        );
+        return state.selectedStages.some((stage) => stage.id === stageId);
       },
 
       selectedStageIds: (state) => {
         return state.selectedStages
-          .map((stage) => stage.value || stage.id || stage.name || stage)
+          .map((stage) => stage.id)
           .filter((id) => id !== undefined && id !== "all");
       },
     },
@@ -336,9 +267,6 @@ export default function createAppStore(
       },
       SET_CURRENT_CYCLE_OVERVIEW_DATA(state, data) {
         state.currentCycleOverviewData = data;
-      },
-      SET_CYCLES(state, cycles) {
-        state.cycles = cycles;
       },
       SET_STAGES(state, stages) {
         state.stages = stages;
