@@ -1,6 +1,6 @@
 // Type definitions for shared-config package
 
-import type { Page, Stage } from "@omega/types";
+import type { Stage } from "@omega/types";
 
 export interface ProcessEnv {
   [key: string]: string | undefined;
@@ -81,57 +81,28 @@ export interface CommonConfig {
   productStrategy: ProductStrategy;
 }
 
+// Generic page configuration interface
+export interface PageConfig {
+  id: string;
+  name: string;
+  path: string;
+}
+
 export interface FrontendConfig {
   pages: {
-    ROOT: Page;
-    CYCLE_OVERVIEW: Page;
-    ROADMAP: Page;
+    ROOT: PageConfig;
+    CYCLE_OVERVIEW: PageConfig;
+    ROADMAP: PageConfig;
   };
-  getAllPages(): Page[];
-}
-
-export interface JiraFields {
-  epic: string;
-  sprint: string;
-  storyPoints: string;
-}
-
-export interface JiraConnection {
-  user: string | null;
-  token: string | null;
-  host: string | null;
-  boardId: number;
-}
-
-export interface JiraStatusMappings {
-  [statusId: string]: string;
-}
-
-export interface JiraStatusCategories {
-  finished: string[];
-  active: string[];
-  future: string[];
-}
-
-export interface JiraLimits {
-  maxResults: number;
-  maxIssuesPerRequest: number;
-}
-
-export interface JiraConfig {
-  statusMappings: JiraStatusMappings;
-  statusCategories: JiraStatusCategories;
-  limits: JiraLimits;
-  fields: JiraFields;
-  connection: JiraConnection;
+  getAllPages(): PageConfig[];
 }
 
 export interface BackendConfig {
   port?: string;
   maxRetry?: string;
   delayBetweenRetry?: string;
-  jira?: JiraConfig;
   useFakeData?: boolean;
+  jira?: any; // Jira configuration - will be properly typed when needed
 }
 
 export interface OmegaConfigData {

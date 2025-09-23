@@ -1,20 +1,10 @@
 // API-specific types that are not shared across the monorepo
 
-// ============================================================================
-// Jira-specific Types
-// ============================================================================
+// Re-export Jira types
+export * from "./jira-types";
 
-/**
- * Sprint interface for Jira domain (different from Cycle)
- * This represents a Jira sprint with its metadata
- */
-export interface Sprint {
-  id: string | number;
-  name: string;
-  state: string;
-  startDate: string;
-  endDate: string;
-}
+// Re-export parsed DTO types
+export * from "./parsed-types";
 
 // ============================================================================
 // API Route Types
@@ -23,12 +13,12 @@ export interface Sprint {
 export interface RouteDefinition {
   method: string;
   path: string;
-  handler: string | ((context: any) => Promise<void> | void);
+  handler: string | ((context: unknown) => Promise<void> | void);
   description: string;
 }
 
 export interface RouteHandlers {
-  [key: string]: (context: any) => Promise<void> | void;
+  [key: string]: (context: unknown) => Promise<void> | void;
 }
 
 export interface RouteOptions {

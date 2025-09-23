@@ -5,10 +5,10 @@ import {
   getLabelsWithPrefix,
   translateLabelWithoutFallback,
 } from "./parse-common";
-import { logger } from "@omega/utils";
 import { resolveStage } from "./resolve-stage";
 import type { OmegaConfig } from "@omega/config";
-import type { JiraIssue, ParsedReleaseItem } from "@omega/types";
+import type { JiraIssue } from "../types";
+import type { ParsedReleaseItem } from "../types";
 
 export class ReleaseItemParser {
   private sprint: any;

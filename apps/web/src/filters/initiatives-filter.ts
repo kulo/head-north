@@ -4,7 +4,7 @@
  */
 
 import type { Initiative } from "@omega/types";
-import type { InitiativeFilter } from "@omega/ui";
+import type { InitiativeFilter } from "../types";
 
 interface Item {
   initiativeId?: string;

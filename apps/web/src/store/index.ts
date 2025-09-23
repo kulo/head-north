@@ -14,21 +14,8 @@ import {
 } from "@/lib/transformers/data-transformations";
 import type { OmegaConfig } from "@omega/config";
 import type { Router } from "vue-router";
-import type {
-  Cycle,
-  CycleWithProgress,
-  Initiative,
-  Assignee,
-  Area,
-  Stage,
-  Page,
-} from "@omega/types";
-import type {
-  RoadmapData,
-  CycleOverviewData,
-  StoreState,
-  Filters,
-} from "@omega/ui";
+import type { Cycle } from "@omega/types";
+import type { StoreState, Filters, Page } from "../types";
 
 /**
  * Determines the best cycle to select based on availability and priority
@@ -79,7 +66,7 @@ const selectBestCycle = (cycles: Cycle[]): Cycle | null => {
 };
 
 // Simple filtering function that works with the simplified data structure
-const applyFilters = (data: any[], filters: Filters): any[] => {
+const applyFilters = (data: unknown[], filters: Filters): unknown[] => {
   if (!data || !Array.isArray(data)) {
     return data;
   }
@@ -142,7 +129,7 @@ export default function createAppStore(
       stages: [],
       pages: {
         all: [],
-        current: {},
+        current: null,
       },
       // Selected filters
       selectedInitiatives: [],
@@ -564,7 +551,6 @@ export default function createAppStore(
           }
 
           // Set current cycle overview data for display
-          const currentAreaId = state.selectedArea || "overview";
           const currentCycleOverviewData = {
             cycle: cycleWithData,
             initiatives: cycleOverviewData.initiatives,
@@ -631,7 +617,13 @@ export default function createAppStore(
 
   // Initialize pages from configuration
   if (omegaConfig) {
-    const pages = omegaConfig.getFrontendConfig().getAllPages();
+    const pageConfigs = omegaConfig.getFrontendConfig().getAllPages();
+    // Convert PageConfig to Page (they have the same structure)
+    const pages: Page[] = pageConfigs.map((config) => ({
+      id: config.id,
+      name: config.name,
+      path: config.path,
+    }));
     store.commit("SET_PAGES", pages);
 
     // Set current page based on initial route

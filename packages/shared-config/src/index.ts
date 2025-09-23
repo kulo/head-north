@@ -25,3 +25,4 @@ export { default } from "./omega-config.js";
 
 // Export types for external use
 export type * from "./types.js";
+export type * from "./jira-config.js";

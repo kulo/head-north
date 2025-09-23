@@ -4,8 +4,8 @@
  * Works with both roadmap and cycle-overview data structures
  */
 
-import type { RoadmapItem, ReleaseItem, Initiative, Cycle } from "@omega/types";
-import type { CycleFilter } from "@omega/ui";
+import type { RoadmapItem, Initiative } from "@omega/types";
+import type { CycleFilter } from "../types";
 
 interface Item {
   roadmapItems?: RoadmapItem[];

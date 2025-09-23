@@ -3,13 +3,8 @@
  * Filters items by selected assignees
  */
 
-import type {
-  RoadmapItem,
-  ReleaseItem,
-  Initiative,
-  Assignee,
-} from "@omega/types";
-import type { AssigneeFilter } from "@omega/ui";
+import type { RoadmapItem, Initiative } from "@omega/types";
+import type { AssigneeFilter } from "../types";
 
 interface Item {
   roadmapItems?: RoadmapItem[];

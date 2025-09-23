@@ -1,14 +1,11 @@
 import pkg from "lodash";
 const { map, reduce, uniq, property } = pkg;
-import {
-  getJiraLink,
-  getLabelsWithPrefix,
-  translateLabelWithoutFallback,
-} from "./parse-common";
+import { getJiraLink } from "./parse-common";
 import { logger } from "@omega/utils";
 import LabelResolver from "./resolve-labels";
 import type { OmegaConfig } from "@omega/config";
-import type { RoadmapItem, ReleaseItem, ParsedRoadmapItem } from "@omega/types";
+import type { RoadmapItem, ReleaseItem } from "@omega/types";
+import type { ParsedRoadmapItem } from "../types";
 
 export class RoadmapItemParser {
   private roadmapItems: Record<string, RoadmapItem>;

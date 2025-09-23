@@ -3,20 +3,8 @@
  * Provides composable predicate functions that can be combined
  */
 
-import type {
-  ReleaseItem,
-  Initiative,
-  Assignee,
-  Stage,
-  Cycle,
-} from "@omega/types";
-import type {
-  InitiativeFilter,
-  AssigneeFilter,
-  StageFilter,
-  CycleFilter,
-  FilterConfig,
-} from "@omega/ui";
+import type { ReleaseItem } from "@omega/types";
+import type { StageFilter, CycleFilter, FilterConfig } from "../types";
 
 /**
  * Create a predicate that filters by area
@@ -78,7 +66,7 @@ export const createInitiativesPredicate = (
     .map((init) => String(init.id))
     .filter((id) => id !== "all");
 
-  return (item: any): boolean => {
+  return (item: unknown): boolean => {
     if (item.initiativeId) {
       // Roadmap structure
       return selectedInitiativeIds.includes(String(item.initiativeId));
@@ -172,9 +160,9 @@ export const createCyclePredicate = (selectedCycle: string | CycleFilter) => {
  * @returns Combined predicate function
  */
 export const combinePredicates = (
-  ...predicates: Array<(item: any) => boolean>
+  ...predicates: Array<(item: unknown) => boolean>
 ) => {
-  return (item: any): boolean =>
+  return (item: unknown): boolean =>
     predicates.every((predicate) => predicate(item));
 };
 

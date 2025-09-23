@@ -3,8 +3,8 @@
  * Filters items by selected stages
  */
 
-import type { RoadmapItem, ReleaseItem, Initiative, Stage } from "@omega/types";
-import type { StageFilter } from "@omega/ui";
+import type { RoadmapItem, Initiative } from "@omega/types";
+import type { StageFilter } from "../types";
 
 interface Item {
   roadmapItems?: RoadmapItem[];

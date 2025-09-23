@@ -29,6 +29,7 @@
 
 import validationDictionary from "./validation-dictionary.js";
 import JiraConfig from "./jira-config.js";
+import type { JiraConfigData } from "./jira-config.js";
 import { getEnvVarWithFallback } from "./utils.js";
 import type {
   ProcessEnv,
@@ -37,8 +38,7 @@ import type {
   CommonConfig,
   FrontendConfig,
   BackendConfig,
-  JiraConfig as JiraConfigType,
-  Page,
+  PageConfig,
   ValidationRules,
 } from "./types.js";
 
@@ -204,7 +204,7 @@ export default class OmegaConfig {
           },
           ROADMAP: { id: "roadmap", path: "/cycles/roadmap", name: "Roadmap" },
         },
-        getAllPages(): Page[] {
+        getAllPages(): PageConfig[] {
           return Object.values(this.pages);
         },
       },
@@ -403,7 +403,7 @@ export default class OmegaConfig {
    * Get Jira configuration
    * @returns Jira configuration
    */
-  getJiraConfig(): JiraConfigType | undefined {
+  getJiraConfig(): JiraConfigData | undefined {
     return this.config.backend.jira;
   }
 
@@ -695,7 +695,7 @@ export default class OmegaConfig {
    * @param pageId - Page ID (e.g., 'CYCLE_OVERVIEW')
    * @returns Page configuration object
    */
-  getPage(pageId: string): Page | undefined {
+  getPage(pageId: string): PageConfig | undefined {
     return this.config.frontend.pages[
       pageId as keyof typeof this.config.frontend.pages
     ];

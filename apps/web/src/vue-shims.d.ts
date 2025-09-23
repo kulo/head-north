@@ -31,5 +31,5 @@ declare module "@/lib/transformers/data-transformations" {
   export function transformForCycleOverview(data: any): any;
   export function transformForRoadmap(data: any): any;
   export function calculateCycleProgress(cycle: any): any;
-  export function calculateCycleData(data: any): any;
+  export function calculateCycleData(cycle: any, initiatives: any): any;
 }
