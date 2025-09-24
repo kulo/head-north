@@ -1,5 +1,5 @@
 // Jira Configuration Types
-// These are kept in shared-config for now but should eventually move to API package
+// These are kept in config for now but should eventually move to API package
 
 export default class JiraConfig {
   private processEnv: Record<string, string | undefined>;

@@ -7,7 +7,7 @@ This package provides a unified configuration system for the Omega application. 
 ### Basic Usage
 
 ```javascript
-import { OmegaConfig } from "@omega/shared-config";
+import { OmegaConfig } from "@omega/config";
 
 // Create configuration instance
 const config = new OmegaConfig("development");
@@ -110,7 +110,7 @@ The configuration includes:
 ### Backend Usage
 
 ```javascript
-import { OmegaConfig } from "@omega/shared-config";
+import { OmegaConfig } from "@omega/config";
 
 const config = new OmegaConfig(process.env.NODE_ENV || "development");
 
@@ -125,7 +125,7 @@ const endpoints = config.getEndpoints();
 ### Frontend Usage
 
 ```javascript
-import { OmegaConfig } from "@omega/shared-config";
+import { OmegaConfig } from "@omega/config";
 
 const environment = import.meta.env?.MODE || "development";
 const config = new OmegaConfig(environment, {

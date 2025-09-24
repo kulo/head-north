@@ -101,7 +101,7 @@ export interface Filters {
   cycle?: Cycle;
 }
 
-// Re-export types from shared-types for convenience
+// Re-export types from types package for convenience
 import type {
   Cycle,
   RoadmapItem,

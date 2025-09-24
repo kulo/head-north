@@ -1,8 +1,16 @@
 # Omega One - Development Cycle Dashboard
 
-This is the unified monorepo containing both the Omega frontend and backend services, reorganized into a modern, idiomatic Node.js & TypeScript structure.
+_Omega_ is a visualisation tool or dashboard for product development organisations that work in common cadence via high-level iterations called "development cycles" or just "cycles".
 
-## 🏗️ Structure
+_Omega_ provides a _Cycle Overview_ screen which shows the current progress or latest status of any completed, currently active for future planned cycle and contains all kinds of items teams plan into their cycles.
+
+The _Roadmap_ view visualises all customer-facing items for the last completed, the currently active and the next two upcoming cycles – while omitting any kind of non-customer-facing items.
+
+## 🏗️ Architecture & Structure
+
+_Omega_ consists of two processes: First, a web application user interface which is visualising the cycle data and, second, a backend API service which is collecting and preparing said cycle data from a correspondingly configured source like a jira project.
+
+Both these apps are part of a 'monorepo' with the following structure:
 
 ```
 omega-one/
@@ -17,7 +25,9 @@ omega-one/
 ├── tools/
 │   ├── eslint-config/ # Shared ESLint configuration
 │   ├── prettier-config/ # Shared Prettier configuration
-│   └── typescript-config/ # Shared TypeScript configuration
+│   ├── typescript-config/ # Shared TypeScript configuration
+│   ├── test-config/ # Shared test configuration
+│   └── build-config/ # Shared build configuration
 ├── scripts/
 │   └── validate-env.js # Environment validation script
 ├── package.json       # Root package.json with workspace configuration
@@ -40,6 +50,7 @@ npm run install:all
 # Or install individually
 npm run install:web     # Web application
 npm run install:api     # API service
+npm run install:packages # Shared packages
 ```
 
 ### Development
@@ -90,17 +101,17 @@ npm run start
 
 ## 📦 Shared Packages
 
-The monorepo includes several shared packages for code reuse and consistency:
+The monorepo includes several shared packages for code reuse and consistency. All packages use modern scoped naming (`@omega/*`) and follow current Node.js monorepo best practices:
 
-### Types (`packages/types/`)
+### Types (`@omega/types`)
 
-Common TypeScript types and interfaces used across web app and API service.
+Common TypeScript types and interfaces used across web app and API service. Provides type safety and consistency across the entire monorepo.
 
-### Utils (`packages/utils/`)
+### Utils (`@omega/utils`)
 
-Utility functions that can be used by both web app and API service applications.
+Utility functions that can be used by both web app and API service applications. Includes logging, data processing, and common helper functions.
 
-### Config (`packages/config/`)
+### Config (`@omega/config`)
 
 **Single Source of Truth** for all API endpoints and configuration settings. Ensures web app and API service always use the same API paths and configuration values. Includes:
 
@@ -108,15 +119,35 @@ Utility functions that can be used by both web app and API service applications.
 - Environment-specific configurations
 - Route consistency validation
 - Cross-platform configuration management
+- Jira integration settings
 
-### UI (`packages/ui/`)
+### UI (`@omega/ui`)
 
-Shared Vue.js components that can be reused across different parts of the web application.
+Shared Vue.js components that can be reused across different parts of the web application. Provides consistent UI components and design system elements.
+
+## 📦 Package Usage Examples
+
+```typescript
+// Import shared types
+import type { Cycle, RoadmapItem } from "@omega/types";
+
+// Import utilities
+import { logger } from "@omega/utils";
+
+// Import configuration
+import { OmegaConfig } from "@omega/config";
+
+// Import UI components
+import { Button, Modal } from "@omega/ui";
+```
 
 ### Tools
 
 - **ESLint Config** (`tools/eslint-config/`): Shared ESLint configuration
+- **Prettier Config** (`tools/prettier-config/`): Shared Prettier configuration
 - **TypeScript Config** (`tools/typescript-config/`): Shared TypeScript configuration
+- **Test Config** (`tools/test-config/`): Shared test configuration
+- **Build Config** (`tools/build-config/`): Shared build configuration
 
 ## 🛠️ Development Tools
 
@@ -172,7 +203,7 @@ npm install <package>
 The backend includes Docker support:
 
 ```bash
-cd apps/backend
+cd apps/api
 make build    # Build Docker image
 make start    # Run Docker container
 ```
@@ -182,7 +213,7 @@ make start    # Run Docker container
 The frontend can be built and served statically:
 
 ```bash
-cd apps/frontend
+cd apps/web
 npm run build
 # Serve the dist/ directory with any static file server
 ```
@@ -203,7 +234,7 @@ The frontend builds to static files in `dist/` directory and can be deployed to 
 ## 🔍 Development Workflow
 
 1. **Start Development**: `npm run dev` (runs both services)
-2. **Frontend**: Access at http://localhost:8081
+2. **Frontend**: Access at http://localhost:8080
 3. **Backend API**: Access at http://localhost:3000
 4. **Make Changes**: Edit files in respective directories
 5. **Testing**: `npm run test` to run all tests
@@ -213,7 +244,7 @@ The frontend builds to static files in `dist/` directory and can be deployed to 
 
 The project uses a **Single Source of Truth** approach for configuration:
 
-- **API Endpoints**: Defined once in `packages/shared-config/`
+- **API Endpoints**: Defined once in `packages/config/`
 - **Frontend**: Uses shared endpoints for API calls
 - **Backend**: Uses shared endpoints for route registration
 - **Consistency**: Frontend and backend automatically stay in sync

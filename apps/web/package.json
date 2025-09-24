@@ -18,9 +18,9 @@
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.28.3",
     "@babel/runtime": "^7.28.4",
-    "@omega/config": "file:../../packages/shared-config",
-    "@omega/types": "file:../../packages/shared-types",
-    "@omega/utils": "file:../../packages/shared-utils",
+    "@omega/config": "file:../../packages/config",
+    "@omega/types": "file:../../packages/types",
+    "@omega/utils": "file:../../packages/utils",
     "@vueuse/core": "^10.11.1",
     "@vueuse/shared": "^10.11.1",
     "ant-design-vue": "^4.2.6",

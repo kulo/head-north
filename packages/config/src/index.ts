@@ -6,7 +6,7 @@
  * logic, environment detection, and utility functions.
  *
  * Usage:
- *   import { OmegaConfig } from '@omega/shared-config'
+ *   import { OmegaConfig } from '@omega/config'
  *
  *   // Create configuration instance
  *   const config = new OmegaConfig('development')

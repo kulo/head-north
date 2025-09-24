@@ -72,9 +72,9 @@ export default (env, argv) => {
       alias: {
         '@': path.resolve(__dirname, 'src'),
         'vue': 'vue/dist/vue.esm-bundler.js',
-      '@omega/types': path.resolve(__dirname, '../../packages/shared-types/dist'),
-      '@omega/utils': path.resolve(__dirname, '../../packages/shared-utils/dist'),
-      '@omega/config': path.resolve(__dirname, '../../packages/shared-config/dist')
+      '@omega/types': path.resolve(__dirname, '../../packages/types/dist'),
+      '@omega/utils': path.resolve(__dirname, '../../packages/utils/dist'),
+      '@omega/config': path.resolve(__dirname, '../../packages/config/dist')
       },
       extensions: ['.ts', '.js', '.vue', '.json']
     },

@@ -30,17 +30,17 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./apps/frontend/src/*"],
-      "@omega/shared-types": ["./packages/shared-types"],
-      "@omega/shared-utils": ["./packages/shared-utils"],
-      "@omega/shared-config": ["./packages/shared-config"]
+      "@omega/types": ["./packages/types"],
+      "@omega/utils": ["./packages/utils"],
+      "@omega/config": ["./packages/config"]
     }
   },
   "include": ["apps/**/*", "packages/**/*", "tools/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
   "references": [
-    { "path": "./packages/shared-types" },
-    { "path": "./packages/shared-config" },
-    { "path": "./packages/shared-utils" },
-    { "path": "./apps/backend" }
+    { "path": "./packages/types" },
+    { "path": "./packages/config" },
+    { "path": "./packages/utils" },
+    { "path": "./apps/api" }
   ]
 }

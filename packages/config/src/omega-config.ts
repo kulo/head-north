@@ -6,7 +6,7 @@
  * configuration like page definitions and route constants.
  *
  * Usage:
- *   import { OmegaConfig } from '@omega/shared-config'
+ *   import { OmegaConfig } from '@omega/config'
  *
  *   // Frontend usage (no process environment needed)
  *   const config = new OmegaConfig()

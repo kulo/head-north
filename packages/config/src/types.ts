@@ -1,4 +1,4 @@
-// Type definitions for shared-config package
+// Type definitions for config package
 
 import type { Stage } from "@omega/types";
 

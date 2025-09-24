@@ -10,7 +10,7 @@ This directory contains the centralized API service layer for the Omega One fron
 - **Features**:
   - Host injection for different environments
   - Configurable timeouts and retry logic
-  - Uses shared configuration from `@omega/shared-config` package
+  - Uses shared configuration from `@omega/config` package
 
 ### Cycle Data Service (`cycle-data-service.js`)
 
@@ -21,7 +21,7 @@ This directory contains the centralized API service layer for the Omega One fron
   - Consistent request/response handling
   - Environment-specific configuration
 
-### Shared Configuration (`@omega/shared-config`)
+### Shared Configuration (`@omega/config`)
 
 - **Purpose**: Shared configuration across frontend and backend
 - **Features**:
@@ -44,7 +44,7 @@ const data = await cycleDataService.getJiraReleaseOverview();
 ### Configuration
 
 ```javascript
-import { OmegaConfig } from "@omega/shared-config";
+import { OmegaConfig } from "@omega/config";
 
 // Create configuration instance
 const omegaConfig = new OmegaConfig("development");
@@ -59,7 +59,7 @@ const pages = omegaConfig.getFrontendConfig().getAllPages();
 ### Environment-specific Configuration
 
 ```javascript
-import { getApiConfig, getApiUrl } from "@omega/shared-config";
+import { getApiConfig, getApiUrl } from "@omega/config";
 
 const config = getApiConfig("production");
 const url = getApiUrl("/jira/release-overview", "production");

@@ -27,9 +27,9 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
-      "@omega/types": ["../../packages/shared-types/src"],
-      "@omega/utils": ["../../packages/shared-utils/src"],
-      "@omega/config": ["../../packages/shared-config/src"]
+      "@omega/types": ["../../packages/types/src"],
+      "@omega/utils": ["../../packages/utils/src"],
+      "@omega/config": ["../../packages/config/src"]
     }
   },
   "include": ["src/**/*"],
