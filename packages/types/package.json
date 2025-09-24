@@ -1,0 +1,33 @@
+{
+  "name": "@omega/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for Omega applications",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "node esbuild.config.js",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "echo 'No tests for types package'",
+    "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "keywords": [
+    "types",
+    "omega",
+    "shared",
+    "typescript"
+  ],
+  "author": "Prewave Team",
+  "license": "UNLICENSED"
+}

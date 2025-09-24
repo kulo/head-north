@@ -1,0 +1,29 @@
+{
+  "extends": "../../tools/typescript-config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "types": ["node"],
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "preserve",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      "@omega/types": ["../../packages/types/src"],
+      "@omega/utils": ["../../packages/utils/src"],
+      "@omega/config": ["../../packages/config/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    { "path": "../../packages/types" },
+    { "path": "../../packages/config" },
+    { "path": "../../packages/utils" }
+  ],
+  "tsBuildInfoFile": "./.tsbuildinfo"
+}

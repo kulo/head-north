@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./apps/frontend/src/*"],
+      "@omega/types": ["./packages/types"],
+      "@omega/utils": ["./packages/utils"],
+      "@omega/config": ["./packages/config"]
+    }
+  },
+  "include": ["apps/**/*", "packages/**/*", "tools/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/config" },
+    { "path": "./packages/utils" },
+    { "path": "./apps/api" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@omega/prettier-config",
+  "version": "1.0.0",
+  "description": "Shared Prettier configuration for Omega applications",
+  "main": "index.js",
+  "private": true,
+  "keywords": [
+    "prettier",
+    "config",
+    "omega",
+    "shared"
+  ],
+  "author": "Prewave Team",
+  "license": "UNLICENSED"
+}

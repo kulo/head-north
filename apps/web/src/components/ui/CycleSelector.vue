@@ -1,0 +1,82 @@
+<template>
+  <a-select
+    v-model:value="selectedCycleId"
+    class="external-selector cycle-selector"
+    placeholder="Select Cycle"
+    @change="handleCycleChange"
+  >
+    <a-select-option
+      v-for="cycle in cycles"
+      :key="cycle.id || cycle.name"
+      :value="cycle.id || cycle.name"
+    >
+      {{ cycle.name }} - {{ cycle.state }}
+    </a-select-option>
+  </a-select>
+</template>
+
+<script>
+import { computed, ref, watch } from "vue";
+import { useStore } from "vuex";
+
+export default {
+  name: "CycleSelector",
+  setup() {
+    const store = useStore();
+
+    const selectedCycle = computed(() => store.state.selectedCycle);
+    const cycles = computed(() => store.state.cycles);
+    const selectedCycleId = ref(null);
+
+    // Initialize with current selected cycle
+    const initializeSelectedCycle = () => {
+      if (selectedCycle.value) {
+        selectedCycleId.value =
+          selectedCycle.value.id || selectedCycle.value.name;
+      }
+    };
+
+    // Initialize on setup
+    initializeSelectedCycle();
+
+    // Watch for changes in store and update local ref
+    watch(
+      () => store.state.selectedCycle,
+      (newValue) => {
+        selectedCycleId.value = newValue?.id || newValue?.name || null;
+      },
+      { immediate: true },
+    );
+
+    // Watch for cycles to be loaded and ensure a cycle is selected
+    watch(
+      () => store.state.cycles,
+      (newCycles) => {
+        if (newCycles && newCycles.length > 0 && !selectedCycle.value) {
+          // Let the store handle cycle selection via _ensureSelectedCycle
+          store.dispatch("_ensureSelectedCycle");
+        }
+      },
+      { immediate: true },
+    );
+
+    const handleCycleChange = (cycleId) => {
+      selectedCycleId.value = cycleId;
+
+      // Find the cycle object by ID
+      const cycle = cycles.value.find((c) => (c.id || c.name) === cycleId);
+
+      if (cycle) {
+        store.dispatch("fetchCycle", cycle);
+      }
+    };
+
+    return {
+      selectedCycle,
+      cycles,
+      selectedCycleId,
+      handleCycleChange,
+    };
+  },
+};
+</script>

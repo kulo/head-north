@@ -1,0 +1,23 @@
+{
+  "name": "@omega/utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for Omega One",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "extensionless": "^1.9.9",
+    "pino": "^8.16.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "node esbuild.config.js",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "node --test",
+    "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
+    "type-check": "tsc --noEmit"
+  }
+}
