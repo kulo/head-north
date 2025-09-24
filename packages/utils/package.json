@@ -13,7 +13,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "node esbuild.config.js",
+    "build": "node esbuild.config.js && tsc --emitDeclarationOnly",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "node --test",

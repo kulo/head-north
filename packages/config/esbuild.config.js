@@ -21,7 +21,7 @@ const buildConfig = {
   splitting: false,
   treeShaking: true,
   external: [],
-  tsconfig: "./tsconfig.json",
+  tsconfig: "./tsconfig.esbuild.json",
 };
 
 // Build function
