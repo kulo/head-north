@@ -2,6 +2,13 @@ import { AgileClient } from "jira.js";
 import pkg from "lodash";
 const { omit, get } = pkg;
 import type { OmegaConfig } from "@omega/config";
+import type {
+  JiraSprintData,
+  JiraIssueData,
+  JiraIssue,
+  JiraSprint,
+  ApiResponse,
+} from "../types/api-response-types";
 
 class JiraAPI {
   private omegaConfig: OmegaConfig;
@@ -16,14 +23,19 @@ class JiraAPI {
    * Get all sprints data (raw from Jira)
    * @returns Raw sprint data
    */
-  async getSprintsData(): Promise<{ sprints: any[] }> {
+  async getSprintsData(): Promise<JiraSprintData> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
     const sprints = await this._client.board.getAllSprints({
       boardId: jiraConfig?.connection?.boardId || 0,
       state: "active,closed,future",
     });
 
-    return { sprints: sprints.values };
+    return {
+      sprints: sprints.values as JiraSprint[],
+      total: sprints.total,
+      startAt: sprints.startAt,
+      maxResults: sprints.maxResults,
+    };
   }
 
   /**
@@ -55,7 +67,7 @@ class JiraAPI {
    * Get release items data (raw from Jira)
    * @returns Raw release items data
    */
-  async getReleaseItemsData(): Promise<any[]> {
+  async getReleaseItemsData(): Promise<JiraIssue[]> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
     const issues = await this._client.board.getIssuesForBoard({
       boardId: jiraConfig?.connection?.boardId || 0,
@@ -96,7 +108,7 @@ class JiraAPI {
   async getIssuesForSprint(
     sprintId: string | number,
     extraFields: string[] = [],
-  ): Promise<any[]> {
+  ): Promise<JiraIssue[]> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
     const response = await this._client.board.getBoardIssuesForSprint({
       maxResults: jiraConfig?.limits?.maxResults || 100,
@@ -117,28 +129,30 @@ class JiraAPI {
       ].concat(extraFields),
     });
 
-    return (response as any).issues.map((issue: any) => {
-      return {
-        ...issue,
-        fields: {
-          ...omit(issue.fields, ["customfield_10002", "customfield_10000"]),
-          effort: issue.fields.customfield_10002,
-          externalRoadmap: get(issue, "fields.customfield_10000.value"),
-          assignee: issue.fields.assignee
-            ? {
-                accountId: issue.fields.assignee.accountId,
-                displayName: issue.fields.assignee.displayName,
-              }
-            : null,
-          reporter: issue.fields.reporter
-            ? {
-                accountId: issue.fields.reporter.accountId,
-                displayName: issue.fields.reporter.displayName,
-              }
-            : null,
-        },
-      };
-    });
+    return (response as { issues: JiraIssue[] }).issues.map(
+      (issue: JiraIssue) => {
+        return {
+          ...issue,
+          fields: {
+            ...omit(issue.fields, ["customfield_10002", "customfield_10000"]),
+            effort: issue.fields.customfield_10002,
+            externalRoadmap: get(issue, "fields.customfield_10000.value"),
+            assignee: issue.fields.assignee
+              ? {
+                  accountId: issue.fields.assignee.accountId,
+                  displayName: issue.fields.assignee.displayName,
+                }
+              : null,
+            reporter: issue.fields.reporter
+              ? {
+                  accountId: issue.fields.reporter.accountId,
+                  displayName: issue.fields.reporter.displayName,
+                }
+              : null,
+          },
+        };
+      },
+    );
   }
 
   private _createClient(): AgileClient {

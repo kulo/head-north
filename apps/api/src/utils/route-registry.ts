@@ -6,6 +6,7 @@
 import { Context } from "koa";
 import { logger } from "@omega/utils";
 import type { RouteDefinition, RouteHandlers, RouteOptions } from "../types";
+import type { Router, RouterLayer } from "../types/api-response-types";
 
 /**
  * Register API routes using provided route definitions
@@ -15,7 +16,7 @@ import type { RouteDefinition, RouteHandlers, RouteOptions } from "../types";
  * @param options - Registration options
  */
 function registerApiRoutes(
-  router: any,
+  router: Router,
   routes: RouteDefinition[],
   handlers: RouteHandlers,
   options: RouteOptions = {},
@@ -68,9 +69,9 @@ function defaultHealthCheck(context: Context): void {
  * @returns Array of registered routes
  */
 function getRegisteredRoutes(
-  router: any,
+  router: Router,
 ): Array<{ method: string; path: string; name: string }> {
-  return router.stack.map((layer: any) => ({
+  return router.stack.map((layer: RouterLayer) => ({
     method: layer.methods.join(", ").toUpperCase(),
     path: layer.path,
     name: layer.name,

@@ -6,6 +6,12 @@ export * from "./jira-types";
 // Re-export parsed DTO types
 export * from "./parsed-types";
 
+// Re-export API response types
+export * from "./api-response-types";
+
+// Re-export error types
+export * from "./error-types";
+
 // ============================================================================
 // API Route Types
 // ============================================================================

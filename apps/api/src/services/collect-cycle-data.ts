@@ -14,6 +14,13 @@ import type {
   Team,
   Initiative,
 } from "@omega/types";
+import type {
+  JiraSprintData,
+  JiraIssue,
+  JiraSprint,
+  Stage,
+  Team as ApiTeam,
+} from "../types/api-response-types";
 
 /**
  * Collect cycle data for both roadmap and cycle overview views
@@ -30,10 +37,10 @@ export default async (
   assignees: Assignee[];
   areas: Record<string, Area>;
   initiatives: Initiative[];
-  stages: any[];
-  teams: any[];
+  stages: Stage[];
+  teams: ApiTeam[];
 }> => {
-  console.log(
+  logger.default.info(
     "🚀 COLLECT CYCLE DATA: Using integrated parser with existing parsers",
   );
   logger.default.info(
@@ -47,7 +54,7 @@ export default async (
   const { sprints } = await jiraApi.getSprintsData();
 
   // Convert sprints to cycles for our domain
-  const cycles: Cycle[] = sprints.map((sprint: any) => ({
+  const cycles: Cycle[] = sprints.map((sprint: JiraSprint) => ({
     id: sprint.id,
     name: sprint.name,
     start: sprint.startDate,
@@ -67,7 +74,7 @@ export default async (
 
   // Get issues for all cycles
   const allIssues = await Promise.all(
-    sprints.map(({ id }: any) => jiraApi.getIssuesForSprint(id)),
+    sprints.map(({ id }: JiraSprint) => jiraApi.getIssuesForSprint(id)),
   );
 
   // Process assignees from all issues
@@ -79,16 +86,16 @@ export default async (
   const roadmapItemsFlat: RoadmapItem[] = [];
 
   // Process release items from getReleaseItemsData() which have proper roadmapItemId
-  releaseItems.forEach((rawReleaseItem: any) => {
+  releaseItems.forEach((rawReleaseItem: JiraIssue) => {
     if (!rawReleaseItem.roadmapItemId) return; // Skip items without roadmapItemId
 
     // Find the corresponding issue for additional fields
     const matchingIssue = allIssues
       .flat()
-      .find((issue: any) => issue && issue.key === rawReleaseItem.id);
+      .find((issue: JiraIssue) => issue && issue.key === rawReleaseItem.id);
 
     // Use existing ReleaseItemParser if we have an issue, otherwise create basic data
-    let parsedReleaseItem: any;
+    let parsedReleaseItem: ReleaseItem;
     if (matchingIssue) {
       const cycle = cycles.find((c) => c.id === rawReleaseItem.cycleId);
       if (cycle) {
@@ -246,7 +253,7 @@ export default async (
 /**
  * Extract assignees from issues
  */
-const getAssignees = (issues: any[]): Assignee[] => {
+const getAssignees = (issues: JiraIssue[]): Assignee[] => {
   return [
     {
       displayName: "All Assignees",
