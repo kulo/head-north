@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "node esbuild.config.js && tsc --emitDeclarationOnly",
+    "build": "node esbuild.config.js && tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "echo 'No tests for UI package'",
