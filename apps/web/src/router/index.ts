@@ -1,4 +1,8 @@
-import { createRouter, createWebHistory } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from "vue-router";
 import CycleOverview from "@/components/cycles/CycleOverview.vue";
 import Roadmap from "@/components/roadmap/Roadmap.vue";
 import type { OmegaConfig } from "@omega/config";
@@ -7,7 +11,7 @@ import type { OmegaConfig } from "@omega/config";
 export default function createAppRouter(omegaConfig: OmegaConfig) {
   const pages = omegaConfig.getFrontendConfig().pages;
 
-  const routes = [
+  const routes: RouteRecordRaw[] = [
     {
       path: pages.ROOT.path,
       redirect: pages.CYCLE_OVERVIEW.path,

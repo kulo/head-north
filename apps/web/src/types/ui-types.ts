@@ -39,6 +39,7 @@ export interface CardProps extends BaseComponentProps {
 export interface FilterItem {
   id: string;
   name: string;
+  value: string;
 }
 
 export type StageFilter = FilterItem;

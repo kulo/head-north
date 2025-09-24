@@ -55,15 +55,18 @@ export const filterByAssignees = (
           const filteredReleaseItems = roadmapItem.releaseItems
             ? roadmapItem.releaseItems.filter((releaseItem) => {
                 // Check if release item assignee matches any selected assignee
-                if (
-                  releaseItem.assignee &&
-                  selectedAssigneeIds.includes(
-                    String(
-                      releaseItem.assignee.accountId || releaseItem.assignee.id,
-                    ),
-                  )
-                ) {
-                  return true;
+                if (releaseItem.assignee) {
+                  const assigneeId =
+                    typeof releaseItem.assignee === "object" &&
+                    "accountId" in releaseItem.assignee
+                      ? releaseItem.assignee.accountId
+                      : (releaseItem.assignee as any).id;
+                  if (
+                    assigneeId &&
+                    selectedAssigneeIds.includes(String(assigneeId))
+                  ) {
+                    return true;
+                  }
                 }
 
                 return false;

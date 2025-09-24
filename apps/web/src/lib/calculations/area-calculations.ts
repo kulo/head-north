@@ -24,7 +24,11 @@ const recalculateReleaseItemBasedFields =
       ...roadmapItem,
       crew: uniq(teams).join(", "),
       area: uniq(areaIds)
-        .map((id) => areaTranslation[id])
+        .map((id) => {
+          const translation = areaTranslation as Record<string, string>;
+          const stringId = String(id);
+          return translation[stringId] || stringId;
+        })
         .join(", "),
     };
   };

@@ -241,7 +241,7 @@ export const transformForCycleOverview = (rawData) => {
   });
 
   // Calculate final initiative-level percentages
-  Object.values(groupedInitiatives).forEach((initiative) => {
+  Object.values(groupedInitiatives).forEach((initiative: any) => {
     initiative.progress =
       initiative.weeks > 0
         ? Math.round((initiative.weeksDone / initiative.weeks) * 100)
@@ -269,7 +269,7 @@ export const transformForCycleOverview = (rawData) => {
 
   // Sort initiatives by weeks (largest first)
   const sortedInitiatives = Object.values(groupedInitiatives).sort(
-    (a, b) => b.weeks - a.weeks,
+    (a, b) => (b as any).weeks - (a as any).weeks,
   );
 
   return {

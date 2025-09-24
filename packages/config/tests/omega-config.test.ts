@@ -4,7 +4,7 @@
 
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
-import OmegaConfig from "../src/omega-config.ts";
+import OmegaConfig from "../dist/omega-config.js";
 
 describe("OmegaConfig", () => {
   let config: OmegaConfig;

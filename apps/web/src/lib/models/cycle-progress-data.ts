@@ -43,7 +43,29 @@ export default class CycleProgressData {
   initiatives: Initiative[] = [];
 
   constructor({ cycle, initiatives }: CycleProgressDataInput = {}) {
-    if (cycle) this.cycle = cycle;
+    if (cycle) {
+      this.cycle = {
+        ...cycle,
+        progress: 0,
+        progressWithInProgress: 0,
+        progressByReleaseItems: 0,
+        weeks: 0,
+        weeksDone: 0,
+        weeksInProgress: 0,
+        weeksNotToDo: 0,
+        weeksCancelled: 0,
+        weeksPostponed: 0,
+        weeksTodo: 0,
+        releaseItemsCount: 0,
+        releaseItemsDoneCount: 0,
+        percentageNotToDo: 0,
+        startMonth: "",
+        endMonth: "",
+        daysFromStartOfCycle: 0,
+        daysInCycle: 0,
+        currentDayPercentage: 0,
+      };
+    }
     if (initiatives) this.initiatives = initiatives;
   }
 
@@ -55,6 +77,7 @@ export default class CycleProgressData {
 
     this.initiatives = data.initiatives.map((initiative) => {
       let preparedInitiative = {
+        id: initiative.id || initiative.initiativeId || initiative.initiative,
         name: initiative.initiative,
         initiative: initiative.initiative,
         initiativeId: initiative.initiativeId,
@@ -88,7 +111,7 @@ export default class CycleProgressData {
                 .map((releaseItem) => releaseItem.validations)
                 .flat(),
             ].flat(),
-            startDate: roadmapItem.startDate,
+            startDate: roadmapItem.startDate || "",
             releaseItemsCount: 0,
             releaseItemsDoneCount: 0,
             weeks: 0,
@@ -106,11 +129,11 @@ export default class CycleProgressData {
             url: roadmapItem.url,
             isPartOfReleaseNarrative: roadmapItem.isPartOfReleaseNarrative,
             isReleaseAtRisk: roadmapItem.isReleaseAtRisk,
-            isCrossCloud: roadmapItem.isCrossCloud,
+            isCrossCloud: roadmapItem.isCrossCloud || false,
           };
 
           roadmapItem.releaseItems.forEach((releaseItem) => {
-            let effort = parseFloat(releaseItem.effort);
+            let effort = parseFloat(String(releaseItem.effort || 0));
 
             if (releaseItem.status != STATUS.REPLANNED) {
               preparedRoadmapItem.weeks += effort;

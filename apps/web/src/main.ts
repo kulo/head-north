@@ -12,7 +12,7 @@ import VueApexCharts from "vue3-apexcharts";
 
 // Create services
 const omegaConfig = new OmegaConfig({
-  overrides: { environment: import.meta.env?.MODE || "development" },
+  overrides: { environment: (import.meta as any).env?.MODE || "development" },
 });
 const cycleDataService = new CycleDataService(omegaConfig);
 

@@ -139,9 +139,11 @@ export const calculateCycleMetadata = (cycle) => {
   const startMonth = startDate.toLocaleString("en-us", { month: "short" });
   const endMonth = endDate.toLocaleString("en-us", { month: "short" });
   const daysFromStartOfCycle = Math.floor(
-    Math.abs(startDate - now) / 1000 / 86400,
+    Math.abs((startDate as any) - (now as any)) / 1000 / 86400,
   );
-  const daysInCycle = Math.floor(Math.abs(startDate - endDate) / 1000 / 86400);
+  const daysInCycle = Math.floor(
+    Math.abs((startDate as any) - (endDate as any)) / 1000 / 86400,
+  );
   const currentDayPercentage =
     daysInCycle > 0
       ? Math.round((daysFromStartOfCycle / daysInCycle) * 100)

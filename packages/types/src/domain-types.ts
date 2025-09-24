@@ -120,6 +120,9 @@ export interface RoadmapItem {
   externalRoadmapDescription?: string;
   isPartOfReleaseNarrative?: boolean;
   isReleaseAtRisk?: boolean;
+  startDate?: string;
+  endDate?: string;
+  isCrossCloud?: boolean;
 }
 
 export interface ReleaseItem {
@@ -146,6 +149,8 @@ export interface ReleaseItem {
   summary?: string;
   closedSprints?: Record<string, unknown>[];
   parent?: string;
+  area?: string | Area;
+  sprint?: { id: string; name: string } | null;
 }
 
 // ============================================================================
@@ -184,4 +189,14 @@ export interface ValidationItem {
   name: string;
   status: string;
   description?: string;
+}
+
+// ============================================================================
+// Filter Types
+// ============================================================================
+
+export interface InitiativeFilter {
+  id: string;
+  name: string;
+  value: string;
 }

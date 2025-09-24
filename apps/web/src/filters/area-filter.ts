@@ -37,19 +37,25 @@ export const filterByArea = (items: Item[], selectedArea: string): Item[] => {
           const filteredReleaseItems = roadmapItem.releaseItems
             ? roadmapItem.releaseItems.filter((releaseItem) => {
                 // Check direct area match (case-insensitive)
-                if (
-                  releaseItem.area &&
-                  releaseItem.area.toLowerCase() === selectedArea.toLowerCase()
-                ) {
-                  return true;
+                if (releaseItem.area) {
+                  const areaName =
+                    typeof releaseItem.area === "string"
+                      ? releaseItem.area
+                      : releaseItem.area.name;
+                  if (areaName.toLowerCase() === selectedArea.toLowerCase()) {
+                    return true;
+                  }
                 }
 
                 // Check area from roadmap item (case-insensitive)
-                if (
-                  roadmapItem.area &&
-                  roadmapItem.area.toLowerCase() === selectedArea.toLowerCase()
-                ) {
-                  return true;
+                if (roadmapItem.area) {
+                  const areaName =
+                    typeof roadmapItem.area === "string"
+                      ? roadmapItem.area
+                      : roadmapItem.area.name;
+                  if (areaName.toLowerCase() === selectedArea.toLowerCase()) {
+                    return true;
+                  }
                 }
 
                 return false;
@@ -59,7 +65,13 @@ export const filterByArea = (items: Item[], selectedArea: string): Item[] => {
           const hasMatchingReleaseItems = filteredReleaseItems.length > 0;
           const hasDirectAreaMatch =
             roadmapItem.area &&
-            roadmapItem.area.toLowerCase() === selectedArea.toLowerCase();
+            (() => {
+              const areaName =
+                typeof roadmapItem.area === "string"
+                  ? roadmapItem.area
+                  : roadmapItem.area.name;
+              return areaName.toLowerCase() === selectedArea.toLowerCase();
+            })();
 
           if (hasMatchingReleaseItems || hasDirectAreaMatch) {
             return { ...roadmapItem, releaseItems: filteredReleaseItems };

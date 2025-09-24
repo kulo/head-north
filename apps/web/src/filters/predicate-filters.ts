@@ -3,7 +3,7 @@
  * Provides composable predicate functions that can be combined
  */
 
-import type { ReleaseItem } from "@omega/types";
+import type { ReleaseItem, InitiativeFilter } from "@omega/types";
 import type { StageFilter, CycleFilter, FilterConfig } from "../types";
 
 /**
@@ -18,11 +18,14 @@ export const createAreaPredicate = (selectedArea: string) => {
 
   return (releaseItem: ReleaseItem): boolean => {
     // Check direct area match (case-insensitive)
-    if (
-      releaseItem.area &&
-      releaseItem.area.toLowerCase() === selectedArea.toLowerCase()
-    ) {
-      return true;
+    if (releaseItem.area) {
+      const areaName =
+        typeof releaseItem.area === "string"
+          ? releaseItem.area
+          : releaseItem.area.name;
+      if (areaName.toLowerCase() === selectedArea.toLowerCase()) {
+        return true;
+      }
     }
 
     // Check area from areaIds array (case-insensitive)
@@ -67,14 +70,17 @@ export const createInitiativesPredicate = (
     .filter((id) => id !== "all");
 
   return (item: unknown): boolean => {
-    if (item.initiativeId) {
+    if (item && typeof item === "object" && "initiativeId" in item) {
       // Roadmap structure
-      return selectedInitiativeIds.includes(String(item.initiativeId));
-    } else if (item.initiatives) {
+      return selectedInitiativeIds.includes(String((item as any).initiativeId));
+    } else if (item && typeof item === "object" && "initiatives" in item) {
       // Cycle-overview structure - check if any initiative matches
-      return item.initiatives.some((initiative) =>
-        selectedInitiativeIds.includes(String(initiative.initiativeId)),
-      );
+      const initiatives = (item as any).initiatives;
+      if (Array.isArray(initiatives)) {
+        return initiatives.some((initiative: any) =>
+          selectedInitiativeIds.includes(String(initiative.initiativeId)),
+        );
+      }
     }
     return true;
   };

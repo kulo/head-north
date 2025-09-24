@@ -3,7 +3,7 @@
  * Tests to ensure frontend and backend use the same API paths
  */
 
-import { OmegaConfig } from "../src/index.ts";
+import { OmegaConfig } from "../dist/index.js";
 import { describe, it } from "node:test";
 import assert from "node:assert";
 

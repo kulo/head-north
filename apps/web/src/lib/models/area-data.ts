@@ -15,20 +15,45 @@ export default class CycleProgressData {
     weeksNotToDo: 0,
     weeksCancelled: 0,
     weeksPostponed: 0,
+    weeksTodo: 0,
     releaseItemsCount: 0,
     releaseItemsDoneCount: 0,
     percentageNotToDo: 0,
+    startMonth: "",
+    endMonth: "",
+    daysFromStartOfCycle: 0,
+    daysInCycle: 0,
+    currentDayPercentage: 0,
   };
 
   initiatives = [];
 
-  constructor({ cycle, initiatives } = {}) {
-    if (cycle) this.cycle = cycle;
+  constructor({ cycle, initiatives } = { cycle: null, initiatives: null }) {
+    if (cycle) {
+      this.cycle = {
+        ...this.cycle,
+        ...cycle,
+        weeksTodo: cycle.weeksTodo || 0,
+        startMonth: cycle.startMonth || "",
+        endMonth: cycle.endMonth || "",
+        daysFromStartOfCycle: cycle.daysFromStartOfCycle || 0,
+        daysInCycle: cycle.daysInCycle || 0,
+        currentDayPercentage: cycle.currentDayPercentage || 0,
+      };
+    }
     if (initiatives) this.initiatives = initiatives;
   }
 
   applyData(data) {
     Object.assign(this.cycle, data.cycle);
+
+    // Ensure all required properties exist
+    if (!this.cycle.weeksTodo) this.cycle.weeksTodo = 0;
+    if (!this.cycle.startMonth) this.cycle.startMonth = "";
+    if (!this.cycle.endMonth) this.cycle.endMonth = "";
+    if (!this.cycle.daysFromStartOfCycle) this.cycle.daysFromStartOfCycle = 0;
+    if (!this.cycle.daysInCycle) this.cycle.daysInCycle = 0;
+    if (!this.cycle.currentDayPercentage) this.cycle.currentDayPercentage = 0;
 
     this.initiatives = data.initiatives.map((initiative) => {
       let preparedInitiative = {
@@ -43,6 +68,7 @@ export default class CycleProgressData {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
+        weeksTodo: 0,
         progress: 0,
         progressWithInProgress: 0,
         progressByReleaseItems: 0,
@@ -247,10 +273,15 @@ export default class CycleProgressData {
       month: "short",
     });
     this.cycle.daysFromStartOfCycle = Math.floor(
-      Math.abs(new Date(this.cycle.delivery) - new Date()) / 1000 / 86400,
+      Math.abs((new Date(this.cycle.delivery) as any) - (new Date() as any)) /
+        1000 /
+        86400,
     );
     this.cycle.daysInCycle = Math.floor(
-      Math.abs(new Date(this.cycle.delivery) - new Date(this.cycle.end)) /
+      Math.abs(
+        (new Date(this.cycle.delivery) as any) -
+          (new Date(this.cycle.end) as any),
+      ) /
         1000 /
         86400,
     );

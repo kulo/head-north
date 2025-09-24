@@ -41,7 +41,7 @@ class CycleDataService {
     this._cacheTTL = this.config.getCacheTTL();
     this._apiTimeout = this.config.getEnvironmentConfig().timeout;
     this._apiRetries = this.config.getEnvironmentConfig().retries;
-    this._apiAttempts = this.config.getEnvironmentConfig().attempts;
+    this._apiAttempts = this.config.getEnvironmentConfig().retries || 3;
   }
 
   /**

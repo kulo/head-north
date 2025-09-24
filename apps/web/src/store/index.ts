@@ -80,22 +80,33 @@ const applyFilters = (data: unknown[], filters: Filters): unknown[] => {
 
   // Apply initiative filtering if specified
   if (filters && filters.initiatives && filters.initiatives.length > 0) {
-    filteredData = filterByInitiatives(filteredData, filters.initiatives);
+    const initiativeNames = filters.initiatives.map((init) =>
+      typeof init === "string" ? init : init.name,
+    );
+    filteredData = filterByInitiatives(filteredData, initiativeNames);
   }
 
   // Apply stage filtering if specified
   if (filters && filters.stages && filters.stages.length > 0) {
-    filteredData = filterByStages(filteredData, filters.stages);
+    const stageNames = filters.stages.map((stage) =>
+      typeof stage === "string" ? stage : stage.name,
+    );
+    filteredData = filterByStages(filteredData, stageNames);
   }
 
   // Apply assignee filtering if specified
   if (filters && filters.assignees && filters.assignees.length > 0) {
-    filteredData = filterByAssignees(filteredData, filters.assignees);
+    const assigneeNames = filters.assignees.map((assignee) =>
+      typeof assignee === "string" ? assignee : assignee.displayName,
+    );
+    filteredData = filterByAssignees(filteredData, assigneeNames);
   }
 
   // Apply cycle filtering if specified
   if (filters && filters.cycle) {
-    filteredData = filterByCycle(filteredData, filters.cycle);
+    const cycleName =
+      typeof filters.cycle === "string" ? filters.cycle : filters.cycle.name;
+    filteredData = filterByCycle(filteredData, cycleName);
   }
 
   return filteredData;
@@ -170,11 +181,11 @@ export default function createAppStore(
         }
 
         const filteredInitiatives = applyFilters(rawData.initiatives, {
-          area: state.selectedArea,
-          initiatives: state.selectedInitiatives,
-          stages: state.selectedStages,
-          assignees: state.selectedAssignees,
-          cycle: state.selectedCycle,
+          area: state.selectedArea || "all",
+          initiatives: state.selectedInitiatives || [],
+          stages: state.selectedStages || [],
+          assignees: state.selectedAssignees || [],
+          cycle: state.selectedCycle || null,
         });
 
         // Recalculate cycle data based on filtered initiatives
