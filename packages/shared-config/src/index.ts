@@ -18,11 +18,11 @@
  */
 
 // Export OmegaConfig as the main and only export
-export { default as OmegaConfig } from "./omega-config.js";
+export { default as OmegaConfig } from "./omega-config";
 
 // For backward compatibility, also export as default
-export { default } from "./omega-config.js";
+export { default } from "./omega-config";
 
 // Export types for external use
-export type * from "./types.js";
-export type * from "./jira-config.js";
+export type * from "./types";
+export type * from "./jira-config";

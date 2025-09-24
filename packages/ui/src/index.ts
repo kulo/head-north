@@ -15,4 +15,4 @@
 // For now, this is a placeholder package
 // Components will be moved here from the web app in future iterations
 
-export * from "./types.js";
+export * from "./types";

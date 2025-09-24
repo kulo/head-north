@@ -39,9 +39,11 @@
     "build": "node esbuild.config.js",
     "build:tsc": "tsc -p tsconfig.relaxed.json",
     "dev": "tsc --watch",
-    "start": "node dist/index.js",
-    "start-dev": "nodemon -r dotenv/config dist/index.js",
+    "start": "node --import=extensionless/register dist/index.js",
+    "start-dev": "nodemon --exec \"node --import=extensionless/register\" -r dotenv/config dist/index.js",
     "clean": "rm -rf dist",
-    "test": "node --test"
+    "test": "node --test",
+    "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
+    "type-check": "tsc --noEmit"
   }
 }

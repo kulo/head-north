@@ -1,0 +1,34 @@
+{
+  "name": "@omega/test-config",
+  "version": "1.0.0",
+  "description": "Shared test configuration for Omega packages",
+  "type": "module",
+  "main": "vitest.config.js",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Test config package - no build needed'",
+    "dev": "echo 'Test config package - no dev needed'",
+    "clean": "echo 'Test config package - no clean needed'",
+    "test": "echo 'No tests for test config package'",
+    "lint": "eslint . --ext .js,.ts --fix --ignore-path .gitignore",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "keywords": [
+    "test",
+    "vitest",
+    "omega",
+    "shared",
+    "typescript"
+  ],
+  "author": "Prewave Team",
+  "license": "UNLICENSED"
+}

@@ -35,20 +35,20 @@ dev:
 	npm run dev
 
 dev-frontend:
-	npm run dev:frontend
+	npm run dev:web
 
 dev-backend:
-	npm run dev:backend
+	npm run dev:api
 
 # Build
 build:
 	npm run build
 
 build-frontend:
-	npm run build:frontend
+	npm run build:web
 
 build-backend:
-	npm run build:backend
+	npm run build:api
 
 # Start
 start:
@@ -59,20 +59,20 @@ test:
 	npm run test
 
 test-frontend:
-	npm run test:frontend
+	npm run test:web
 
 test-backend:
-	npm run test:backend
+	npm run test:api
 
 # Lint
 lint:
 	npm run lint
 
 lint-frontend:
-	npm run lint:frontend
+	npm run lint:web
 
 lint-backend:
-	npm run lint:backend
+	npm run lint:api
 
 # Clean
 clean:
@@ -80,7 +80,7 @@ clean:
 
 # Docker commands
 docker-build:
-	cd apps/backend && make build
+	cd apps/api && make build
 
 docker-run:
-	cd apps/backend && make start
+	cd apps/api && make start

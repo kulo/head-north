@@ -1,7 +1,7 @@
 // Generic validation rules for Development Cycle & Roadmap Dashboard
 // TODO: Customize these validation rules for your company's specific workflow and conventions
 
-import type { ValidationRules } from "./types.js";
+import type { ValidationRules } from "./types";
 
 const validationDictionary: ValidationRules = {
   releaseItem: {

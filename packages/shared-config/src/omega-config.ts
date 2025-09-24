@@ -27,10 +27,10 @@
  *   const endpoints = config.getEndpoints()
  */
 
-import validationDictionary from "./validation-dictionary.js";
-import JiraConfig from "./jira-config.js";
-import type { JiraConfigData } from "./jira-config.js";
-import { getEnvVarWithFallback } from "./utils.js";
+import validationDictionary from "./validation-dictionary";
+import JiraConfig from "./jira-config";
+import type { JiraConfigData } from "./jira-config";
+import { getEnvVarWithFallback } from "./utils";
 import type {
   ProcessEnv,
   ConfigOverrides,
@@ -40,7 +40,7 @@ import type {
   BackendConfig,
   PageConfig,
   ValidationRules,
-} from "./types.js";
+} from "./types";
 
 export default class OmegaConfig {
   private processEnv: ProcessEnv;

@@ -2,7 +2,7 @@
  * Shared utility functions for configuration classes
  */
 
-import type { ProcessEnv } from "./types.js";
+import type { ProcessEnv } from "./types";
 
 /**
  * Get required environment variable

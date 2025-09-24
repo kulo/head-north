@@ -1,4 +1,4 @@
-export * from "./logger.js";
+export * from "./logger";
 
 // Shared utility functions for Omega applications
 

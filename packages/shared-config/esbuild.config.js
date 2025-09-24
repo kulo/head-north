@@ -10,7 +10,7 @@ const srcFiles = readdirSync("src")
 
 const buildConfig = {
   entryPoints: srcFiles,
-  bundle: false,
+  bundle: true,
   platform: "neutral",
   target: "es2020",
   format: "esm",
