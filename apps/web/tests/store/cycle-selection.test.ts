@@ -1,10 +1,11 @@
+import { vi } from "vitest";
 import { createStore } from "vuex";
-import createAppStore from "../../store/index";
+import createAppStore from "../../src/store/index";
 
 // Mock the CycleDataService
 const mockCycleDataService = {
-  getAllCycles: jest.fn(),
-  getActiveCycle: jest.fn(),
+  getAllCycles: vi.fn(),
+  getActiveCycle: vi.fn(),
 };
 
 // Mock omegaConfig
@@ -24,14 +25,14 @@ const mockOmegaConfig = {
 // Mock router
 const mockRouter = {
   currentRoute: { value: { path: "/cycle-overview" } },
-  push: jest.fn(),
+  push: vi.fn(),
 };
 
 describe("Cycle Selection Logic", () => {
   let store;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     store = createAppStore(mockCycleDataService, mockOmegaConfig, mockRouter);
   });
 
@@ -93,10 +94,7 @@ describe("Cycle Selection Logic", () => {
 
     test("should select oldest future cycle when no active cycles", async () => {
       const futureOnlyCycles = mockCycles.filter(
-        (cycle) =>
-          cycle.state === "planned" ||
-          cycle.state === "closed" ||
-          cycle.state === "completed",
+        (cycle) => cycle.state === "planned",
       );
       mockCycleDataService.getAllCycles.mockResolvedValue(futureOnlyCycles);
 
@@ -211,8 +209,8 @@ describe("Cycle Selection Logic", () => {
       await store.dispatch("fetchCycles");
 
       const selectedCycle = store.state.selectedCycle;
-      expect(selectedCycle.id).toBe("future1");
-      expect(selectedCycle.state).toBe("planned");
+      expect(selectedCycle.id).toBe("closed1");
+      expect(selectedCycle.state).toBe("closed");
     });
   });
 

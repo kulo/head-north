@@ -38,6 +38,31 @@ export function createPackageTestConfig(packageName, customOptions = {}) {
   });
 }
 
+export function createWebTestConfig(customOptions = {}) {
+  return defineConfig({
+    test: {
+      globals: true,
+      environment: "jsdom",
+      include: ["tests/**/*.test.{js,ts,vue}"],
+      exclude: ["node_modules", "dist"],
+      setupFiles: ["./tests/setup.ts"],
+      coverage: {
+        provider: "v8",
+        reporter: ["text", "json", "html"],
+        exclude: [
+          "node_modules/",
+          "dist/",
+          "tests/",
+          "**/*.d.ts",
+          "**/*.config.js",
+          "**/*.config.ts",
+        ],
+      },
+      ...customOptions,
+    },
+  });
+}
+
 export function createAppTestConfig(appName, customOptions = {}) {
   return createBaseTestConfig({
     test: {
@@ -48,5 +73,5 @@ export function createAppTestConfig(appName, customOptions = {}) {
   });
 }
 
-// Default export for direct usage
+// Default export for easy importing
 export default createBaseTestConfig();

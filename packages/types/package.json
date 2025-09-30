@@ -10,13 +10,14 @@
     "build": "node esbuild.config.js && tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "test": "echo 'No tests for types package'",
+    "test": "vitest",
     "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "esbuild": "^0.25.10",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=22.0.0",

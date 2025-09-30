@@ -1,6 +1,5 @@
-import { describe, it, beforeEach } from "node:test";
-import assert from "node:assert";
-import { resolveStatus } from "../src/calculator/resolve-status.ts";
+import { describe, it, beforeEach, expect } from "vitest";
+import { resolveStatus } from "../../src/calculator/resolve-status.ts";
 import type { OmegaConfig } from "@omega/config";
 
 describe("resolveStatus", () => {
@@ -35,7 +34,7 @@ describe("resolveStatus", () => {
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
-    assert.strictEqual(result, "inprogress");
+    expect(result).toBe("inprogress");
   });
 
   it("should return default TODO status for unmapped status ID", () => {
@@ -44,7 +43,7 @@ describe("resolveStatus", () => {
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
-    assert.strictEqual(result, "todo");
+    expect(result).toBe("todo");
   });
 
   it("should return postponed status when sprint timing mismatch", () => {
@@ -56,7 +55,7 @@ describe("resolveStatus", () => {
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
-    assert.strictEqual(result, "postponed");
+    expect(result).toBe("postponed");
   });
 
   it("should handle missing sprint gracefully", () => {
@@ -65,7 +64,7 @@ describe("resolveStatus", () => {
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
-    assert.strictEqual(result, "inprogress");
+    expect(result).toBe("inprogress");
   });
 
   it("should handle missing issue sprint gracefully", () => {
@@ -74,6 +73,6 @@ describe("resolveStatus", () => {
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
-    assert.strictEqual(result, "inprogress");
+    expect(result).toBe("inprogress");
   });
 });

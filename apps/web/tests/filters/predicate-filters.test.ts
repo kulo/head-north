@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import {
   createAreaPredicate,
   createInitiativesPredicate,
@@ -5,7 +6,7 @@ import {
   createCyclePredicate,
   combinePredicates,
   createFilterPredicates,
-} from "../predicate-filters";
+} from "../../src/filters/predicate-filters";
 
 describe("predicateFilters", () => {
   const mockReleaseItem = {
@@ -117,9 +118,7 @@ describe("predicateFilters", () => {
     let consoleErrorSpy;
 
     beforeEach(() => {
-      consoleErrorSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     });
 
     afterEach(() => {

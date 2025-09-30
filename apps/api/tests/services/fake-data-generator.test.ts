@@ -1,6 +1,5 @@
-import { describe, it, beforeEach } from "node:test";
-import assert from "node:assert";
-import FakeDataGenerator from "../src/services/fake-data-generator.ts";
+import { describe, it, beforeEach, expect } from "vitest";
+import FakeDataGenerator from "../../src/services/fake-data-generator.ts";
 import type { OmegaConfig } from "@omega/config";
 
 describe("FakeDataGenerator", () => {
@@ -53,12 +52,12 @@ describe("FakeDataGenerator", () => {
   it("should initialize with correct assignees", () => {
     const assignees = generator.getAssignees();
 
-    assert.strictEqual(assignees.length, 8);
-    assert.deepStrictEqual(assignees[0], {
+    expect(assignees).toHaveLength(8);
+    expect(assignees[0]).toEqual({
       displayName: "All Assignees",
       accountId: "all",
     });
-    assert.deepStrictEqual(assignees[1], {
+    expect(assignees[1]).toEqual({
       displayName: "John Doe",
       accountId: "john.doe",
     });
@@ -67,17 +66,17 @@ describe("FakeDataGenerator", () => {
   it("should generate areas from config", () => {
     const areas = generator.getAreas();
 
-    assert.strictEqual(areas.length, 3);
-    assert.strictEqual(areas[0].id, "area1");
-    assert.strictEqual(areas[0].name, "Frontend");
-    assert.ok(Array.isArray(areas[0].teams));
+    expect(areas).toHaveLength(3);
+    expect(areas[0].id).toBe("area1");
+    expect(areas[0].name).toBe("Frontend");
+    expect(Array.isArray(areas[0].teams)).toBe(true);
   });
 
   it("should generate initiatives from config", () => {
     const initiatives = generator.getInitiatives();
 
-    assert.strictEqual(initiatives.length, 3);
-    assert.deepStrictEqual(initiatives[0], {
+    expect(initiatives).toHaveLength(3);
+    expect(initiatives[0]).toEqual({
       id: "init1",
       name: "User Experience",
     });
@@ -86,26 +85,26 @@ describe("FakeDataGenerator", () => {
   it("should generate roadmap items", async () => {
     const roadmapItems = await generator.getRoadmapItemsData();
 
-    assert.ok(Object.keys(roadmapItems).length > 0);
+    expect(Object.keys(roadmapItems).length).toBeGreaterThan(0);
     const firstItem = Object.values(roadmapItems)[0];
-    assert.ok(firstItem.id);
-    assert.ok(firstItem.name);
-    assert.ok(firstItem.area);
+    expect(firstItem.id).toBeDefined();
+    expect(firstItem.name).toBeDefined();
+    expect(firstItem.area).toBeDefined();
   });
 
   it("should generate sprints", async () => {
     const sprintsData = await generator.getSprintsData();
     const sprints = sprintsData.sprints;
 
-    assert.ok(sprints.length > 0);
+    expect(sprints.length).toBeGreaterThan(0);
     const firstSprint = sprints[0];
-    assert.ok(firstSprint.id);
-    assert.ok(firstSprint.name);
+    expect(firstSprint.id).toBeDefined();
+    expect(firstSprint.name).toBeDefined();
     // Check if it has either start/end or other date properties
-    assert.ok(
+    expect(
       firstSprint.start ||
         firstSprint.startDate ||
         typeof firstSprint.id !== "undefined",
-    );
+    ).toBeTruthy();
   });
 });

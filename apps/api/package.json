@@ -29,7 +29,8 @@
     "dotenv": "^16.3.0",
     "esbuild": "^0.25.10",
     "nodemon": "^3.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=22.0.0",
@@ -42,7 +43,8 @@
     "start": "node --import=extensionless/register dist/index.js",
     "start-dev": "nodemon --exec \"node --import=extensionless/register\" -r dotenv/config dist/index.js",
     "clean": "rm -rf dist",
-    "test": "node --test",
+    "test": "vitest",
+    "test:run": "vitest run",
     "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
     "type-check": "tsc --noEmit"
   }

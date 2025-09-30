@@ -1,11 +1,10 @@
 import { defineConfig } from "vitest/config";
-import { resolve } from "path";
 
 export default defineConfig({
   test: {
-    environment: "jsdom",
+    environment: "node",
     globals: true,
-    include: ["tests/**/*.test.{js,ts,vue}"],
+    include: ["tests/**/*.test.{js,ts}"],
     exclude: ["node_modules", "dist"],
     coverage: {
       provider: "v8",
@@ -18,11 +17,6 @@ export default defineConfig({
         "**/*.config.js",
         "**/*.config.ts",
       ],
-    },
-  },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
     },
   },
 });

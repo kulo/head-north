@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { filterByCycle } from "../cycle-filter";
+import { filterByCycle } from "../../src/filters/cycle-filter";
 
 // Mock data structure that matches the transformed initiative data
 const mockInitiatives = [

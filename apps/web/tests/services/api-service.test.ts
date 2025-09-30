@@ -3,19 +3,27 @@
  * Unit tests for the API service functionality
  */
 
-import { CycleDataService } from "../index";
+import { vi } from "vitest";
+import CycleDataService from "../../src/services/cycle-data-service";
 import { OmegaConfig } from "@omega/config";
 
 // Mock fetch globally
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe("Cycle Data Service", () => {
   let cycleDataService;
   let omegaConfig;
 
   beforeEach(() => {
-    fetch.mockClear();
+    vi.mocked(fetch).mockClear();
     omegaConfig = new OmegaConfig();
+    // Mock the config to disable retries for testing
+    vi.spyOn(omegaConfig, "getEnvironmentConfig").mockReturnValue({
+      backendHost: null,
+      timeout: 1000,
+      retries: 1,
+      retryDelay: 100,
+    });
     cycleDataService = new CycleDataService(omegaConfig);
   });
 
@@ -34,35 +42,34 @@ describe("Cycle Data Service", () => {
   describe("API Endpoints", () => {
     test("should have all required endpoints defined", () => {
       const endpoints = omegaConfig.getEndpoints();
-      expect(endpoints.CYCLE_OVERVIEW).toBe("/cycles/:id/overview");
-      expect(endpoints.CYCLES_ROADMAP).toBe("/cycles/roadmap");
       expect(endpoints.HEALTH_CHECK).toBe("/healthcheck");
+      expect(endpoints.CYCLE_DATA).toBe("/cycle-data");
     });
   });
 
   describe("Request handling", () => {
     test("should make successful API request", async () => {
       const mockData = { test: "data" };
-      fetch.mockResolvedValueOnce({
+      vi.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockData),
-      });
+      } as Response);
 
       const result = await cycleDataService.getCyclesRoadmap();
 
       expect(fetch).toHaveBeenCalledWith(
-        "http://localhost:3000/cycles/roadmap",
+        "http://localhost:3000/cycle-data",
         expect.any(Object),
       );
       expect(result).toEqual(mockData);
     });
 
     test("should handle API errors gracefully", async () => {
-      fetch.mockRejectedValueOnce(new Error("Network error"));
+      vi.mocked(fetch).mockRejectedValue(new Error("Network error"));
 
       await expect(cycleDataService.getCyclesRoadmap()).rejects.toThrow(
-        "API request failed after 3 attempts: Network error",
+        "API request failed after 1 attempts",
       );
-    });
+    }, 10000);
   });
 });

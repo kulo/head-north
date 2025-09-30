@@ -4,8 +4,7 @@
  */
 
 import { OmegaConfig } from "../dist/index.js";
-import { describe, it } from "node:test";
-import assert from "node:assert";
+import { describe, it, expect } from "vitest";
 
 describe("Route Consistency", () => {
   describe("API Endpoints", () => {
@@ -14,8 +13,8 @@ describe("Route Consistency", () => {
       const endpoints = config.getEndpoints();
 
       // These paths must match exactly between frontend and backend
-      assert.ok(endpoints.HEALTH_CHECK);
-      assert.ok(endpoints.CYCLE_DATA);
+      expect(endpoints.HEALTH_CHECK).toBeDefined();
+      expect(endpoints.CYCLE_DATA).toBeDefined();
     });
 
     it("should have all endpoints start with forward slash", () => {
@@ -23,11 +22,7 @@ describe("Route Consistency", () => {
       const endpoints = config.getEndpoints();
 
       Object.values(endpoints).forEach((endpoint) => {
-        assert.match(
-          endpoint,
-          /^\//,
-          `Endpoint ${endpoint} should start with forward slash`,
-        );
+        expect(endpoint).toMatch(/^\//);
       });
     });
 
@@ -36,11 +31,7 @@ describe("Route Consistency", () => {
       const endpoints = config.getEndpoints();
 
       Object.values(endpoints).forEach((endpoint) => {
-        assert.doesNotMatch(
-          endpoint,
-          /\/$/,
-          `Endpoint ${endpoint} should not have trailing slash`,
-        );
+        expect(endpoint).not.toMatch(/\/$/);
       });
     });
 
@@ -50,11 +41,7 @@ describe("Route Consistency", () => {
 
       Object.values(endpoints).forEach((endpoint) => {
         // Should be lowercase with hyphens or forward slashes
-        assert.match(
-          endpoint,
-          /^\/[a-z0-9\/-]+$/,
-          `Endpoint ${endpoint} should follow naming convention`,
-        );
+        expect(endpoint).toMatch(/^\/[a-z0-9\/-]+$/);
       });
     });
   });
@@ -64,16 +51,16 @@ describe("Route Consistency", () => {
       const config = new OmegaConfig();
       const endpoints = config.getEndpoints();
 
-      assert.ok(endpoints.HEALTH_CHECK);
-      assert.match(endpoints.HEALTH_CHECK, /^\/healthcheck/);
+      expect(endpoints.HEALTH_CHECK).toBeDefined();
+      expect(endpoints.HEALTH_CHECK).toMatch(/^\/healthcheck/);
     });
 
     it("should have cycle data endpoint", () => {
       const config = new OmegaConfig();
       const endpoints = config.getEndpoints();
 
-      assert.ok(endpoints.CYCLE_DATA);
-      assert.match(endpoints.CYCLE_DATA, /^\/cycle-data/);
+      expect(endpoints.CYCLE_DATA).toBeDefined();
+      expect(endpoints.CYCLE_DATA).toMatch(/^\/cycle-data/);
     });
   });
 });

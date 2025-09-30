@@ -11,13 +11,15 @@
   },
   "devDependencies": {
     "esbuild": "^0.25.10",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "node esbuild.config.js && tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "test": "node --test",
+    "test": "vitest",
+    "test:run": "vitest run",
     "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
     "type-check": "tsc --noEmit"
   }

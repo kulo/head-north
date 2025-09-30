@@ -3,11 +3,11 @@
  * Tests the complete filtering system to ensure all filters work correctly
  */
 
-import { filterByInitiatives } from "../initiatives-filter";
-import { filterByStages } from "../stages-filter";
-import { filterByAssignees } from "../assignee-filter";
-import { filterByArea } from "../area-filter";
-import { filterByCycle } from "../cycle-filter";
+import { filterByInitiatives } from "../../src/filters/initiatives-filter";
+import { filterByStages } from "../../src/filters/stages-filter";
+import { filterByAssignees } from "../../src/filters/assignee-filter";
+import { filterByArea } from "../../src/filters/area-filter";
+import { filterByCycle } from "../../src/filters/cycle-filter";
 
 // Mock data structure that matches the transformed initiative data
 const mockInitiatives = [
