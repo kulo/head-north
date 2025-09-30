@@ -144,9 +144,9 @@ export default {
 
     const loading = computed(() => store.state.loading);
     const error = computed(() => store.state.error);
-    const cycleOverviewData = computed(() => {
-      return store.getters.currentCycleOverviewData;
-    });
+    const cycleOverviewData = computed(
+      () => store.getters.currentCycleOverviewData,
+    );
     const isOverviewPage = computed(
       () => store.getters.selectedPageName === "Cycle Overview",
     );

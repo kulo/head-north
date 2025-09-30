@@ -20,26 +20,38 @@ interface Item {
  */
 export const filterByStages = (
   items: Item[],
-  selectedStages: StageFilter[],
+  selectedStages: (StageFilter | string)[],
 ): Item[] => {
   if (!selectedStages || selectedStages.length === 0) {
     return items;
   }
 
-  // Check if "All" is selected
-  const isAllSelected = selectedStages.some(
-    (stage) => stage && (stage.id === "all" || stage.name === "all"),
-  );
+  // Check if "All" is selected - handle both object and string formats
+  const isAllSelected = selectedStages.some((stage) => {
+    if (typeof stage === "string") {
+      return stage === "all";
+    }
+    return (
+      stage &&
+      (stage.id === "all" ||
+        stage.name === "all" ||
+        stage.name === "All Stages")
+    );
+  });
 
   if (isAllSelected) {
     return items;
   }
 
-  // Filter by selected stage IDs
+  // Filter by selected stage IDs - handle both string and object formats
   const selectedStageIds = selectedStages
-    .filter((stage) => stage && stage.id)
-    .map((stage) => stage.id)
-    .filter((id) => id !== "all");
+    .map((stage) => {
+      if (typeof stage === "string") {
+        return stage;
+      }
+      return stage && stage.id ? stage.id : null;
+    })
+    .filter((id) => id && id !== "all");
 
   return items
     .map((item) => {

@@ -2,6 +2,7 @@
   "name": "@omega/utils",
   "version": "1.0.0",
   "description": "Shared utilities for Omega One",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
@@ -13,7 +14,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "node esbuild.config.js && tsc --project tsconfig.declaration.json && npx extensionless",
+    "build": "node esbuild.config.js && tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "node --test",

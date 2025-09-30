@@ -80,26 +80,20 @@ const applyFilters = (data: unknown[], filters: Filters): unknown[] => {
 
   // Apply initiative filtering if specified
   if (filters && filters.initiatives && filters.initiatives.length > 0) {
-    const initiativeNames = filters.initiatives.map((init) =>
-      typeof init === "string" ? init : init.name,
+    filteredData = filterByInitiatives(
+      filteredData,
+      filters.initiatives as any,
     );
-    filteredData = filterByInitiatives(filteredData, initiativeNames);
   }
 
   // Apply stage filtering if specified
   if (filters && filters.stages && filters.stages.length > 0) {
-    const stageNames = filters.stages.map((stage) =>
-      typeof stage === "string" ? stage : stage.name,
-    );
-    filteredData = filterByStages(filteredData, stageNames);
+    filteredData = filterByStages(filteredData, filters.stages as any);
   }
 
   // Apply assignee filtering if specified
   if (filters && filters.assignees && filters.assignees.length > 0) {
-    const assigneeNames = filters.assignees.map((assignee) =>
-      typeof assignee === "string" ? assignee : assignee.displayName,
-    );
-    filteredData = filterByAssignees(filteredData, assigneeNames);
+    filteredData = filterByAssignees(filteredData, filters.assignees as any);
   }
 
   // Apply cycle filtering if specified
@@ -166,7 +160,7 @@ export default function createAppStore(
         // Roadmap view only supports initiatives and areas filtering
         const filteredData = applyFilters(state.roadmapData.initiatives, {
           area: state.selectedArea,
-          initiatives: state.selectedInitiatives,
+          initiatives: state.selectedInitiatives || [],
         });
 
         // Return the filtered initiatives array
@@ -180,13 +174,30 @@ export default function createAppStore(
           return rawData;
         }
 
-        const filteredInitiatives = applyFilters(rawData.initiatives, {
+        const initiativesIds = (state.selectedInitiatives || []).map(
+          (init) => init.id,
+        );
+        const stagesIds = (state.selectedStages || []).map((stage) => stage.id);
+        const assigneesIds = (state.selectedAssignees || []).map(
+          (assignee) => assignee.accountId,
+        );
+
+        const filterOptions: any = {
           area: state.selectedArea || "all",
-          initiatives: state.selectedInitiatives || [],
-          stages: state.selectedStages || [],
-          assignees: state.selectedAssignees || [],
-          cycle: state.selectedCycle || null,
-        });
+          initiatives: initiativesIds,
+          stages: stagesIds,
+          assignees: assigneesIds,
+        };
+
+        // Only add cycle filter if a cycle is actually selected
+        if (state.selectedCycle) {
+          filterOptions.cycle = state.selectedCycle;
+        }
+
+        const filteredInitiatives = applyFilters(
+          rawData.initiatives,
+          filterOptions,
+        );
 
         // Recalculate cycle data based on filtered initiatives
         const recalculatedCycle = calculateCycleData(
@@ -460,6 +471,7 @@ export default function createAppStore(
 
       // Cycle overview data actions
       async fetchCycleOverviewData({ state, commit }) {
+        commit("SET_LOADING", true);
         commit("CLEAR_ERROR");
         try {
           // Fetch raw data from API service
@@ -492,7 +504,7 @@ export default function createAppStore(
             initiatives: cycleOverviewData.initiatives,
           };
 
-          commit("SET_CYCLE_OVERVIEW_DATA", finalCycleOverviewData);
+          commit("SET_CURRENT_CYCLE_OVERVIEW_DATA", finalCycleOverviewData);
           commit("SET_SELECTED_AREA_BY_PATH", router?.currentRoute);
           commit("SET_CYCLES", cyclesWithProgress);
           commit("SET_SELECTED_CYCLE", displayCycle);
@@ -571,6 +583,8 @@ export default function createAppStore(
           const errorMessage = e?.message || e?.toString() || "Unknown error";
           logger.error.errorSafe("Error on loading Cycle Overview data", e);
           commit("SET_ERROR", errorMessage);
+        } finally {
+          commit("SET_LOADING", false);
         }
       },
 

@@ -50,74 +50,39 @@ export const filterByCycle = (
     return [];
   }
 
-  return items
-    .map((item) => {
-      // Handle different data structures
-      const roadmapItems =
-        item.roadmapItems ||
-        item.initiatives?.flatMap((init) => init.roadmapItems) ||
-        [];
+  // Filter initiatives by cycle - check if any roadmap items have release items in the selected cycle
+  const filteredItems = items.filter((item) => {
+    if (!item.roadmapItems || !Array.isArray(item.roadmapItems)) {
+      return false;
+    }
 
-      const filteredRoadmapItems = roadmapItems
-        .map((roadmapItem) => {
-          const filteredReleaseItems = roadmapItem.releaseItems
-            ? roadmapItem.releaseItems.filter((releaseItem) => {
-                // Check cycleId match
-                if (releaseItem.cycleId && releaseItem.cycleId === cycleId) {
-                  return true;
-                }
-
-                // Check if release item belongs to the selected cycle through sprint
-                if (releaseItem.sprint && releaseItem.sprint.id === cycleId) {
-                  return true;
-                }
-
-                return false;
-              })
-            : [];
-
-          const hasMatchingReleaseItems = filteredReleaseItems.length > 0;
-
-          if (hasMatchingReleaseItems) {
-            return { ...roadmapItem, releaseItems: filteredReleaseItems };
-          }
-
-          return null;
-        })
-        .filter((item) => item !== null);
-
-      // Return filtered item with appropriate structure
-      if (item.roadmapItems) {
-        // Roadmap structure
-        return { ...item, roadmapItems: filteredRoadmapItems };
-      } else if (item.initiatives) {
-        // Cycle-overview structure
-        return {
-          ...item,
-          initiatives: item.initiatives
-            .map((initiative) => ({
-              ...initiative,
-              roadmapItems: filteredRoadmapItems.filter((roadmapItem) =>
-                initiative.roadmapItems.some(
-                  (orig) => orig.id === roadmapItem.id,
-                ),
-              ),
-            }))
-            .filter((initiative) => initiative.roadmapItems.length > 0),
-        };
+    // Check if any roadmap item has release items in the selected cycle
+    const hasMatchingCycle = item.roadmapItems.some((roadmapItem) => {
+      if (
+        !roadmapItem.releaseItems ||
+        !Array.isArray(roadmapItem.releaseItems)
+      ) {
+        return false;
       }
 
-      return item;
-    })
-    .filter((item) => {
-      // Remove items with no matching roadmap items
-      if (item.roadmapItems) {
-        return item.roadmapItems.length > 0;
-      } else if (item.initiatives) {
-        return item.initiatives.length > 0;
-      }
-      return true;
+      // Check if any release item belongs to the selected cycle
+      return roadmapItem.releaseItems.some((releaseItem) => {
+        // Handle both cycle object and cycleId cases
+        if (releaseItem.cycle) {
+          const releaseCycleId = releaseItem.cycle.id || releaseItem.cycleId;
+          const releaseCycleName = releaseItem.cycle.name;
+          return releaseCycleId === cycleId || releaseCycleName === cycleId;
+        } else if (releaseItem.cycleId) {
+          return releaseItem.cycleId === cycleId;
+        }
+        return false;
+      });
     });
+
+    return hasMatchingCycle;
+  });
+
+  return filteredItems;
 };
 
 export default filterByCycle;

@@ -158,6 +158,8 @@ export default class FakeDataGenerator {
           ...item,
           roadmapItemId: roadmapItemKey,
           cycleId: item.sprint?.id || null,
+          // Don't set cycle here - let collect-cycle-data.ts look it up from the cycles array
+          cycle: undefined, // Explicitly remove cycle property
         } as ReleaseItem & { roadmapItemId: string; cycleId: number | null });
       });
     });
@@ -505,7 +507,7 @@ export default class FakeDataGenerator {
       const sprintName = `${startMonthName}-${endMonthName} ${sprintYear}`;
 
       sprints.push({
-        id: (i + 2).toString(), // Start from 1, so: 1, 2, 3, 4
+        id: (i + 2).toString(), // i goes from -1 to 2, so IDs will be 1, 2, 3, 4
         name: sprintName,
         state: state as any,
         startDate: startDate.toISOString().split("T")[0] || "", // YYYY-MM-DD format

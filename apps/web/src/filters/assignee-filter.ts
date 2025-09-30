@@ -20,26 +20,40 @@ interface Item {
  */
 export const filterByAssignees = (
   items: Item[],
-  selectedAssignees: AssigneeFilter[],
+  selectedAssignees: (AssigneeFilter | string)[],
 ): Item[] => {
   if (!selectedAssignees || selectedAssignees.length === 0) {
     return items;
   }
 
-  // Check if "All" is selected
-  const isAllSelected = selectedAssignees.some(
-    (assignee) =>
-      assignee && (assignee.id === "all" || assignee.name === "all"),
-  );
+  // Check if "All" is selected - handle both object and string formats
+  const isAllSelected = selectedAssignees.some((assignee) => {
+    if (typeof assignee === "string") {
+      return assignee === "all";
+    }
+    return (
+      !assignee ||
+      assignee === undefined ||
+      (assignee &&
+        (assignee.id === "all" ||
+          assignee.name === "all" ||
+          assignee.name === "All Assignees"))
+    );
+  });
 
   if (isAllSelected) {
     return items;
   }
 
-  // Filter by selected assignee IDs
+  // Filter by selected assignee IDs - handle both string and object formats
   const selectedAssigneeIds = selectedAssignees
-    .filter((assignee) => assignee && assignee.id)
-    .map((assignee) => String(assignee.id));
+    .map((assignee) => {
+      if (typeof assignee === "string") {
+        return assignee;
+      }
+      return assignee && assignee.id ? String(assignee.id) : null;
+    })
+    .filter((id) => id && id !== "all");
 
   return items
     .map((item) => {
@@ -56,11 +70,21 @@ export const filterByAssignees = (
             ? roadmapItem.releaseItems.filter((releaseItem) => {
                 // Check if release item assignee matches any selected assignee
                 if (releaseItem.assignee) {
-                  const assigneeId =
+                  let assigneeId;
+                  if (typeof releaseItem.assignee === "string") {
+                    assigneeId = releaseItem.assignee;
+                  } else if (
                     typeof releaseItem.assignee === "object" &&
                     "accountId" in releaseItem.assignee
-                      ? releaseItem.assignee.accountId
-                      : (releaseItem.assignee as any).id;
+                  ) {
+                    assigneeId = releaseItem.assignee.accountId;
+                  } else if (
+                    typeof releaseItem.assignee === "object" &&
+                    "id" in releaseItem.assignee
+                  ) {
+                    assigneeId = releaseItem.assignee.id;
+                  }
+
                   if (
                     assigneeId &&
                     selectedAssigneeIds.includes(String(assigneeId))
