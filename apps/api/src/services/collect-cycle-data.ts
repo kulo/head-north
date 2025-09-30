@@ -130,10 +130,16 @@ export default async (
         false,
       roadmapItemId: rawReleaseItem.roadmapItemId, // Foreign key from getReleaseItemsData()
       cycleId: rawReleaseItem.cycleId, // Foreign key
-      cycle: rawReleaseItem.cycle || {
-        id: rawReleaseItem.cycleId,
-        name: `Cycle ${rawReleaseItem.cycleId}`,
-      },
+      cycle: (() => {
+        // Always look up the actual cycle by ID to get the correct name
+        const matchingCycle = cycles.find(
+          (c) => c.id === rawReleaseItem.cycleId,
+        );
+        return {
+          id: rawReleaseItem.cycleId,
+          name: matchingCycle?.name || `Cycle ${rawReleaseItem.cycleId}`,
+        };
+      })(),
       created: matchingIssue?.fields?.created || new Date().toISOString(),
       updated: matchingIssue?.fields?.updated || new Date().toISOString(),
     };
