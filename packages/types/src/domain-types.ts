@@ -40,8 +40,6 @@ export interface Cycle {
   end: string;
   delivery: string;
   state: CycleState;
-  isActive: boolean;
-  description?: string;
 }
 
 // Cycle with calculated progress data - extends core cycle

@@ -19,7 +19,6 @@ export default class CycleProgressData {
     delivery: "1975-01-01",
     end: "1975-01-01",
     state: "future",
-    isActive: false,
     progress: 0,
     progressWithInProgress: 0,
     progressByReleaseItems: 0,

@@ -61,9 +61,6 @@ export default async (
     end: sprint.endDate,
     delivery: sprint.startDate,
     state: sprint.state,
-    progress: 0, // Will be calculated after we have release items
-    isActive: sprint.state === "active",
-    description: null,
   }));
 
   // Get all necessary data in parallel
