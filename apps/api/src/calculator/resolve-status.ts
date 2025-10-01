@@ -27,8 +27,8 @@ export function resolveStatus(
   if (
     issueFields.sprint &&
     sprint &&
-    sprint.start &&
-    new Date(sprint.start) < new Date(issueFields.sprint.startDate)
+    sprint.startDate &&
+    new Date(sprint.startDate) < new Date(issueFields.sprint.startDate)
   ) {
     return (
       jiraConfig?.statusMappings?.[

@@ -79,6 +79,26 @@ describe("FakeDataGenerator", () => {
     expect(initiatives[0]).toEqual({
       id: "init1",
       name: "User Experience",
+      initiativeId: "init1",
+      initiative: "User Experience",
+      progress: 0,
+      progressWithInProgress: 0,
+      progressByReleaseItems: 0,
+      weeks: 0,
+      weeksDone: 0,
+      weeksInProgress: 0,
+      weeksNotToDo: 0,
+      weeksCancelled: 0,
+      weeksPostponed: 0,
+      weeksTodo: 0,
+      releaseItemsCount: 0,
+      releaseItemsDoneCount: 0,
+      percentageNotToDo: 0,
+      startMonth: "",
+      endMonth: "",
+      daysFromStartOfCycle: 0,
+      daysInCycle: 0,
+      currentDayPercentage: 0,
     });
   });
 
@@ -100,10 +120,10 @@ describe("FakeDataGenerator", () => {
     const firstSprint = sprints[0];
     expect(firstSprint.id).toBeDefined();
     expect(firstSprint.name).toBeDefined();
-    // Check if it has either start/end or other date properties
+    // Check if it has either startDate/endDate or other date properties
     expect(
-      firstSprint.start ||
-        firstSprint.startDate ||
+      firstSprint.startDate ||
+        firstSprint.endDate ||
         typeof firstSprint.id !== "undefined",
     ).toBeTruthy();
   });
