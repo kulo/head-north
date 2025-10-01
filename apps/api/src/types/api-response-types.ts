@@ -1,6 +1,8 @@
 // API Response Types
 // Comprehensive types for all API responses and data structures
 
+import type { ISODateString } from "@omega/types";
+
 // ============================================================================
 // Generic API Response Types
 // ============================================================================
@@ -40,8 +42,8 @@ export interface JiraSprint {
   id: string | number;
   name: string;
   state: "active" | "closed" | "future";
-  startDate: string;
-  endDate: string;
+  startDate: ISODateString;
+  endDate: ISODateString;
   originBoardId: number;
   goal?: string;
 }
@@ -77,8 +79,8 @@ export interface JiraIssueFields {
   sprint?: JiraSprint | null;
   teams?: string[];
   areaIds?: string[];
-  created?: string;
-  updated?: string;
+  created?: ISODateString;
+  updated?: ISODateString;
   resolution?: JiraResolution;
   priority?: JiraPriority;
   components?: JiraComponent[];

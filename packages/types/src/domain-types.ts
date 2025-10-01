@@ -32,13 +32,16 @@ export interface Assignee {
 
 export type CycleState = "active" | "closed" | "future" | "completed";
 
+// Strict ISO date string type for YYYY-MM-DD format
+export type ISODateString = `${number}-${number}-${number}`;
+
 // Core cycle - immutable properties
 export interface Cycle {
   id: string;
   name: string;
-  start: string;
-  end: string;
-  delivery: string;
+  start: ISODateString;
+  end: ISODateString;
+  delivery: ISODateString;
   state: CycleState;
 }
 
@@ -118,8 +121,8 @@ export interface RoadmapItem {
   externalRoadmapDescription?: string;
   isPartOfReleaseNarrative?: boolean;
   isReleaseAtRisk?: boolean;
-  startDate?: string;
-  endDate?: string;
+  startDate?: ISODateString;
+  endDate?: ISODateString;
   isCrossCloud?: boolean;
 }
 
