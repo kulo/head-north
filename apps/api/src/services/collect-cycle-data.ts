@@ -166,7 +166,6 @@ export default async (
       name: parsedRoadmapItem.name,
       summary: parsedRoadmapItem.name,
       labels: [],
-      externalRoadmap: parsedRoadmapItem.isExternal ? "Yes" : "No",
       initiative: parsedRoadmapItem.initiative,
       initiativeId: parsedRoadmapItem.initiativeId,
       theme: parsedRoadmapItem.theme,

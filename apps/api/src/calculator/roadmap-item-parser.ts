@@ -84,7 +84,6 @@ export class RoadmapItemParser {
       this.omegaConfig,
     );
     const release = this._collectReleaseInfo(releaseItems);
-    const external = this._collectExternal(project, releaseItems);
     const hasNoPreReleaseAllowedLabel =
       this._hasNoPreReleaseAllowedLabel(project);
 
@@ -95,10 +94,10 @@ export class RoadmapItemParser {
       theme: { name: theme.value },
       projectId,
       area: { name: area.value },
-      isExternal: external.value,
+      isExternal: false,
       releaseItems: this._updateReleaseItemsExternalState(
         projectId,
-        external.value,
+        false,
         hasNoPreReleaseAllowedLabel,
         releaseItems,
       ),
@@ -108,7 +107,6 @@ export class RoadmapItemParser {
         area.validations,
         theme.validations,
         initiative.validations,
-        external.validations,
       ].flat(),
       isPartOfReleaseNarrative: release.isPartOfNarrative,
       isReleaseAtRisk: release.isAtRisk,
@@ -170,19 +168,6 @@ export class RoadmapItemParser {
     });
   }
 
-  private _collectExternal(
-    project: RoadmapItem,
-    releaseItems: ReleaseItem[],
-  ): { value: boolean; validations: any[] } {
-    const value = this._isExternal(project);
-    const validations = [
-      ...this._validateExternal(project),
-      ...this._validateExternalRoadmapDescription(project),
-      ...this._validateExternalReleaseStages(project, releaseItems),
-    ];
-    return { value, validations };
-  }
-
   private _parseProjectName(summary: string): string {
     const endOfPrefix = !summary.startsWith("[") ? 0 : summary.indexOf("]") + 1;
     const beginningOfSuffix = summary.lastIndexOf("[");
@@ -221,50 +206,9 @@ export class RoadmapItemParser {
     };
   }
 
-  private _isExternal(project: RoadmapItem): boolean {
-    return project.externalRoadmap === "Yes";
-  }
-
   private _hasNoPreReleaseAllowedLabel(project: RoadmapItem): boolean {
     const noPreReleaseAllowedLabel =
       this.omegaConfig.getNoPrereleaseAllowedLabel();
     return project.labels?.includes(noPreReleaseAllowedLabel) || false;
-  }
-
-  private _validateExternalRoadmapDescription(project: RoadmapItem): any[] {
-    const hasExternalRoadmapDescription =
-      project.externalRoadmapDescription !== null;
-    if (this._isExternal(project) && !hasExternalRoadmapDescription) {
-      return [
-        this.validationDictionary.roadmapItem.missingExternalRoadmapDescription,
-      ];
-    }
-
-    return [];
-  }
-
-  private _validateExternal(project: RoadmapItem): any[] {
-    if (!project.externalRoadmap) {
-      return [this.validationDictionary.roadmapItem.missingExternalRoadmap];
-    } else {
-      return [];
-    }
-  }
-
-  private _validateExternalReleaseStages(
-    project: RoadmapItem,
-    releaseItems: ReleaseItem[],
-  ): any[] {
-    const externalStages = this.omegaConfig.getStageCategories().externalStages;
-    const hasReleaseItemWithStage = releaseItems.some((releaseItem) =>
-      externalStages.includes(releaseItem.stage),
-    );
-    if (!this._isExternal(project) && hasReleaseItemWithStage) {
-      return [
-        this.validationDictionary.roadmapItem.iternalWithStagedReleaseItem,
-      ];
-    }
-
-    return [];
   }
 }

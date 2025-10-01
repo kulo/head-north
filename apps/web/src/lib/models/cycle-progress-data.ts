@@ -132,7 +132,6 @@ export default class CycleProgressData {
             summary: roadmapItem.summary || "",
             area: roadmapItem.area,
             labels: roadmapItem.labels || [],
-            externalRoadmap: roadmapItem.externalRoadmap || "",
             owner: roadmapItem.crew,
             ticketId: roadmapItem.projectId,
             validations: roadmapItem.validations,

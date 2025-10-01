@@ -87,7 +87,6 @@ export interface JiraIssueFields {
   assignee: JiraUser | null;
   reporter?: JiraUser;
   effort?: number;
-  externalRoadmap?: string;
   labels: string[];
   parent?: JiraParent;
   issuetype: JiraIssueType;

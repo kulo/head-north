@@ -48,15 +48,13 @@ class JiraAPI {
       boardId: jiraConfig?.connection?.boardId || 0,
       maxResults: jiraConfig?.limits?.maxResults || 100,
       jql: 'issuetype = "Roadmap Item"',
-      fields: ["summary", "labels", "customfield_10000", "customfield_10001"], // Using generic field names for now
+      fields: ["summary", "labels"], // Using generic field names for now
     });
 
     const roadmapItemData = response.issues.map((issue) => ({
       [issue.key as string]: {
         summary: issue.fields?.summary || "",
         labels: issue.fields?.labels || [],
-        externalRoadmap: get(issue, "fields.customfield_10000.value"),
-        externalRoadmapDescription: get(issue, "fields.customfield_10001"),
       },
     }));
 
@@ -205,15 +203,9 @@ class JiraAPI {
         return {
           ...issue,
           fields: {
-            ...omit(issue.fields, ["customfield_10002", "customfield_10000"]),
+            ...omit(issue.fields, ["customfield_10002"]),
             ...(issue.fields.customfield_10002 !== undefined && {
               effort: issue.fields.customfield_10002,
-            }),
-            ...(get(issue, "fields.customfield_10000.value") && {
-              externalRoadmap: get(
-                issue,
-                "fields.customfield_10000.value",
-              ) as string,
             }),
             assignee: issue.fields.assignee
               ? {

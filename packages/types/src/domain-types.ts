@@ -105,8 +105,6 @@ export interface RoadmapItem {
   validations?: ValidationItem[];
   releaseItems?: ReleaseItem[];
   labels: string[];
-  externalRoadmap: string;
-  externalRoadmapDescription?: string;
   isPartOfReleaseNarrative?: boolean;
   isReleaseAtRisk?: boolean;
   startDate?: ISODateString;

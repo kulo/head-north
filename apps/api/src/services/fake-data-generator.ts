@@ -131,7 +131,6 @@ export default class FakeDataGenerator {
             },
             assignee: assignee,
             effort: Math.floor(Math.random() * 8) + 1,
-            externalRoadmap: "Yes", // This needs to be 'Yes' for isExternal to return true
             labels: roadmapItem.labels, // Use the roadmap item's labels which now include proper prefixes
             parent: { key: roadmapItemKey },
             issuetype: { name: issueType },
@@ -211,7 +210,6 @@ export default class FakeDataGenerator {
               assignee: item.assignee || null,
               labels: roadmapItem.labels || [],
               parent: { key: roadmapItemKey },
-              externalRoadmap: "Yes",
               issuetype: { name: "Release Item" },
               area: roadmapItem.area,
               initiativeId: roadmapItem.initiativeId || "",
@@ -399,8 +397,6 @@ export default class FakeDataGenerator {
             `team:${selectedTeam}`,
             `theme:${selectedTheme}`,
           ],
-          externalRoadmap: "Yes",
-          externalRoadmapDescription: `${initiative.name} - roadmap item ${roadmapItemCounter}`,
           area: area.id,
           initiativeId: initiative.id,
           isExternal: true,
@@ -442,8 +438,6 @@ export default class FakeDataGenerator {
           `team:${selectedTeam}`,
           `theme:${selectedTheme}`,
         ],
-        externalRoadmap: "Yes",
-        externalRoadmapDescription: `Unassigned roadmap item ${roadmapItemCounter}`,
         area: area.id,
         initiativeId: null, // No initiative assigned
         isExternal: true,

@@ -193,15 +193,7 @@ export class ReleaseItemParser {
   }
 
   private _isExternalRoadmap(issue: JiraIssue): boolean {
-    return (
-      this._isExternal(issue) &&
-      !issue.fields.summary.includes("(Internal)") &&
-      !issue.fields.summary.includes("(S0)")
-    );
-  }
-
-  private _isExternal(issue: JiraIssue): boolean {
-    return issue.fields.externalRoadmap === "Yes";
+    return false;
   }
 
   private _isPartOfReleaseNarrative(issue: JiraIssue): boolean {
