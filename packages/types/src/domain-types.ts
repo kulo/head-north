@@ -174,13 +174,3 @@ export interface ValidationItem {
   status: string;
   description?: string;
 }
-
-// ============================================================================
-// Filter Types
-// ============================================================================
-
-export interface InitiativeFilter {
-  id: string;
-  name: string;
-  value: string;
-}

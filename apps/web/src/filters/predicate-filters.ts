@@ -3,7 +3,8 @@
  * Provides composable predicate functions that can be combined
  */
 
-import type { ReleaseItem, InitiativeFilter } from "@omega/types";
+import type { ReleaseItem } from "@omega/types";
+import type { InitiativeFilter } from "../types";
 import type { StageFilter, CycleFilter, FilterConfig } from "../types";
 
 /**
