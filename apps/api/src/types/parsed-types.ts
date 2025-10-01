@@ -1,7 +1,7 @@
 // Parsed/Processed DTOs for API data transformation
 // These are temporary data structures used only during parsing from Jira to Domain objects
 
-import type { ReleaseItem, ValidationItem } from "@omega/types";
+import type { ReleaseItem, ValidationItem, AreaId } from "@omega/types";
 
 // ============================================================================
 // Parsed Roadmap Item DTO
@@ -32,7 +32,7 @@ export interface ParsedReleaseItem {
   effort: number;
   projectId: string | null;
   name: string;
-  areaIds: string[];
+  areaIds: AreaId[];
   teams: string[];
   status: string;
   url: string;

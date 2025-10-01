@@ -9,7 +9,7 @@ import type {
   Cycle,
   ReleaseItem,
   RoadmapItem,
-  Assignee,
+  Person,
   Area,
   Team,
   Initiative,
@@ -34,7 +34,7 @@ export default async (
   roadmapItems: RoadmapItem[];
   releaseItems: ReleaseItem[];
   cycles: Cycle[];
-  assignees: Assignee[];
+  assignees: Person[];
   areas: Record<string, Area>;
   initiatives: Initiative[];
   stages: Stage[];
@@ -256,7 +256,7 @@ export default async (
 /**
  * Extract assignees from issues
  */
-const getAssignees = (issues: JiraIssue[]): Assignee[] => {
+const getAssignees = (issues: JiraIssue[]): Person[] => {
   return [
     {
       displayName: "All Assignees",

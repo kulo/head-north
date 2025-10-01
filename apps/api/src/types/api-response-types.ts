@@ -1,7 +1,14 @@
 // API Response Types
 // Comprehensive types for all API responses and data structures
 
-import type { ISODateString } from "@omega/types";
+import type {
+  ISODateString,
+  AreaId,
+  TeamId,
+  Stage,
+  Team,
+  Person,
+} from "@omega/types";
 
 // ============================================================================
 // Generic API Response Types
@@ -78,7 +85,7 @@ export interface JiraIssueFields {
   url?: string;
   sprint?: JiraSprint | null;
   teams?: string[];
-  areaIds?: string[];
+  areaIds?: AreaId[];
   created?: ISODateString;
   updated?: ISODateString;
   resolution?: JiraResolution;
@@ -251,29 +258,9 @@ export interface RouteContext {
 // Stage and Team Types
 // ============================================================================
 
-export interface Stage {
-  id: string;
-  name: string;
-  description?: string;
-  category: "internal" | "external";
-  order: number;
-}
+// Stage interface is now imported from @omega/types
 
-export interface Team {
-  id: string;
-  name: string;
-  description: string;
-  areaId?: string;
-  areaName?: string;
-  members?: TeamMember[];
-}
-
-export interface TeamMember {
-  accountId: string;
-  displayName: string;
-  role?: string;
-  active: boolean;
-}
+// Team and Person interfaces are now imported from @omega/types
 
 // ============================================================================
 // Collection and Processing Types

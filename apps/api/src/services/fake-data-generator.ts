@@ -1,6 +1,6 @@
 import type { OmegaConfig } from "@omega/config";
 import type {
-  Assignee,
+  Person,
   Area,
   Team,
   Initiative,
@@ -13,7 +13,7 @@ import { logger } from "@omega/utils";
 
 export default class FakeDataGenerator {
   private omegaConfig: OmegaConfig;
-  private assignees: Assignee[];
+  private assignees: Person[];
   private areas: Area[];
   private initiatives: Initiative[];
   private roadmapItems: Record<string, RoadmapItem>;
@@ -315,7 +315,7 @@ export default class FakeDataGenerator {
     return statusMap[statusName] || "10001";
   }
 
-  getAssignees(): Assignee[] {
+  getAssignees(): Person[] {
     return this.assignees;
   }
 
@@ -531,41 +531,34 @@ export default class FakeDataGenerator {
         {
           id: "platform-frontend",
           name: "Frontend Team",
-          description: "Frontend development team",
         },
         {
           id: "platform-backend",
           name: "Backend Team",
-          description: "Backend services team",
         },
         {
           id: "platform-devops",
           name: "DevOps Team",
-          description: "Infrastructure and deployment team",
         },
       ],
       resilience: [
         {
           id: "resilience-security",
           name: "Security Team",
-          description: "Security and compliance team",
         },
         {
           id: "resilience-monitoring",
           name: "Monitoring Team",
-          description: "System monitoring and alerting team",
         },
       ],
       sustainability: [
         {
           id: "sustainability-green",
           name: "Green Tech Team",
-          description: "Sustainable technology initiatives",
         },
         {
           id: "sustainability-metrics",
           name: "Metrics Team",
-          description: "Environmental impact measurement team",
         },
       ],
     };
@@ -575,12 +568,10 @@ export default class FakeDataGenerator {
         {
           id: `${areaId}-team1`,
           name: `${areaName} Team 1`,
-          description: `Primary team for ${areaName}`,
         },
         {
           id: `${areaId}-team2`,
           name: `${areaName} Team 2`,
-          description: `Secondary team for ${areaName}`,
         },
       ]
     );

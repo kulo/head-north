@@ -4,24 +4,23 @@
 // Organisation Related Types
 // ============================================================================
 
+// Type aliases for better domain clarity
+export type AreaId = string;
+export type TeamId = string;
+
 export interface Area {
-  id: string;
+  id: AreaId;
   name: string;
-  description?: string | null;
-  initiatives?: string[];
-  progress?: number;
   teams: Team[];
 }
 
 export interface Team {
-  id: string;
+  id: TeamId;
   name: string;
-  description: string;
-  areaId?: string;
-  areaName?: string;
+  areaId: AreaId;
 }
 
-export interface Assignee {
+export interface Person {
   accountId: string;
   displayName: string;
 }
@@ -45,8 +44,8 @@ export interface Cycle {
   state: CycleState;
 }
 
-// Cycle with calculated progress data - extends core cycle
-export interface CycleWithProgress extends Cycle {
+// Progress data that can be shared between cycles and initiatives
+export interface ProgressWithinCycle {
   progress: number;
   progressWithInProgress: number;
   progressByReleaseItems: number;
@@ -67,30 +66,15 @@ export interface CycleWithProgress extends Cycle {
   currentDayPercentage: number;
 }
 
-export interface Initiative {
+// Cycle with calculated progress data - extends core cycle
+export interface CycleWithProgress extends Cycle, ProgressWithinCycle {}
+
+export interface Initiative extends ProgressWithinCycle {
   id: string;
   name: string;
   initiativeId: string;
   initiative: string;
   roadmapItems?: RoadmapItem[];
-  weeks?: number;
-  weeksDone?: number;
-  weeksInProgress?: number;
-  weeksNotToDo?: number;
-  weeksCancelled?: number;
-  weeksPostponed?: number;
-  weeksTodo?: number;
-  progress?: number;
-  progressWithInProgress?: number;
-  progressByReleaseItems?: number;
-  releaseItemsCount?: number;
-  releaseItemsDoneCount?: number;
-  percentageNotToDo?: number;
-  startMonth?: string;
-  endMonth?: string;
-  daysFromStartOfCycle?: number;
-  daysInCycle?: number;
-  currentDayPercentage?: number;
 }
 
 export interface Stage {
@@ -132,13 +116,13 @@ export interface ReleaseItem {
   effort: number;
   projectId: string | null;
   name: string;
-  areaIds: string[];
+  areaIds: AreaId[];
   teams: string[];
   status: string;
   url: string;
   isExternal: boolean;
   stage: string;
-  assignee: Assignee | Record<string, unknown>;
+  assignee: Person | Record<string, unknown>;
   validations: ValidationItem[];
   isPartOfReleaseNarrative: boolean;
   isReleaseAtRisk: boolean;
@@ -164,7 +148,7 @@ export interface RawData {
   roadmapItems: Record<string, unknown>;
   releaseItems: Record<string, unknown>[];
   issues: Record<string, unknown>[]; // Jira issues - generic to avoid circular deps
-  assignees: Assignee[];
+  assignees: Person[];
   areas: Record<string, Area>;
   initiatives: Initiative[];
   stages: string[];
@@ -177,7 +161,7 @@ export interface CycleData {
   releaseItems: ReleaseItem[];
   areas: Area[];
   initiatives: Initiative[];
-  assignees: Assignee[];
+  assignees: Person[];
   stages: string[];
 }
 

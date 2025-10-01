@@ -12,7 +12,7 @@ import type {
   Cycle,
   CycleWithProgress,
   Initiative,
-  Assignee,
+  Person,
   Area,
   Stage,
   RawData,
@@ -302,7 +302,6 @@ class CycleDataService {
           allTeams.push({
             ...team,
             areaId: areaData.id,
-            areaName: areaData.name || areaData.id,
           });
         });
       }
@@ -328,7 +327,6 @@ class CycleDataService {
     return area.teams.map((team) => ({
       ...team,
       areaId,
-      areaName: area.name || areaId,
     }));
   }
 
