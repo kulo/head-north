@@ -68,13 +68,18 @@ export interface ProgressWithinCycle {
 // Cycle with calculated progress data - extends core cycle
 export interface CycleWithProgress extends Cycle, ProgressWithinCycle {}
 
-export interface Initiative extends ProgressWithinCycle {
+export interface Initiative {
   id: string;
   name: string;
   initiativeId: string;
   initiative: string;
   roadmapItems?: RoadmapItem[];
 }
+
+// Initiative with calculated progress data - extends base initiative
+export interface InitiativeWithProgress
+  extends Initiative,
+    ProgressWithinCycle {}
 
 export interface Stage {
   id: string;

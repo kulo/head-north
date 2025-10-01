@@ -3,6 +3,7 @@ import type {
   Cycle,
   CycleWithProgress,
   Initiative,
+  InitiativeWithProgress,
   RoadmapItem,
 } from "@omega/types";
 
@@ -39,7 +40,7 @@ export default class CycleProgressData {
     currentDayPercentage: 0,
   };
 
-  initiatives: Initiative[] = [];
+  initiatives: InitiativeWithProgress[] = [];
 
   constructor({ cycle, initiatives }: CycleProgressDataInput = {}) {
     if (cycle) {
@@ -65,7 +66,29 @@ export default class CycleProgressData {
         currentDayPercentage: 0,
       };
     }
-    if (initiatives) this.initiatives = initiatives;
+    if (initiatives) {
+      this.initiatives = initiatives.map((initiative) => ({
+        ...initiative,
+        progress: 0,
+        progressWithInProgress: 0,
+        progressByReleaseItems: 0,
+        weeks: 0,
+        weeksDone: 0,
+        weeksInProgress: 0,
+        weeksNotToDo: 0,
+        weeksCancelled: 0,
+        weeksPostponed: 0,
+        weeksTodo: 0,
+        percentageNotToDo: 0,
+        releaseItemsCount: 0,
+        releaseItemsDoneCount: 0,
+        startMonth: "",
+        endMonth: "",
+        daysFromStartOfCycle: 0,
+        daysInCycle: 0,
+        currentDayPercentage: 0,
+      }));
+    }
   }
 
   applyData(data: {
@@ -75,11 +98,12 @@ export default class CycleProgressData {
     Object.assign(this.cycle, data.cycle);
 
     this.initiatives = data.initiatives.map((initiative) => {
-      let preparedInitiative = {
+      let preparedInitiative: InitiativeWithProgress = {
         id: initiative.id || initiative.initiativeId || initiative.initiative,
         name: initiative.initiative,
         initiative: initiative.initiative,
         initiativeId: initiative.initiativeId,
+        roadmapItems: [],
         releaseItemsCount: 0,
         releaseItemsDoneCount: 0,
         weeks: 0,
@@ -93,14 +117,22 @@ export default class CycleProgressData {
         progressWithInProgress: 0,
         progressByReleaseItems: 0,
         percentageNotToDo: 0,
-        roadmapItems: [],
+        startMonth: "",
+        endMonth: "",
+        daysFromStartOfCycle: 0,
+        daysInCycle: 0,
+        currentDayPercentage: 0,
       };
 
       preparedInitiative.roadmapItems = initiative.roadmapItems.map(
         (roadmapItem) => {
           let preparedRoadmapItem = {
-            area: roadmapItem.area,
+            id: roadmapItem.id,
             name: roadmapItem.name,
+            summary: roadmapItem.summary || "",
+            area: roadmapItem.area,
+            labels: roadmapItem.labels || [],
+            externalRoadmap: roadmapItem.externalRoadmap || "",
             owner: roadmapItem.crew,
             ticketId: roadmapItem.projectId,
             validations: roadmapItem.validations,
@@ -110,7 +142,7 @@ export default class CycleProgressData {
                 .map((releaseItem) => releaseItem.validations)
                 .flat(),
             ].flat(),
-            startDate: roadmapItem.startDate || "",
+            startDate: roadmapItem.startDate,
             releaseItemsCount: 0,
             releaseItemsDoneCount: 0,
             weeks: 0,

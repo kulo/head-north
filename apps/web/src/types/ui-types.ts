@@ -62,12 +62,12 @@ export interface RoadmapData {
   orderedCycles: Cycle[];
   roadmapItems: RoadmapItem[];
   activeCycle: Cycle | null;
-  initiatives?: Initiative[];
+  initiatives?: InitiativeWithProgress[];
 }
 
 export interface CycleOverviewData {
   cycle: Cycle;
-  initiatives: Initiative[];
+  initiatives: InitiativeWithProgress[];
 }
 
 export interface StoreState {
@@ -77,16 +77,16 @@ export interface StoreState {
   cycles: Cycle[];
   cycleOverviewData: CycleOverviewData | null;
   currentCycleOverviewData: CycleOverviewData | null;
-  initiatives: Initiative[];
-  assignees: Assignee[];
+  initiatives: InitiativeWithProgress[];
+  assignees: Person[];
   areas: Area[];
   stages: Stage[];
   pages: {
     all: Page[];
     current: Page | null;
   };
-  selectedInitiatives: Initiative[];
-  selectedAssignees: Assignee[];
+  selectedInitiatives: InitiativeWithProgress[];
+  selectedAssignees: Person[];
   selectedArea: string | null;
   selectedCycle: Cycle | null;
   selectedStages: Stage[];
@@ -96,9 +96,9 @@ export interface StoreState {
 
 export interface Filters {
   area?: string;
-  initiatives?: Initiative[];
+  initiatives?: InitiativeWithProgress[];
   stages?: Stage[];
-  assignees?: Assignee[];
+  assignees?: Person[];
   cycle?: Cycle;
 }
 
@@ -107,7 +107,8 @@ import type {
   Cycle,
   RoadmapItem,
   Initiative,
-  Assignee,
+  InitiativeWithProgress,
+  Person,
   Area,
   Stage,
 } from "@omega/types";
