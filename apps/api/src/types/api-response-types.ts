@@ -9,6 +9,7 @@ import type {
   Team,
   Person,
 } from "@omega/types";
+import type { ApiError, ValidationError, ProcessingError } from "./error-types";
 
 // ============================================================================
 // Generic API Response Types
@@ -21,12 +22,7 @@ export interface ApiResponse<T = unknown> {
   metadata?: ResponseMetadata;
 }
 
-export interface ApiError {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
-  stack?: string;
-}
+// ApiError is now imported from error-types.ts
 
 export interface ResponseMetadata {
   timestamp: string;
@@ -67,6 +63,21 @@ export interface JiraIssue {
   key: string;
   fields: JiraIssueFields;
   expand?: string;
+  // Custom properties added during parsing
+  roadmapItemId?: string;
+  cycleId?: string | number;
+  effort?: number;
+  summary?: string;
+  areaIds?: AreaId[];
+  teams?: string[];
+  status?: string;
+  url?: string;
+  isExternal?: boolean;
+  stage?: string;
+  assignee?: Person | Record<string, unknown>;
+  validations?: any[];
+  isPartOfReleaseNarrative?: boolean;
+  isReleaseAtRisk?: boolean;
 }
 
 export interface JiraIssueFields {
@@ -93,6 +104,8 @@ export interface JiraIssueFields {
   components?: JiraComponent[];
   fixVersions?: JiraVersion[];
   customfield_10020?: JiraSprint[]; // Sprint field
+  customfield_10002?: number; // Effort field
+  customfield_10000?: { value: string }; // External roadmap field
 }
 
 export interface JiraStatus {
@@ -170,12 +183,7 @@ export interface ValidationResult {
   warnings: ValidationWarning[];
 }
 
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
-  value?: unknown;
-}
+// ValidationError is now imported from error-types.ts
 
 export interface ValidationWarning {
   field: string;
@@ -192,13 +200,7 @@ export interface ProcessingResult<T = unknown> {
   metadata?: ProcessingMetadata;
 }
 
-export interface ProcessingError {
-  type: string;
-  message: string;
-  field?: string;
-  value?: unknown;
-  stack?: string;
-}
+// ProcessingError is now imported from error-types.ts
 
 export interface ProcessingWarning {
   type: string;
@@ -260,7 +262,8 @@ export interface RouteContext {
 
 // Stage interface is now imported from @omega/types
 
-// Team and Person interfaces are now imported from @omega/types
+// Re-export Team and Stage from @omega/types for backward compatibility
+export type { Team, Stage } from "@omega/types";
 
 // ============================================================================
 // Collection and Processing Types

@@ -92,7 +92,7 @@ export default async (
       .find((issue: JiraIssue) => issue && issue.key === rawReleaseItem.id);
 
     // Use existing ReleaseItemParser if we have an issue, otherwise create basic data
-    let parsedReleaseItem: ReleaseItem;
+    let parsedReleaseItem: ReleaseItem | undefined;
     if (matchingIssue) {
       const cycle = cycles.find((c) => c.id === rawReleaseItem.cycleId);
       if (cycle) {
@@ -103,18 +103,19 @@ export default async (
 
     // Create flat release item with foreign keys
     const releaseItem: ReleaseItem = {
+      id: rawReleaseItem.id,
       ticketId: rawReleaseItem.id,
       effort: parsedReleaseItem?.effort || rawReleaseItem.effort || 0,
       projectId: parsedReleaseItem?.projectId || null,
-      name: parsedReleaseItem?.name || rawReleaseItem.summary,
+      name: parsedReleaseItem?.name || rawReleaseItem.summary || "",
       areaIds: parsedReleaseItem?.areaIds || rawReleaseItem.areaIds || [],
       teams: parsedReleaseItem?.teams || rawReleaseItem.teams || [],
-      status: parsedReleaseItem?.status || rawReleaseItem.status,
-      url: parsedReleaseItem?.url || rawReleaseItem.url,
+      status: parsedReleaseItem?.status || rawReleaseItem.status || "",
+      url: parsedReleaseItem?.url || rawReleaseItem.url || "",
       isExternal:
         parsedReleaseItem?.isExternal || rawReleaseItem.isExternal || false,
-      stage: parsedReleaseItem?.stage || rawReleaseItem.stage,
-      assignee: parsedReleaseItem?.assignee || rawReleaseItem.assignee,
+      stage: parsedReleaseItem?.stage || rawReleaseItem.stage || "",
+      assignee: parsedReleaseItem?.assignee || rawReleaseItem.assignee || {},
       validations:
         parsedReleaseItem?.validations || rawReleaseItem.validations || [],
       isPartOfReleaseNarrative:
@@ -126,14 +127,14 @@ export default async (
         rawReleaseItem.isReleaseAtRisk ||
         false,
       roadmapItemId: rawReleaseItem.roadmapItemId, // Foreign key from getReleaseItemsData()
-      cycleId: rawReleaseItem.cycleId, // Foreign key
+      cycleId: rawReleaseItem.cycleId?.toString() || "", // Foreign key
       cycle: (() => {
         // Always look up the actual cycle by ID to get the correct name
         const matchingCycle = cycles.find(
-          (c) => c.id === rawReleaseItem.cycleId,
+          (c) => c.id === rawReleaseItem.cycleId?.toString(),
         );
         return {
-          id: rawReleaseItem.cycleId,
+          id: rawReleaseItem.cycleId?.toString() || "",
           name: matchingCycle?.name || `Cycle ${rawReleaseItem.cycleId}`,
         };
       })(),
@@ -169,7 +170,7 @@ export default async (
       initiative: parsedRoadmapItem.initiative,
       initiativeId: parsedRoadmapItem.initiativeId,
       theme: parsedRoadmapItem.theme,
-      area: parsedRoadmapItem.area,
+      area: parsedRoadmapItem.area as unknown as Area,
       isExternal: parsedRoadmapItem.isExternal,
       crew: parsedRoadmapItem.crew,
       url: parsedRoadmapItem.url,
@@ -247,6 +248,26 @@ export default async (
     initiatives: Object.entries(initiatives).map(([id, name]) => ({
       id,
       name: name as string,
+      initiativeId: id,
+      initiative: name as string,
+      progress: 0,
+      progressWithInProgress: 0,
+      progressByReleaseItems: 0,
+      weeks: 0,
+      weeksDone: 0,
+      weeksInProgress: 0,
+      weeksNotToDo: 0,
+      weeksCancelled: 0,
+      weeksPostponed: 0,
+      weeksTodo: 0,
+      releaseItemsCount: 0,
+      releaseItemsDoneCount: 0,
+      percentageNotToDo: 0,
+      startMonth: "",
+      endMonth: "",
+      daysFromStartOfCycle: 0,
+      daysInCycle: 0,
+      currentDayPercentage: 0,
     })),
     stages,
     teams,
@@ -266,10 +287,14 @@ const getAssignees = (issues: JiraIssue[]): Person[] => {
     uniqBy(
       issues
         .filter((issue) => issue.fields.assignee !== null)
-        .map((issue) => issue.fields.assignee),
+        .map((issue) => issue.fields.assignee!)
+        .map((assignee) => ({
+          displayName: assignee.displayName,
+          accountId: assignee.accountId,
+        })),
       "accountId",
-    ).sort((assignee1, assignee2) =>
-      assignee1.displayName > assignee2.displayName ? 1 : -1,
-    ),
+    ).sort((assignee1, assignee2) => {
+      return assignee1.displayName > assignee2.displayName ? 1 : -1;
+    }),
   );
 };

@@ -44,6 +44,26 @@ export default class FakeDataGenerator {
     this.initiatives = Object.entries(initiativesConfig).map(([id, name]) => ({
       id,
       name,
+      initiativeId: id,
+      initiative: name,
+      progress: 0,
+      progressWithInProgress: 0,
+      progressByReleaseItems: 0,
+      weeks: 0,
+      weeksDone: 0,
+      weeksInProgress: 0,
+      weeksNotToDo: 0,
+      weeksCancelled: 0,
+      weeksPostponed: 0,
+      weeksTodo: 0,
+      releaseItemsCount: 0,
+      releaseItemsDoneCount: 0,
+      percentageNotToDo: 0,
+      startMonth: "",
+      endMonth: "",
+      daysFromStartOfCycle: 0,
+      daysInCycle: 0,
+      currentDayPercentage: 0,
     }));
 
     // Generate roadmap items dynamically based on areas and initiatives from config
@@ -132,9 +152,6 @@ export default class FakeDataGenerator {
             teams: [assignee.accountId],
             areaIds: [roadmapItem.area],
           },
-          parent: roadmapItemKey,
-          created: new Date().toISOString(),
-          updated: new Date().toISOString(),
         });
       });
     });
@@ -154,12 +171,12 @@ export default class FakeDataGenerator {
       const releaseItems = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
       // Add roadmapItemId foreign key to each release item
       releaseItems.forEach((item) => {
+        const { cycle, ...itemWithoutCycle } = item;
         allReleaseItems.push({
-          ...item,
+          ...itemWithoutCycle,
           roadmapItemId: roadmapItemKey,
           cycleId: item.sprint?.id || null,
           // Don't set cycle here - let collect-cycle-data.ts look it up from the cycles array
-          cycle: undefined, // Explicitly remove cycle property
         } as ReleaseItem & { roadmapItemId: string; cycleId: number | null });
       });
     });
@@ -267,11 +284,16 @@ export default class FakeDataGenerator {
           : null;
 
       releaseItems.push({
+        id: `${roadmapItemKey}-RELEASE-${i + 1}`,
         ticketId: `${roadmapItemKey}-RELEASE-${i + 1}`,
         effort: Math.floor(Math.random() * 8) + 1,
         projectId: roadmapItemKey,
         name: `${roadmapItem.summary} - Release Item ${i + 1} - (${releaseStage})`,
-        areaIds: [roadmapItem.area || ""],
+        areaIds: [
+          typeof roadmapItem.area === "string"
+            ? roadmapItem.area
+            : roadmapItem.area?.id || "",
+        ],
         teams: [assignee.accountId],
         status: status,
         url: `https://example.com/browse/${roadmapItemKey}-RELEASE-${i + 1}`,
@@ -286,11 +308,8 @@ export default class FakeDataGenerator {
         parent: roadmapItemKey,
         sprint: sprint
           ? {
-              id: sprint.id,
+              id: sprint.id.toString(),
               name: sprint.name,
-              startDate: sprint.startDate,
-              endDate: sprint.endDate,
-              state: sprint.state,
             }
           : null,
       });
@@ -510,8 +529,12 @@ export default class FakeDataGenerator {
         id: (i + 2).toString(), // i goes from -1 to 2, so IDs will be 1, 2, 3, 4
         name: sprintName,
         state: state as any,
-        startDate: startDate.toISOString().split("T")[0] || "", // YYYY-MM-DD format
-        endDate: endDate.toISOString().split("T")[0] || "", // YYYY-MM-DD format
+        startDate: startDate
+          .toISOString()
+          .split("T")[0] as `${number}-${number}-${number}`, // YYYY-MM-DD format
+        endDate: endDate
+          .toISOString()
+          .split("T")[0] as `${number}-${number}-${number}`, // YYYY-MM-DD format
       });
     }
 
@@ -531,34 +554,41 @@ export default class FakeDataGenerator {
         {
           id: "platform-frontend",
           name: "Frontend Team",
+          areaId: "platform",
         },
         {
           id: "platform-backend",
           name: "Backend Team",
+          areaId: "platform",
         },
         {
           id: "platform-devops",
           name: "DevOps Team",
+          areaId: "platform",
         },
       ],
       resilience: [
         {
           id: "resilience-security",
           name: "Security Team",
+          areaId: "resilience",
         },
         {
           id: "resilience-monitoring",
           name: "Monitoring Team",
+          areaId: "resilience",
         },
       ],
       sustainability: [
         {
           id: "sustainability-green",
           name: "Green Tech Team",
+          areaId: "sustainability",
         },
         {
           id: "sustainability-metrics",
           name: "Metrics Team",
+          areaId: "sustainability",
         },
       ],
     };
@@ -568,10 +598,12 @@ export default class FakeDataGenerator {
         {
           id: `${areaId}-team1`,
           name: `${areaName} Team 1`,
+          areaId: areaId,
         },
         {
           id: `${areaId}-team2`,
           name: `${areaName} Team 2`,
+          areaId: areaId,
         },
       ]
     );

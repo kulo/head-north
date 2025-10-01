@@ -25,6 +25,21 @@ export interface Person {
   displayName: string;
 }
 
+export interface Sprint {
+  id: string | number;
+  name: string;
+  startDate: ISODateString;
+  endDate: ISODateString;
+  state: "active" | "closed" | "future";
+}
+
+export interface JiraIssue {
+  id: string;
+  key: string;
+  fields: Record<string, unknown>;
+  expand?: string;
+}
+
 // ============================================================================
 // Cycle Types
 // ============================================================================
@@ -145,13 +160,13 @@ export interface ReleaseItem {
 export interface RawData {
   cycles: Cycle[];
   sprints: Record<string, unknown>[]; // Jira sprints - generic to avoid circular deps
-  roadmapItems: Record<string, unknown>;
-  releaseItems: Record<string, unknown>[];
+  roadmapItems: RoadmapItem[];
+  releaseItems: ReleaseItem[];
   issues: Record<string, unknown>[]; // Jira issues - generic to avoid circular deps
   assignees: Person[];
   areas: Record<string, Area>;
   initiatives: Initiative[];
-  stages: string[];
+  stages: Stage[];
   teams?: Team[];
 }
 

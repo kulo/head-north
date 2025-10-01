@@ -32,7 +32,7 @@ function registerApiRoutes(
 
     if (handlerFunction) {
       const fullPath = prefix + route.path;
-      router[route.method.toLowerCase()](fullPath, handlerFunction);
+      (router as any)[route.method.toLowerCase()](fullPath, handlerFunction);
 
       if (logRoutes) {
         logger.default.info("Route registered", {
@@ -74,7 +74,7 @@ function getRegisteredRoutes(
   return router.stack.map((layer: RouterLayer) => ({
     method: layer.methods.join(", ").toUpperCase(),
     path: layer.path,
-    name: layer.name,
+    name: layer.name || "unnamed",
   }));
 }
 

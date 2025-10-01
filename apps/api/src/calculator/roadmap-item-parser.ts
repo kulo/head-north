@@ -35,12 +35,12 @@ export class RoadmapItemParser {
         ticket_ids: ticketIds,
       });
       return {
-        initiative: null,
+        initiative: {},
         initiativeId: null,
         name: "",
-        theme: null,
+        theme: {},
         projectId,
-        area: null,
+        area: {},
         isExternal: false,
         releaseItems,
         crew,
@@ -60,12 +60,12 @@ export class RoadmapItemParser {
         ticket_ids: ticketIds,
       });
       return {
-        initiative: null,
+        initiative: {},
         initiativeId: null,
         name: "",
-        theme: null,
+        theme: {},
         projectId,
-        area: null,
+        area: {},
         isExternal: false,
         releaseItems,
         crew,
@@ -89,12 +89,12 @@ export class RoadmapItemParser {
       this._hasNoPreReleaseAllowedLabel(project);
 
     const res: ParsedRoadmapItem = {
-      initiative: initiative.value,
+      initiative: { name: initiative.value },
       initiativeId: project.initiativeId || initiative.id,
       name,
-      theme: theme.value,
+      theme: { name: theme.value },
       projectId,
-      area: area.value,
+      area: { name: area.value },
       isExternal: external.value,
       releaseItems: this._updateReleaseItemsExternalState(
         projectId,

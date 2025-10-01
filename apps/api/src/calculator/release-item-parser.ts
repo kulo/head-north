@@ -33,6 +33,7 @@ export class ReleaseItemParser {
     const assignee = this._collectAssignee(issue);
 
     return {
+      id: issue.key,
       ticketId: issue.key,
       effort: effort.value,
       projectId: projectId.value,

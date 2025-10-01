@@ -28,6 +28,7 @@ export interface ParsedRoadmapItem {
 // ============================================================================
 
 export interface ParsedReleaseItem {
+  id: string;
   ticketId: string;
   effort: number;
   projectId: string | null;

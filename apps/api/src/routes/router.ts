@@ -35,11 +35,11 @@ function createRouter(omegaConfig: OmegaConfig): Router {
 
   // Define route handlers
   const handlers = {
-    cycleData: getCycleData,
+    cycleData: getCycleData as any,
   };
 
   // Register API routes
-  registerApiRoutes(router, routes, handlers);
+  registerApiRoutes(router as any, routes, handlers);
 
   return router;
 }

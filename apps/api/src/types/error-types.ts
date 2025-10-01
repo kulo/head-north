@@ -28,7 +28,12 @@ export interface ApiError extends BaseError {
 }
 
 export interface JiraError extends BaseError {
-  code: "JIRA_ERROR";
+  code:
+    | "JIRA_ERROR"
+    | "JIRA_AUTHENTICATION_ERROR"
+    | "JIRA_RATE_LIMIT_ERROR"
+    | "JIRA_NOT_FOUND_ERROR"
+    | "JIRA_PERMISSION_ERROR";
   jiraErrorCode?: string;
   jiraErrorMessage?: string;
   jiraEndpoint?: string;
