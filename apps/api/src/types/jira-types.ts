@@ -3,16 +3,16 @@
 
 import type {
   JiraSprint,
-  JiraIssue,
   JiraIssueFields,
   JiraUser,
-  JiraApiResponse,
   JiraSprintData,
   JiraIssueData,
+  ApiResponse,
 } from "./api-response-types";
+import type { ISODateString } from "@omega/types";
 
 // Re-export commonly used types for backward compatibility
-export type Sprint = JiraSprint;
+export type JiraSprintAlias = JiraSprint;
 export type JiraAssignee = JiraUser;
 export type JiraReporter = JiraUser;
 
@@ -20,8 +20,27 @@ export type JiraReporter = JiraUser;
 // Jira API Response Types (Legacy compatibility)
 // ============================================================================
 
-export type JiraIssueResponse = JiraApiResponse<JiraIssue>;
-export type JiraSprintResponse = JiraApiResponse<JiraSprint>;
+export type JiraIssueResponse = ApiResponse<JiraIssue>;
+export type JiraSprintResponse = ApiResponse<JiraSprint>;
+
+// ============================================================================
+// Jira Domain Types
+// ============================================================================
+
+export interface JiraIssue {
+  id: string;
+  key: string;
+  fields: Record<string, unknown>;
+  expand?: string;
+}
+
+export interface Sprint {
+  id: string | number;
+  name: string;
+  startDate: ISODateString;
+  endDate: ISODateString;
+  state: "active" | "closed" | "future";
+}
 
 // ============================================================================
 // Jira Configuration Types

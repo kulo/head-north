@@ -85,14 +85,85 @@ class JiraAPI {
 
     return issues.issues
       .map((issue) => ({
-        id: issue.key,
+        id: issue.key || "",
+        key: issue.key || "",
+        fields: {
+          summary: issue.fields?.summary || "",
+          status: get(issue, "fields.status") || {
+            id: "",
+            name: "",
+            statusCategory: { id: 0, key: "", colorName: "", name: "" },
+          },
+          parent: get(issue, "fields.parent"),
+          sprint: get(issue, "fields.sprint")
+            ? {
+                id: get(issue, "fields.sprint.id") || 0,
+                name: get(issue, "fields.sprint.name") || "",
+                state:
+                  (get(issue, "fields.sprint.state") as
+                    | "active"
+                    | "closed"
+                    | "future") || "active",
+                startDate: (get(issue, "fields.sprint.startDate") as any) || "",
+                endDate: (get(issue, "fields.sprint.endDate") as any) || "",
+                originBoardId: get(issue, "fields.sprint.originBoardId") || 0,
+                ...(get(issue, "fields.sprint.goal") && {
+                  goal: get(issue, "fields.sprint.goal") as string,
+                }),
+              }
+            : null,
+          labels: issue.fields?.labels || [],
+          issuetype: issue.fields?.issuetype || {
+            id: "",
+            name: "",
+            subtask: false,
+          },
+          assignee: issue.fields?.assignee
+            ? {
+                accountId: issue.fields.assignee.accountId,
+                displayName: issue.fields.assignee.displayName,
+                ...(issue.fields.assignee.emailAddress && {
+                  emailAddress: issue.fields.assignee.emailAddress,
+                }),
+                ...(issue.fields.assignee.avatarUrls && {
+                  avatarUrls: issue.fields.assignee.avatarUrls as Record<
+                    string,
+                    string
+                  >,
+                }),
+                active: issue.fields.assignee.active,
+                ...(issue.fields.assignee.timeZone && {
+                  timeZone: issue.fields.assignee.timeZone,
+                }),
+              }
+            : null,
+          ...(issue.fields?.reporter && {
+            reporter: {
+              accountId: issue.fields.reporter.accountId,
+              displayName: issue.fields.reporter.displayName,
+              ...(issue.fields.reporter.emailAddress && {
+                emailAddress: issue.fields.reporter.emailAddress,
+              }),
+              ...(issue.fields.reporter.avatarUrls && {
+                avatarUrls: issue.fields.reporter.avatarUrls as Record<
+                  string,
+                  string
+                >,
+              }),
+              active: issue.fields.reporter.active,
+              ...(issue.fields.reporter.timeZone && {
+                timeZone: issue.fields.reporter.timeZone,
+              }),
+            },
+          }),
+        },
         summary: issue.fields?.summary || "",
         closedSprints: get(issue, "fields.closedSprints", []),
         parent: get(issue, "fields.parent.key"),
-        status: get(issue, "fields.status"),
+        status: get(issue, "fields.status")?.name || "",
         sprint: get(issue, "fields.sprint"),
         roadmapItemId: get(issue, "fields.parent.key"), // Foreign key
-        cycleId: get(issue, "fields.sprint.id"), // Foreign key
+        cycleId: get(issue, "fields.sprint.id") || "", // Foreign key
       }))
       .filter((x) => !!x.parent)
       .filter((x) => !(x.sprint === null && (x.status as any)?.name === "Done"))
@@ -135,20 +206,53 @@ class JiraAPI {
           ...issue,
           fields: {
             ...omit(issue.fields, ["customfield_10002", "customfield_10000"]),
-            effort: issue.fields.customfield_10002,
-            externalRoadmap: get(issue, "fields.customfield_10000.value"),
+            ...(issue.fields.customfield_10002 !== undefined && {
+              effort: issue.fields.customfield_10002,
+            }),
+            ...(get(issue, "fields.customfield_10000.value") && {
+              externalRoadmap: get(
+                issue,
+                "fields.customfield_10000.value",
+              ) as string,
+            }),
             assignee: issue.fields.assignee
               ? {
                   accountId: issue.fields.assignee.accountId,
                   displayName: issue.fields.assignee.displayName,
+                  ...(issue.fields.assignee.emailAddress && {
+                    emailAddress: issue.fields.assignee.emailAddress,
+                  }),
+                  ...(issue.fields.assignee.avatarUrls && {
+                    avatarUrls: issue.fields.assignee.avatarUrls as Record<
+                      string,
+                      string
+                    >,
+                  }),
+                  active: issue.fields.assignee.active,
+                  ...(issue.fields.assignee.timeZone && {
+                    timeZone: issue.fields.assignee.timeZone,
+                  }),
                 }
               : null,
-            reporter: issue.fields.reporter
-              ? {
-                  accountId: issue.fields.reporter.accountId,
-                  displayName: issue.fields.reporter.displayName,
-                }
-              : null,
+            ...(issue.fields.reporter && {
+              reporter: {
+                accountId: issue.fields.reporter.accountId,
+                displayName: issue.fields.reporter.displayName,
+                ...(issue.fields.reporter.emailAddress && {
+                  emailAddress: issue.fields.reporter.emailAddress,
+                }),
+                ...(issue.fields.reporter.avatarUrls && {
+                  avatarUrls: issue.fields.reporter.avatarUrls as Record<
+                    string,
+                    string
+                  >,
+                }),
+                active: issue.fields.reporter.active,
+                ...(issue.fields.reporter.timeZone && {
+                  timeZone: issue.fields.reporter.timeZone,
+                }),
+              },
+            }),
           },
         };
       },

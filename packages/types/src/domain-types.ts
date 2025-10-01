@@ -17,27 +17,11 @@ export interface Area {
 export interface Team {
   id: TeamId;
   name: string;
-  areaId: AreaId;
 }
 
 export interface Person {
   accountId: string;
   displayName: string;
-}
-
-export interface Sprint {
-  id: string | number;
-  name: string;
-  startDate: ISODateString;
-  endDate: ISODateString;
-  state: "active" | "closed" | "future";
-}
-
-export interface JiraIssue {
-  id: string;
-  key: string;
-  fields: Record<string, unknown>;
-  expand?: string;
 }
 
 // ============================================================================

@@ -324,10 +324,7 @@ class CycleDataService {
       return [];
     }
 
-    return area.teams.map((team) => ({
-      ...team,
-      areaId,
-    }));
+    return area.teams;
   }
 
   /**

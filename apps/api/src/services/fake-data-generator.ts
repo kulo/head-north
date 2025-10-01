@@ -4,11 +4,11 @@ import type {
   Area,
   Team,
   Initiative,
-  Sprint,
   RoadmapItem,
   ReleaseItem,
-  JiraIssue,
 } from "@omega/types";
+import type { JiraIssue } from "../types/jira-types";
+import type { JiraSprint } from "../types/api-response-types";
 import { logger } from "@omega/utils";
 
 export default class FakeDataGenerator {
@@ -17,7 +17,7 @@ export default class FakeDataGenerator {
   private areas: Area[];
   private initiatives: Initiative[];
   private roadmapItems: Record<string, RoadmapItem>;
-  private sprints: Sprint[];
+  private sprints: JiraSprint[];
 
   constructor(omegaConfig: OmegaConfig) {
     this.omegaConfig = omegaConfig;
@@ -73,7 +73,7 @@ export default class FakeDataGenerator {
     this.sprints = this._generateSprints();
   }
 
-  async getSprintsData(): Promise<{ sprints: Sprint[] }> {
+  async getSprintsData(): Promise<{ sprints: JiraSprint[] }> {
     return { sprints: this.sprints };
   }
 
@@ -461,9 +461,9 @@ export default class FakeDataGenerator {
    * Creates: 1 past sprint, 1 active sprint, 2 future sprints
    * @private
    */
-  private _generateSprints(): Sprint[] {
+  private _generateSprints(): JiraSprint[] {
     const now = new Date();
-    const sprints: Sprint[] = [];
+    const sprints: JiraSprint[] = [];
 
     // Get current month and year
     const currentMonth = now.getMonth(); // 0-based (0 = January)
@@ -535,6 +535,7 @@ export default class FakeDataGenerator {
         endDate: endDate
           .toISOString()
           .split("T")[0] as `${number}-${number}-${number}`, // YYYY-MM-DD format
+        originBoardId: 1, // Default board ID for fake data
       });
     }
 
@@ -554,41 +555,34 @@ export default class FakeDataGenerator {
         {
           id: "platform-frontend",
           name: "Frontend Team",
-          areaId: "platform",
         },
         {
           id: "platform-backend",
           name: "Backend Team",
-          areaId: "platform",
         },
         {
           id: "platform-devops",
           name: "DevOps Team",
-          areaId: "platform",
         },
       ],
       resilience: [
         {
           id: "resilience-security",
           name: "Security Team",
-          areaId: "resilience",
         },
         {
           id: "resilience-monitoring",
           name: "Monitoring Team",
-          areaId: "resilience",
         },
       ],
       sustainability: [
         {
           id: "sustainability-green",
           name: "Green Tech Team",
-          areaId: "sustainability",
         },
         {
           id: "sustainability-metrics",
           name: "Metrics Team",
-          areaId: "sustainability",
         },
       ],
     };
@@ -598,12 +592,10 @@ export default class FakeDataGenerator {
         {
           id: `${areaId}-team1`,
           name: `${areaName} Team 1`,
-          areaId: areaId,
         },
         {
           id: `${areaId}-team2`,
           name: `${areaName} Team 2`,
-          areaId: areaId,
         },
       ]
     );
