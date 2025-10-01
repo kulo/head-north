@@ -30,7 +30,7 @@ describe("resolveStatus", () => {
 
   it("should return mapped status for valid status ID", () => {
     const issueFields = { status: { id: "2" } };
-    const sprint = { start: "2024-01-01", end: "2024-01-31" };
+    const sprint = { startDate: "2024-01-01", endDate: "2024-01-31" };
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
@@ -39,7 +39,7 @@ describe("resolveStatus", () => {
 
   it("should return default TODO status for unmapped status ID", () => {
     const issueFields = { status: { id: "999" } };
-    const sprint = { start: "2024-01-01", end: "2024-01-31" };
+    const sprint = { startDate: "2024-01-01", endDate: "2024-01-31" };
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
@@ -51,7 +51,7 @@ describe("resolveStatus", () => {
       status: { id: "2" },
       sprint: { startDate: "2024-02-01" },
     };
-    const sprint = { start: "2024-01-01", end: "2024-01-31" };
+    const sprint = { startDate: "2024-01-01", endDate: "2024-01-31" };
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
@@ -69,7 +69,7 @@ describe("resolveStatus", () => {
 
   it("should handle missing issue sprint gracefully", () => {
     const issueFields = { status: { id: "2" } };
-    const sprint = { start: "2024-01-01", end: "2024-01-31" };
+    const sprint = { startDate: "2024-01-01", endDate: "2024-01-31" };
 
     const result = resolveStatus(issueFields, sprint, mockOmegaConfig);
 
