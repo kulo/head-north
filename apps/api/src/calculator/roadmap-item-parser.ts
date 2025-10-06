@@ -1,5 +1,4 @@
-import pkg from "lodash";
-const { map, uniq } = pkg;
+import { map, uniq } from "lodash";
 import { getJiraLink } from "./parse-common";
 import { logger } from "@omega/utils";
 import LabelResolver from "./resolve-labels";
@@ -53,10 +52,10 @@ export class RoadmapItemParser {
         ticket_ids: ticketIds,
       });
       return {
+        id: projectId,
         initiativeId: null,
         name: "",
         theme: {},
-        projectId,
         area: {},
         isExternal: false,
         releaseItems,
@@ -75,10 +74,10 @@ export class RoadmapItemParser {
         ticket_ids: ticketIds,
       });
       return {
+        id: projectId,
         initiativeId: null,
         name: "",
         theme: {},
-        projectId,
         area: {},
         isExternal: false,
         releaseItems,
@@ -99,10 +98,10 @@ export class RoadmapItemParser {
       this._hasNoPreReleaseAllowedLabel(project);
 
     const res: ParsedRoadmapItem = {
-      initiative: { id: initiative.id, name: initiative.value },
+      id: projectId,
+      initiativeId: initiative.id,
       name,
       theme: { name: theme.value },
-      projectId,
       area: { name: area.value },
       isExternal: false,
       releaseItems: this._updateReleaseItemsExternalState(

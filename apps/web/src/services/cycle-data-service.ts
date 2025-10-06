@@ -123,11 +123,9 @@ class CycleDataService {
    * @returns {Promise<CycleData>} The fetched and transformed cycle data
    */
   async #loadCycleData(): Promise<CycleData> {
-    // Fetch fresh data from cycle-data endpoint
     const endpoints = this.#config.getEndpoints();
     const rawData: RawCycleData = await this.#request(endpoints.CYCLE_DATA);
 
-    // Transform raw data to processed data for caching
     return this.#transformRawToProcessed(rawData);
   }
 
@@ -214,8 +212,7 @@ class CycleDataService {
   }
 
   /**
-   * Get all areas from appropriate data source union with areas from the configuration.
-   *
+   * Get all areas from appropriate data source union with areas from the configuration.   *
    * @returns {Promise<Area[]>} Array of areas with id and name properties
    */
   async getAllAreas(_cycleId: CycleId | null = null): Promise<Area[]> {

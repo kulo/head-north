@@ -1,8 +1,7 @@
 import { ReleaseItemParser } from "../calculator/release-item-parser";
 import { RoadmapItemParser } from "../calculator/roadmap-item-parser";
 import JiraApiProxy from "./jira-api-proxy";
-import pkg from "lodash";
-const { uniqBy } = pkg;
+import { uniqBy } from "lodash";
 import type { OmegaConfig } from "@omega/config";
 import type {
   Cycle,
@@ -26,7 +25,6 @@ export default async (
 ): Promise<RawCycleData> => {
   const jiraApi = new JiraApiProxy(omegaConfig);
 
-  // Get all sprint data from Jira
   const { sprints } = await jiraApi.getSprintsData();
 
   // Convert sprints to cycles for our domain

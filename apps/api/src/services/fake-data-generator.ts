@@ -19,7 +19,8 @@ export default class FakeDataGenerator {
 
   constructor(omegaConfig: OmegaConfig) {
     this.omegaConfig = omegaConfig;
-    this.assignees = this.omegaConfig.getAssignees();
+    // Generate fake assignees since OmegaConfig doesn't have getAssignees method
+    this.assignees = this._generateFakeAssignees();
 
     // Get areas and initiatives from omega config
     const areasConfig = this.omegaConfig.getAreas();
@@ -114,14 +115,30 @@ export default class FakeDataGenerator {
               id: this._getStatusId(releaseItem.status),
               name: releaseItem.status,
             },
-            assignee: assignee,
+            assignee: {
+              accountId: assignee.accountId,
+              displayName: assignee.displayName,
+              active: true,
+            },
             effort: Math.floor(Math.random() * 8) + 1,
             labels: roadmapItem.labels, // Use the roadmap item's labels which now include proper prefixes
-            parent: { key: roadmapItemKey },
-            issuetype: { name: issueType },
-            area: roadmapItem.area,
-            id: roadmapItem.initiative?.name || "",
-            url: `https://example.com/browse/ISSUE-${issueIndex}`,
+            parent: {
+              id: roadmapItemKey,
+              key: roadmapItemKey,
+              fields: {
+                summary: roadmapItem.summary || "",
+                status: { id: "10001", name: "To Do" },
+              },
+            },
+            issuetype: {
+              id: "10001",
+              name: issueType,
+              subtask: false,
+            },
+            area:
+              typeof roadmapItem.area === "string"
+                ? roadmapItem.area
+                : roadmapItem.area?.id || "",
             // Add sprint information for proper status resolution
             sprint: currentSprint
               ? {
@@ -134,7 +151,11 @@ export default class FakeDataGenerator {
               : null,
             // Add additional fields for release items
             teams: [assignee.accountId],
-            areaIds: [roadmapItem.area],
+            areaIds: [
+              typeof roadmapItem.area === "string"
+                ? roadmapItem.area
+                : roadmapItem.area?.id || "",
+            ],
           },
         });
       });
@@ -192,16 +213,51 @@ export default class FakeDataGenerator {
               description: `Description for ${item.summary}`,
               status: { id: this._getStatusId(item.status), name: item.status },
               effort: item.effort || 0,
-              assignee: item.assignee || null,
+              assignee: item.assignee
+                ? {
+                    accountId: (item.assignee as Person).accountId,
+                    displayName: (item.assignee as Person).displayName,
+                    active: true,
+                  }
+                : null,
               labels: roadmapItem.labels || [],
-              parent: { key: roadmapItemKey },
-              issuetype: { name: "Release Item" },
-              area: roadmapItem.area,
+              parent: {
+                id: roadmapItemKey,
+                key: roadmapItemKey,
+                fields: {
+                  summary: roadmapItem.summary || "",
+                  status: { id: "10001", name: "To Do" },
+                },
+              },
+              issuetype: {
+                id: "10001",
+                name: "Release Item",
+                subtask: false,
+              },
+              area:
+                typeof roadmapItem.area === "string"
+                  ? roadmapItem.area
+                  : roadmapItem.area?.id || "",
               initiativeId: roadmapItem.initiativeId || "",
               url: `https://example.com/browse/${item.id}`,
-              sprint: item.sprint,
-              teams: [item.assignee?.accountId || "unknown"],
-              areaIds: [roadmapItem.area],
+              sprint: item.sprint
+                ? {
+                    id: item.sprint.id,
+                    name: item.sprint.name,
+                    state: "active" as const,
+                    startDate: "2024-01-01" as const,
+                    endDate: "2024-02-29" as const,
+                    originBoardId: 1,
+                  }
+                : null,
+              teams: [
+                item.assignee ? (item.assignee as Person).accountId : "unknown",
+              ],
+              areaIds: [
+                typeof roadmapItem.area === "string"
+                  ? roadmapItem.area
+                  : roadmapItem.area?.id || "",
+              ],
             },
             parent: roadmapItemKey,
             created: new Date().toISOString(),
@@ -505,7 +561,7 @@ export default class FakeDataGenerator {
       sprints.push({
         id: (i + 2).toString(), // i goes from -1 to 2, so IDs will be 1, 2, 3, 4
         name: sprintName,
-        state: state as any,
+        state: state as "active" | "closed" | "future",
         startDate: startDate
           .toISOString()
           .split("T")[0] as `${number}-${number}-${number}`, // YYYY-MM-DD format
@@ -517,6 +573,22 @@ export default class FakeDataGenerator {
     }
 
     return sprints;
+  }
+
+  /**
+   * Generate fake assignees for testing
+   * @returns Array of fake assignees
+   * @private
+   */
+  private _generateFakeAssignees(): Person[] {
+    return [
+      { accountId: "all", displayName: "All Assignees" },
+      { accountId: "user1", displayName: "John Doe" },
+      { accountId: "user2", displayName: "Jane Smith" },
+      { accountId: "user3", displayName: "Bob Johnson" },
+      { accountId: "user4", displayName: "Alice Brown" },
+      { accountId: "user5", displayName: "Charlie Wilson" },
+    ];
   }
 
   /**
