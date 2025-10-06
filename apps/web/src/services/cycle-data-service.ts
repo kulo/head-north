@@ -214,30 +214,15 @@ class CycleDataService {
   }
 
   /**
-   * Get all areas from appropriate data source with config fallbacks
-   * @param {CycleId} cycleId - The cycle ID to get areas for
+   * Get all areas from appropriate data source union with areas from the configuration.
+   *
    * @returns {Promise<Area[]>} Array of areas with id and name properties
    */
   async getAllAreas(_cycleId: CycleId | null = null): Promise<Area[]> {
-    try {
-      // Get raw data to access areas object
-      const rawData = await this.#getCachedCycleData();
-
-      // Extract areas from raw data (areas is a Record<string, Area>)
-      if (rawData.areas && typeof rawData.areas === "object") {
-        return Object.values(rawData.areas).map((area) => ({
-          id: area.id,
-          name: area.name || area.id,
-          teams: area.teams || [],
-        }));
-      }
-
-      // Fallback to config areas if backend data is not available
-      return this.#getConfigAreas();
-    } catch (_error) {
-      // Fallback to config only if backend fails
-      return this.#getConfigAreas();
-    }
+    const areasFromCycles = (await this.#getCachedCycleData()).areas;
+    const areasFromConfig = this.#getConfigAreas();
+    const allAreas = new Set([...areasFromCycles, ...areasFromConfig]);
+    return Array.from(allAreas);
   }
 
   /**
