@@ -9,7 +9,7 @@ import { filterByAssignees } from "../../src/filters/assignee-filter";
 const mockInitiatives = [
   {
     name: "Initiative 1",
-    initiativeId: "init-1",
+    id: "init-1",
     roadmapItems: [
       {
         id: "roadmap-1",
@@ -87,7 +87,7 @@ describe("filterByAssignees", () => {
   it("should filter by specific assignee ID (string format)", () => {
     const result = filterByAssignees(mockInitiatives, ["user-1"]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by specific assignee ID (object format)", () => {
@@ -95,7 +95,7 @@ describe("filterByAssignees", () => {
       { id: "user-1", name: "John Doe" },
     ]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by multiple assignee IDs", () => {
@@ -124,7 +124,7 @@ describe("filterByAssignees", () => {
   it("should handle empty string IDs", () => {
     const result = filterByAssignees(mockInitiatives, ["", "user-1"]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should handle null/undefined items in selection", () => {
@@ -134,14 +134,14 @@ describe("filterByAssignees", () => {
       undefined,
     ]);
     expect(result).toHaveLength(2); // null/undefined are treated as "all"
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should handle initiatives with no roadmap items", () => {
     const initiativesWithNoRoadmap = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [],
       },
     ];
@@ -153,7 +153,7 @@ describe("filterByAssignees", () => {
     const initiativesWithNoRelease = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [
           {
             id: "roadmap-3",
@@ -172,7 +172,7 @@ describe("filterByAssignees", () => {
     const initiativesWithStringAssignee = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [
           {
             id: "roadmap-3",
@@ -192,6 +192,6 @@ describe("filterByAssignees", () => {
     ];
     const result = filterByAssignees(initiativesWithStringAssignee, ["user-3"]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-3");
+    expect(result[0].id).toBe("init-3");
   });
 });

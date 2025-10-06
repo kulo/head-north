@@ -49,25 +49,41 @@ describe("Cycle Data Service", () => {
 
   describe("Request handling", () => {
     test("should make successful API request", async () => {
-      const mockData = { test: "data" };
+      const mockData = {
+        cycles: [],
+        roadmapItems: [],
+        releaseItems: [],
+        areas: {},
+        initiatives: [],
+        assignees: [],
+        stages: [],
+      };
       vi.mocked(fetch).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockData),
       } as Response);
 
-      const result = await cycleDataService.getCyclesRoadmap();
+      const result = await cycleDataService.getCycleData();
 
       expect(fetch).toHaveBeenCalledWith(
         "http://localhost:3000/cycle-data",
         expect.any(Object),
       );
-      expect(result).toEqual(mockData);
+      expect(result).toEqual({
+        cycles: [],
+        roadmapItems: [],
+        releaseItems: [],
+        areas: [],
+        initiatives: [],
+        assignees: [],
+        stages: [],
+      });
     });
 
     test("should handle API errors gracefully", async () => {
       vi.mocked(fetch).mockRejectedValue(new Error("Network error"));
 
-      await expect(cycleDataService.getCyclesRoadmap()).rejects.toThrow(
+      await expect(cycleDataService.getCycleData()).rejects.toThrow(
         "API request failed after 1 attempts",
       );
     }, 10000);

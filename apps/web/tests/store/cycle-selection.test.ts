@@ -5,7 +5,6 @@ import createAppStore from "../../src/store/index";
 // Mock the CycleDataService
 const mockCycleDataService = {
   getAllCycles: vi.fn(),
-  getActiveCycle: vi.fn(),
 };
 
 // Mock omegaConfig

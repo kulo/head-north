@@ -3,10 +3,12 @@
     v-model:value="selectedAssignees"
     class="external-selector assignee-selector"
     mode="multiple"
-    placeholder="All Assignees"
+    :placeholder="ALL_ASSIGNEES_FILTER.name"
     @change="setSelectedAssignees"
   >
-    <a-select-option key="all" value="all"> All Assignees </a-select-option>
+    <a-select-option key="all" value="all">
+      {{ ALL_ASSIGNEES_FILTER.name }}
+    </a-select-option>
     <a-select-option
       v-for="assignee in filteredAssignees"
       :key="assignee.id"
@@ -20,6 +22,7 @@
 <script>
 import { ref, computed, watch } from "vue";
 import { useStore } from "vuex";
+import { ALL_ASSIGNEES_FILTER } from "@/filters/filter-constants";
 
 export default {
   name: "AssigneeSelector",
@@ -31,7 +34,9 @@ export default {
 
     // Filter out "All Assignees" from the dropdown options
     const filteredAssignees = computed(() => {
-      return assignees.value.filter((assignee) => assignee.id !== "all");
+      return assignees.value.filter(
+        (assignee) => assignee.id !== ALL_ASSIGNEES_FILTER.id,
+      );
     });
 
     // Watch for changes in store and update local ref
@@ -61,7 +66,7 @@ export default {
           (!store.state.selectedAssignees ||
             store.state.selectedAssignees.length === 0)
         ) {
-          // Don't set any default selection - let it show "All Assignees" placeholder
+          // Don't set any default selection - let it show placeholder
           selectedAssignees.value = [];
         }
       },
@@ -78,7 +83,7 @@ export default {
 
       selectedAssignees.value = assigneeIds;
 
-      // If no assignees selected, clear the store (equivalent to "All Assignees")
+      // If no assignees selected, clear the store (equivalent to "All Assignees" selection)
       if (!assigneeIds || assigneeIds.length === 0) {
         store.dispatch("setSelectedAssignees", []);
         return;
@@ -98,6 +103,7 @@ export default {
       assignees,
       filteredAssignees,
       setSelectedAssignees,
+      ALL_ASSIGNEES_FILTER,
     };
   },
 };

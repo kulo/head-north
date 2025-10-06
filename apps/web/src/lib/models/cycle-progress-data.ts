@@ -4,7 +4,6 @@ import type {
   CycleWithProgress,
   Initiative,
   InitiativeWithProgress,
-  RoadmapItem,
 } from "@omega/types";
 
 interface CycleProgressDataInput {
@@ -99,10 +98,8 @@ export default class CycleProgressData {
 
     this.initiatives = data.initiatives.map((initiative) => {
       let preparedInitiative: InitiativeWithProgress = {
-        id: initiative.id || initiative.initiativeId || initiative.initiative,
-        name: initiative.initiative,
-        initiative: initiative.initiative,
-        initiativeId: initiative.initiativeId,
+        id: initiative.id,
+        name: initiative.name,
         roadmapItems: [],
         releaseItemsCount: 0,
         releaseItemsDoneCount: 0,
@@ -132,7 +129,7 @@ export default class CycleProgressData {
             summary: roadmapItem.summary || "",
             area: roadmapItem.area,
             labels: roadmapItem.labels || [],
-            owner: roadmapItem.crew,
+            owner: roadmapItem.owningTeam?.name || "Unknown Team",
             ticketId: roadmapItem.projectId,
             validations: roadmapItem.validations,
             aggregatedValidations: [
@@ -157,9 +154,6 @@ export default class CycleProgressData {
             percentageNotToDo: 0,
             releaseItems: roadmapItem.releaseItems,
             url: roadmapItem.url,
-            isPartOfReleaseNarrative: roadmapItem.isPartOfReleaseNarrative,
-            isReleaseAtRisk: roadmapItem.isReleaseAtRisk,
-            isCrossCloud: roadmapItem.isCrossCloud || false,
           };
 
           roadmapItem.releaseItems.forEach((releaseItem) => {

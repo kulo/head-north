@@ -3,7 +3,7 @@
  * Provides composable predicate functions that can be combined
  */
 
-import type { ReleaseItem } from "@omega/types";
+import type { ReleaseItem, CycleId } from "@omega/types";
 import type { InitiativeFilter } from "../types";
 import type { StageFilter, CycleFilter, FilterConfig } from "../types";
 
@@ -71,15 +71,17 @@ export const createInitiativesPredicate = (
     .filter((id) => id !== "all");
 
   return (item: unknown): boolean => {
-    if (item && typeof item === "object" && "initiativeId" in item) {
+    if (item && typeof item === "object" && "initiative" in item) {
       // Roadmap structure
-      return selectedInitiativeIds.includes(String((item as any).initiativeId));
+      return selectedInitiativeIds.includes(
+        String((item as any).initiative?.id),
+      );
     } else if (item && typeof item === "object" && "initiatives" in item) {
       // Cycle-overview structure - check if any initiative matches
       const initiatives = (item as any).initiatives;
       if (Array.isArray(initiatives)) {
         return initiatives.some((initiative: any) =>
-          selectedInitiativeIds.includes(String(initiative.initiativeId)),
+          selectedInitiativeIds.includes(String(initiative.id)),
         );
       }
     }
@@ -127,7 +129,7 @@ export const createStagesPredicate = (selectedStages: StageFilter[]) => {
  * @param selectedCycle - Selected cycle ID or cycle object
  * @returns Predicate function
  */
-export const createCyclePredicate = (selectedCycle: string | CycleFilter) => {
+export const createCyclePredicate = (selectedCycle: CycleId | CycleFilter) => {
   if (selectedCycle === null || selectedCycle === undefined) {
     console.error(
       "createCyclePredicate: No cycle provided. Client code must ensure a valid cycle is passed.",

@@ -9,7 +9,7 @@ import { filterByInitiatives } from "../../src/filters/initiatives-filter";
 const mockInitiatives = [
   {
     name: "Initiative 1",
-    initiativeId: "init-1",
+    id: "init-1",
     roadmapItems: [
       {
         id: "roadmap-1",
@@ -28,7 +28,7 @@ const mockInitiatives = [
   },
   {
     name: "Initiative 2",
-    initiativeId: "init-2",
+    id: "init-2",
     roadmapItems: [
       {
         id: "roadmap-2",
@@ -82,7 +82,7 @@ describe("filterByInitiatives", () => {
   it("should filter by specific initiative ID (string format)", () => {
     const result = filterByInitiatives(mockInitiatives, ["init-1"]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by specific initiative ID (object format)", () => {
@@ -90,7 +90,7 @@ describe("filterByInitiatives", () => {
       { id: "init-1", name: "Initiative 1" },
     ]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by multiple initiative IDs", () => {
@@ -119,7 +119,7 @@ describe("filterByInitiatives", () => {
   it("should handle empty string IDs", () => {
     const result = filterByInitiatives(mockInitiatives, ["", "init-1"]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should handle null/undefined items in selection", () => {
@@ -129,6 +129,6 @@ describe("filterByInitiatives", () => {
       undefined,
     ]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 });

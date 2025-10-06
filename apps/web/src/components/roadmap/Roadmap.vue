@@ -23,17 +23,14 @@
         <div class="roadmap-table">
           <template
             v-for="(row, index) in filteredRoadmapData"
-            :key="row?.initiativeId || index"
+            :key="row?.id || index"
           >
-            <template v-if="row && row.initiativeId">
+            <template v-if="row && row.id">
               <!-- Initiative header row -->
               <a-row class="roadmap-initiative-header-row">
                 <a-col :span="6">
                   <div class="roadmap-initiative-header-name">
-                    {{
-                      initiativeName(row.initiativeId) ||
-                      `Initiative: ${row.initiativeId}`
-                    }}
+                    {{ initiativeName(row.id) || `Initiative: ${row.id}` }}
                   </div>
                 </a-col>
                 <a-col v-for="cycle in orderedCycles" :key="cycle.id" :span="4">

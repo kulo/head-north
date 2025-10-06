@@ -59,13 +59,13 @@ class IssueParser {
     // Group by initiative instead of theme + initiative
     const grouped = groupBy(
       nonVirtuals,
-      (roadmapItem) => roadmapItem.initiativeId,
+      (roadmapItem) => roadmapItem.initiative?.name,
     );
 
     const initiatives = Object.entries(grouped).map(([initiativeId, value]) => {
       return {
         initiative: get(value, "0.initiative"),
-        initiativeId: initiativeId,
+        id: initiativeId,
         roadmapItems: value.map((roadmapItem) =>
           omit(roadmapItem, ["theme", "initiative", "initiativeId"]),
         ),
@@ -76,9 +76,9 @@ class IssueParser {
     if (virtuals.length > 0) {
       initiatives.push({
         initiative: virtualLabel,
-        initiativeId: virtualId,
+        id: virtualId,
         roadmapItems: virtuals.map((roadmapItem) =>
-          omit(roadmapItem, ["theme", "initiative", "initiativeId"]),
+          omit(roadmapItem, ["theme", "initiative"]),
         ),
       });
     }

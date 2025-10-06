@@ -4,7 +4,7 @@
  * Works with both roadmap and cycle-overview data structures
  */
 
-import type { RoadmapItem, Initiative } from "@omega/types";
+import type { RoadmapItem, Initiative, CycleId } from "@omega/types";
 import type { CycleFilter } from "../types";
 
 interface Item {
@@ -22,7 +22,7 @@ interface Item {
  */
 export const filterByCycle = (
   items: Item[],
-  selectedCycle: string | CycleFilter,
+  selectedCycle: CycleId | CycleFilter,
 ): Item[] => {
   if (selectedCycle === null || selectedCycle === undefined) {
     console.error(

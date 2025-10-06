@@ -5,9 +5,10 @@
 
 import type { Initiative } from "@omega/types";
 import type { InitiativeFilter } from "../types";
+import { ALL_INITIATIVES_FILTER } from "./filter-constants";
 
 interface Item {
-  initiativeId?: string;
+  id?: string;
   name?: string;
   initiatives?: Initiative[];
   roadmapItems?: any[];
@@ -37,7 +38,7 @@ export const filterByInitiatives = (
       init &&
       (init.id === "all" ||
         init.name === "all" ||
-        init.name === "All Initiatives")
+        init.name === ALL_INITIATIVES_FILTER.name)
     );
   });
 
@@ -56,20 +57,20 @@ export const filterByInitiatives = (
     .filter((id) => id && id !== "all");
 
   const filteredItems = items.filter((item) => {
-    if (item.initiativeId) {
+    if (item.id) {
       // Roadmap structure
-      const matches = selectedInitiativeIds.includes(String(item.initiativeId));
+      const matches = selectedInitiativeIds.includes(String(item.id));
       return matches;
     } else if (item.initiatives) {
       // Cycle-overview structure - filter initiatives within the item
       const filteredInitiatives = item.initiatives.filter((initiative) =>
-        selectedInitiativeIds.includes(String(initiative.initiativeId)),
+        selectedInitiativeIds.includes(String(initiative.id)),
       );
       const matches = filteredInitiatives.length > 0;
       return matches;
     } else if (item.name && item.roadmapItems) {
-      // Transformed initiative structure - filter by initiativeId
-      const matches = selectedInitiativeIds.includes(String(item.initiativeId));
+      // Transformed initiative structure - filter by id
+      const matches = selectedInitiativeIds.includes(String(item.id));
       return matches;
     }
     return true;

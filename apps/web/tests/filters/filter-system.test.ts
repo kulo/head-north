@@ -13,7 +13,7 @@ import { filterByCycle } from "../../src/filters/cycle-filter";
 const mockInitiatives = [
   {
     name: "Initiative 1",
-    initiativeId: "init-1",
+    id: "init-1",
     roadmapItems: [
       {
         id: "roadmap-1",
@@ -70,7 +70,7 @@ describe("Filter System Integration Tests", () => {
     test("should filter by specific initiative IDs", () => {
       const result = filterByInitiatives(mockInitiatives, ["init-1"]);
       expect(result).toHaveLength(1);
-      expect(result[0].initiativeId).toBe("init-1");
+      expect(result[0].id).toBe("init-1");
     });
 
     test("should return empty array when no initiatives match", () => {
@@ -88,7 +88,7 @@ describe("Filter System Integration Tests", () => {
     test("should filter by specific stage", () => {
       const result = filterByStages(mockInitiatives, ["Development"]);
       expect(result).toHaveLength(1);
-      expect(result[0].initiativeId).toBe("init-1");
+      expect(result[0].id).toBe("init-1");
     });
   });
 
@@ -101,7 +101,7 @@ describe("Filter System Integration Tests", () => {
     test("should filter by specific assignee", () => {
       const result = filterByAssignees(mockInitiatives, ["user-1"]);
       expect(result).toHaveLength(1);
-      expect(result[0].initiativeId).toBe("init-1");
+      expect(result[0].id).toBe("init-1");
     });
   });
 
@@ -114,7 +114,7 @@ describe("Filter System Integration Tests", () => {
     test("should filter by specific area", () => {
       const result = filterByArea(mockInitiatives, "Engineering");
       expect(result).toHaveLength(1);
-      expect(result[0].initiativeId).toBe("init-1");
+      expect(result[0].id).toBe("init-1");
     });
   });
 
@@ -122,7 +122,7 @@ describe("Filter System Integration Tests", () => {
     test("should filter by cycle name", () => {
       const result = filterByCycle(mockInitiatives, "Sep-Oct 2025");
       expect(result).toHaveLength(1);
-      expect(result[0].initiativeId).toBe("init-1");
+      expect(result[0].id).toBe("init-1");
     });
   });
 });

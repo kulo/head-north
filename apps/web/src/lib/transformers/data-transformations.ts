@@ -5,6 +5,21 @@
 
 import pkg from "lodash";
 const { groupBy } = pkg;
+import type {
+  CycleId,
+  InitiativeId,
+  ReleaseItem,
+  Cycle,
+  CycleData,
+  CycleWithProgress,
+  InitiativeWithProgress,
+} from "@omega/types";
+import type {
+  CycleOverviewData,
+  TransformedRoadmapData,
+  TransformedRoadmapItem,
+  ProgressMetrics,
+} from "../../types/ui-types";
 import {
   calculateReleaseItemProgress,
   calculateCycleMetadata,
@@ -13,10 +28,10 @@ import {
 
 /**
  * Calculate progress percentage for release items
- * @param {Array} releaseItems - Array of release items
+ * @param {ReleaseItem[]} releaseItems - Array of release items
  * @returns {number} Progress percentage (0-100)
  */
-export const calculateProgress = (releaseItems) => {
+export const calculateProgress = (releaseItems: ReleaseItem[]): number => {
   if (!Array.isArray(releaseItems) || releaseItems.length === 0) {
     return 0;
   }
@@ -31,10 +46,10 @@ export const calculateProgress = (releaseItems) => {
 
 /**
  * Calculate total weeks from effort values
- * @param {Array} releaseItems - Array of release items
+ * @param {ReleaseItem[]} releaseItems - Array of release items
  * @returns {number} Total weeks
  */
-export const calculateTotalWeeks = (releaseItems) => {
+export const calculateTotalWeeks = (releaseItems: ReleaseItem[]): number => {
   if (!Array.isArray(releaseItems)) {
     return 0;
   }
@@ -44,10 +59,10 @@ export const calculateTotalWeeks = (releaseItems) => {
 
 /**
  * Get primary owner from release items
- * @param {Array} releaseItems - Array of release items
+ * @param {ReleaseItem[]} releaseItems - Array of release items
  * @returns {string} Primary owner name
  */
-export const getPrimaryOwner = (releaseItems) => {
+export const getPrimaryOwner = (releaseItems: ReleaseItem[]): string => {
   if (!Array.isArray(releaseItems) || releaseItems.length === 0) {
     return "Unassigned";
   }
@@ -60,8 +75,12 @@ export const getPrimaryOwner = (releaseItems) => {
   }
 
   // If assignee is an object with displayName property
-  if (typeof lastItem.assignee === "object" && lastItem.assignee.displayName) {
-    return lastItem.assignee.displayName;
+  if (
+    typeof lastItem.assignee === "object" &&
+    lastItem.assignee &&
+    "displayName" in lastItem.assignee
+  ) {
+    return String((lastItem.assignee as any).displayName);
   }
 
   // If assignee is already a string
@@ -74,52 +93,58 @@ export const getPrimaryOwner = (releaseItems) => {
 
 /**
  * Get cycle name by ID
- * @param {Array} cycles - Array of cycles
- * @param {string|number} cycleId - Cycle ID to look up
+ * @param {Cycle[]} cycles - Array of cycles
+ * @param {CycleId} cycleId - Cycle ID to look up
  * @returns {string} Cycle name
  */
-export const getCycleName = (cycles, cycleId) => {
+export const getCycleName = (cycles: Cycle[], cycleId: CycleId): string => {
   if (!Array.isArray(cycles)) {
     return `Cycle ${cycleId}`;
   }
 
   const cycle = cycles.find((c) => c.id === cycleId);
-  return cycle ? cycle.name : `Cycle ${cycleId}`;
+  return cycle ? cycle.name : `Cycle ${String(cycleId)}`;
 };
 
 /**
  * Group roadmap items by initiative
- * @param {Array} roadmapItems - Array of roadmap items
- * @returns {Object} Grouped roadmap items by initiative ID
+ * @param {RoadmapItem[]} roadmapItems - Array of roadmap items
+ * @returns {Record<string, RoadmapItem[]>} Grouped roadmap items by initiative ID
  */
-export const groupRoadmapItemsByInitiative = (roadmapItems) => {
+export const groupRoadmapItemsByInitiative = (
+  roadmapItems: RoadmapItem[],
+): Record<string, RoadmapItem[]> => {
   if (!Array.isArray(roadmapItems)) {
     return {};
   }
 
-  return groupBy(roadmapItems, (item) => item.initiativeId);
+  return groupBy(roadmapItems, (item) =>
+    String(item.initiative?.id || "unassigned"),
+  );
 };
 
 /**
  * Transform raw roadmap item for display
- * @param {Object} item - Raw roadmap item
- * @param {Array} cycles - Array of cycles for name lookup
- * @returns {Object} Transformed roadmap item
+ * @param {RoadmapItem} item - Raw roadmap item
+ * @param {Cycle[]} cycles - Array of cycles for name lookup
+ * @returns {TransformedRoadmapItem | null} Transformed roadmap item
  */
-export const transformRoadmapItem = (item, cycles) => {
+export const transformRoadmapItem = (
+  item: RoadmapItem,
+  cycles: Cycle[],
+): TransformedRoadmapItem | null => {
   if (!item || typeof item !== "object") {
     return null;
   }
 
-  // Get all release items from sprints
-  const allReleaseItems =
-    item.sprints?.flatMap((sprint) => sprint.releaseItems || []) || [];
+  // Get all release items from the roadmap item
+  const allReleaseItems = item.releaseItems || [];
 
   return {
     id: item.id,
     name: item.summary || item.name || `Roadmap Item ${item.id}`,
-    area: item.area,
-    theme: item.theme,
+    area: typeof item.area === "string" ? item.area : item.area?.name || "",
+    theme: typeof item.theme === "string" ? item.theme : "",
     owner: getPrimaryOwner(allReleaseItems),
     progress: calculateProgress(allReleaseItems),
     weeks: calculateTotalWeeks(allReleaseItems),
@@ -128,13 +153,8 @@ export const transformRoadmapItem = (item, cycles) => {
     releaseItems: allReleaseItems.map((releaseItem) => ({
       ...releaseItem,
       cycle: {
-        id: item.sprints?.find((s) => s.releaseItems?.includes(releaseItem))
-          ?.sprintId,
-        name: getCycleName(
-          cycles,
-          item.sprints?.find((s) => s.releaseItems?.includes(releaseItem))
-            ?.sprintId,
-        ),
+        id: releaseItem.cycleId || "",
+        name: getCycleName(cycles, releaseItem.cycleId || ""),
       },
     })),
   };
@@ -142,12 +162,14 @@ export const transformRoadmapItem = (item, cycles) => {
 
 /**
  * Transform raw data for cycle overview view
- * @param {Object} rawData - Raw data from backend
- * @returns {Object} Transformed data for cycle overview with full calculations
+ * @param {CycleData} rawData - Raw data from backend
+ * @returns {CycleOverviewData} Transformed data for cycle overview with full calculations
  */
-export const transformForCycleOverview = (rawData) => {
+export const transformForCycleOverview = (
+  rawData: CycleData,
+): CycleOverviewData => {
   if (!rawData || typeof rawData !== "object") {
-    return { cycles: [], initiatives: [] };
+    return { cycle: null, initiatives: [] };
   }
 
   const {
@@ -166,15 +188,16 @@ export const transformForCycleOverview = (rawData) => {
   }
 
   // Group roadmap items by initiative and calculate progress
-  const groupedInitiatives = {};
+  const groupedInitiatives: Record<string, InitiativeWithProgress> = {};
   const cycleMetrics = [];
 
   roadmapItems.forEach((item) => {
-    const initiativeId = item.initiativeId || "unassigned";
+    const initiativeId: InitiativeId = String(
+      item.initiative?.id || "unassigned",
+    );
     if (!groupedInitiatives[initiativeId]) {
       groupedInitiatives[initiativeId] = {
-        initiativeId,
-        initiative: initiativesLookup[initiativeId] || initiativeId,
+        id: initiativeId,
         name: initiativesLookup[initiativeId] || initiativeId,
         roadmapItems: [],
         // Initialize initiative-level metrics
@@ -191,6 +214,11 @@ export const transformForCycleOverview = (rawData) => {
         progressWithInProgress: 0,
         progressByReleaseItems: 0,
         percentageNotToDo: 0,
+        startMonth: "",
+        endMonth: "",
+        daysFromStartOfCycle: 0,
+        daysInCycle: 0,
+        currentDayPercentage: 0,
       };
     }
 
@@ -205,8 +233,8 @@ export const transformForCycleOverview = (rawData) => {
     const roadmapItem = {
       id: item.id,
       name: item.summary || item.name || `Roadmap Item ${item.id}`,
-      area: item.area,
-      theme: item.theme,
+      area: typeof item.area === "string" ? item.area : item.area?.name || "",
+      theme: typeof item.theme === "string" ? item.theme : "",
       owner: getPrimaryOwner(itemReleaseItems),
       url: item.url || `https://example.com/browse/${item.id}`,
       validations: item.validations || {},
@@ -241,49 +269,54 @@ export const transformForCycleOverview = (rawData) => {
   });
 
   // Calculate final initiative-level percentages
-  Object.values(groupedInitiatives).forEach((initiative: any) => {
-    initiative.progress =
-      initiative.weeks > 0
-        ? Math.round((initiative.weeksDone / initiative.weeks) * 100)
-        : 0;
-    initiative.progressWithInProgress =
-      initiative.weeks > 0
-        ? Math.round(
-            ((initiative.weeksDone + initiative.weeksInProgress) /
-              initiative.weeks) *
-              100,
-          )
-        : 0;
-    initiative.progressByReleaseItems =
-      initiative.releaseItemsCount > 0
-        ? Math.round(
-            (initiative.releaseItemsDoneCount / initiative.releaseItemsCount) *
-              100,
-          )
-        : 0;
-    initiative.percentageNotToDo =
-      initiative.weeks > 0
-        ? Math.round((initiative.weeksNotToDo / initiative.weeks) * 100)
-        : 0;
-  });
+  Object.values(groupedInitiatives).forEach(
+    (initiative: InitiativeWithProgress) => {
+      initiative.progress =
+        initiative.weeks > 0
+          ? Math.round((initiative.weeksDone / initiative.weeks) * 100)
+          : 0;
+      initiative.progressWithInProgress =
+        initiative.weeks > 0
+          ? Math.round(
+              ((initiative.weeksDone + initiative.weeksInProgress) /
+                initiative.weeks) *
+                100,
+            )
+          : 0;
+      initiative.progressByReleaseItems =
+        initiative.releaseItemsCount > 0
+          ? Math.round(
+              (initiative.releaseItemsDoneCount /
+                initiative.releaseItemsCount) *
+                100,
+            )
+          : 0;
+      initiative.percentageNotToDo =
+        initiative.weeks > 0
+          ? Math.round((initiative.weeksNotToDo / initiative.weeks) * 100)
+          : 0;
+    },
+  );
 
   // Sort initiatives by weeks (largest first)
   const sortedInitiatives = Object.values(groupedInitiatives).sort(
-    (a, b) => (b as any).weeks - (a as any).weeks,
+    (a, b) => b.weeks - a.weeks,
   );
 
   return {
-    cycles: cycles || [],
+    cycle: cycles?.[0] || null,
     initiatives: sortedInitiatives,
   };
 };
 
 /**
  * Transform raw data for roadmap view
- * @param {Object} rawData - Raw data from backend
- * @returns {Object} Transformed data for roadmap
+ * @param {CycleData} rawData - Raw data from backend
+ * @returns {TransformedRoadmapData} Transformed data for roadmap
  */
-export const transformForRoadmap = (rawData) => {
+export const transformForRoadmap = (
+  rawData: CycleData,
+): TransformedRoadmapData => {
   if (!rawData || typeof rawData !== "object") {
     return { initiatives: [] };
   }
@@ -307,11 +340,13 @@ export const transformForRoadmap = (rawData) => {
   const groupedInitiatives = {};
 
   roadmapItems.forEach((item) => {
-    const initiativeId = item.initiativeId || "unassigned";
+    const initiativeId: InitiativeId = String(
+      item.initiative?.name || "unassigned",
+    );
     if (!groupedInitiatives[initiativeId]) {
       groupedInitiatives[initiativeId] = {
-        initiativeId,
-        initiative: initiativesLookup[initiativeId] || initiativeId,
+        id: initiativeId,
+        name: initiativesLookup[initiativeId] || initiativeId,
         roadmapItems: [],
       };
     }
@@ -324,8 +359,8 @@ export const transformForRoadmap = (rawData) => {
     groupedInitiatives[initiativeId].roadmapItems.push({
       id: item.id,
       name: item.summary || item.name || `Roadmap Item ${item.id}`,
-      area: item.area,
-      theme: item.theme,
+      area: typeof item.area === "string" ? item.area : item.area?.name || "",
+      theme: typeof item.theme === "string" ? item.theme : "",
       owner: getPrimaryOwner(itemReleaseItems),
       progress: calculateProgress(itemReleaseItems),
       weeks: calculateTotalWeeks(itemReleaseItems),
@@ -348,13 +383,36 @@ export const transformForRoadmap = (rawData) => {
 
 /**
  * Calculate cycle progress based on release items
- * @param {Array} cycles - Array of cycles
- * @param {Array} releaseItems - Array of release items
- * @returns {Array} Cycles with calculated progress and metadata
+ * @param {Cycle[]} cycles - Array of cycles
+ * @param {ReleaseItem[]} releaseItems - Array of release items
+ * @returns {CycleWithProgress[]} Cycles with calculated progress and metadata
  */
-export const calculateCycleProgress = (cycles, releaseItems) => {
+export const calculateCycleProgress = (
+  cycles: Cycle[],
+  releaseItems: ReleaseItem[],
+): CycleWithProgress[] => {
   if (!Array.isArray(cycles) || !Array.isArray(releaseItems)) {
-    return cycles || [];
+    return (cycles || []).map((cycle) => ({
+      ...cycle,
+      progress: 0,
+      progressWithInProgress: 0,
+      progressByReleaseItems: 0,
+      weeks: 0,
+      weeksDone: 0,
+      weeksInProgress: 0,
+      weeksNotToDo: 0,
+      weeksCancelled: 0,
+      weeksPostponed: 0,
+      weeksTodo: 0,
+      releaseItemsCount: 0,
+      releaseItemsDoneCount: 0,
+      percentageNotToDo: 0,
+      startMonth: "",
+      endMonth: "",
+      daysFromStartOfCycle: 0,
+      daysInCycle: 0,
+      currentDayPercentage: 0,
+    }));
   }
 
   return cycles.map((cycle) => {
@@ -398,27 +456,56 @@ export const calculateCycleProgress = (cycles, releaseItems) => {
 
 /**
  * Calculate cycle-level data for a specific cycle with all initiatives
- * @param {Object} cycle - Cycle object
- * @param {Array} initiatives - Array of initiatives with calculated metrics
- * @returns {Object} Cycle with aggregated data
+ * @param {Cycle} cycle - Cycle object
+ * @param {InitiativeWithProgress[]} initiatives - Array of initiatives with calculated metrics
+ * @returns {CycleWithProgress} Cycle with aggregated data
  */
-export const calculateCycleData = (cycle, initiatives) => {
+export const calculateCycleData = (
+  cycle: Cycle,
+  initiatives: InitiativeWithProgress[],
+): CycleWithProgress => {
   if (!cycle || !Array.isArray(initiatives)) {
-    return cycle;
+    return {
+      ...cycle,
+      progress: 0,
+      progressWithInProgress: 0,
+      progressByReleaseItems: 0,
+      weeks: 0,
+      weeksDone: 0,
+      weeksInProgress: 0,
+      weeksNotToDo: 0,
+      weeksCancelled: 0,
+      weeksPostponed: 0,
+      weeksTodo: 0,
+      releaseItemsCount: 0,
+      releaseItemsDoneCount: 0,
+      percentageNotToDo: 0,
+      startMonth: "",
+      endMonth: "",
+      daysFromStartOfCycle: 0,
+      daysInCycle: 0,
+      currentDayPercentage: 0,
+    };
   }
 
   // Aggregate all initiative metrics
-  const initiativeMetrics = initiatives.map((initiative) => ({
-    weeks: initiative.weeks || 0,
-    weeksDone: initiative.weeksDone || 0,
-    weeksInProgress: initiative.weeksInProgress || 0,
-    weeksTodo: initiative.weeksTodo || 0,
-    weeksNotToDo: initiative.weeksNotToDo || 0,
-    weeksCancelled: initiative.weeksCancelled || 0,
-    weeksPostponed: initiative.weeksPostponed || 0,
-    releaseItemsCount: initiative.releaseItemsCount || 0,
-    releaseItemsDoneCount: initiative.releaseItemsDoneCount || 0,
-  }));
+  const initiativeMetrics: ProgressMetrics[] = initiatives.map(
+    (initiative) => ({
+      weeks: initiative.weeks || 0,
+      weeksDone: initiative.weeksDone || 0,
+      weeksInProgress: initiative.weeksInProgress || 0,
+      weeksTodo: initiative.weeksTodo || 0,
+      weeksNotToDo: initiative.weeksNotToDo || 0,
+      weeksCancelled: initiative.weeksCancelled || 0,
+      weeksPostponed: initiative.weeksPostponed || 0,
+      releaseItemsCount: initiative.releaseItemsCount || 0,
+      releaseItemsDoneCount: initiative.releaseItemsDoneCount || 0,
+      progress: initiative.progress || 0,
+      progressWithInProgress: initiative.progressWithInProgress || 0,
+      progressByReleaseItems: initiative.progressByReleaseItems || 0,
+      percentageNotToDo: initiative.percentageNotToDo || 0,
+    }),
+  );
 
   const aggregatedMetrics = aggregateProgressMetrics(initiativeMetrics);
   const cycleMetadata = calculateCycleMetadata(cycle);

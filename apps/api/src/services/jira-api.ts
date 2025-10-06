@@ -3,12 +3,12 @@ import pkg from "lodash";
 const { omit, get } = pkg;
 import type { OmegaConfig } from "@omega/config";
 import type {
-  JiraSprintData,
-  JiraIssueData,
+  JiraSprintsData,
   JiraIssue,
   JiraSprint,
-  ApiResponse,
-} from "../types/api-response-types";
+  JiraRoadmapItemsData,
+} from "../types/jira-types";
+import type { ApiResponse } from "../types/api-response-types";
 
 class JiraAPI {
   private omegaConfig: OmegaConfig;
@@ -23,7 +23,7 @@ class JiraAPI {
    * Get all sprints data (raw from Jira)
    * @returns Raw sprint data
    */
-  async getSprintsData(): Promise<JiraSprintData> {
+  async getSprintsData(): Promise<JiraSprintsData> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
     const sprints = await this._client.board.getAllSprints({
       boardId: jiraConfig?.connection?.boardId || 0,
@@ -42,7 +42,7 @@ class JiraAPI {
    * Get roadmap items data (raw from Jira)
    * @returns Raw roadmap items data
    */
-  async getRoadmapItemsData(): Promise<Record<string, any>> {
+  async getRoadmapItemsData(): Promise<JiraRoadmapItemsData> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
     const response = await this._client.board.getIssuesForBoard({
       boardId: jiraConfig?.connection?.boardId || 0,

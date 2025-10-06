@@ -9,7 +9,7 @@ import { filterByStages } from "../../src/filters/stages-filter";
 const mockInitiatives = [
   {
     name: "Initiative 1",
-    initiativeId: "init-1",
+    id: "init-1",
     roadmapItems: [
       {
         id: "roadmap-1",
@@ -80,7 +80,7 @@ describe("filterByStages", () => {
   it("should filter by specific stage (string format)", () => {
     const result = filterByStages(mockInitiatives, ["Development"]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by specific stage (object format)", () => {
@@ -88,7 +88,7 @@ describe("filterByStages", () => {
       { id: "Development", name: "Development" },
     ]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by multiple stages", () => {
@@ -117,7 +117,7 @@ describe("filterByStages", () => {
   it("should handle empty string IDs", () => {
     const result = filterByStages(mockInitiatives, ["", "Development"]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should handle null/undefined items in selection", () => {
@@ -127,14 +127,14 @@ describe("filterByStages", () => {
       undefined,
     ]);
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should handle initiatives with no roadmap items", () => {
     const initiativesWithNoRoadmap = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [],
       },
     ];
@@ -146,7 +146,7 @@ describe("filterByStages", () => {
     const initiativesWithNoRelease = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [
           {
             id: "roadmap-3",

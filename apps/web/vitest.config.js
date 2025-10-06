@@ -7,6 +7,7 @@ export default defineConfig({
     globals: true,
     include: ["tests/**/*.test.{js,ts,vue}"],
     exclude: ["node_modules", "dist"],
+    setupFiles: ["./tests/setup.ts"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

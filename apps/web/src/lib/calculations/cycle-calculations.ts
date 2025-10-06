@@ -8,15 +8,16 @@ import {
   normalizeStatus,
   isCompletedStatus,
   isInProgressStatus,
-  isNotToDoStatus,
 } from "../constants/status-constants";
+import type { ReleaseItem, Cycle } from "@omega/types";
+import type { CycleMetadata, ProgressMetrics } from "../../types/ui-types";
 
 /**
  * Normalize a number to one decimal place
  * @param {number} number - Number to normalize
  * @returns {number} Normalized number
  */
-export const normalize = (number) => {
+export const normalize = (number: number): number => {
   return Math.round(number * 10) / 10;
 };
 
@@ -25,16 +26,18 @@ export const normalize = (number) => {
  * @param {number} number - Number to round
  * @returns {number} Rounded number
  */
-export const roundToTwoDigit = (number) => {
+export const roundToTwoDigit = (number: number): number => {
   return Math.round(number * 100) / 100;
 };
 
 /**
  * Calculate progress metrics for release items
- * @param {Array} releaseItems - Array of release items
- * @returns {Object} Progress metrics
+ * @param {ReleaseItem[]} releaseItems - Array of release items
+ * @returns {ProgressMetrics} Progress metrics
  */
-export const calculateReleaseItemProgress = (releaseItems) => {
+export const calculateReleaseItemProgress = (
+  releaseItems: ReleaseItem[],
+): ProgressMetrics => {
   if (!Array.isArray(releaseItems) || releaseItems.length === 0) {
     return {
       weeks: 0,
@@ -64,7 +67,10 @@ export const calculateReleaseItemProgress = (releaseItems) => {
   let releaseItemsDoneCount = 0;
 
   releaseItems.forEach((releaseItem) => {
-    const effort = parseFloat(releaseItem.effort) || 0;
+    const effort =
+      typeof releaseItem.effort === "number"
+        ? releaseItem.effort
+        : parseFloat(String(releaseItem.effort)) || 0;
     const status = normalizeStatus(releaseItem.status);
 
     if (status !== STATUS.REPLANNED) {
@@ -118,10 +124,10 @@ export const calculateReleaseItemProgress = (releaseItems) => {
 
 /**
  * Calculate cycle metadata (months, days, percentages)
- * @param {Object} cycle - Cycle object with start, delivery, end dates
- * @returns {Object} Cycle metadata
+ * @param {Cycle} cycle - Cycle object with start, delivery, end dates
+ * @returns {CycleMetadata} Cycle metadata
  */
-export const calculateCycleMetadata = (cycle) => {
+export const calculateCycleMetadata = (cycle: Cycle): CycleMetadata => {
   if (!cycle || !cycle.delivery || !cycle.end) {
     return {
       startMonth: "",
@@ -160,10 +166,12 @@ export const calculateCycleMetadata = (cycle) => {
 
 /**
  * Aggregate progress metrics from multiple sources
- * @param {Array} metricsArray - Array of progress metrics objects
- * @returns {Object} Aggregated progress metrics
+ * @param {ProgressMetrics[]} metricsArray - Array of progress metrics objects
+ * @returns {ProgressMetrics} Aggregated progress metrics
  */
-export const aggregateProgressMetrics = (metricsArray) => {
+export const aggregateProgressMetrics = (
+  metricsArray: ProgressMetrics[],
+): ProgressMetrics => {
   if (!Array.isArray(metricsArray) || metricsArray.length === 0) {
     return {
       weeks: 0,
@@ -205,6 +213,10 @@ export const aggregateProgressMetrics = (metricsArray) => {
       weeksPostponed: 0,
       releaseItemsCount: 0,
       releaseItemsDoneCount: 0,
+      progress: 0,
+      progressWithInProgress: 0,
+      progressByReleaseItems: 0,
+      percentageNotToDo: 0,
     },
   );
 

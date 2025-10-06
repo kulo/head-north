@@ -9,7 +9,7 @@ import { filterByCycle } from "../../src/filters/cycle-filter";
 const mockInitiatives = [
   {
     name: "Initiative 1",
-    initiativeId: "init-1",
+    id: "init-1",
     roadmapItems: [
       {
         id: "roadmap-1",
@@ -83,13 +83,13 @@ describe("filterByCycle", () => {
   it("should filter by cycle ID (string format)", () => {
     const result = filterByCycle(mockInitiatives, "cycle-1");
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by cycle name (string format)", () => {
     const result = filterByCycle(mockInitiatives, "Sep-Oct 2025");
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by cycle ID (object format)", () => {
@@ -98,7 +98,7 @@ describe("filterByCycle", () => {
       name: "Sep-Oct 2025",
     });
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-1");
+    expect(result[0].id).toBe("init-1");
   });
 
   it("should filter by cycle name (object format)", () => {
@@ -119,7 +119,7 @@ describe("filterByCycle", () => {
     const initiativesWithNoRoadmap = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [],
       },
     ];
@@ -131,7 +131,7 @@ describe("filterByCycle", () => {
     const initiativesWithNoRelease = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [
           {
             id: "roadmap-3",
@@ -150,7 +150,7 @@ describe("filterByCycle", () => {
     const initiativesWithNoCycle = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [
           {
             id: "roadmap-3",
@@ -177,7 +177,7 @@ describe("filterByCycle", () => {
     const initiativesWithCycleId = [
       {
         name: "Initiative 3",
-        initiativeId: "init-3",
+        id: "init-3",
         roadmapItems: [
           {
             id: "roadmap-3",
@@ -199,6 +199,6 @@ describe("filterByCycle", () => {
     ];
     const result = filterByCycle(initiativesWithCycleId, "cycle-1");
     expect(result).toHaveLength(1);
-    expect(result[0].initiativeId).toBe("init-3");
+    expect(result[0].id).toBe("init-3");
   });
 });

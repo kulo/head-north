@@ -2,7 +2,7 @@ import { Context } from "koa";
 import collectCycleData from "../../services/collect-cycle-data";
 import { logger } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
-import type { RawData } from "@omega/types";
+import type { RawCycleData } from "@omega/types";
 
 /**
  * Get cycle data endpoint that provides raw data for frontend transformation
@@ -16,29 +16,20 @@ export const getCycleData = async (context: Context): Promise<void> => {
 
   try {
     // Collect raw data from Jira
+    const rawData: RawCycleData = await collectCycleData(omegaConfig);
     const {
       roadmapItems,
-      releaseItems, // ← Changed from issues
+      releaseItems,
       cycles,
       assignees,
       areas,
       initiatives: configInitiatives,
       stages,
       teams,
-    } = await collectCycleData(omegaConfig);
+    } = rawData;
 
     // Basic data validation - fail fast on invalid data
-    validateRawData({
-      cycles,
-      sprints: [],
-      roadmapItems,
-      releaseItems,
-      issues: [],
-      assignees,
-      areas,
-      stages,
-      initiatives: configInitiatives,
-    });
+    validateRawData(rawData);
 
     // Convert areas object to array for consistency
     const areasArray = Object.entries(areas).map(([id, areaData]) => ({
@@ -71,7 +62,7 @@ export const getCycleData = async (context: Context): Promise<void> => {
 /**
  * Validate raw data structure - fail fast on invalid data
  */
-function validateRawData(data: RawData): void {
+function validateRawData(data: RawCycleData): void {
   const {
     cycles,
     roadmapItems,
@@ -90,7 +81,6 @@ function validateRawData(data: RawData): void {
     throw new Error("Invalid roadmapItems data: expected array");
   }
   if (!Array.isArray(releaseItems)) {
-    // ← Changed from issues
     throw new Error("Invalid releaseItems data: expected array");
   }
   if (!Array.isArray(assignees)) {

@@ -3,10 +3,12 @@
     v-model:value="selectedInitiatives"
     class="external-selector initiative-selector"
     mode="multiple"
-    placeholder="All Initiatives"
+    :placeholder="ALL_INITIATIVES_FILTER.name"
     @change="setSelectedInitiatives"
   >
-    <a-select-option key="all" value="all"> All Initiatives </a-select-option>
+    <a-select-option key="all" value="all">
+      {{ ALL_INITIATIVES_FILTER.name }}
+    </a-select-option>
     <a-select-option
       v-for="initiative in filteredInitiatives"
       :key="initiative.id"
@@ -20,6 +22,7 @@
 <script>
 import { ref, computed, watch } from "vue";
 import { useStore } from "vuex";
+import { ALL_INITIATIVES_FILTER } from "@/filters/filter-constants";
 
 export default {
   name: "InitiativeSelector",
@@ -78,7 +81,7 @@ export default {
 
       selectedInitiatives.value = initiativeIds;
 
-      // If no initiatives selected, clear the store (equivalent to "All Initiatives")
+      // If no initiatives selected, clear the store (equivalent to "All Initiatives" selection)
       if (!initiativeIds || initiativeIds.length === 0) {
         store.dispatch("setSelectedInitiatives", []);
         return;
@@ -98,6 +101,7 @@ export default {
       initiatives,
       filteredInitiatives,
       setSelectedInitiatives,
+      ALL_INITIATIVES_FILTER,
     };
   },
 };

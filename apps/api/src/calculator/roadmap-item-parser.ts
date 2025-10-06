@@ -1,11 +1,17 @@
 import pkg from "lodash";
-const { map, reduce, uniq, property } = pkg;
+const { map, uniq } = pkg;
 import { getJiraLink } from "./parse-common";
 import { logger } from "@omega/utils";
 import LabelResolver from "./resolve-labels";
 import type { OmegaConfig } from "@omega/config";
-import type { RoadmapItem, ReleaseItem } from "@omega/types";
+import type {
+  RoadmapItem,
+  ReleaseItem,
+  ValidationItem,
+  TeamId,
+} from "@omega/types";
 import type { ParsedRoadmapItem } from "../types";
+import type { ValidationRule } from "@omega/config";
 
 export class RoadmapItemParser {
   private roadmapItems: Record<string, RoadmapItem>;
@@ -21,11 +27,23 @@ export class RoadmapItemParser {
     this.validationDictionary = omegaConfig.getValidationDictionary();
   }
 
+  private _convertValidationRulesToItems(
+    validationRules: ValidationRule[],
+  ): ValidationItem[] {
+    return validationRules.map((rule, index) => ({
+      id: `validation-${index}`,
+      name: rule.label,
+      status: "error",
+      description: rule.reference,
+    }));
+  }
+
   parse(
     projectId: string,
     releaseItems: ReleaseItem[] = [],
   ): ParsedRoadmapItem {
-    const crew = uniq(map(releaseItems, "teams").flat()).join(", ");
+    const allTeamIds: string[] = uniq(map(releaseItems, "teams").flat());
+    const owningTeam: TeamId = allTeamIds[0] || "unknown";
     const url = getJiraLink(projectId, this.omegaConfig);
 
     if (!this.roadmapItems.hasOwnProperty(projectId)) {
@@ -35,7 +53,6 @@ export class RoadmapItemParser {
         ticket_ids: ticketIds,
       });
       return {
-        initiative: {},
         initiativeId: null,
         name: "",
         theme: {},
@@ -43,11 +60,9 @@ export class RoadmapItemParser {
         area: {},
         isExternal: false,
         releaseItems,
-        crew,
+        owningTeam,
         url,
         validations: [],
-        isPartOfReleaseNarrative: false,
-        isReleaseAtRisk: false,
       };
     }
 
@@ -60,7 +75,6 @@ export class RoadmapItemParser {
         ticket_ids: ticketIds,
       });
       return {
-        initiative: {},
         initiativeId: null,
         name: "",
         theme: {},
@@ -68,11 +82,9 @@ export class RoadmapItemParser {
         area: {},
         isExternal: false,
         releaseItems,
-        crew,
+        owningTeam,
         url,
         validations: [],
-        isPartOfReleaseNarrative: false,
-        isReleaseAtRisk: false,
       };
     }
 
@@ -83,13 +95,11 @@ export class RoadmapItemParser {
       project,
       this.omegaConfig,
     );
-    const release = this._collectReleaseInfo(releaseItems);
     const hasNoPreReleaseAllowedLabel =
       this._hasNoPreReleaseAllowedLabel(project);
 
     const res: ParsedRoadmapItem = {
-      initiative: { name: initiative.value },
-      initiativeId: project.initiativeId || initiative.id,
+      initiative: { id: initiative.id, name: initiative.value },
       name,
       theme: { name: theme.value },
       projectId,
@@ -101,15 +111,11 @@ export class RoadmapItemParser {
         hasNoPreReleaseAllowedLabel,
         releaseItems,
       ),
-      crew: uniq(map(releaseItems, "teams").flat()).join(", "),
+      owningTeam,
       url: getJiraLink(projectId, this.omegaConfig),
-      validations: [
-        area.validations,
-        theme.validations,
-        initiative.validations,
-      ].flat(),
-      isPartOfReleaseNarrative: release.isPartOfNarrative,
-      isReleaseAtRisk: release.isAtRisk,
+      validations: this._convertValidationRulesToItems(
+        [area.validations, theme.validations, initiative.validations].flat(),
+      ),
     };
 
     return res;
@@ -162,7 +168,10 @@ export class RoadmapItemParser {
       }
       return {
         ...item,
-        validations: [...validations, ...validationErrors],
+        validations: [
+          ...validations,
+          ...this._convertValidationRulesToItems(validationErrors),
+        ],
         isExternal: newIsExternal,
       };
     });
@@ -176,34 +185,6 @@ export class RoadmapItemParser {
 
     const projectName = summary.substring(endOfPrefix, endOfProjectName).trim();
     return projectName;
-  }
-
-  private _collectReleaseInfo(releaseItems: ReleaseItem[]): {
-    isPartOfNarrative: boolean;
-    isAtRisk: boolean;
-  } {
-    const OR = (a: boolean, b: boolean) => a || b;
-
-    const releaseItemsReleaseNarratives = map(
-      releaseItems,
-      property("isPartOfReleaseNarrative"),
-    ) as boolean[];
-    const isProjectPartOfNarrative = reduce(
-      releaseItemsReleaseNarratives,
-      OR,
-      false,
-    );
-
-    const releaseItemsReleaseRisks = map(
-      releaseItems,
-      property("isReleaseAtRisk"),
-    ) as boolean[];
-    const isProjectAtRisk = reduce(releaseItemsReleaseRisks, OR, false);
-
-    return {
-      isPartOfNarrative: isProjectPartOfNarrative,
-      isAtRisk: isProjectAtRisk,
-    };
   }
 
   private _hasNoPreReleaseAllowedLabel(project: RoadmapItem): boolean {

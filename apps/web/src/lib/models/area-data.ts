@@ -57,9 +57,8 @@ export default class CycleProgressData {
 
     this.initiatives = data.initiatives.map((initiative) => {
       let preparedInitiative = {
-        name: initiative.initiative,
-        initiative: initiative.initiative,
-        initiativeId: initiative.initiativeId,
+        id: initiative.id,
+        name: initiative.name,
         releaseItemsCount: 0,
         releaseItemsDoneCount: 0,
         weeks: 0,
@@ -81,7 +80,7 @@ export default class CycleProgressData {
           let preparedRoadmapItem = {
             area: roadmapItem.area,
             name: roadmapItem.name,
-            owner: roadmapItem.crew,
+            owner: roadmapItem.owningTeam?.name || "Unknown Team",
             ticketId: roadmapItem.projectId,
             validations: roadmapItem.validations,
             aggregatedValidations: [
@@ -106,9 +105,6 @@ export default class CycleProgressData {
             percentageNotToDo: 0,
             releaseItems: roadmapItem.releaseItems,
             url: roadmapItem.url,
-            isPartOfReleaseNarrative: roadmapItem.isPartOfReleaseNarrative,
-            isReleaseAtRisk: roadmapItem.isReleaseAtRisk,
-            isCrossCloud: roadmapItem.isCrossCloud,
           };
 
           roadmapItem.releaseItems.forEach((releaseItem) => {

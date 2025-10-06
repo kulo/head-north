@@ -1,26 +1,34 @@
 // Parsed/Processed DTOs for API data transformation
 // These are temporary data structures used only during parsing from Jira to Domain objects
 
-import type { ReleaseItem, ValidationItem, AreaId } from "@omega/types";
+import type {
+  ReleaseItem,
+  ValidationItem,
+  AreaId,
+  TeamId,
+  RoadmapItemId,
+  ReleaseItemId,
+  TicketId,
+  ProjectId,
+  StageId,
+  InitiativeId,
+} from "@omega/types";
 
 // ============================================================================
 // Parsed Roadmap Item DTO
 // ============================================================================
 
 export interface ParsedRoadmapItem {
-  initiative: Record<string, unknown>;
-  initiativeId: string | null;
+  id: RoadmapItemId;
+  initiativeId: InitiativeId | null;
   name: string;
   theme: Record<string, unknown>;
-  projectId: string;
   area: Record<string, unknown>;
   isExternal: boolean;
   releaseItems: ReleaseItem[];
-  crew: string;
+  owningTeam: TeamId;
   url: string;
   validations: ValidationItem[];
-  isPartOfReleaseNarrative: boolean;
-  isReleaseAtRisk: boolean;
 }
 
 // ============================================================================
@@ -28,19 +36,17 @@ export interface ParsedRoadmapItem {
 // ============================================================================
 
 export interface ParsedReleaseItem {
-  id: string;
-  ticketId: string;
+  id: ReleaseItemId;
+  ticketId: TicketId;
   effort: number;
-  projectId: string | null;
+  projectId: ProjectId | null;
   name: string;
   areaIds: AreaId[];
-  teams: string[];
+  teams: TeamId[];
   status: string;
   url: string;
   isExternal: boolean;
-  stage: string;
+  stage: StageId;
   assignee: Record<string, unknown>;
   validations: ValidationItem[];
-  isPartOfReleaseNarrative: boolean;
-  isReleaseAtRisk: boolean;
 }

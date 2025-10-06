@@ -22,7 +22,10 @@ const recalculateReleaseItemBasedFields =
       .flat();
     return {
       ...roadmapItem,
-      crew: uniq(teams).join(", "),
+      owningTeam: {
+        id: uniq(teams)[0] || "unknown",
+        name: uniq(teams)[0] || "Unknown Team",
+      },
       area: uniq(areaIds)
         .map((id) => {
           const translation = areaTranslation as Record<string, string>;

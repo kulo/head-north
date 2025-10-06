@@ -5,6 +5,7 @@
 
 import type { RoadmapItem, Initiative } from "@omega/types";
 import type { StageFilter } from "../types";
+import { ALL_STAGES_FILTER } from "./filter-constants";
 
 interface Item {
   roadmapItems?: RoadmapItem[];
@@ -35,7 +36,7 @@ export const filterByStages = (
       stage &&
       (stage.id === "all" ||
         stage.name === "all" ||
-        stage.name === "All Stages")
+        stage.name === ALL_STAGES_FILTER.name)
     );
   });
 

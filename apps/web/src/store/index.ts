@@ -1,4 +1,4 @@
-import { createStore } from "vuex";
+import { createStore, ActionContext } from "vuex";
 import { CycleDataService } from "@/services/index";
 import { logger } from "@omega/utils";
 import { filterByArea } from "@/filters/area-filter";
@@ -14,8 +14,13 @@ import {
 } from "@/lib/transformers/data-transformations";
 import type { OmegaConfig } from "@omega/config";
 import type { Router } from "vue-router";
-import type { Cycle } from "@omega/types";
-import type { StoreState, Filters, Page } from "../types";
+import type { Cycle, CycleId, CycleData, Person } from "@omega/types";
+import type { StoreState, Filters, Page, RoadmapData } from "../types";
+import {
+  ALL_ASSIGNEES_FILTER,
+  ALL_INITIATIVES_FILTER,
+  ALL_STAGES_FILTER,
+} from "@/filters/filter-constants";
 
 /**
  * Determines the best cycle to select based on availability and priority
@@ -63,6 +68,22 @@ const selectBestCycle = (cycles: Cycle[]): Cycle | null => {
 
   // 4. Last resort: return the first cycle (oldest by our sort)
   return sortedCycles[0];
+};
+
+/**
+ * Transform raw assignees data to include "All Assignees" option for UI
+ * @param {Person[]} assignees - Raw assignees from backend
+ * @returns {Array<{id: string, name: string}>} Assignees with "All Assignees" option
+ */
+const transformAssigneesForUI = (
+  assignees: Person[],
+): Array<{ id: string; name: string }> => {
+  return [ALL_ASSIGNEES_FILTER].concat(
+    assignees.map((assignee) => ({
+      id: assignee.accountId,
+      name: assignee.displayName,
+    })),
+  );
 };
 
 // Simple filtering function that works with the simplified data structure
@@ -116,14 +137,14 @@ export default function createAppStore(
     state: {
       loading: false,
       error: null,
+      // Backend cycles data
+      cycles: [],
       // Roadmap data
       roadmapData: {
         orderedCycles: [],
         roadmapItems: [],
         activeCycle: null,
       },
-      // Raw cycles data
-      cycles: [],
       // Cycle overview data
       cycleOverviewData: null,
       currentCycleOverviewData: null,
@@ -168,10 +189,10 @@ export default function createAppStore(
       },
 
       currentCycleOverviewData: (state) => {
-        const rawData = state.currentCycleOverviewData;
+        const cycleOverviewData = state.currentCycleOverviewData;
 
-        if (!rawData || !rawData.initiatives) {
-          return rawData;
+        if (!cycleOverviewData || !cycleOverviewData.initiatives) {
+          return cycleOverviewData;
         }
 
         const initiativesIds = (state.selectedInitiatives || []).map(
@@ -195,28 +216,26 @@ export default function createAppStore(
         }
 
         const filteredInitiatives = applyFilters(
-          rawData.initiatives,
+          cycleOverviewData.initiatives,
           filterOptions,
         );
 
         // Recalculate cycle data based on filtered initiatives
         const recalculatedCycle = calculateCycleData(
-          rawData.cycle,
+          cycleOverviewData.cycle,
           filteredInitiatives,
         );
 
         return {
-          ...rawData,
+          ...cycleOverviewData,
           cycle: recalculatedCycle,
           initiatives: filteredInitiatives,
         };
       },
       validationSummary: (state) => state.validationSummary,
-      initiativeName: (state) => (initiativeId) => {
-        const initiative = state.initiatives.find((i) => i.id === initiativeId);
-        return initiative
-          ? initiative.name
-          : `Unknown Initiative (${initiativeId})`;
+      initiativeName: (state) => (id) => {
+        const initiative = state.initiatives.find((i) => i.id === id);
+        return initiative ? initiative.name : `Unknown Initiative (${id})`;
       },
       selectedPageName: (state) => {
         return (
@@ -317,7 +336,10 @@ export default function createAppStore(
        * @param {object} context - Vuex action context
        * @returns {Promise<string|null>} Cycle ID or null
        */
-      async _ensureSelectedCycle({ commit, state }) {
+      async _ensureSelectedCycle({
+        commit,
+        state,
+      }: ActionContext<StoreState, StoreState>): Promise<CycleId | null> {
         let cycleId = state.selectedCycle?.id;
 
         // If no cycle selected, determine the best cycle to select
@@ -346,38 +368,34 @@ export default function createAppStore(
         return cycleId;
       },
 
-      async fetchRoadmap({ commit }) {
+      async fetchRoadmap({
+        commit,
+      }: ActionContext<StoreState, StoreState>): Promise<void> {
         try {
           commit("SET_LOADING", true);
           commit("SET_ERROR", null);
 
-          // Fetch raw data from API service
-          const rawData = await cycleDataService.getCycleData();
+          const cycleData: CycleData = await cycleDataService.getCycleData();
+          const roadmapData: RoadmapData = transformForRoadmap(cycleData);
 
-          // Transform raw data for roadmap view
-          const roadmapData = transformForRoadmap(rawData);
-
-          // Store the transformed roadmap data
           commit("SET_ROADMAP_DATA", roadmapData);
 
-          // Extract and set metadata from raw data
-          if (rawData.cycles) {
-            // Calculate cycle progress with release items
+          if (cycleData.cycles) {
             const cyclesWithProgress = calculateCycleProgress(
-              rawData.cycles,
-              rawData.releaseItems || [],
+              cycleData.cycles,
+              cycleData.releaseItems || [],
             );
             commit("SET_CYCLES", cyclesWithProgress);
           }
 
-          if (rawData.stages) {
-            commit("SET_STAGES", rawData.stages);
+          if (cycleData.stages) {
+            commit("SET_STAGES", cycleData.stages);
           }
 
-          if (rawData.areas) {
+          if (cycleData.areas) {
             commit(
               "SET_AREAS",
-              rawData.areas.map((area) => ({
+              cycleData.areas.map((area) => ({
                 id: area.id,
                 name: area.name || area.id,
                 teams: area.teams || [],
@@ -385,20 +403,17 @@ export default function createAppStore(
             );
           }
 
-          if (rawData.assignees) {
+          if (cycleData.assignees) {
             commit(
               "SET_ASSIGNEES",
-              rawData.assignees.map((assignee) => ({
-                id: assignee.accountId,
-                name: assignee.displayName,
-              })),
+              transformAssigneesForUI(cycleData.assignees),
             );
           }
 
-          if (rawData.initiatives) {
-            const allInitiatives = [
-              { name: "All Initiatives", id: "all" },
-            ].concat(rawData.initiatives);
+          if (cycleData.initiatives) {
+            const allInitiatives = [ALL_INITIATIVES_FILTER].concat(
+              cycleData.initiatives,
+            );
             commit("SET_INITIATIVES", allInitiatives);
           }
         } catch (error) {
@@ -412,15 +427,16 @@ export default function createAppStore(
       },
 
       // Selector actions
-      async fetchInitiatives({ commit, dispatch }) {
+      async fetchInitiatives({
+        commit,
+        dispatch,
+      }: ActionContext<StoreState, StoreState>): Promise<void> {
         try {
-          const cycleId = await dispatch("_ensureSelectedCycle");
-          const initiatives = await cycleDataService.getAllInitiatives(cycleId);
+          await dispatch("_ensureSelectedCycle");
+          const initiatives = await cycleDataService.getAllInitiatives();
 
-          // Add "All Initiatives" option
-          const allInitiatives = [
-            { name: "All Initiatives", id: "all" },
-          ].concat(initiatives);
+          // Add "All Initiatives" filter option
+          const allInitiatives = [ALL_INITIATIVES_FILTER].concat(initiatives);
           commit("SET_INITIATIVES", allInitiatives);
         } catch (error) {
           const errorMessage =
@@ -429,10 +445,12 @@ export default function createAppStore(
         }
       },
 
-      async fetchAssignees({ commit }) {
+      async fetchAssignees({
+        commit,
+      }: ActionContext<StoreState, StoreState>): Promise<void> {
         try {
           const assignees = await cycleDataService.getAllAssignees();
-          commit("SET_ASSIGNEES", assignees);
+          commit("SET_ASSIGNEES", transformAssigneesForUI(assignees));
         } catch (error) {
           const errorMessage =
             error?.message || error?.toString() || "Unknown error";
@@ -440,7 +458,10 @@ export default function createAppStore(
         }
       },
 
-      async fetchAreas({ commit, dispatch }) {
+      async fetchAreas({
+        commit,
+        dispatch,
+      }: ActionContext<StoreState, StoreState>): Promise<void> {
         try {
           const cycleId = await dispatch("_ensureSelectedCycle");
           const areas = await cycleDataService.getAllAreas(cycleId);
@@ -470,20 +491,22 @@ export default function createAppStore(
       },
 
       // Cycle overview data actions
-      async fetchCycleOverviewData({ state, commit }) {
+      async fetchCycleOverviewData({
+        state,
+        commit,
+      }: ActionContext<StoreState, StoreState>): Promise<void> {
         commit("SET_LOADING", true);
         commit("CLEAR_ERROR");
         try {
-          // Fetch raw data from API service
-          const rawData = await cycleDataService.getCycleData();
+          const cycleData = await cycleDataService.getCycleData();
 
           // Transform raw data for cycle overview view
-          const cycleOverviewData = transformForCycleOverview(rawData);
+          const cycleOverviewData = transformForCycleOverview(cycleData);
 
           // Calculate cycle progress with release items
           const cyclesWithProgress = calculateCycleProgress(
-            rawData.cycles || [],
-            rawData.releaseItems || [],
+            cycleData.cycles || [],
+            cycleData.releaseItems || [],
           );
 
           // Use currently selected cycle if available, otherwise select the best cycle
@@ -510,25 +533,22 @@ export default function createAppStore(
           commit("SET_SELECTED_CYCLE", displayCycle);
 
           // Set metadata from raw data
-          if (rawData.initiatives) {
-            const allInitiatives = [
-              { name: "All Initiatives", id: "all" },
-            ].concat(rawData.initiatives);
+          if (cycleData.initiatives) {
+            const allInitiatives = [ALL_INITIATIVES_FILTER].concat(
+              cycleData.initiatives,
+            );
             commit("SET_INITIATIVES", allInitiatives);
           }
 
-          if (rawData.assignees) {
-            const allAssignees = [{ name: "All Assignees", id: "all" }].concat(
-              rawData.assignees.map((assignee) => ({
-                id: assignee.accountId,
-                name: assignee.displayName,
-              })),
+          if (cycleData.assignees) {
+            commit(
+              "SET_ASSIGNEES",
+              transformAssigneesForUI(cycleData.assignees),
             );
-            commit("SET_ASSIGNEES", allAssignees);
           }
 
-          if (rawData.areas) {
-            const areas = rawData.areas.map((area) => ({
+          if (cycleData.areas) {
+            const areas = cycleData.areas.map((area) => ({
               id: area.id,
               name: area.name || area.id,
               teams: area.teams || [],
@@ -537,9 +557,12 @@ export default function createAppStore(
           }
 
           let allStages = [];
-          if (rawData.stages) {
-            allStages = [{ name: "All Stages", id: "all" }].concat(
-              rawData.stages,
+          if (cycleData.stages) {
+            allStages = [ALL_STAGES_FILTER].concat(
+              cycleData.stages.map((stage) => ({
+                name: stage.name,
+                id: stage.id,
+              })),
             );
             commit("SET_STAGES", allStages);
           }
@@ -548,9 +571,9 @@ export default function createAppStore(
             !state.selectedInitiatives ||
             state.selectedInitiatives.length === 0
           ) {
-            const allInitiatives = [
-              { name: "All Initiatives", id: "all" },
-            ].concat(rawData.initiatives || []);
+            const allInitiatives = [ALL_INITIATIVES_FILTER].concat(
+              cycleData.initiatives || [],
+            );
             commit("SET_SELECTED_INITIATIVES", [allInitiatives[0]]);
           }
 
@@ -558,11 +581,8 @@ export default function createAppStore(
             !state.selectedAssignees ||
             state.selectedAssignees.length === 0
           ) {
-            const allAssignees = [{ name: "All Assignees", id: "all" }].concat(
-              rawData.assignees?.map((assignee) => ({
-                id: assignee.accountId,
-                name: assignee.displayName,
-              })) || [],
+            const allAssignees = transformAssigneesForUI(
+              cycleData.assignees || [],
             );
             commit("SET_SELECTED_ASSIGNEES", [allAssignees[0]]);
           }
@@ -589,7 +609,9 @@ export default function createAppStore(
       },
 
       // Additional selector actions
-      async fetchCycles({ commit }) {
+      async fetchCycles({
+        commit,
+      }: ActionContext<StoreState, StoreState>): Promise<void> {
         try {
           const data = await cycleDataService.getAllCycles();
           commit("SET_CYCLES", data);
@@ -613,7 +635,9 @@ export default function createAppStore(
         dispatch("fetchCycleOverviewData");
       },
 
-      async fetchStages({ commit }) {
+      async fetchStages({
+        commit,
+      }: ActionContext<StoreState, StoreState>): Promise<void> {
         try {
           const data = await cycleDataService.getAllStages();
           commit("SET_STAGES", data);

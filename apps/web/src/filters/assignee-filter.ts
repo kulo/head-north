@@ -5,6 +5,7 @@
 
 import type { RoadmapItem, Initiative } from "@omega/types";
 import type { AssigneeFilter } from "../types";
+import { ALL_ASSIGNEES_FILTER } from "./filter-constants";
 
 interface Item {
   roadmapItems?: RoadmapItem[];
@@ -37,7 +38,7 @@ export const filterByAssignees = (
       (assignee &&
         (assignee.id === "all" ||
           assignee.name === "all" ||
-          assignee.name === "All Assignees"))
+          assignee.name === ALL_ASSIGNEES_FILTER.name))
     );
   });
 

@@ -11,13 +11,21 @@ import {
 describe("predicateFilters", () => {
   const mockReleaseItem = {
     id: "release1",
+    ticketId: "TICKET-123",
+    effort: 5,
+    projectId: "PROJ-1",
     name: "Release Item 1",
-    area: "frontend",
     areaIds: ["frontend", "mobile"],
-    initiativeId: 1,
+    teams: ["team1"],
+    status: "In Progress",
+    url: "https://example.com/ticket/123",
+    isExternal: false,
     stage: "s1",
+    assignee: { id: "user1", name: "John Doe" },
+    validations: [],
     cycleId: "cycle1",
     sprint: { id: "cycle1", name: "Sprint 1" },
+    area: "frontend",
   };
 
   describe("createAreaPredicate", () => {
@@ -60,31 +68,37 @@ describe("predicateFilters", () => {
 
     test('should return true for all items when "All" is selected', () => {
       const predicate = createInitiativesPredicate([
-        { id: "all", name: "All Initiatives" },
+        { id: "all", name: "All Initiatives", value: "all" },
       ]);
       expect(predicate(mockReleaseItem)).toBe(true);
     });
 
     test("should match initiative by initiativeId", () => {
       const predicate = createInitiativesPredicate([
-        { id: 1, name: "Test Initiative" },
+        { id: "1", name: "Test Initiative", value: "1" },
       ]);
-      expect(predicate(mockReleaseItem)).toBe(true);
+      const roadmapItem = {
+        initiative: { id: "1", name: "Test Initiative" },
+      };
+      expect(predicate(roadmapItem)).toBe(true);
     });
 
     test("should return false for non-matching initiative", () => {
       const predicate = createInitiativesPredicate([
-        { id: 2, name: "Other Initiative" },
+        { id: "2", name: "Other Initiative", value: "2" },
       ]);
-      expect(predicate(mockReleaseItem)).toBe(false);
+      const roadmapItem = {
+        initiative: { id: "1", name: "Test Initiative" },
+      };
+      expect(predicate(roadmapItem)).toBe(false);
     });
 
     test("should work with roadmap structure", () => {
       const roadmapItem = {
-        initiatives: [{ initiativeId: 1, name: "Test Initiative" }],
+        initiatives: [{ id: "1", name: "Test Initiative" }],
       };
       const predicate = createInitiativesPredicate([
-        { id: 1, name: "Test Initiative" },
+        { id: "1", name: "Test Initiative", value: "1" },
       ]);
       expect(predicate(roadmapItem)).toBe(true);
     });
@@ -98,18 +112,22 @@ describe("predicateFilters", () => {
 
     test('should return true for all items when "All" is selected', () => {
       const predicate = createStagesPredicate([
-        { id: "all", name: "All Stages" },
+        { id: "all", name: "All Stages", value: "all" },
       ]);
       expect(predicate(mockReleaseItem)).toBe(true);
     });
 
     test("should match stage by stage property", () => {
-      const predicate = createStagesPredicate([{ id: "s1", name: "Stage 1" }]);
+      const predicate = createStagesPredicate([
+        { id: "s1", name: "Stage 1", value: "s1" },
+      ]);
       expect(predicate(mockReleaseItem)).toBe(true);
     });
 
     test("should return false for non-matching stage", () => {
-      const predicate = createStagesPredicate([{ id: "s2", name: "Stage 2" }]);
+      const predicate = createStagesPredicate([
+        { id: "s2", name: "Stage 2", value: "s2" },
+      ]);
       expect(predicate(mockReleaseItem)).toBe(false);
     });
   });
@@ -155,7 +173,11 @@ describe("predicateFilters", () => {
     });
 
     test("should match cycle by cycle object", () => {
-      const predicate = createCyclePredicate({ id: "cycle1", name: "Cycle 1" });
+      const predicate = createCyclePredicate({
+        id: "cycle1",
+        name: "Cycle 1",
+        value: "cycle1",
+      });
       expect(predicate(mockReleaseItem)).toBe(true);
     });
 
@@ -198,8 +220,8 @@ describe("predicateFilters", () => {
     test("should create composite predicates from filter configuration", () => {
       const filters = {
         area: "frontend",
-        initiatives: [{ id: 1, name: "Test Initiative" }],
-        stages: [{ id: "s1", name: "Stage 1" }],
+        initiatives: [{ id: "1", name: "Test Initiative", value: "1" }],
+        stages: [{ id: "s1", name: "Stage 1", value: "s1" }],
         cycle: "cycle1",
       };
 

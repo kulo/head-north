@@ -41,7 +41,7 @@
             </div>
           </div>
           <div class="global-initiatives__detail__name">
-            <span class="initiative">{{ initiative.initiative }}</span>
+            <span class="initiative">{{ initiative.name }}</span>
           </div>
         </div>
       </div>
@@ -309,7 +309,6 @@ export default {
       let initiatives = summarizedInitiatives.value.map((initiative) => {
         return {
           name: initiative.name,
-          initiative: initiative.initiative,
           weeks: initiative.weeks,
           weeksDone: initiative.weeksDone,
           progress: initiative.progress,
@@ -391,7 +390,6 @@ export default {
 
         return {
           name: initiative.name,
-          initiative: initiative.initiative,
           weeks: initiative.weeks,
           weeksDone: initiative.weeksDone,
           progress: initiative.progress,

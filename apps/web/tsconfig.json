@@ -24,6 +24,7 @@
     "incremental": false,
     "noEmit": true,
     "noEmitOnError": false,
+    "types": ["vitest/globals", "node", "jsdom"],
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
@@ -32,6 +33,6 @@
       "@omega/config": ["../../packages/config/src"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

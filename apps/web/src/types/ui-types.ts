@@ -65,6 +65,89 @@ export interface RoadmapData {
   initiatives?: InitiativeWithProgress[];
 }
 
+/**
+ * Transformed roadmap data for frontend display.
+ * Contains processed initiatives with calculated progress metrics
+ * for the roadmap view.
+ */
+export interface TransformedRoadmapData {
+  initiatives: InitiativeWithProgress[];
+}
+
+// ============================================================================
+// Frontend-Specific Transformed Data Types
+// ============================================================================
+
+/**
+ * Release item with embedded cycle information.
+ * Extends a release item to include cycle context for display purposes.
+ * Used when release items need to show which cycle they belong to.
+ */
+export interface ReleaseItemWithCycle extends ReleaseItem {
+  cycle: {
+    id: CycleId;
+    name: string;
+  };
+}
+
+/**
+ * Transformed roadmap item for frontend display.
+ * Contains processed roadmap item data with calculated metrics and
+ * embedded release items that include cycle context.
+ */
+export interface TransformedRoadmapItem {
+  id: string;
+  name: string;
+  area?: string;
+  theme?: string;
+  owner: string;
+  progress: number;
+  weeks: number;
+  url: string;
+  validations: ValidationItem[];
+  releaseItems: ReleaseItemWithCycle[];
+}
+
+/**
+ * Cycle-specific metadata for date and time calculations.
+ * Contains temporal information about cycles like start/end months,
+ * days elapsed, and percentage completion within the cycle timeframe.
+ */
+export interface CycleMetadata {
+  startMonth: string;
+  endMonth: string;
+  daysFromStartOfCycle: number;
+  daysInCycle: number;
+  currentDayPercentage: number;
+}
+
+/**
+ * Pure progress metrics for calculation functions.
+ * Contains only the core progress data without cycle metadata.
+ * Used by calculation functions that need to work with progress metrics
+ * without the overhead of cycle-specific metadata like dates and months.
+ */
+export interface ProgressMetrics {
+  progress: number;
+  progressWithInProgress: number;
+  progressByReleaseItems: number;
+  weeks: number;
+  weeksDone: number;
+  weeksInProgress: number;
+  weeksNotToDo: number;
+  weeksCancelled: number;
+  weeksPostponed: number;
+  weeksTodo: number;
+  releaseItemsCount: number;
+  releaseItemsDoneCount: number;
+  percentageNotToDo: number;
+}
+
+/**
+ * Cycle overview data for frontend display.
+ * Contains a single cycle with its associated initiatives that have
+ * calculated progress metrics for the cycle overview view.
+ */
 export interface CycleOverviewData {
   cycle: Cycle;
   initiatives: InitiativeWithProgress[];
@@ -106,9 +189,11 @@ export interface Filters {
 import type {
   Cycle,
   RoadmapItem,
-  Initiative,
   InitiativeWithProgress,
   Person,
   Area,
   Stage,
+  ReleaseItem,
+  CycleId,
+  ValidationItem,
 } from "@omega/types";

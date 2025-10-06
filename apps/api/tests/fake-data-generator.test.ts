@@ -52,7 +52,7 @@ describe("FakeDataGenerator", () => {
   it("should initialize with correct assignees", () => {
     const assignees = generator.getAssignees();
 
-    expect(assignees).toHaveLength(8);
+    expect(assignees).toHaveLength(2);
     expect(assignees[0]).toEqual({
       displayName: "All Assignees",
       accountId: "all",
@@ -79,8 +79,7 @@ describe("FakeDataGenerator", () => {
     expect(initiatives[0]).toEqual({
       id: "init1",
       name: "User Experience",
-      initiativeId: "init1",
-      initiative: "User Experience",
+      roadmapItems: [],
       progress: 0,
       progressWithInProgress: 0,
       progressByReleaseItems: 0,

@@ -7,6 +7,15 @@
 // Type aliases for better domain clarity
 export type AreaId = string;
 export type TeamId = string;
+export type CycleId = string;
+export type InitiativeId = string;
+export type StageId = string;
+export type RoadmapItemId = string;
+export type ReleaseItemId = string;
+export type ValidationItemId = string;
+export type PersonId = string;
+export type TicketId = string;
+export type ProjectId = string;
 
 export interface Area {
   id: AreaId;
@@ -20,7 +29,7 @@ export interface Team {
 }
 
 export interface Person {
-  accountId: string;
+  accountId: PersonId;
   displayName: string;
 }
 
@@ -35,7 +44,7 @@ export type ISODateString = `${number}-${number}-${number}`;
 
 // Core cycle - immutable properties
 export interface Cycle {
-  id: string;
+  id: CycleId;
   name: string;
   start: ISODateString;
   end: ISODateString;
@@ -43,7 +52,12 @@ export interface Cycle {
   state: CycleState;
 }
 
-// Progress data that can be shared between cycles and initiatives
+/**
+ * Complete progress data including cycle metadata.
+ * Contains both progress metrics and cycle-specific metadata like dates and months.
+ * Used by complete entities (CycleWithProgress, InitiativeWithProgress) that need
+ * both progress calculations and contextual cycle information.
+ */
 export interface ProgressWithinCycle {
   progress: number;
   progressWithInProgress: number;
@@ -69,10 +83,8 @@ export interface ProgressWithinCycle {
 export interface CycleWithProgress extends Cycle, ProgressWithinCycle {}
 
 export interface Initiative {
-  id: string;
+  id: InitiativeId;
   name: string;
-  initiativeId: string;
-  initiative: string;
   roadmapItems?: RoadmapItem[];
 }
 
@@ -82,7 +94,7 @@ export interface InitiativeWithProgress
     ProgressWithinCycle {}
 
 export interface Stage {
-  id: string;
+  id: StageId;
   name: string;
 }
 
@@ -91,32 +103,29 @@ export interface Stage {
 // ============================================================================
 
 export interface RoadmapItem {
-  id: string;
+  id: RoadmapItemId;
   name: string;
   summary: string;
   area?: string | Area;
   theme?: string | Record<string, unknown>;
   initiative?: Record<string, unknown>;
-  initiativeId?: string | null;
+  initiativeId?: InitiativeId | null;
   isExternal?: boolean;
-  crew?: string;
-  projectId?: string;
+  owningTeam?: Team;
+  projectId?: ProjectId;
   url?: string;
   validations?: ValidationItem[];
   releaseItems?: ReleaseItem[];
   labels: string[];
-  isPartOfReleaseNarrative?: boolean;
-  isReleaseAtRisk?: boolean;
   startDate?: ISODateString;
   endDate?: ISODateString;
-  isCrossCloud?: boolean;
 }
 
 export interface ReleaseItem {
-  id: string;
-  ticketId: string;
+  id: ReleaseItemId;
+  ticketId: TicketId;
   effort: number;
-  projectId: string | null;
+  projectId: ProjectId | null;
   name: string;
   areaIds: AreaId[];
   teams: string[];
@@ -126,11 +135,9 @@ export interface ReleaseItem {
   stage: string;
   assignee: Person | Record<string, unknown>;
   validations: ValidationItem[];
-  isPartOfReleaseNarrative: boolean;
-  isReleaseAtRisk: boolean;
-  roadmapItemId?: string;
-  cycleId?: string | number | null;
-  cycle?: { id: string; name: string };
+  roadmapItemId?: RoadmapItemId;
+  cycleId?: CycleId | null;
+  cycle?: { id: CycleId; name: string };
   created?: string;
   updated?: string;
   summary?: string;
@@ -144,12 +151,15 @@ export interface ReleaseItem {
 // Data Collection and Processing Types
 // ============================================================================
 
-export interface RawData {
+/**
+ * Raw cycle data collected from Jira and other sources before any frontend processing.
+ * This represents the initial, unprocessed data structure returned by the backend API.
+ * Contains raw Jira objects and domain entities in their original form.
+ */
+export interface RawCycleData {
   cycles: Cycle[];
-  sprints: Record<string, unknown>[]; // Jira sprints - generic to avoid circular deps
   roadmapItems: RoadmapItem[];
   releaseItems: ReleaseItem[];
-  issues: Record<string, unknown>[]; // Jira issues - generic to avoid circular deps
   assignees: Person[];
   areas: Record<string, Area>;
   initiatives: Initiative[];
@@ -157,14 +167,19 @@ export interface RawData {
   teams?: Team[];
 }
 
+/**
+ * Processed cycle data from the data service layer.
+ * This represents the data structure returned by CycleDataService after basic processing.
+ * Contains raw cycles without progress calculations - progress is added in the transformation layer.
+ */
 export interface CycleData {
-  cycles: CycleWithProgress[];
+  cycles: Cycle[];
   roadmapItems: RoadmapItem[];
   releaseItems: ReleaseItem[];
   areas: Area[];
   initiatives: Initiative[];
   assignees: Person[];
-  stages: string[];
+  stages: Stage[];
 }
 
 // ============================================================================
@@ -172,7 +187,7 @@ export interface CycleData {
 // ============================================================================
 
 export interface ValidationItem {
-  id: string;
+  id: ValidationItemId;
   name: string;
   status: string;
   description?: string;

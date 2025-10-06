@@ -53,8 +53,6 @@ export class ReleaseItemParser {
         stage.validations,
         assignee.validations,
       ].flat(),
-      isPartOfReleaseNarrative: this._isPartOfReleaseNarrative(issue),
-      isReleaseAtRisk: this._isReleaseAtRisk(issue),
     };
   }
 
@@ -194,16 +192,5 @@ export class ReleaseItemParser {
 
   private _isExternalRoadmap(issue: JiraIssue): boolean {
     return false;
-  }
-
-  private _isPartOfReleaseNarrative(issue: JiraIssue): boolean {
-    return issue.fields.labels.includes("release:part-of-narrative");
-  }
-
-  private _isReleaseAtRisk(issue: JiraIssue): boolean {
-    return (
-      issue.fields.labels.includes("release:at-risk") ||
-      issue.fields.labels.includes("at-risk")
-    );
   }
 }

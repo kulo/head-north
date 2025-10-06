@@ -3,10 +3,12 @@
     v-model:value="selectedStages"
     class="external-selector stage-selector"
     mode="multiple"
-    placeholder="All Stages"
+    :placeholder="ALL_STAGES_FILTER.name"
     @change="setSelectedStages"
   >
-    <a-select-option key="all" value="all"> All Stages </a-select-option>
+    <a-select-option key="all" value="all">
+      {{ ALL_STAGES_FILTER.name }}
+    </a-select-option>
     <a-select-option
       v-for="stage in filteredStages"
       :key="stage.id"
@@ -23,6 +25,7 @@
 <script>
 import { computed, ref, watch } from "vue";
 import { useStore } from "vuex";
+import { ALL_STAGES_FILTER } from "@/filters/filter-constants";
 
 export default {
   name: "StageSelector",
@@ -53,7 +56,7 @@ export default {
         return;
       }
 
-      // If no stages selected, clear the store (equivalent to "All Stages")
+      // If no stages selected, clear the store (equivalent to "All Stages" selection)
       if (!stageIds || stageIds.length === 0) {
         store.dispatch("setSelectedStages", []);
         return;
@@ -74,6 +77,7 @@ export default {
       filteredStages,
       isStageSelected,
       setSelectedStages,
+      ALL_STAGES_FILTER,
     };
   },
 };

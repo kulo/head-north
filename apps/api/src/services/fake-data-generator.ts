@@ -7,9 +7,7 @@ import type {
   RoadmapItem,
   ReleaseItem,
 } from "@omega/types";
-import type { JiraIssue } from "../types/jira-types";
-import type { JiraSprint } from "../types/api-response-types";
-import { logger } from "@omega/utils";
+import type { JiraIssue, JiraSprint } from "../types/jira-types";
 
 export default class FakeDataGenerator {
   private omegaConfig: OmegaConfig;
@@ -21,16 +19,7 @@ export default class FakeDataGenerator {
 
   constructor(omegaConfig: OmegaConfig) {
     this.omegaConfig = omegaConfig;
-    this.assignees = [
-      { displayName: "All Assignees", accountId: "all" },
-      { displayName: "John Doe", accountId: "john.doe" },
-      { displayName: "Jane Smith", accountId: "jane.smith" },
-      { displayName: "Bob Johnson", accountId: "bob.johnson" },
-      { displayName: "Alice Brown", accountId: "alice.brown" },
-      { displayName: "Charlie Wilson", accountId: "charlie.wilson" },
-      { displayName: "David Lee", accountId: "david.lee" },
-      { displayName: "Emma Davis", accountId: "emma.davis" },
-    ];
+    this.assignees = this.omegaConfig.getAssignees();
 
     // Get areas and initiatives from omega config
     const areasConfig = this.omegaConfig.getAreas();
@@ -44,8 +33,7 @@ export default class FakeDataGenerator {
     this.initiatives = Object.entries(initiativesConfig).map(([id, name]) => ({
       id,
       name,
-      initiativeId: id,
-      initiative: name,
+      roadmapItems: [],
       progress: 0,
       progressWithInProgress: 0,
       progressByReleaseItems: 0,
@@ -79,13 +67,10 @@ export default class FakeDataGenerator {
 
   async getIssuesForSprint(
     sprintId: string | number,
-    extraFields: string[] = [],
+    _extraFields: string[] = [],
   ): Promise<JiraIssue[]> {
     const issues: JiraIssue[] = [];
     const roadmapItemKeys = Object.keys(this.roadmapItems);
-    const statuses = ["To Do", "In Progress", "Done", "Review"];
-    const issueTypes = ["Story", "Task", "Bug", "Epic", "Release Item"];
-    const stages = ["s0", "s1", "s2", "s3", "s3+"]; // Stage progression order
 
     // Get the current sprint data
     const currentSprint = this.sprints.find(
@@ -135,7 +120,7 @@ export default class FakeDataGenerator {
             parent: { key: roadmapItemKey },
             issuetype: { name: issueType },
             area: roadmapItem.area,
-            initiativeId: roadmapItem.initiativeId || "",
+            id: roadmapItem.initiative?.name || "",
             url: `https://example.com/browse/ISSUE-${issueIndex}`,
             // Add sprint information for proper status resolution
             sprint: currentSprint
@@ -170,7 +155,7 @@ export default class FakeDataGenerator {
       const releaseItems = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
       // Add roadmapItemId foreign key to each release item
       releaseItems.forEach((item) => {
-        const { cycle, ...itemWithoutCycle } = item;
+        const { cycle: _cycle, ...itemWithoutCycle } = item;
         allReleaseItems.push({
           ...itemWithoutCycle,
           roadmapItemId: roadmapItemKey,
@@ -197,7 +182,7 @@ export default class FakeDataGenerator {
 
       const releaseItems = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
 
-      releaseItems.forEach((item, index) => {
+      releaseItems.forEach((item, _index) => {
         if (item.sprint?.id.toString() === sprintId.toString()) {
           issues.push({
             id: item.id,
@@ -299,8 +284,6 @@ export default class FakeDataGenerator {
         stage: releaseStage,
         assignee: assignee,
         validations: [],
-        isPartOfReleaseNarrative: false,
-        isReleaseAtRisk: false,
         summary: `${roadmapItem.summary} - Release Item ${i + 1} - (${releaseStage})`,
         closedSprints: [],
         parent: roadmapItemKey,
@@ -360,7 +343,7 @@ export default class FakeDataGenerator {
     let roadmapItemCounter = 1;
 
     // Generate roadmap items for each initiative (1-5 items per initiative)
-    this.initiatives.forEach((initiative, initiativeIndex) => {
+    this.initiatives.forEach((initiative, _initiativeIndex) => {
       // Generate between 1 and 5 roadmap items per initiative
       const numRoadmapItems = Math.floor(Math.random() * 5) + 1; // 1-5 items
 

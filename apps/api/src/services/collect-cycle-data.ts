@@ -1,7 +1,6 @@
 import { ReleaseItemParser } from "../calculator/release-item-parser";
 import { RoadmapItemParser } from "../calculator/roadmap-item-parser";
 import JiraApiProxy from "./jira-api-proxy";
-import { logger } from "@omega/utils";
 import pkg from "lodash";
 const { uniqBy } = pkg;
 import type { OmegaConfig } from "@omega/config";
@@ -12,15 +11,9 @@ import type {
   Person,
   Area,
   Team,
-  Initiative,
+  RawCycleData,
 } from "@omega/types";
-import type {
-  JiraSprintData,
-  JiraIssue,
-  JiraSprint,
-  Stage,
-  Team as ApiTeam,
-} from "../types/api-response-types";
+import type { JiraIssue, JiraSprint } from "../types/jira-types";
 
 /**
  * Collect cycle data for both roadmap and cycle overview views
@@ -29,26 +22,9 @@ import type {
  */
 export default async (
   omegaConfig: OmegaConfig,
-  extraFields: string[] = [],
-): Promise<{
-  roadmapItems: RoadmapItem[];
-  releaseItems: ReleaseItem[];
-  cycles: Cycle[];
-  assignees: Person[];
-  areas: Record<string, Area>;
-  initiatives: Initiative[];
-  stages: Stage[];
-  teams: ApiTeam[];
-}> => {
-  logger.default.info(
-    "🚀 COLLECT CYCLE DATA: Using integrated parser with existing parsers",
-  );
-  logger.default.info(
-    "🔄 COLLECT CYCLE DATA: Using integrated parser with existing parsers",
-  );
+  _extraFields: string[] = [],
+): Promise<RawCycleData> => {
   const jiraApi = new JiraApiProxy(omegaConfig);
-
-  logger.default.info("🔄 PARSING CYCLE DATA: Starting with existing parsers");
 
   // Get all sprint data from Jira
   const { sprints } = await jiraApi.getSprintsData();
@@ -118,14 +94,6 @@ export default async (
       assignee: parsedReleaseItem?.assignee || rawReleaseItem.assignee || {},
       validations:
         parsedReleaseItem?.validations || rawReleaseItem.validations || [],
-      isPartOfReleaseNarrative:
-        parsedReleaseItem?.isPartOfReleaseNarrative ||
-        rawReleaseItem.isPartOfReleaseNarrative ||
-        false,
-      isReleaseAtRisk:
-        parsedReleaseItem?.isReleaseAtRisk ||
-        rawReleaseItem.isReleaseAtRisk ||
-        false,
       roadmapItemId: rawReleaseItem.roadmapItemId, // Foreign key from getReleaseItemsData()
       cycleId: rawReleaseItem.cycleId?.toString() || "", // Foreign key
       cycle: (() => {
@@ -148,7 +116,7 @@ export default async (
   // Parse roadmap items using existing parser
   const roadmapItemParser = new RoadmapItemParser(roadmapItems, omegaConfig);
 
-  Object.entries(roadmapItems).forEach(([projectId, roadmapItem]) => {
+  Object.entries(roadmapItems).forEach(([projectId, _roadmapItem]) => {
     // Get release items for this roadmap item
     const itemReleaseItems = parsedReleaseItems.filter(
       (ri) => ri.roadmapItemId === projectId,
@@ -160,18 +128,34 @@ export default async (
       itemReleaseItems,
     );
 
+    // Convert TeamId to Team object
+    const owningTeamId = parsedRoadmapItem.owningTeam;
+    const owningTeam: Team = (() => {
+      // Find the team in enhanced areas
+      for (const area of Object.values(enhancedAreas)) {
+        const team = area.teams.find((t) => t.id === owningTeamId);
+        if (team) {
+          return team;
+        }
+      }
+      // Fallback: create a basic team object if not found
+      return {
+        id: owningTeamId,
+        name: `Team ${owningTeamId}`,
+      };
+    })();
+
     // Create flat roadmap item
     const flatRoadmapItem: RoadmapItem = {
       id: projectId,
       name: parsedRoadmapItem.name,
       summary: parsedRoadmapItem.name,
       labels: [],
-      initiative: parsedRoadmapItem.initiative,
       initiativeId: parsedRoadmapItem.initiativeId,
       theme: parsedRoadmapItem.theme,
       area: parsedRoadmapItem.area as unknown as Area,
       isExternal: parsedRoadmapItem.isExternal,
-      crew: parsedRoadmapItem.crew,
+      owningTeam: owningTeam,
       url: parsedRoadmapItem.url,
       validations: parsedRoadmapItem.validations,
       // Remove the nested releaseItems - they're in the flat releaseItems array
@@ -245,10 +229,9 @@ export default async (
     assignees,
     areas: enhancedAreas,
     initiatives: Object.entries(initiatives).map(([id, name]) => ({
-      id,
+      id: id as string,
       name: name as string,
-      initiativeId: id,
-      initiative: name as string,
+      roadmapItems: [],
       progress: 0,
       progressWithInProgress: 0,
       progressByReleaseItems: 0,
@@ -277,23 +260,16 @@ export default async (
  * Extract assignees from issues
  */
 const getAssignees = (issues: JiraIssue[]): Person[] => {
-  return [
-    {
-      displayName: "All Assignees",
-      accountId: "all",
-    },
-  ].concat(
-    uniqBy(
-      issues
-        .filter((issue) => issue.fields.assignee !== null)
-        .map((issue) => issue.fields.assignee!)
-        .map((assignee) => ({
-          displayName: assignee.displayName,
-          accountId: assignee.accountId,
-        })),
-      "accountId",
-    ).sort((assignee1, assignee2) => {
-      return assignee1.displayName > assignee2.displayName ? 1 : -1;
-    }),
-  );
+  return uniqBy(
+    issues
+      .filter((issue) => issue.fields.assignee !== null)
+      .map((issue) => issue.fields.assignee!)
+      .map((assignee) => ({
+        displayName: assignee.displayName,
+        accountId: assignee.accountId,
+      })),
+    "accountId",
+  ).sort((assignee1, assignee2) => {
+    return assignee1.displayName > assignee2.displayName ? 1 : -1;
+  });
 };

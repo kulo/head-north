@@ -115,18 +115,18 @@ describe("Data Transformations", () => {
   describe("groupRoadmapItemsByInitiative", () => {
     test("should group items by initiativeId", () => {
       const roadmapItems = [
-        { id: 1, initiativeId: "init1", name: "Item 1" },
-        { id: 2, initiativeId: "init1", name: "Item 2" },
-        { id: 3, initiativeId: "init2", name: "Item 3" },
+        { id: 1, name: "Item 1", initiative: { id: "init1" } },
+        { id: 2, name: "Item 2", initiative: { id: "init1" } },
+        { id: 3, name: "Item 3", initiative: { id: "init2" } },
       ];
 
       const result = groupRoadmapItemsByInitiative(roadmapItems);
       expect(result).toEqual({
         init1: [
-          { id: 1, initiativeId: "init1", name: "Item 1" },
-          { id: 2, initiativeId: "init1", name: "Item 2" },
+          { id: 1, name: "Item 1", initiative: { id: "init1" } },
+          { id: 2, name: "Item 2", initiative: { id: "init1" } },
         ],
-        init2: [{ id: 3, initiativeId: "init2", name: "Item 3" }],
+        init2: [{ id: 3, name: "Item 3", initiative: { id: "init2" } }],
       });
     });
 
@@ -148,18 +148,20 @@ describe("Data Transformations", () => {
         area: "test-area",
         theme: "test-theme",
         url: "https://example.com/ROAD-1",
-        sprints: [
+        releaseItems: [
           {
-            sprintId: 1,
-            releaseItems: [
-              { id: "REL-1", status: "done", effort: 2, assignee: "John Doe" },
-              {
-                id: "REL-2",
-                status: "in-progress",
-                effort: 1,
-                assignee: "Jane Smith",
-              },
-            ],
+            id: "REL-1",
+            status: "done",
+            effort: 2,
+            assignee: "John Doe",
+            cycleId: 1,
+          },
+          {
+            id: "REL-2",
+            status: "in-progress",
+            effort: 1,
+            assignee: "Jane Smith",
+            cycleId: 1,
           },
         ],
       };
@@ -182,6 +184,7 @@ describe("Data Transformations", () => {
             status: "done",
             effort: 2,
             assignee: "John Doe",
+            cycleId: 1,
             cycle: { id: 1, name: "Sprint 1" },
           },
           {
@@ -189,6 +192,7 @@ describe("Data Transformations", () => {
             status: "in-progress",
             effort: 1,
             assignee: "Jane Smith",
+            cycleId: 1,
             cycle: { id: 1, name: "Sprint 1" },
           },
         ],
@@ -210,8 +214,7 @@ describe("Data Transformations", () => {
         roadmapItems: [
           {
             id: "ROAD-1",
-            initiativeId: "init1",
-            initiative: "Initiative 1",
+            initiative: { id: "init1", name: "Initiative 1" },
             summary: "Item 1",
             sprints: [],
           },
@@ -223,16 +226,17 @@ describe("Data Transformations", () => {
 
       const result = transformForCycleOverview(rawData);
 
-      expect(result).toHaveProperty("cycles");
+      expect(result).toHaveProperty("cycle");
       expect(result).toHaveProperty("initiatives");
-      expect(result.cycles).toHaveLength(2);
+      expect(result.cycle).toBeDefined();
       expect(result.initiatives).toHaveLength(1);
       expect(result.initiatives[0]).toMatchObject({
-        initiativeId: "init1",
+        id: "init1",
+        name: "init1",
         roadmapItems: expect.arrayContaining([
           expect.objectContaining({
             id: "ROAD-1",
-            name: "Item 1",
+            summary: "Item 1",
           }),
         ]),
       });
@@ -240,7 +244,7 @@ describe("Data Transformations", () => {
 
     test("should handle invalid input", () => {
       expect(transformForCycleOverview(null)).toEqual({
-        cycles: [],
+        cycle: null,
         initiatives: [],
       });
     });
@@ -253,10 +257,8 @@ describe("Data Transformations", () => {
         roadmapItems: [
           {
             id: "ROAD-1",
-            initiativeId: "init1",
-            initiative: "Initiative 1",
+            initiative: { name: "init1" },
             summary: "Item 1",
-            sprints: [],
           },
         ],
         releaseItems: [],
@@ -267,7 +269,8 @@ describe("Data Transformations", () => {
       expect(result).toHaveProperty("initiatives");
       expect(result.initiatives).toHaveLength(1);
       expect(result.initiatives[0]).toMatchObject({
-        initiativeId: "init1",
+        id: "init1",
+        name: "init1",
         roadmapItems: expect.arrayContaining([
           expect.objectContaining({
             id: "ROAD-1",
