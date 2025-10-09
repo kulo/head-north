@@ -1,9 +1,10 @@
 /**
- * DataProcessor - Unified data processing and filtering
+ * Data Transformer
  *
- * This class handles the transformation of raw CycleData into NestedCycleData
- * and applies unified filtering. It replaces the fragmented data transformation
- * and filtering logic with a single, consistent approach.
+ * Pure data transformation functions with no side effects.
+ * Handles the core business logic of transforming raw data into UI-ready formats.
+ *
+ * This belongs in /lib because it contains only pure functions with no external dependencies.
  */
 
 import type { CycleData, InitiativeId, RoadmapItem } from "@omega/types";
@@ -12,8 +13,12 @@ import type {
   InitiativeWithProgress,
   NestedCycleData,
   RoadmapItemWithProgress,
+  RoadmapData,
+  CycleOverviewData,
 } from "../../types/ui-types";
-import { filter } from "../filters/filter";
+import { filter } from "../utils/filter";
+import { selectBestCycle } from "../selectors/cycle-selector";
+import { calculateCycleProgress } from "../cycle-progress-calculator";
 import {
   calculateReleaseItemProgress,
   calculateCycleMetadata,
@@ -27,44 +32,14 @@ import {
 } from "../constants/default-values";
 
 /**
- * DataProcessor class for unified data processing
- *
- * Handles:
- * 1. Transformation of raw CycleData to NestedCycleData
- * 2. Application of unified filters
- * 3. Progress calculations and metrics
+ * Pure data transformation functions
  */
-export class DataProcessor {
-  /**
-   * Process raw cycle data into nested structure with filtering
-   *
-   * @param rawData - Raw cycle data from backend
-   * @param filters - Filter criteria to apply
-   * @returns Processed nested data with filters applied
-   */
-  processCycleData(
-    rawData: CycleData,
-    filters: FilterCriteria = {},
-  ): NestedCycleData {
-    // Transform raw data to nested structure
-    const nestedData = this.transformToNestedStructure(rawData);
-
-    // Apply initiative filter first (at initiative level)
-    const initiativeFilteredData = this.applyInitiativeFilter(
-      nestedData,
-      filters.initiatives,
-    );
-
-    // Apply all other filters (cascading from release items up)
-    const result = filter.apply(initiativeFilteredData, filters);
-
-    return result.data;
-  }
-
+export class DataTransformer {
   /**
    * Transform raw CycleData to NestedCycleData structure
+   * Pure function - no side effects
    */
-  private transformToNestedStructure(rawData: CycleData): NestedCycleData {
+  static transformToNestedStructure(rawData: CycleData): NestedCycleData {
     const { cycles, roadmapItems, releaseItems, initiatives } = rawData;
 
     // Create initiatives lookup
@@ -132,7 +107,7 @@ export class DataProcessor {
           ...releaseItem,
           cycle: releaseItem.cycle || {
             id: releaseItem.cycleId,
-            name: this.getCycleName(cycles, releaseItem.cycleId),
+            name: DataTransformer.getCycleName(cycles, releaseItem.cycleId),
           },
         })),
         // Add calculated metrics
@@ -203,8 +178,9 @@ export class DataProcessor {
 
   /**
    * Apply initiative filter at the initiative level
+   * Pure function - no side effects
    */
-  private applyInitiativeFilter(
+  static applyInitiativeFilter(
     data: NestedCycleData,
     initiatives?: InitiativeId[],
   ): NestedCycleData {
@@ -223,21 +199,144 @@ export class DataProcessor {
   }
 
   /**
-   * Get primary owner from release items
+   * Process raw cycle data into nested structure with filtering
+   * Pure function - no side effects
    */
-  private getPrimaryOwner(releaseItems: any[]): string {
-    if (!Array.isArray(releaseItems) || releaseItems.length === 0) {
-      return DEFAULT_ASSIGNEE.NAME;
+  static processCycleData(
+    rawData: CycleData,
+    filters: FilterCriteria = {},
+  ): NestedCycleData {
+    // Transform raw data to nested structure
+    const nestedData = DataTransformer.transformToNestedStructure(rawData);
+
+    // Apply initiative filter first (at initiative level)
+    const initiativeFilteredData = DataTransformer.applyInitiativeFilter(
+      nestedData,
+      filters.initiatives,
+    );
+
+    // Apply all other filters (cascading from release items up)
+    const result = filter.apply(initiativeFilteredData, filters);
+
+    return result.data;
+  }
+
+  /**
+   * Generate roadmap data from raw and processed data
+   * Pure function - no side effects
+   */
+  static generateRoadmapData(
+    rawData: CycleData | null,
+    processedData: NestedCycleData | null,
+  ): RoadmapData {
+    if (!processedData) {
+      return {
+        orderedCycles: [],
+        roadmapItems: [],
+        activeCycle: null,
+        initiatives: [],
+      };
     }
 
-    const lastItem = releaseItems[releaseItems.length - 1];
-    return getDefaultAssigneeName(lastItem.assignee);
+    return {
+      orderedCycles: rawData?.cycles || [],
+      roadmapItems: [],
+      activeCycle: selectBestCycle(rawData?.cycles || []),
+      initiatives: processedData.initiatives || [],
+    };
+  }
+
+  /**
+   * Generate cycle overview data from raw and processed data
+   * Pure function - no side effects
+   */
+  static generateCycleOverviewData(
+    rawData: CycleData | null,
+    processedData: NestedCycleData | null,
+  ): CycleOverviewData | null {
+    if (!processedData || !rawData?.cycles?.length) {
+      return null;
+    }
+
+    const selectedCycle = selectBestCycle(rawData.cycles);
+    if (!selectedCycle) {
+      return null;
+    }
+
+    return {
+      cycle: selectedCycle,
+      initiatives: processedData.initiatives || [],
+    };
+  }
+
+  /**
+   * Generate filtered roadmap data
+   * Pure function - no side effects
+   */
+  static generateFilteredRoadmapData(
+    rawData: CycleData | null,
+    processedData: NestedCycleData | null,
+    activeFilters: FilterCriteria,
+  ): RoadmapData {
+    if (!processedData) {
+      return {
+        orderedCycles: [],
+        roadmapItems: [],
+        activeCycle: null,
+        initiatives: [],
+      };
+    }
+
+    // Apply filters using unified filter system
+    const filteredData = filter.apply(processedData, activeFilters);
+
+    return {
+      orderedCycles: rawData?.cycles || [],
+      roadmapItems: [],
+      activeCycle: selectBestCycle(rawData?.cycles || []),
+      initiatives: filteredData.data.initiatives || [],
+    };
+  }
+
+  /**
+   * Generate filtered cycle overview data with progress calculations
+   * Pure function - no side effects
+   */
+  static generateFilteredCycleOverviewData(
+    rawData: CycleData | null,
+    processedData: NestedCycleData | null,
+    activeFilters: FilterCriteria,
+  ): CycleOverviewData | null {
+    if (!processedData || !rawData?.cycles?.length) {
+      return null;
+    }
+
+    const selectedCycle = selectBestCycle(rawData.cycles);
+    if (!selectedCycle) {
+      return null;
+    }
+
+    // Apply filters using unified filter system
+    const filteredData = filter.apply(processedData, activeFilters);
+    const filteredInitiatives = filteredData.data.initiatives || [];
+
+    // Calculate cycle progress data
+    const cycleWithProgress = calculateCycleProgress(
+      selectedCycle,
+      filteredInitiatives,
+    );
+
+    return {
+      cycle: cycleWithProgress,
+      initiatives: filteredInitiatives,
+    };
   }
 
   /**
    * Get cycle name by ID
+   * Pure function - no side effects
    */
-  private getCycleName(cycles: any[], cycleId: string): string {
+  private static getCycleName(cycles: any[], cycleId: string): string {
     if (!Array.isArray(cycles)) {
       return `Cycle ${cycleId}`;
     }
@@ -246,6 +345,3 @@ export class DataProcessor {
     return cycle ? cycle.name : `Cycle ${String(cycleId)}`;
   }
 }
-
-// Export singleton instance
-export const dataProcessor = new DataProcessor();

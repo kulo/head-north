@@ -1,9 +1,9 @@
 import { createStore, ActionContext } from "vuex";
 import { CycleDataService } from "../services/index";
 import { logger } from "@omega/utils";
-import { dataProcessor } from "../lib/processors/data-processor";
-import { filter } from "../lib/filters/filter";
-import { viewFilterManager } from "../lib/filters/view-filter-manager";
+import { DataTransformer } from "../lib/transformers/data-transformer";
+import { filter } from "../lib/utils/filter";
+import { createViewFilterManager } from "../services/view-filter-manager";
 import {
   calculateReleaseItemProgress,
   calculateCycleMetadata,
@@ -118,6 +118,9 @@ export default function createAppStore(
   omegaConfig: OmegaConfig,
   router: Router,
 ) {
+  // Create ViewFilterManager with dependency injection
+  const viewFilterManager = createViewFilterManager(omegaConfig);
+
   const store = createStore<StoreState>({
     state: {
       loading: false,
@@ -300,7 +303,7 @@ export default function createAppStore(
 
           // Process data using DataProcessor
           console.log("Processing data with DataProcessor");
-          const processedData = dataProcessor.processCycleData(cycleData, {});
+          const processedData = DataTransformer.processCycleData(cycleData, {});
 
           if (!processedData) {
             throw new Error("Data processing failed");
@@ -340,7 +343,10 @@ export default function createAppStore(
       ) {
         try {
           // Use ViewFilterManager to handle filter updates
-          const activeFilters = viewFilterManager.updateFilter(key, value);
+          const activeFilters = viewFilterManager.updateFilter(
+            key as any,
+            value,
+          );
           const allViewFilters = viewFilterManager.getAllViewFilters();
 
           commit("SET_FILTERS", allViewFilters);

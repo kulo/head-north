@@ -25,7 +25,7 @@
 <script>
 import { ref, computed, watch } from "vue";
 import { useStore } from "vuex";
-import { ALL_ASSIGNEES_FILTER } from "@/filters/filter-constants";
+import { ALL_ASSIGNEES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {
   name: "AssigneeSelector",

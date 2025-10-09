@@ -3,6 +3,8 @@ import App from "./App.vue";
 import createAppRouter from "./router/index";
 import createAppStore from "./store/index";
 import { CycleDataService } from "./services/index";
+import { createViewFilterManager } from "./services/view-filter-manager";
+import { createCycleDataViewCoordinator } from "./services/cycle-data-view-coordinator";
 import { OmegaConfig } from "@omega/config";
 import { logger } from "@omega/utils";
 import Antd from "ant-design-vue";
@@ -15,6 +17,11 @@ const omegaConfig = new OmegaConfig({
   overrides: { environment: (import.meta as any).env?.MODE || "development" },
 });
 const cycleDataService = new CycleDataService(omegaConfig);
+
+// Create filter services with dependency injection
+const viewFilterManager = createViewFilterManager(omegaConfig);
+const cycleDataViewCoordinator =
+  createCycleDataViewCoordinator(viewFilterManager);
 
 // Create the Vue app
 const app = createApp(App);

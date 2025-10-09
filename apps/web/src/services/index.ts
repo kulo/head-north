@@ -1,6 +1,14 @@
 /**
  * Services Index
- * Centralized export for all cycle data services
+ * Centralized export for all services
  */
 
 export { default as CycleDataService } from "./cycle-data-service";
+export {
+  CycleDataViewCoordinator,
+  createCycleDataViewCoordinator,
+} from "./cycle-data-view-coordinator";
+export {
+  ViewFilterManager,
+  createViewFilterManager,
+} from "./view-filter-manager";

@@ -25,7 +25,7 @@
 <script>
 import { computed, ref, watch } from "vue";
 import { useStore } from "vuex";
-import { ALL_STAGES_FILTER } from "@/filters/filter-constants";
+import { ALL_STAGES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {
   name: "StageSelector",
