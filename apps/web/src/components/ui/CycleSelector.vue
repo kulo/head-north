@@ -16,7 +16,7 @@ import { computed, watch } from "vue";
 import { useStore } from "vuex";
 
 export default {
-  name: "UnifiedCycleSelector",
+  name: "CycleSelector",
   setup() {
     const store = useStore();
 

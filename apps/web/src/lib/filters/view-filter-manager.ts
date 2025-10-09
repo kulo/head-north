@@ -69,12 +69,9 @@ export class ViewFilterManager {
       }
     } else if (this.isRoadmapFilter(key)) {
       if (value === undefined) {
-        delete this.viewFilters.roadmap[
-          key as keyof typeof this.viewFilters.roadmap
-        ];
+        delete (this.viewFilters.roadmap as any)[key];
       } else {
-        this.viewFilters.roadmap[key as keyof typeof this.viewFilters.roadmap] =
-          value;
+        (this.viewFilters.roadmap as any)[key] = value;
       }
     }
 

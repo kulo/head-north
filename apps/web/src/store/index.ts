@@ -2,7 +2,7 @@ import { createStore, ActionContext } from "vuex";
 import { CycleDataService } from "../services/index";
 import { logger } from "@omega/utils";
 import { dataProcessor } from "../lib/processors/data-processor";
-import { unifiedFilter } from "../lib/filters/unified-filter";
+import { filter } from "../lib/filters/filter";
 import { viewFilterManager } from "../lib/filters/view-filter-manager";
 import type { OmegaConfig } from "@omega/config";
 import type { Router } from "vue-router";
@@ -16,7 +16,7 @@ import type {
   Stage,
 } from "@omega/types";
 import type {
-  UnifiedStoreState,
+  StoreState,
   FilterCriteria,
   ViewFilterCriteria,
   NestedCycleData,
@@ -74,12 +74,12 @@ const selectBestCycle = (cycles: Cycle[]): Cycle | null => {
 };
 
 // Store factory function that accepts dependencies
-export default function createUnifiedStore(
+export default function createAppStore(
   cycleDataService: CycleDataService,
   omegaConfig: OmegaConfig,
   router: Router,
 ) {
-  const store = createStore<UnifiedStoreState>({
+  const store = createStore<StoreState>({
     state: {
       loading: false,
       error: null,
@@ -164,10 +164,7 @@ export default function createUnifiedStore(
 
         // Apply filters using unified filter system
         const activeFilters = viewFilterManager.getActiveFilters();
-        const filteredData = unifiedFilter.apply(
-          state.processedData,
-          activeFilters,
-        );
+        const filteredData = filter.apply(state.processedData, activeFilters);
         return {
           orderedCycles: state.rawData?.cycles || [],
           roadmapItems: [],
@@ -187,10 +184,7 @@ export default function createUnifiedStore(
 
         // Apply filters using unified filter system
         const activeFilters = viewFilterManager.getActiveFilters();
-        const filteredData = unifiedFilter.apply(
-          state.processedData,
-          activeFilters,
-        );
+        const filteredData = filter.apply(state.processedData, activeFilters);
         return {
           cycle: selectedCycle,
           initiatives: filteredData.data.initiatives || [],

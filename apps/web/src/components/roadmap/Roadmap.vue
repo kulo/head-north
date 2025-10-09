@@ -6,8 +6,8 @@
         <page-selector></page-selector>
       </div>
       <div class="cycle-overview-header__right">
-        <unified-initiative-selector></unified-initiative-selector>
-        <unified-area-selector></unified-area-selector>
+        <initiative-selector></initiative-selector>
+        <area-selector></area-selector>
       </div>
     </div>
     <a-layout-content id="roadmaps">
@@ -66,17 +66,17 @@ import { useStore } from "vuex";
 import RoadmapItemOverview from "./RoadmapItemOverview.vue";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
-import UnifiedAreaSelector from "../ui/UnifiedAreaSelector.vue";
-import UnifiedInitiativeSelector from "../ui/UnifiedInitiativeSelector.vue";
+import AreaSelector from "../ui/AreaSelector.vue";
+import InitiativeSelector from "../ui/InitiativeSelector.vue";
 
 export default {
-  name: "UnifiedRoadmap",
+  name: "Roadmap",
   components: {
     RoadmapItemOverview,
     Logo,
     PageSelector,
-    UnifiedAreaSelector,
-    UnifiedInitiativeSelector,
+    AreaSelector,
+    InitiativeSelector,
   },
   setup() {
     const store = useStore();

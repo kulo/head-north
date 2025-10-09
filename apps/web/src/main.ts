@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import createAppRouter from "./router/index";
-import createUnifiedStore from "./store/unified-store";
+import createAppStore from "./store/index";
 import { CycleDataService } from "./services/index";
 import { OmegaConfig } from "@omega/config";
 import { logger } from "@omega/utils";
@@ -22,7 +22,7 @@ const app = createApp(App);
 // Add router, store, and Ant Design Vue
 const router = createAppRouter(omegaConfig);
 app.use(router);
-const store = createUnifiedStore(cycleDataService, omegaConfig, router);
+const store = createAppStore(cycleDataService, omegaConfig, router);
 app.use(store);
 
 app.use(Antd);

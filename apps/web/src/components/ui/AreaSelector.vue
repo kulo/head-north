@@ -17,7 +17,7 @@ import { computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
 export default {
-  name: "UnifiedAreaSelector",
+  name: "AreaSelector",
   setup() {
     const store = useStore();
 

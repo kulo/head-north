@@ -28,7 +28,7 @@ import { useStore } from "vuex";
 import { ALL_STAGES_FILTER } from "@/filters/filter-constants";
 
 export default {
-  name: "UnifiedStageSelector",
+  name: "StageSelector",
   setup() {
     const store = useStore();
 

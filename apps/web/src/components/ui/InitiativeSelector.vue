@@ -25,7 +25,7 @@ import { useStore } from "vuex";
 import { ALL_INITIATIVES_FILTER } from "@/filters/filter-constants";
 
 export default {
-  name: "UnifiedInitiativeSelector",
+  name: "InitiativeSelector",
   setup() {
     const store = useStore();
 

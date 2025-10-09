@@ -225,30 +225,6 @@ export interface CycleOverviewData extends NestedCycleData {
 export interface StoreState {
   loading: boolean;
   error: string | null;
-  roadmapData: RoadmapData;
-  cycles: Cycle[];
-  cycleOverviewData: CycleOverviewData | null;
-  currentCycleOverviewData: CycleOverviewData | null;
-  initiatives: InitiativeWithProgress[];
-  assignees: Person[];
-  areas: Area[];
-  stages: Stage[];
-  pages: {
-    all: Page[];
-    current: Page | null;
-  };
-  selectedInitiatives: InitiativeWithProgress[];
-  selectedAssignees: Person[];
-  selectedArea: string | null;
-  selectedCycle: Cycle | null;
-  selectedStages: Stage[];
-  validationEnabled: boolean;
-  validationSummary: Record<string, unknown>[];
-}
-
-export interface UnifiedStoreState {
-  loading: boolean;
-  error: string | null;
   validationEnabled: boolean;
   pages: Page[];
   currentPage: string;

@@ -4,13 +4,13 @@
       <div class="cycle-overview-header__left">
         <logo></logo>
         <page-selector></page-selector>
-        <unified-cycle-selector></unified-cycle-selector>
+        <cycle-selector></cycle-selector>
       </div>
       <div class="cycle-overview-header__right">
-        <unified-initiative-selector></unified-initiative-selector>
-        <unified-area-selector></unified-area-selector>
-        <unified-assignee-selector></unified-assignee-selector>
-        <unified-stage-selector></unified-stage-selector>
+        <initiative-selector></initiative-selector>
+        <area-selector></area-selector>
+        <assignee-selector></assignee-selector>
+        <stage-selector></stage-selector>
         <validation-selector></validation-selector>
       </div>
     </div>
@@ -110,27 +110,27 @@ import { useStore } from "vuex";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
 import ValidationSelector from "../ui/ValidationSelector.vue";
-import UnifiedCycleSelector from "../ui/UnifiedCycleSelector.vue";
-import UnifiedAreaSelector from "../ui/UnifiedAreaSelector.vue";
-import UnifiedInitiativeSelector from "../ui/UnifiedInitiativeSelector.vue";
-import UnifiedStageSelector from "../ui/UnifiedStageSelector.vue";
-import UnifiedAssigneeSelector from "../ui/UnifiedAssigneeSelector.vue";
+import CycleSelector from "../ui/CycleSelector.vue";
+import AreaSelector from "../ui/AreaSelector.vue";
+import InitiativeSelector from "../ui/InitiativeSelector.vue";
+import StageSelector from "../ui/StageSelector.vue";
+import AssigneeSelector from "../ui/AssigneeSelector.vue";
 import GlobalInitiativeProgress from "./GlobalInitiativeProgress.vue";
 import InitiativeChart from "./InitiativeChart.vue";
 import InitiativeListItem from "./InitiativeListItem.vue";
 import RoadmapItemListItem from "./RoadmapItemListItem.vue";
 
 export default {
-  name: "UnifiedCycleOverview",
+  name: "CycleOverview",
   components: {
     Logo,
     PageSelector,
     ValidationSelector,
-    UnifiedCycleSelector,
-    UnifiedAreaSelector,
-    UnifiedInitiativeSelector,
-    UnifiedStageSelector,
-    UnifiedAssigneeSelector,
+    CycleSelector,
+    AreaSelector,
+    InitiativeSelector,
+    StageSelector,
+    AssigneeSelector,
     GlobalInitiativeProgress,
     InitiativeChart,
     InitiativeListItem,

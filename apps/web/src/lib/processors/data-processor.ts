@@ -13,7 +13,7 @@ import type {
   NestedCycleData,
   RoadmapItemWithProgress,
 } from "../../types/ui-types";
-import { unifiedFilter } from "../filters/unified-filter";
+import { filter } from "../filters/filter";
 import {
   calculateReleaseItemProgress,
   calculateCycleMetadata,
@@ -56,7 +56,7 @@ export class DataProcessor {
     );
 
     // Apply all other filters (cascading from release items up)
-    const result = unifiedFilter.apply(initiativeFilteredData, filters);
+    const result = filter.apply(initiativeFilteredData, filters);
 
     return result.data;
   }

@@ -1,5 +1,5 @@
 /**
- * UnifiedFilter - Core filtering system for NestedCycleData
+ * Filter - Core filtering system for NestedCycleData
  *
  * This class provides a single, composable filtering system that replaces
  * the fragmented filtering approach. All filters are applied at the
@@ -23,14 +23,14 @@ import type {
 } from "@omega/types";
 
 /**
- * UnifiedFilter class for applying filters to NestedCycleData
+ * Filter class for applying filters to NestedCycleData
  *
  * The filter works by:
  * 1. Applying filters at the ReleaseItem level (lowest level)
  * 2. Cascading results up through RoadmapItem -> Initiative
  * 3. Removing empty containers at each level
  */
-export class UnifiedFilter {
+export class Filter {
   /**
    * Apply filters to NestedCycleData structure
    *
@@ -369,4 +369,4 @@ export class UnifiedFilter {
 }
 
 // Export singleton instance
-export const unifiedFilter = new UnifiedFilter();
+export const filter = new Filter();

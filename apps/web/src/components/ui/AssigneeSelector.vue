@@ -28,7 +28,7 @@ import { useStore } from "vuex";
 import { ALL_ASSIGNEES_FILTER } from "@/filters/filter-constants";
 
 export default {
-  name: "UnifiedAssigneeSelector",
+  name: "AssigneeSelector",
   setup() {
     const store = useStore();
 
