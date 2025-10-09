@@ -4,6 +4,11 @@ import { logger } from "@omega/utils";
 import { dataProcessor } from "../lib/processors/data-processor";
 import { filter } from "../lib/filters/filter";
 import { viewFilterManager } from "../lib/filters/view-filter-manager";
+import {
+  calculateReleaseItemProgress,
+  calculateCycleMetadata,
+  aggregateProgressMetrics,
+} from "../lib/calculations/cycle-calculations";
 import type { OmegaConfig } from "@omega/config";
 import type { Router } from "vue-router";
 import type {
@@ -23,6 +28,8 @@ import type {
   RoadmapData,
   CycleOverviewData,
   Page,
+  CycleWithProgress,
+  InitiativeWithProgress,
 } from "../types/ui-types";
 
 /**
@@ -71,6 +78,38 @@ const selectBestCycle = (cycles: Cycle[]): Cycle | null => {
 
   // 4. Last resort: return the first cycle (oldest by our sort)
   return sortedCycles[0];
+};
+
+/**
+ * Calculate cycle progress data by aggregating progress from all initiatives
+ * @param cycle - Basic cycle object
+ * @param initiatives - Array of initiatives with progress data
+ * @returns CycleWithProgress object with calculated progress metrics
+ */
+const calculateCycleProgress = (
+  cycle: Cycle,
+  initiatives: InitiativeWithProgress[],
+): CycleWithProgress => {
+  // Calculate cycle metadata (months, days, etc.)
+  const cycleMetadata = calculateCycleMetadata(cycle);
+
+  // Collect all release items from all initiatives
+  const allReleaseItems = initiatives.flatMap(
+    (initiative) =>
+      initiative.roadmapItems?.flatMap(
+        (roadmapItem) => roadmapItem.releaseItems || [],
+      ) || [],
+  );
+
+  // Calculate progress metrics from all release items
+  const progressMetrics = calculateReleaseItemProgress(allReleaseItems);
+
+  // Combine cycle data with progress metrics and metadata
+  return {
+    ...cycle,
+    ...progressMetrics,
+    ...cycleMetadata,
+  };
 };
 
 // Store factory function that accepts dependencies
@@ -185,9 +224,17 @@ export default function createAppStore(
         // Apply filters using unified filter system
         const activeFilters = viewFilterManager.getActiveFilters();
         const filteredData = filter.apply(state.processedData, activeFilters);
+        const filteredInitiatives = filteredData.data.initiatives || [];
+
+        // Calculate cycle progress data
+        const cycleWithProgress = calculateCycleProgress(
+          selectedCycle,
+          filteredInitiatives,
+        );
+
         return {
-          cycle: selectedCycle,
-          initiatives: filteredData.data.initiatives || [],
+          cycle: cycleWithProgress,
+          initiatives: filteredInitiatives,
         };
       },
 
