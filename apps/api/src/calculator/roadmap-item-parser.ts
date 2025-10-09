@@ -1,4 +1,4 @@
-import { map, uniq } from "lodash";
+import _ from "lodash";
 import { getJiraLink } from "./parse-common";
 import { logger } from "@omega/utils";
 import LabelResolver from "./resolve-labels";
@@ -11,6 +11,11 @@ import type {
 } from "@omega/types";
 import type { ParsedRoadmapItem } from "../types";
 import type { ValidationRule } from "@omega/config";
+import {
+  getDefaultTeamId,
+  getDefaultStage,
+  getDefaultTicketId,
+} from "../constants/default-values";
 
 export class RoadmapItemParser {
   private roadmapItems: Record<string, RoadmapItem>;
@@ -41,8 +46,8 @@ export class RoadmapItemParser {
     projectId: string,
     releaseItems: ReleaseItem[] = [],
   ): ParsedRoadmapItem {
-    const allTeamIds: string[] = uniq(map(releaseItems, "teams").flat());
-    const owningTeam: TeamId = allTeamIds[0] || "unknown";
+    const allTeamIds: string[] = _.uniq(_.map(releaseItems, "teams").flat());
+    const owningTeam: TeamId = getDefaultTeamId(allTeamIds[0]);
     const url = getJiraLink(projectId, this.omegaConfig);
 
     if (!this.roadmapItems.hasOwnProperty(projectId)) {
@@ -128,8 +133,8 @@ export class RoadmapItemParser {
   ): ReleaseItem[] {
     return releaseItems.map((item) => {
       // Handle cases where item doesn't have expected properties (e.g., from fake data)
-      const stage = item.stage || "unknown";
-      const ticketId = item.ticketId || "unknown";
+      const stage = getDefaultStage(item.stage);
+      const ticketId = getDefaultTicketId(item.ticketId);
       const isExternal = item.isExternal || false;
       const validations = Array.isArray(item.validations)
         ? item.validations

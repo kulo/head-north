@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import createAppRouter from "./router/index";
-import createAppStore from "./store/index";
+import createUnifiedStore from "./store/unified-store";
 import { CycleDataService } from "./services/index";
 import { OmegaConfig } from "@omega/config";
 import { logger } from "@omega/utils";
@@ -22,7 +22,7 @@ const app = createApp(App);
 // Add router, store, and Ant Design Vue
 const router = createAppRouter(omegaConfig);
 app.use(router);
-const store = createAppStore(cycleDataService, omegaConfig, router); // Create store with dependencies including router
+const store = createUnifiedStore(cycleDataService, omegaConfig, router);
 app.use(store);
 
 app.use(Antd);
@@ -31,6 +31,12 @@ app.use(VueApexCharts);
 // Mount the app
 try {
   app.mount("#app");
+
+  // Initialize data after mounting
+  store.dispatch("fetchAndProcessData");
+
+  // Initialize ViewFilterManager with store state
+  store.dispatch("initializeFilters");
 
   logger.default.info("Omega One frontend started successfully!");
 } catch (error) {

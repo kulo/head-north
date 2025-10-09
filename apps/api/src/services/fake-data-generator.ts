@@ -8,6 +8,7 @@ import type {
   ReleaseItem,
 } from "@omega/types";
 import type { JiraIssue, JiraSprint } from "../types/jira-types";
+import { DEFAULT_UNKNOWN } from "../constants/default-values";
 
 export default class FakeDataGenerator {
   private omegaConfig: OmegaConfig;
@@ -116,8 +117,8 @@ export default class FakeDataGenerator {
               name: releaseItem.status,
             },
             assignee: {
-              accountId: assignee.accountId,
-              displayName: assignee.displayName,
+              accountId: assignee.id,
+              displayName: assignee.name,
               active: true,
             },
             effort: Math.floor(Math.random() * 8) + 1,
@@ -150,7 +151,7 @@ export default class FakeDataGenerator {
                 }
               : null,
             // Add additional fields for release items
-            teams: [assignee.accountId],
+            teams: [assignee.id],
             areaIds: [
               typeof roadmapItem.area === "string"
                 ? roadmapItem.area
@@ -215,8 +216,8 @@ export default class FakeDataGenerator {
               effort: item.effort || 0,
               assignee: item.assignee
                 ? {
-                    accountId: (item.assignee as Person).accountId,
-                    displayName: (item.assignee as Person).displayName,
+                    accountId: (item.assignee as Person).id,
+                    displayName: (item.assignee as Person).name,
                     active: true,
                   }
                 : null,
@@ -251,7 +252,9 @@ export default class FakeDataGenerator {
                   }
                 : null,
               teams: [
-                item.assignee ? (item.assignee as Person).accountId : "unknown",
+                item.assignee
+                  ? (item.assignee as Person).id
+                  : DEFAULT_UNKNOWN.ID,
               ],
               areaIds: [
                 typeof roadmapItem.area === "string"
@@ -326,14 +329,13 @@ export default class FakeDataGenerator {
         id: `${roadmapItemKey}-RELEASE-${i + 1}`,
         ticketId: `${roadmapItemKey}-RELEASE-${i + 1}`,
         effort: Math.floor(Math.random() * 8) + 1,
-        projectId: roadmapItemKey,
         name: `${roadmapItem.summary} - Release Item ${i + 1} - (${releaseStage})`,
         areaIds: [
           typeof roadmapItem.area === "string"
             ? roadmapItem.area
             : roadmapItem.area?.id || "",
         ],
-        teams: [assignee.accountId],
+        teams: [assignee.id],
         status: status,
         url: `https://example.com/browse/${roadmapItemKey}-RELEASE-${i + 1}`,
         isExternal: true,
@@ -582,12 +584,11 @@ export default class FakeDataGenerator {
    */
   private _generateFakeAssignees(): Person[] {
     return [
-      { accountId: "all", displayName: "All Assignees" },
-      { accountId: "user1", displayName: "John Doe" },
-      { accountId: "user2", displayName: "Jane Smith" },
-      { accountId: "user3", displayName: "Bob Johnson" },
-      { accountId: "user4", displayName: "Alice Brown" },
-      { accountId: "user5", displayName: "Charlie Wilson" },
+      { id: "user1", name: "Johnny Doe" },
+      { id: "user2", name: "Jane Smith" },
+      { id: "user3", name: "Bob Johnson" },
+      { id: "user4", name: "Alice Brown" },
+      { id: "user5", name: "Charlie Wilson" },
     ];
   }
 

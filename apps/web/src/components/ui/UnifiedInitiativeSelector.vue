@@ -4,7 +4,7 @@
     class="external-selector initiative-selector"
     mode="multiple"
     :placeholder="ALL_INITIATIVES_FILTER.name"
-    @change="setSelectedInitiatives"
+    @change="handleInitiativeChange"
   >
     <a-select-option key="all" value="all">
       {{ ALL_INITIATIVES_FILTER.name }}
@@ -25,12 +25,16 @@ import { useStore } from "vuex";
 import { ALL_INITIATIVES_FILTER } from "@/filters/filter-constants";
 
 export default {
-  name: "InitiativeSelector",
+  name: "UnifiedInitiativeSelector",
   setup() {
     const store = useStore();
 
     const selectedInitiatives = ref([]);
-    const initiatives = computed(() => store.state.initiatives || []);
+    const initiatives = computed(() => {
+      const data = store.getters.initiatives;
+      return Array.isArray(data) ? data : [];
+    });
+    const activeFilters = computed(() => store.getters.activeFilters);
 
     // Filter out "All Initiatives" from the dropdown options
     const filteredInitiatives = computed(() => {
@@ -39,14 +43,10 @@ export default {
 
     // Watch for changes in store and update local ref
     watch(
-      () => store.state.selectedInitiatives,
+      () => activeFilters.value.initiatives,
       (newValue) => {
-        if (newValue && newValue.length > 0 && newValue[0] !== undefined) {
-          // Convert initiative objects to IDs for the select component, excluding 'all'
-          const initiativeIds = newValue
-            .map((init) => init.id || init)
-            .filter((id) => id !== undefined && id !== "all");
-          selectedInitiatives.value = initiativeIds;
+        if (newValue && newValue.length > 0) {
+          selectedInitiatives.value = newValue;
         } else {
           selectedInitiatives.value = [];
         }
@@ -54,28 +54,11 @@ export default {
       { immediate: true },
     );
 
-    // Watch for initiatives to be loaded and set default selection
-    watch(
-      () => store.state.initiatives,
-      (newInitiatives) => {
-        if (
-          newInitiatives &&
-          newInitiatives.length > 0 &&
-          (!store.state.selectedInitiatives ||
-            store.state.selectedInitiatives.length === 0)
-        ) {
-          // Don't set any default selection - let it show "All Initiatives" placeholder
-          selectedInitiatives.value = [];
-        }
-      },
-      { immediate: true },
-    );
-
-    const setSelectedInitiatives = (initiativeIds) => {
+    const handleInitiativeChange = (initiativeIds) => {
       // If "all" is selected, clear all selections
       if (initiativeIds && initiativeIds.includes("all")) {
         selectedInitiatives.value = [];
-        store.dispatch("setSelectedInitiatives", []);
+        store.dispatch("updateFilter", { key: "initiatives", value: [] });
         return;
       }
 
@@ -83,24 +66,22 @@ export default {
 
       // If no initiatives selected, clear the store (equivalent to "All Initiatives" selection)
       if (!initiativeIds || initiativeIds.length === 0) {
-        store.dispatch("setSelectedInitiatives", []);
+        store.dispatch("updateFilter", { key: "initiatives", value: [] });
         return;
       }
 
-      // Convert IDs back to initiative objects for the store
-      const initiativeObjects = initiativeIds.map((id) => {
-        const initiative = initiatives.value.find((init) => init.id === id);
-        return initiative || { id, name: "Unknown Initiative" };
+      // Update store with new initiative IDs
+      store.dispatch("updateFilter", {
+        key: "initiatives",
+        value: initiativeIds,
       });
-
-      store.dispatch("setSelectedInitiatives", initiativeObjects);
     };
 
     return {
       selectedInitiatives,
       initiatives,
       filteredInitiatives,
-      setSelectedInitiatives,
+      handleInitiativeChange,
       ALL_INITIATIVES_FILTER,
     };
   },

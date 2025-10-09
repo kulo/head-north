@@ -1,6 +1,5 @@
 import { AgileClient } from "jira.js";
-import pkg from "lodash";
-const { omit, get } = pkg;
+import _ from "lodash";
 import type { OmegaConfig } from "@omega/config";
 import type {
   JiraSprintsData,
@@ -87,26 +86,27 @@ class JiraAPI {
         key: issue.key || "",
         fields: {
           summary: issue.fields?.summary || "",
-          status: get(issue, "fields.status") || {
+          status: _.get(issue, "fields.status") || {
             id: "",
             name: "",
             statusCategory: { id: 0, key: "", colorName: "", name: "" },
           },
-          parent: get(issue, "fields.parent"),
-          sprint: get(issue, "fields.sprint")
+          parent: _.get(issue, "fields.parent"),
+          sprint: _.get(issue, "fields.sprint")
             ? {
-                id: get(issue, "fields.sprint.id") || 0,
-                name: get(issue, "fields.sprint.name") || "",
+                id: _.get(issue, "fields.sprint.id") || 0,
+                name: _.get(issue, "fields.sprint.name") || "",
                 state:
-                  (get(issue, "fields.sprint.state") as
+                  (_.get(issue, "fields.sprint.state") as
                     | "active"
                     | "closed"
                     | "future") || "active",
-                startDate: (get(issue, "fields.sprint.startDate") as any) || "",
-                endDate: (get(issue, "fields.sprint.endDate") as any) || "",
-                originBoardId: get(issue, "fields.sprint.originBoardId") || 0,
-                ...(get(issue, "fields.sprint.goal") && {
-                  goal: get(issue, "fields.sprint.goal") as string,
+                startDate:
+                  (_.get(issue, "fields.sprint.startDate") as any) || "",
+                endDate: (_.get(issue, "fields.sprint.endDate") as any) || "",
+                originBoardId: _.get(issue, "fields.sprint.originBoardId") || 0,
+                ...(_.get(issue, "fields.sprint.goal") && {
+                  goal: _.get(issue, "fields.sprint.goal") as string,
                 }),
               }
             : null,
@@ -156,12 +156,12 @@ class JiraAPI {
           }),
         },
         summary: issue.fields?.summary || "",
-        closedSprints: get(issue, "fields.closedSprints", []),
-        parent: get(issue, "fields.parent.key"),
-        status: get(issue, "fields.status")?.name || "",
-        sprint: get(issue, "fields.sprint"),
-        roadmapItemId: get(issue, "fields.parent.key"), // Foreign key
-        cycleId: get(issue, "fields.sprint.id") || "", // Foreign key
+        closedSprints: _.get(issue, "fields.closedSprints", []),
+        parent: _.get(issue, "fields.parent.key"),
+        status: _.get(issue, "fields.status")?.name || "",
+        sprint: _.get(issue, "fields.sprint"),
+        roadmapItemId: _.get(issue, "fields.parent.key"), // Foreign key
+        cycleId: _.get(issue, "fields.sprint.id") || "", // Foreign key
       }))
       .filter((x) => !!x.parent)
       .filter((x) => !(x.sprint === null && (x.status as any)?.name === "Done"))
@@ -203,7 +203,7 @@ class JiraAPI {
         return {
           ...issue,
           fields: {
-            ...omit(issue.fields, ["customfield_10002"]),
+            ..._.omit(issue.fields, ["customfield_10002"]),
             ...(issue.fields.customfield_10002 !== undefined && {
               effort: issue.fields.customfield_10002,
             }),

@@ -3,8 +3,8 @@ import {
   createWebHistory,
   type RouteRecordRaw,
 } from "vue-router";
-import CycleOverview from "@/components/cycles/CycleOverview.vue";
-import Roadmap from "@/components/roadmap/Roadmap.vue";
+import UnifiedCycleOverview from "@/components/cycles/UnifiedCycleOverview.vue";
+import UnifiedRoadmap from "@/components/roadmap/UnifiedRoadmap.vue";
 import type { OmegaConfig } from "@omega/config";
 
 // Router factory function that accepts OmegaConfig
@@ -18,11 +18,11 @@ export default function createAppRouter(omegaConfig: OmegaConfig) {
     },
     {
       path: pages.CYCLE_OVERVIEW.path,
-      component: CycleOverview,
+      component: UnifiedCycleOverview,
     },
     {
       path: pages.ROADMAP.path,
-      component: Roadmap,
+      component: UnifiedRoadmap,
     },
   ];
 

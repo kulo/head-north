@@ -20,18 +20,18 @@ export default {
   setup() {
     const store = useStore();
 
-    const pages = computed(() => store.state.pages);
-    const selectedPageName = computed(() => store.getters.selectedPageName);
+    const pages = computed(() => store.getters.pages);
+    const currentPage = computed(() => store.getters.currentPage);
     const selectedPageValue = ref(null);
 
-    const allPages = computed(() => pages.value.all);
+    const allPages = computed(() => pages.value || []);
 
     // Watch for changes in store and update local ref
     watch(
-      () => store.state.pages,
-      (newPages) => {
-        if (newPages && newPages.current) {
-          selectedPageValue.value = newPages.current.id;
+      () => currentPage.value,
+      (newPage) => {
+        if (newPage) {
+          selectedPageValue.value = newPage;
         }
       },
       { immediate: true },
@@ -39,12 +39,12 @@ export default {
 
     const handlePageChange = (pageId) => {
       selectedPageValue.value = pageId;
-      store.dispatch("changePage", pageId);
+      store.dispatch("switchView", pageId);
     };
 
     return {
       pages,
-      selectedPageName,
+      currentPage,
       selectedPageValue,
       allPages,
       handlePageChange,

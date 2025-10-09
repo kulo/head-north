@@ -10,7 +10,7 @@
     "build": "node esbuild.config.js && tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "eslint . --ext .ts,.js,.vue --fix --ignore-path .gitignore",
     "type-check": "tsc --noEmit"
   },

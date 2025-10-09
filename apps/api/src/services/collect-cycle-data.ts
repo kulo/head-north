@@ -1,7 +1,7 @@
 import { ReleaseItemParser } from "../calculator/release-item-parser";
 import { RoadmapItemParser } from "../calculator/roadmap-item-parser";
 import JiraApiProxy from "./jira-api-proxy";
-import { uniqBy } from "lodash";
+import _ from "lodash";
 import type { OmegaConfig } from "@omega/config";
 import type {
   Cycle,
@@ -24,6 +24,9 @@ export default async (
   _extraFields: string[] = [],
 ): Promise<RawCycleData> => {
   const jiraApi = new JiraApiProxy(omegaConfig);
+
+  // Initialize enhancedAreas early to avoid hoisting issues
+  let enhancedAreas: Record<string, Area> = {};
 
   const { sprints } = await jiraApi.getSprintsData();
 
@@ -48,9 +51,9 @@ export default async (
     sprints.map(({ id }: JiraSprint) => jiraApi.getIssuesForSprint(id)),
   );
 
-  // Process assignees from all issues
+  // Process assignees from all issues (will be overridden for fake data)
   const allIssuesFlat = allIssues.flat().filter(Boolean);
-  const assignees = getAssignees(allIssuesFlat);
+  let assignees = getAssignees(allIssuesFlat);
 
   // Parse release items using existing parsers
   const parsedReleaseItems: ReleaseItem[] = [];
@@ -80,7 +83,6 @@ export default async (
       id: rawReleaseItem.id,
       ticketId: rawReleaseItem.id,
       effort: parsedReleaseItem?.effort || rawReleaseItem.effort || 0,
-      projectId: parsedReleaseItem?.projectId || null,
       name: parsedReleaseItem?.name || rawReleaseItem.summary || "",
       areaIds: parsedReleaseItem?.areaIds || rawReleaseItem.areaIds || [],
       teams: parsedReleaseItem?.teams || rawReleaseItem.teams || [],
@@ -168,9 +170,8 @@ export default async (
   const stages = omegaConfig.getStages();
 
   // Get enhanced areas with teams from fake data generator if available
-  let enhancedAreas: Record<string, Area> = {};
   if (omegaConfig.isUsingFakeCycleData()) {
-    // Import FakeDataGenerator to get enhanced areas
+    // Import FakeDataGenerator to get enhanced areas and assignees
     const FakeDataGenerator = (await import("./fake-data-generator")).default;
     const fakeDataGenerator = new FakeDataGenerator(omegaConfig);
     const enhancedAreasData = fakeDataGenerator.getEnhancedAreas();
@@ -180,6 +181,8 @@ export default async (
         { ...data, id },
       ]),
     );
+    // Use fake data generator's assignees directly
+    assignees = fakeDataGenerator.getAssignees();
   } else {
     // Convert areas to objects with teams for real data
     Object.entries(areas).forEach(([areaId, areaName]) => {
@@ -258,16 +261,16 @@ export default async (
  * Extract assignees from issues
  */
 const getAssignees = (issues: JiraIssue[]): Person[] => {
-  return uniqBy(
+  return _.uniqBy(
     issues
       .filter((issue) => issue.fields.assignee !== null)
       .map((issue) => issue.fields.assignee!)
       .map((assignee) => ({
-        displayName: assignee.displayName,
-        accountId: assignee.accountId,
+        name: assignee.displayName,
+        id: assignee.accountId,
       })),
-    "accountId",
+    "id",
   ).sort((assignee1, assignee2) => {
-    return assignee1.displayName > assignee2.displayName ? 1 : -1;
+    return assignee1.name > assignee2.name ? 1 : -1;
   });
 };

@@ -61,13 +61,13 @@
               class="roadmap-popover__release-item__stage"
               :class="getStageClass(releaseItem.stage)"
             >
-              {{ releaseItem.stage || "Unknown" }}
+              {{ releaseItem.stage || DEFAULT_UNKNOWN.NAME }}
             </div>
             <div
               class="roadmap-popover__release-item__status"
               :class="getStatusClass(releaseItem.status)"
             >
-              {{ releaseItem.status || "Unknown" }}
+              {{ releaseItem.status || DEFAULT_UNKNOWN.NAME }}
             </div>
             <div
               v-if="
@@ -121,6 +121,7 @@
 <script>
 import { computed, ref } from "vue";
 import { useStore } from "vuex";
+import { DEFAULT_UNKNOWN } from "../../lib/constants/default-values";
 
 export default {
   name: "RoadmapItemListItem",
@@ -172,6 +173,7 @@ export default {
       closePopover,
       getStatusClass,
       getStageClass,
+      DEFAULT_UNKNOWN,
     };
   },
 };

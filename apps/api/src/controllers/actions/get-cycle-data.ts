@@ -107,10 +107,8 @@ function validateRawData(data: RawCycleData): void {
 
   // Validate assignees have required fields
   assignees.forEach((assignee, index) => {
-    if (!assignee.accountId || !assignee.displayName) {
-      throw new Error(
-        `Invalid assignee at index ${index}: missing accountId or displayName`,
-      );
+    if (!assignee.id || !assignee.name) {
+      throw new Error(`Invalid assignee at index ${index}: missing id or name`);
     }
   });
 

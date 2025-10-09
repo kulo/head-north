@@ -1,5 +1,4 @@
-import pkg from "lodash";
-const { groupBy, omit, get } = pkg;
+import _ from "lodash";
 import { ReleaseItemParser } from "./release-item-parser";
 import { RoadmapItemParser } from "./roadmap-item-parser";
 import { translateLabel } from "./parse-common";
@@ -35,12 +34,12 @@ class IssueParser {
   }
 
   private _groupByRoadmapItems(parsed: any[]) {
-    const grouped = groupBy(parsed, (releaseItem) => releaseItem.projectId);
+    const grouped = _.groupBy(parsed, (releaseItem) => releaseItem.projectId);
 
     return Object.values(grouped).map((roadmapItemGroup) => {
       const projectId = roadmapItemGroup[0].projectId;
       const releaseItems = roadmapItemGroup.map((releaseItem) =>
-        omit(releaseItem, ["projectId"]),
+        _.omit(releaseItem, ["projectId"]),
       ) as any[];
       return this._roadmapItemParser.parse(projectId, releaseItems);
     });
@@ -57,17 +56,17 @@ class IssueParser {
     );
 
     // Group by initiative instead of theme + initiative
-    const grouped = groupBy(
+    const grouped = _.groupBy(
       nonVirtuals,
       (roadmapItem) => roadmapItem.initiative?.name,
     );
 
     const initiatives = Object.entries(grouped).map(([initiativeId, value]) => {
       return {
-        initiative: get(value, "0.initiative"),
+        initiative: _.get(value, "0.initiative"),
         id: initiativeId,
         roadmapItems: value.map((roadmapItem) =>
-          omit(roadmapItem, ["theme", "initiative", "initiativeId"]),
+          _.omit(roadmapItem, ["theme", "initiative", "initiativeId"]),
         ),
       };
     });
@@ -78,7 +77,7 @@ class IssueParser {
         initiative: virtualLabel,
         id: virtualId,
         roadmapItems: virtuals.map((roadmapItem) =>
-          omit(roadmapItem, ["theme", "initiative"]),
+          _.omit(roadmapItem, ["theme", "initiative"]),
         ),
       });
     }

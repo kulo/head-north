@@ -4,7 +4,7 @@
     class="external-selector stage-selector"
     mode="multiple"
     :placeholder="ALL_STAGES_FILTER.name"
-    @change="setSelectedStages"
+    @change="handleStageChange"
   >
     <a-select-option key="all" value="all">
       {{ ALL_STAGES_FILTER.name }}
@@ -28,47 +28,58 @@ import { useStore } from "vuex";
 import { ALL_STAGES_FILTER } from "@/filters/filter-constants";
 
 export default {
-  name: "StageSelector",
+  name: "UnifiedStageSelector",
   setup() {
     const store = useStore();
 
     // Use store getters for global state
-    const stages = computed(() => store.state.stages || []);
-    const filteredStages = computed(() => store.getters.filteredStages);
-    const isStageSelected = (stageId) => store.getters.isStageSelected(stageId);
+    const stages = computed(() => {
+      const data = store.getters.stages;
+      return Array.isArray(data) ? data : [];
+    });
+    const activeFilters = computed(() => store.getters.activeFilters);
+
+    // Filter out "All Stages" from the dropdown options
+    const filteredStages = computed(() => {
+      return stages.value.filter((stage) => stage.id !== "all");
+    });
+
+    // Check if a stage is selected
+    const isStageSelected = (stageId) => {
+      const selectedStages = activeFilters.value.stages || [];
+      return selectedStages.includes(stageId);
+    };
 
     // Create writable ref for v-model
     const selectedStages = ref([]);
 
     // Watch store changes and update local ref
     watch(
-      () => store.getters.selectedStageIds,
+      () => activeFilters.value.stages,
       (newValue) => {
         selectedStages.value = newValue || [];
       },
       { immediate: true },
     );
 
-    const setSelectedStages = (stageIds) => {
+    const handleStageChange = (stageIds) => {
       // If "all" is selected, clear all selections
       if (stageIds && stageIds.includes("all")) {
-        store.dispatch("setSelectedStages", []);
+        selectedStages.value = [];
+        store.dispatch("updateFilter", { key: "stages", value: [] });
         return;
       }
+
+      selectedStages.value = stageIds;
 
       // If no stages selected, clear the store (equivalent to "All Stages" selection)
       if (!stageIds || stageIds.length === 0) {
-        store.dispatch("setSelectedStages", []);
+        store.dispatch("updateFilter", { key: "stages", value: [] });
         return;
       }
 
-      // Convert IDs back to stage objects for the store
-      const stageObjects = stageIds.map((id) => {
-        const stage = stages.value.find((stage) => stage.id === id);
-        return stage || { id: id, name: "Unknown Stage" };
-      });
-
-      store.dispatch("setSelectedStages", stageObjects);
+      // Update store with new stage IDs
+      store.dispatch("updateFilter", { key: "stages", value: stageIds });
     };
 
     return {
@@ -76,7 +87,7 @@ export default {
       stages,
       filteredStages,
       isStageSelected,
-      setSelectedStages,
+      handleStageChange,
       ALL_STAGES_FILTER,
     };
   },

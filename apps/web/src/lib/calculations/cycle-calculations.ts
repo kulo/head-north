@@ -103,7 +103,7 @@ export const calculateReleaseItemProgress = (
       ? Math.round((releaseItemsDoneCount / releaseItemsCount) * 100)
       : 0;
   const percentageNotToDo =
-    weeks > 0 ? Math.round((weeksNotToDo / weeks) * 100) : 0;
+    weeks > 0 ? Math.max(0, Math.round((weeksNotToDo / weeks) * 100)) : 0;
 
   return {
     weeks,
@@ -224,26 +224,35 @@ export const aggregateProgressMetrics = (
   aggregated.weeks = normalize(aggregated.weeks);
   aggregated.progress =
     aggregated.weeks > 0
-      ? Math.round((aggregated.weeksDone / aggregated.weeks) * 100)
+      ? Math.max(0, Math.round((aggregated.weeksDone / aggregated.weeks) * 100))
       : 0;
   aggregated.progressWithInProgress =
     aggregated.weeks > 0
-      ? Math.round(
-          ((aggregated.weeksDone + aggregated.weeksInProgress) /
-            aggregated.weeks) *
-            100,
+      ? Math.max(
+          0,
+          Math.round(
+            ((aggregated.weeksDone + aggregated.weeksInProgress) /
+              aggregated.weeks) *
+              100,
+          ),
         )
       : 0;
   aggregated.progressByReleaseItems =
     aggregated.releaseItemsCount > 0
-      ? Math.round(
-          (aggregated.releaseItemsDoneCount / aggregated.releaseItemsCount) *
-            100,
+      ? Math.max(
+          0,
+          Math.round(
+            (aggregated.releaseItemsDoneCount / aggregated.releaseItemsCount) *
+              100,
+          ),
         )
       : 0;
   aggregated.percentageNotToDo =
     aggregated.weeks > 0
-      ? Math.round((aggregated.weeksNotToDo / aggregated.weeks) * 100)
+      ? Math.max(
+          0,
+          Math.round((aggregated.weeksNotToDo / aggregated.weeks) * 100),
+        )
       : 0;
 
   return aggregated;

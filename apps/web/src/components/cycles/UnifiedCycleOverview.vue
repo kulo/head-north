@@ -4,13 +4,13 @@
       <div class="cycle-overview-header__left">
         <logo></logo>
         <page-selector></page-selector>
-        <cycle-selector></cycle-selector>
+        <unified-cycle-selector></unified-cycle-selector>
       </div>
       <div class="cycle-overview-header__right">
-        <initiative-selector></initiative-selector>
-        <area-selector></area-selector>
-        <assignee-selector></assignee-selector>
-        <stage-selector></stage-selector>
+        <unified-initiative-selector></unified-initiative-selector>
+        <unified-area-selector></unified-area-selector>
+        <unified-assignee-selector></unified-assignee-selector>
+        <unified-stage-selector></unified-stage-selector>
         <validation-selector></validation-selector>
       </div>
     </div>
@@ -32,18 +32,23 @@
       "
       class="cycle-overview-content"
     >
-      <div class="global-initiatives">
-        <div class="global-initiatives__container">
-          <initiative-chart :initiatives="cycleOverviewData.initiatives">
-          </initiative-chart>
-        </div>
-        <div class="global-initiatives__progress">
-          <global-initiative-progress
-            :cycle="cycleOverviewData.cycle"
-            :initiatives="cycleOverviewData.initiatives"
-          >
-          </global-initiative-progress>
-        </div>
+      <!-- Global Initiative Progress -->
+      <div class="global-initiatives__container">
+        <initiative-chart
+          v-if="
+            cycleOverviewData.initiatives &&
+            cycleOverviewData.initiatives.length > 0
+          "
+          :initiatives="cycleOverviewData.initiatives"
+        >
+        </initiative-chart>
+      </div>
+      <div class="global-initiatives__progress">
+        <global-initiative-progress
+          :cycle="cycleOverviewData.cycle"
+          :initiatives="cycleOverviewData.initiatives"
+        >
+        </global-initiative-progress>
       </div>
 
       <!-- Initiative and Roadmap Items Listing -->
@@ -83,25 +88,17 @@
       class="validation-dialog"
     >
       <div v-if="selectedIssue">
-        <h3>
-          <a :href="selectedIssue.url" class="jira-link" target="_blank">
-            {{ selectedIssue.ticketId + ": " + selectedIssue.name }}
-            <span>🔗</span>
-          </a>
-        </h3>
-        <a-divider />
-        <p>Found issues:</p>
-        <ul>
-          <li
-            v-for="validation in selectedIssue.validations"
-            :key="validation.label"
+        <h3>{{ selectedIssue.name }}</h3>
+        <div v-if="selectedIssue.validations">
+          <div
+            v-for="(validation, key) in selectedIssue.validations"
+            :key="key"
+            class="validation-item"
           >
-            <a :href="validation.reference" target="_blank">
-              {{ validation.label }}
-              <span>🔗</span>
-            </a>
-          </li>
-        </ul>
+            <strong>{{ key }}:</strong> {{ validation }}
+          </div>
+        </div>
+        <div v-else>No validation details available.</div>
       </div>
     </a-modal>
   </div>
@@ -113,27 +110,27 @@ import { useStore } from "vuex";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
 import ValidationSelector from "../ui/ValidationSelector.vue";
-import CycleSelector from "../ui/CycleSelector.vue";
-import AreaSelector from "../ui/AreaSelector.vue";
-import StageSelector from "../ui/StageSelector.vue";
-import InitiativeSelector from "../ui/InitiativeSelector.vue";
-import AssigneeSelector from "../ui/AssigneeSelector.vue";
+import UnifiedCycleSelector from "../ui/UnifiedCycleSelector.vue";
+import UnifiedAreaSelector from "../ui/UnifiedAreaSelector.vue";
+import UnifiedInitiativeSelector from "../ui/UnifiedInitiativeSelector.vue";
+import UnifiedStageSelector from "../ui/UnifiedStageSelector.vue";
+import UnifiedAssigneeSelector from "../ui/UnifiedAssigneeSelector.vue";
 import GlobalInitiativeProgress from "./GlobalInitiativeProgress.vue";
 import InitiativeChart from "./InitiativeChart.vue";
 import InitiativeListItem from "./InitiativeListItem.vue";
 import RoadmapItemListItem from "./RoadmapItemListItem.vue";
 
 export default {
-  name: "CycleOverview",
+  name: "UnifiedCycleOverview",
   components: {
     Logo,
     PageSelector,
     ValidationSelector,
-    CycleSelector,
-    AreaSelector,
-    InitiativeSelector,
-    StageSelector,
-    AssigneeSelector,
+    UnifiedCycleSelector,
+    UnifiedAreaSelector,
+    UnifiedInitiativeSelector,
+    UnifiedStageSelector,
+    UnifiedAssigneeSelector,
     GlobalInitiativeProgress,
     InitiativeChart,
     InitiativeListItem,
@@ -142,10 +139,11 @@ export default {
   setup() {
     const store = useStore();
 
+    // Use filtered data for proper filtering functionality
     const loading = computed(() => store.state.loading);
     const error = computed(() => store.state.error);
     const cycleOverviewData = computed(
-      () => store.getters.currentCycleOverviewData,
+      () => store.getters.filteredCycleOverviewData,
     );
     const isOverviewPage = computed(
       () => store.getters.selectedPageName === "Cycle Overview",
@@ -161,18 +159,8 @@ export default {
     };
 
     onMounted(async () => {
-      // Ensure we have a selected cycle before loading data
-      await store.dispatch("_ensureSelectedCycle");
-
-      // Load initial data
-      await Promise.all([
-        store.dispatch("fetchCycleOverviewData"),
-        store.dispatch("fetchInitiatives"),
-        store.dispatch("fetchAssignees"),
-        store.dispatch("fetchAreas"),
-        store.dispatch("fetchCycles"),
-        store.dispatch("fetchStages"),
-      ]);
+      // Switch to cycle overview view
+      await store.dispatch("switchView", "cycle-overview");
     });
 
     return {

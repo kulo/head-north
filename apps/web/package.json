@@ -10,7 +10,7 @@
     "start": "npm run dev",
     "build": "webpack --config webpack.config.mjs --mode production",
     "preview": "webpack serve --config webpack.config.mjs --mode production",
-    "test": "vitest",
+    "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "lint": "eslint . --ext .vue,.ts,.tsx,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",

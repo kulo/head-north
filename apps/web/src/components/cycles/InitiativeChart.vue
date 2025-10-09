@@ -1,10 +1,18 @@
 <template>
   <div class="global-initiatives__container">
     <div
+      v-if="!initiatives || initiatives.length === 0"
+      class="global-initiatives__loading"
+    >
+      <p>Loading initiatives...</p>
+    </div>
+    <div
+      v-else-if="isReady"
       class="global-initiatives__chart-container"
       style="transform: rotateY(180deg) rotateX(180deg)"
     >
       <apexchart
+        :key="`background-${initiatives.length}`"
         class="global-initiatives__chart global-initiatives__chart_background"
         type="radialBar"
         height="100%"
@@ -12,6 +20,7 @@
         :series="initiativeTracks"
       ></apexchart>
       <apexchart
+        :key="`inprogress-${initiatives.length}`"
         class="global-initiatives__chart"
         type="radialBar"
         height="100%"
@@ -19,6 +28,7 @@
         :series="initiativeInProgress"
       ></apexchart>
       <apexchart
+        :key="`progress-${initiatives.length}`"
         class="global-initiatives__chart"
         type="radialBar"
         height="100%"
@@ -26,7 +36,11 @@
         :series="initiativeProgresses"
       ></apexchart>
     </div>
-    <div class="global-initiatives__details" :class="initiativeLengthClass()">
+    <div
+      v-if="initiatives && initiatives.length > 0 && isReady"
+      class="global-initiatives__details"
+      :class="initiativeLengthClass()"
+    >
       <div>
         <div
           v-for="initiative in initiativesWithRelativeValues"
@@ -50,7 +64,7 @@
 </template>
 
 <script>
-import { computed } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 
 const deepCopy = function (src) {
   return JSON.parse(JSON.stringify(src));
@@ -71,6 +85,12 @@ export default {
     },
   },
   setup(props) {
+    const isReady = ref(false);
+
+    onMounted(async () => {
+      await nextTick();
+      isReady.value = true;
+    });
     const options1Default = {
       chart: {},
       plotOptions: {
@@ -480,6 +500,7 @@ export default {
     };
 
     return {
+      isReady,
       options1,
       options2,
       inProgressOptions,

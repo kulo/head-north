@@ -1,4 +1,5 @@
 import CycleProgressData from "../models/area-data";
+import { DEFAULT_UNKNOWN } from "../constants/default-values";
 
 const uniq = (list) => [...new Set(list)];
 
@@ -23,8 +24,8 @@ const recalculateReleaseItemBasedFields =
     return {
       ...roadmapItem,
       owningTeam: {
-        id: uniq(teams)[0] || "unknown",
-        name: uniq(teams)[0] || "Unknown Team",
+        id: uniq(teams)[0] || DEFAULT_UNKNOWN.ID,
+        name: uniq(teams)[0] || DEFAULT_UNKNOWN.NAME,
       },
       area: uniq(areaIds)
         .map((id) => {

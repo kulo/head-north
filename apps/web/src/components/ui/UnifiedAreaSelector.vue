@@ -13,32 +13,39 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
 export default {
-  name: "AreaSelector",
+  name: "UnifiedAreaSelector",
   setup() {
     const store = useStore();
+
+    const areas = computed(() => {
+      const data = store.getters.areas;
+      return Array.isArray(data) ? data : [];
+    });
+    const activeFilters = computed(() => store.getters.activeFilters);
+
     const selectedArea = computed({
-      get: () => store.state.selectedArea || "all",
+      get: () => activeFilters.value.area || "all",
       set: (value) => {
-        // Dispatch action to filter by area
-        store.dispatch("setSelectedArea", value === "all" ? null : value);
+        // If "all" is selected, remove the area filter (set to undefined)
+        store.dispatch("updateFilter", {
+          key: "area",
+          value: value === "all" ? undefined : value,
+        });
       },
     });
 
-    const areas = computed(() => store.state.areas);
-
     const handleAreaChange = (value) => {
-      // The computed setter will handle the store update
       selectedArea.value = value;
     };
 
     onMounted(() => {
       // Load areas if not already loaded
       if (areas.value.length === 0) {
-        store.dispatch("fetchAreas");
+        store.dispatch("fetchAndProcessData");
       }
     });
 
