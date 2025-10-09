@@ -31,49 +31,6 @@ export interface Page {
   path: string;
 }
 
-export interface BaseComponentProps {
-  id?: string;
-  className?: string;
-  testId?: string;
-}
-
-export interface ButtonProps extends BaseComponentProps {
-  variant?: "primary" | "secondary" | "danger";
-  size?: "small" | "medium" | "large";
-  disabled?: boolean;
-  loading?: boolean;
-  onClick?: () => void;
-}
-
-export interface CardProps extends BaseComponentProps {
-  title?: string;
-  subtitle?: string;
-  header?: boolean;
-  footer?: boolean;
-}
-
-// ============================================================================
-// Filter Types
-// ============================================================================
-
-export interface FilterItem {
-  id: string;
-  name: string;
-  value: string;
-}
-
-export type StageFilter = FilterItem;
-export type InitiativeFilter = FilterItem;
-export type AssigneeFilter = FilterItem;
-export type CycleFilter = FilterItem;
-
-export interface FilterConfig {
-  area?: string;
-  initiatives?: InitiativeFilter[];
-  stages?: StageFilter[];
-  cycle?: string | CycleFilter;
-}
-
 // ============================================================================
 // Vue Store Types
 // ============================================================================
@@ -83,15 +40,6 @@ export interface RoadmapData {
   roadmapItems: RoadmapItem[];
   activeCycle: Cycle | null;
   initiatives?: InitiativeWithProgress[];
-}
-
-/**
- * Transformed roadmap data for frontend display.
- * Contains processed initiatives with calculated progress metrics
- * for the roadmap view.
- */
-export interface TransformedRoadmapData {
-  initiatives: InitiativeWithProgress[];
 }
 
 // ============================================================================
@@ -136,36 +84,6 @@ export interface InitiativeWithProgress
 export interface RoadmapItemWithProgress
   extends RoadmapItem,
     ProgressWithinCycle {}
-
-/**
- * Release item with embedded cycle information.
- * Extends a release item to include cycle context for display purposes.
- * Used when release items need to show which cycle they belong to.
- */
-export interface ReleaseItemWithCycle extends ReleaseItem {
-  cycle: {
-    id: CycleId;
-    name: string;
-  };
-}
-
-/**
- * Transformed roadmap item for frontend display.
- * Contains processed roadmap item data with calculated metrics and
- * embedded release items that include cycle context.
- */
-export interface TransformedRoadmapItem {
-  id: string;
-  name: string;
-  area?: string;
-  theme?: string;
-  owner: string;
-  progress: number;
-  weeks: number;
-  url: string;
-  validations: ValidationItem[];
-  releaseItems: ReleaseItemWithCycle[];
-}
 
 /**
  * Cycle-specific metadata for date and time calculations.
@@ -234,16 +152,8 @@ export interface StoreState {
   validationSummary: Record<string, unknown>[];
 }
 
-export interface Filters {
-  area?: string;
-  initiatives?: InitiativeWithProgress[];
-  stages?: Stage[];
-  assignees?: Person[];
-  cycle?: Cycle;
-}
-
 // ============================================================================
-// Unified Filter Types
+// Filter Types
 // ============================================================================
 
 /**
@@ -280,11 +190,6 @@ export interface ViewFilterCriteria {
     // Future roadmap-specific filters can be added here
   };
 }
-
-/**
- * Filter predicate function type
- */
-export type FilterPredicate<T> = (item: T) => boolean;
 
 /**
  * Filter result containing both the filtered data and metadata

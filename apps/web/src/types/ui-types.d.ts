@@ -26,20 +26,6 @@ export interface CardProps extends BaseComponentProps {
   header?: boolean;
   footer?: boolean;
 }
-export interface FilterItem {
-  id: string;
-  name: string;
-}
-export type StageFilter = FilterItem;
-export type InitiativeFilter = FilterItem;
-export type AssigneeFilter = FilterItem;
-export type CycleFilter = FilterItem;
-export interface FilterConfig {
-  area?: string;
-  initiatives?: InitiativeFilter[];
-  stages?: StageFilter[];
-  cycle?: string | CycleFilter;
-}
 export interface RoadmapData {
   orderedCycles: Cycle[];
   roadmapItems: RoadmapItem[];

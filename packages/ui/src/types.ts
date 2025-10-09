@@ -9,12 +9,6 @@
 export type BaseComponentProps = Record<string, unknown>;
 export type ButtonProps = Record<string, unknown>;
 export type CardProps = Record<string, unknown>;
-export type FilterItem = Record<string, unknown>;
-export type StageFilter = Record<string, unknown>;
-export type InitiativeFilter = Record<string, unknown>;
-export type AssigneeFilter = Record<string, unknown>;
-export type CycleFilter = Record<string, unknown>;
-export type FilterConfig = Record<string, unknown>;
 export type RoadmapData = Record<string, unknown>;
 export type CycleOverviewData = Record<string, unknown>;
 export type StoreState = Record<string, unknown>;
