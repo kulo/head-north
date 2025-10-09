@@ -120,6 +120,8 @@ Utility functions that can be used by both web app and API service applications.
 - Route consistency validation
 - Cross-platform configuration management
 - Jira integration settings
+- **Page definitions and routing** - Centralized page configuration for the frontend
+- **Filter system configuration** - Type-safe filter definitions and validation rules
 
 ### UI (`@omega/ui`)
 
