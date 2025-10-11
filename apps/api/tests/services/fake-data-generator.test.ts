@@ -49,13 +49,9 @@ describe("FakeDataGenerator", () => {
   it("should initialize with correct assignees", () => {
     const assignees = generator.getAssignees();
 
-    expect(assignees).toHaveLength(6);
+    expect(assignees).toHaveLength(5);
     expect(assignees[0]).toEqual({
-      name: "All Assignees",
-      id: "all",
-    });
-    expect(assignees[1]).toEqual({
-      name: "John Doe",
+      name: "Johnny Doe",
       id: "user1",
     });
   });

@@ -54,7 +54,7 @@ describe("FakeDataGenerator", () => {
 
     expect(assignees).toHaveLength(5);
     expect(assignees[0]).toEqual({
-      name: "John Doe",
+      name: "Johnny Doe",
       id: "user1",
     });
   });

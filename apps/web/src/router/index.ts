@@ -3,8 +3,13 @@ import {
   createWebHistory,
   type RouteRecordRaw,
 } from "vue-router";
-import CycleOverview from "@/components/cycles/CycleOverview.vue";
-import Roadmap from "@/components/roadmap/Roadmap.vue";
+// Using Pinia versions of components
+import CycleOverview from "@/components/cycles/CycleOverview-pinia.vue";
+import Roadmap from "@/components/roadmap/Roadmap-pinia.vue";
+
+// COMMENTED OUT - Original Vuex components
+// import CycleOverview from "@/components/cycles/CycleOverview.vue";
+// import Roadmap from "@/components/roadmap/Roadmap.vue";
 import type { OmegaConfig } from "@omega/config";
 
 // Router factory function that accepts OmegaConfig

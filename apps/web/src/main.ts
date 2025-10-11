@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import createAppRouter from "./router/index";
-import createAppStore from "./store/index";
+// import createAppStore from "./store/index"; // COMMENTED OUT - Using Pinia instead
 import { CycleDataService } from "./services/index";
 import { createViewFilterManager } from "./services/view-filter-manager";
 import { createCycleDataViewCoordinator } from "./services/cycle-data-view-coordinator";
@@ -11,6 +11,10 @@ import Antd from "ant-design-vue";
 import "ant-design-vue/dist/reset.css";
 import "./assets/css/style.css";
 import VueApexCharts from "vue3-apexcharts";
+
+// Pinia imports
+import { createPinia } from "pinia";
+import { initializeStores } from "./stores/registry";
 
 // Create services
 const omegaConfig = new OmegaConfig({
@@ -26,27 +30,59 @@ const cycleDataViewCoordinator =
 // Create the Vue app
 const app = createApp(App);
 
-// Add router, store, and Ant Design Vue
+// Create Pinia instance
+const pinia = createPinia();
+
+// Add router, Pinia, and Ant Design Vue
 const router = createAppRouter(omegaConfig);
 app.use(router);
-const store = createAppStore(cycleDataService, omegaConfig, router);
-app.use(store);
+app.use(pinia); // Using Pinia instead of Vuex
+
+// COMMENTED OUT - Vuex store no longer used
+// const store = createAppStore(cycleDataService, omegaConfig, router);
+// app.use(store);
 
 app.use(Antd);
 app.use(VueApexCharts);
 
-// Mount the app
-try {
-  app.mount("#app");
+// Initialize Pinia services
+async function initializeApp() {
+  try {
+    // Initialize stores with immutable service injection
+    initializeStores({
+      cycleDataService,
+      viewFilterManager,
+      cycleDataViewCoordinator,
+      router,
+      config: omegaConfig,
+    });
 
-  // Initialize data after mounting
-  store.dispatch("fetchAndProcessData");
+    // Mount the app
+    app.mount("#app");
 
-  // Initialize ViewFilterManager with store state
-  store.dispatch("initializeFilters");
+    // Initialize stores and fetch data
+    const { useAppStore, useDataStore, useValidationStore, useFilterStore } =
+      await import("./stores/registry");
 
-  logger.default.info("Omega One frontend started successfully!");
-} catch (error) {
-  const errorMessage = error?.message || error?.toString() || "Unknown error";
-  logger.error.errorSafe("Error mounting Vue app", error);
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+    const validationStore = useValidationStore();
+    const filterStore = useFilterStore();
+
+    // Initialize stores
+    appStore.initializeApp();
+    validationStore.initializeValidation();
+    filterStore.initializeFilters();
+
+    // Fetch initial data
+    await dataStore.fetchAndProcessData(appStore);
+
+    logger.default.info("Omega One frontend started successfully with Pinia!");
+  } catch (error) {
+    const errorMessage = error?.message || error?.toString() || "Unknown error";
+    logger.error.errorSafe("Error initializing Pinia app", error);
+  }
 }
+
+// Initialize the application
+initializeApp();

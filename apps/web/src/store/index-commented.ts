@@ -11,7 +11,6 @@
  */
 
 /*
-// COMMENTED OUT - Vuex store migrated to Pinia
 import { createStore, ActionContext } from "vuex";
 import { CycleDataService } from "../services/index";
 import { logger } from "@omega/utils";
@@ -42,8 +41,6 @@ import type {
 import type { FilterCriteria, ViewFilterCriteria } from "../types/ui-types";
 
 // ... rest of the Vuex store code would be here ...
-// The entire Vuex store implementation is commented out
-// See the original file in git history if needed
 */
 
 // Export a placeholder function for compatibility
