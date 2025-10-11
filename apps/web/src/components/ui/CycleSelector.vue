@@ -12,8 +12,9 @@
 </template>
 
 <script>
-import { computed, watch } from "vue";
+import { computed, watch, ref } from "vue";
 import { useDataStore, useFilterStore } from "../../stores/registry";
+import { selectBestCycle } from "../../lib/selectors/cycle-selector";
 
 export default {
   name: "CycleSelector",
@@ -28,27 +29,46 @@ export default {
 
     const activeFilters = computed(() => filterStore.activeFilters);
 
-    const selectedCycle = computed({
-      get: () => activeFilters.value.cycle || "all",
-      set: async (value) => {
-        try {
-          await filterStore.updateFilter("cycle", value);
-        } catch (error) {
-          console.error("Failed to update cycle filter:", error);
+    // Create a reactive ref for the selected cycle
+    const selectedCycle = ref(null);
+
+    // Watch for changes in activeFilters and update selectedCycle accordingly
+    watch(
+      () => activeFilters.value.cycle,
+      (newCycleId) => {
+        if (newCycleId) {
+          selectedCycle.value = newCycleId;
+        } else {
+          // If no cycle filter is set, use the best cycle
+          const bestCycle = selectBestCycle(cycles.value);
+          selectedCycle.value = bestCycle ? bestCycle.id : null;
         }
       },
-    });
+      { immediate: true },
+    );
 
-    // Watch for cycles to be loaded and set default selection
+    // Watch for changes in cycles and update selectedCycle if no filter is set
+    watch(
+      () => cycles.value,
+      (newCycles) => {
+        if (newCycles && newCycles.length > 0 && !activeFilters.value.cycle) {
+          const bestCycle = selectBestCycle(newCycles);
+          selectedCycle.value = bestCycle ? bestCycle.id : null;
+        }
+      },
+      { immediate: true },
+    );
+
+    // Watch for cycles to be loaded and set default selection if no filter exists
     watch(
       () => cycles.value,
       async (newCycles) => {
         if (newCycles && newCycles.length > 0 && !activeFilters.value.cycle) {
-          // Select the first cycle by default
-          const firstCycle = newCycles[0];
-          if (firstCycle) {
+          // Select the best cycle using the same logic as data transformer
+          const bestCycle = selectBestCycle(newCycles);
+          if (bestCycle) {
             try {
-              await filterStore.updateFilter("cycle", firstCycle.id);
+              await filterStore.updateFilter("cycle", bestCycle.id);
             } catch (error) {
               console.error("Failed to set default cycle:", error);
             }
@@ -58,8 +78,12 @@ export default {
       { immediate: true },
     );
 
-    const handleCycleChange = (cycleId) => {
-      selectedCycle.value = cycleId;
+    const handleCycleChange = async (cycleId) => {
+      try {
+        await filterStore.updateFilter("cycle", cycleId);
+      } catch (error) {
+        console.error("Failed to update cycle filter:", error);
+      }
     };
 
     return {
