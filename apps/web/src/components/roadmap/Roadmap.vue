@@ -62,7 +62,11 @@
 
 <script>
 import { computed, onMounted } from "vue";
-import { useStore } from "vuex";
+import {
+  useAppStore,
+  useDataStore,
+  useFilterStore,
+} from "../../stores/registry";
 import RoadmapItemOverview from "./RoadmapItemOverview.vue";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
@@ -79,13 +83,16 @@ export default {
     InitiativeSelector,
   },
   setup() {
-    const store = useStore();
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+    const filterStore = useFilterStore();
 
     // Use filtered data for proper filtering functionality
-    const roadmapData = computed(() => store.getters.filteredRoadmapData);
-    const loading = computed(() => store.state.loading);
-    const error = computed(() => store.state.error);
-    const cycles = computed(() => store.getters.cycles);
+    const roadmapData = computed(() => dataStore.filteredRoadmapData);
+
+    const loading = computed(() => appStore.loading);
+    const error = computed(() => appStore.error);
+    const cycles = computed(() => dataStore.cycles);
 
     // Extract cycles from store
     const orderedCycles = computed(() => {
@@ -98,8 +105,12 @@ export default {
     });
 
     onMounted(async () => {
-      // Switch to roadmap view and reset view-specific filters
-      await store.dispatch("switchView", "roadmap");
+      try {
+        // Switch to roadmap view and reset view-specific filters
+        await filterStore.switchView("roadmap", appStore);
+      } catch (error) {
+        console.error("Failed to switch to roadmap view:", error);
+      }
     });
 
     return {

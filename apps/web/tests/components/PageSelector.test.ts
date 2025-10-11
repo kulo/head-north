@@ -1,7 +1,7 @@
 /**
- * PageSelector Pinia Component Tests
+ * PageSelector Component Tests
  *
- * Tests for the Pinia version of PageSelector component
+ * Tests for the PageSelector component
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -12,7 +12,7 @@ import {
   useFilterStore,
   initializeStores,
 } from "../../src/stores/registry";
-import PageSelectorPinia from "../../src/components/ui/PageSelector-pinia.vue";
+import PageSelector from "../../src/components/ui/PageSelector.vue";
 
 // Mock Ant Design Vue components
 vi.mock("ant-design-vue", () => ({
@@ -63,7 +63,7 @@ const mockOmegaConfig = {
   getValidationEnabled: () => false,
 } as any;
 
-describe("PageSelector Pinia", () => {
+describe("PageSelector", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
 
@@ -77,7 +77,7 @@ describe("PageSelector Pinia", () => {
     });
   });
 
-  it("should render with pages from Pinia store", () => {
+  it("should render with pages from store", () => {
     const appStore = useAppStore();
     const filterStore = useFilterStore();
 
@@ -90,7 +90,7 @@ describe("PageSelector Pinia", () => {
     appStore.setPages(mockPages);
     appStore.setCurrentPage("roadmap");
 
-    const wrapper = mount(PageSelectorPinia);
+    const wrapper = mount(PageSelector);
 
     // Test that the component mounts successfully
     expect(wrapper.exists()).toBe(true);
@@ -115,7 +115,7 @@ describe("PageSelector Pinia", () => {
     appStore.setPages(mockPages);
     appStore.setCurrentPage("roadmap");
 
-    const wrapper = mount(PageSelectorPinia);
+    const wrapper = mount(PageSelector);
 
     // Simulate page change
     await wrapper.vm.handlePageChange("cycle-overview");
@@ -135,7 +135,7 @@ describe("PageSelector Pinia", () => {
     appStore.setPages(mockPages);
     appStore.setCurrentPage("roadmap");
 
-    const wrapper = mount(PageSelectorPinia);
+    const wrapper = mount(PageSelector);
 
     // Change current page
     appStore.setCurrentPage("cycle-overview");

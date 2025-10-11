@@ -24,17 +24,18 @@
 
 <script>
 import { ref, computed, watch } from "vue";
-import { useStore } from "vuex";
+import { useDataStore, useFilterStore } from "../../stores/registry";
 import { ALL_ASSIGNEES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {
   name: "AssigneeSelector",
   setup() {
-    const store = useStore();
+    const dataStore = useDataStore();
+    const filterStore = useFilterStore();
 
     const selectedAssignees = ref([]);
-    const assignees = computed(() => store.getters.assignees || []);
-    const activeFilters = computed(() => store.getters.activeFilters);
+    const assignees = computed(() => dataStore.assignees || []);
+    const activeFilters = computed(() => filterStore.activeFilters);
 
     // Watch for changes in store and update local ref
     watch(
@@ -49,11 +50,15 @@ export default {
       { immediate: true },
     );
 
-    const handleAssigneeChange = (assigneeIds) => {
+    const handleAssigneeChange = async (assigneeIds) => {
       // If "all" is selected, clear all selections
       if (assigneeIds && assigneeIds.includes(ALL_ASSIGNEES_FILTER.id)) {
         selectedAssignees.value = [];
-        store.dispatch("updateFilter", { key: "assignees", value: [] });
+        try {
+          await filterStore.updateFilter("assignees", []);
+        } catch (error) {
+          console.error("Failed to clear assignees filter:", error);
+        }
         return;
       }
 
@@ -61,12 +66,20 @@ export default {
 
       // If no assignees selected, clear the store (equivalent to "All Assignees" selection)
       if (!assigneeIds || assigneeIds.length === 0) {
-        store.dispatch("updateFilter", { key: "assignees", value: [] });
+        try {
+          await filterStore.updateFilter("assignees", []);
+        } catch (error) {
+          console.error("Failed to clear assignees filter:", error);
+        }
         return;
       }
 
       // Update store with new assignee IDs
-      store.dispatch("updateFilter", { key: "assignees", value: assigneeIds });
+      try {
+        await filterStore.updateFilter("assignees", assigneeIds);
+      } catch (error) {
+        console.error("Failed to update assignees filter:", error);
+      }
     };
 
     return {

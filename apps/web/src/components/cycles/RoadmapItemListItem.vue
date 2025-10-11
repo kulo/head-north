@@ -120,7 +120,7 @@
 
 <script>
 import { computed, ref } from "vue";
-import { useStore } from "vuex";
+import { useValidationStore } from "../../stores/registry";
 import { DEFAULT_UNKNOWN } from "../../lib/constants/default-values";
 
 export default {
@@ -136,9 +136,9 @@ export default {
     },
   },
   setup(props, { emit }) {
-    const store = useStore();
+    const validationStore = useValidationStore();
 
-    const validationEnabled = computed(() => store.state.validationEnabled);
+    const validationEnabled = computed(() => validationStore.validationEnabled);
     const popoverVisible = ref(false);
 
     const showValidation = (roadmapItem) => {

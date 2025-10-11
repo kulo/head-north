@@ -1,7 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import createAppRouter from "./router/index";
-// import createAppStore from "./store/index"; // COMMENTED OUT - Using Pinia instead
 import { CycleDataService } from "./services/index";
 import { createViewFilterManager } from "./services/view-filter-manager";
 import { createCycleDataViewCoordinator } from "./services/cycle-data-view-coordinator";
@@ -36,11 +35,7 @@ const pinia = createPinia();
 // Add router, Pinia, and Ant Design Vue
 const router = createAppRouter(omegaConfig);
 app.use(router);
-app.use(pinia); // Using Pinia instead of Vuex
-
-// COMMENTED OUT - Vuex store no longer used
-// const store = createAppStore(cycleDataService, omegaConfig, router);
-// app.use(store);
+app.use(pinia);
 
 app.use(Antd);
 app.use(VueApexCharts);

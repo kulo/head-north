@@ -8,7 +8,7 @@
 </template>
 <script>
 import { computed } from "vue";
-import { useStore } from "vuex";
+import { useValidationStore } from "../../stores/registry";
 import { FlagOutlined } from "@ant-design/icons-vue";
 
 export default {
@@ -17,12 +17,14 @@ export default {
     FlagOutlined,
   },
   setup() {
-    const store = useStore();
+    const validationStore = useValidationStore();
 
-    const validationEnabled = computed(() => store.state.validationEnabled);
+    const validationEnabled = computed(
+      () => validationStore.isValidationEnabled,
+    );
 
     const toggleValidation = () => {
-      store.commit("TOGGLE_VALIDATION");
+      validationStore.toggleValidation();
     };
 
     return {

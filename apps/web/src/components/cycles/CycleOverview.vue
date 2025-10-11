@@ -106,7 +106,11 @@
 
 <script>
 import { computed, onMounted, ref } from "vue";
-import { useStore } from "vuex";
+import {
+  useAppStore,
+  useDataStore,
+  useFilterStore,
+} from "../../stores/registry";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
 import ValidationSelector from "../ui/ValidationSelector.vue";
@@ -137,16 +141,18 @@ export default {
     RoadmapItemListItem,
   },
   setup() {
-    const store = useStore();
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+    const filterStore = useFilterStore();
 
     // Use filtered data for proper filtering functionality
-    const loading = computed(() => store.state.loading);
-    const error = computed(() => store.state.error);
+    const loading = computed(() => appStore.loading);
+    const error = computed(() => appStore.error);
     const cycleOverviewData = computed(
-      () => store.getters.filteredCycleOverviewData,
+      () => dataStore.filteredCycleOverviewData,
     );
     const isOverviewPage = computed(
-      () => store.getters.selectedPageName === "Cycle Overview",
+      () => appStore.selectedPageName === "Cycle Overview",
     );
 
     // Dialog state
@@ -159,8 +165,12 @@ export default {
     };
 
     onMounted(async () => {
-      // Switch to cycle overview view
-      await store.dispatch("switchView", "cycle-overview");
+      try {
+        // Switch to cycle overview view
+        await filterStore.switchView("cycle-overview", appStore);
+      } catch (error) {
+        console.error("Failed to switch to cycle overview view:", error);
+      }
     });
 
     return {

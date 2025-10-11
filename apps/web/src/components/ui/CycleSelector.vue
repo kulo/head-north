@@ -13,38 +13,45 @@
 
 <script>
 import { computed, watch } from "vue";
-import { useStore } from "vuex";
+import { useDataStore, useFilterStore } from "../../stores/registry";
 
 export default {
   name: "CycleSelector",
   setup() {
-    const store = useStore();
+    const dataStore = useDataStore();
+    const filterStore = useFilterStore();
 
     const cycles = computed(() => {
-      const data = store.getters.cycles;
+      const data = dataStore.cycles;
       return Array.isArray(data) ? data : [];
     });
-    const activeFilters = computed(() => store.getters.activeFilters);
+
+    const activeFilters = computed(() => filterStore.activeFilters);
 
     const selectedCycle = computed({
       get: () => activeFilters.value.cycle || "all",
-      set: (value) => {
-        store.dispatch("updateFilter", { key: "cycle", value: value });
+      set: async (value) => {
+        try {
+          await filterStore.updateFilter("cycle", value);
+        } catch (error) {
+          console.error("Failed to update cycle filter:", error);
+        }
       },
     });
 
     // Watch for cycles to be loaded and set default selection
     watch(
       () => cycles.value,
-      (newCycles) => {
+      async (newCycles) => {
         if (newCycles && newCycles.length > 0 && !activeFilters.value.cycle) {
           // Select the first cycle by default
           const firstCycle = newCycles[0];
           if (firstCycle) {
-            store.dispatch("updateFilter", {
-              key: "cycle",
-              value: firstCycle.id,
-            });
+            try {
+              await filterStore.updateFilter("cycle", firstCycle.id);
+            } catch (error) {
+              console.error("Failed to set default cycle:", error);
+            }
           }
         }
       },

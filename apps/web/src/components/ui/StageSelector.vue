@@ -24,20 +24,22 @@
 
 <script>
 import { computed, ref, watch } from "vue";
-import { useStore } from "vuex";
+import { useDataStore, useFilterStore } from "../../stores/registry";
 import { ALL_STAGES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {
   name: "StageSelector",
   setup() {
-    const store = useStore();
+    const dataStore = useDataStore();
+    const filterStore = useFilterStore();
 
     // Use store getters for global state
     const stages = computed(() => {
-      const data = store.getters.stages;
+      const data = dataStore.stages;
       return Array.isArray(data) ? data : [];
     });
-    const activeFilters = computed(() => store.getters.activeFilters);
+
+    const activeFilters = computed(() => filterStore.activeFilters);
 
     // Filter out "All Stages" from the dropdown options
     const filteredStages = computed(() => {
@@ -62,11 +64,15 @@ export default {
       { immediate: true },
     );
 
-    const handleStageChange = (stageIds) => {
+    const handleStageChange = async (stageIds) => {
       // If "all" is selected, clear all selections
       if (stageIds && stageIds.includes("all")) {
         selectedStages.value = [];
-        store.dispatch("updateFilter", { key: "stages", value: [] });
+        try {
+          await filterStore.updateFilter("stages", []);
+        } catch (error) {
+          console.error("Failed to clear stages filter:", error);
+        }
         return;
       }
 
@@ -74,12 +80,20 @@ export default {
 
       // If no stages selected, clear the store (equivalent to "All Stages" selection)
       if (!stageIds || stageIds.length === 0) {
-        store.dispatch("updateFilter", { key: "stages", value: [] });
+        try {
+          await filterStore.updateFilter("stages", []);
+        } catch (error) {
+          console.error("Failed to clear stages filter:", error);
+        }
         return;
       }
 
       // Update store with new stage IDs
-      store.dispatch("updateFilter", { key: "stages", value: stageIds });
+      try {
+        await filterStore.updateFilter("stages", stageIds);
+      } catch (error) {
+        console.error("Failed to update stages filter:", error);
+      }
     };
 
     return {

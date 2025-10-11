@@ -21,20 +21,22 @@
 
 <script>
 import { ref, computed, watch } from "vue";
-import { useStore } from "vuex";
+import { useDataStore, useFilterStore } from "../../stores/registry";
 import { ALL_INITIATIVES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {
   name: "InitiativeSelector",
   setup() {
-    const store = useStore();
+    const dataStore = useDataStore();
+    const filterStore = useFilterStore();
 
     const selectedInitiatives = ref([]);
     const initiatives = computed(() => {
-      const data = store.getters.initiatives;
+      const data = dataStore.initiatives;
       return Array.isArray(data) ? data : [];
     });
-    const activeFilters = computed(() => store.getters.activeFilters);
+
+    const activeFilters = computed(() => filterStore.activeFilters);
 
     // Filter out "All Initiatives" from the dropdown options
     const filteredInitiatives = computed(() => {
@@ -54,11 +56,15 @@ export default {
       { immediate: true },
     );
 
-    const handleInitiativeChange = (initiativeIds) => {
+    const handleInitiativeChange = async (initiativeIds) => {
       // If "all" is selected, clear all selections
       if (initiativeIds && initiativeIds.includes("all")) {
         selectedInitiatives.value = [];
-        store.dispatch("updateFilter", { key: "initiatives", value: [] });
+        try {
+          await filterStore.updateFilter("initiatives", []);
+        } catch (error) {
+          console.error("Failed to clear initiatives filter:", error);
+        }
         return;
       }
 
@@ -66,15 +72,20 @@ export default {
 
       // If no initiatives selected, clear the store (equivalent to "All Initiatives" selection)
       if (!initiativeIds || initiativeIds.length === 0) {
-        store.dispatch("updateFilter", { key: "initiatives", value: [] });
+        try {
+          await filterStore.updateFilter("initiatives", []);
+        } catch (error) {
+          console.error("Failed to clear initiatives filter:", error);
+        }
         return;
       }
 
       // Update store with new initiative IDs
-      store.dispatch("updateFilter", {
-        key: "initiatives",
-        value: initiativeIds,
-      });
+      try {
+        await filterStore.updateFilter("initiatives", initiativeIds);
+      } catch (error) {
+        console.error("Failed to update initiatives filter:", error);
+      }
     };
 
     return {

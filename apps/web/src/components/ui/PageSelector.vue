@@ -13,15 +13,16 @@
 
 <script>
 import { computed, ref, watch } from "vue";
-import { useStore } from "vuex";
+import { useAppStore, useFilterStore } from "../../stores/registry";
 
 export default {
   name: "PageSelector",
   setup() {
-    const store = useStore();
+    const appStore = useAppStore();
+    const filterStore = useFilterStore();
 
-    const pages = computed(() => store.getters.pages);
-    const currentPage = computed(() => store.getters.currentPage);
+    const pages = computed(() => appStore.allPages);
+    const currentPage = computed(() => appStore.currentPageId);
     const selectedPageValue = ref(null);
 
     const allPages = computed(() => pages.value || []);
@@ -37,9 +38,13 @@ export default {
       { immediate: true },
     );
 
-    const handlePageChange = (pageId) => {
+    const handlePageChange = async (pageId) => {
       selectedPageValue.value = pageId;
-      store.dispatch("switchView", pageId);
+      try {
+        await filterStore.switchView(pageId, appStore);
+      } catch (error) {
+        console.error("Failed to switch view:", error);
+      }
     };
 
     return {

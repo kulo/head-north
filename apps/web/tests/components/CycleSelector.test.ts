@@ -1,7 +1,7 @@
 /**
- * CycleSelector Pinia Component Tests
+ * CycleSelector Component Tests
  *
- * Tests for the Pinia version of CycleSelector component
+ * Tests for the CycleSelector component
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -12,7 +12,7 @@ import {
   useFilterStore,
   initializeStores,
 } from "../../src/stores/registry";
-import CycleSelectorPinia from "../../src/components/ui/CycleSelector-pinia.vue";
+import CycleSelector from "../../src/components/ui/CycleSelector.vue";
 
 // Mock Ant Design Vue components
 vi.mock("ant-design-vue", () => ({
@@ -67,7 +67,7 @@ const mockOmegaConfig = {
   getValidationEnabled: () => false,
 } as any;
 
-describe("CycleSelector Pinia", () => {
+describe("CycleSelector", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
 
@@ -81,7 +81,7 @@ describe("CycleSelector Pinia", () => {
     });
   });
 
-  it("should render with cycles from Pinia store", () => {
+  it("should render with cycles from store", () => {
     const dataStore = useDataStore();
     const filterStore = useFilterStore();
 
@@ -94,7 +94,7 @@ describe("CycleSelector Pinia", () => {
     // Mock the data store
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue(mockCycles);
 
-    const wrapper = mount(CycleSelectorPinia);
+    const wrapper = mount(CycleSelector);
 
     // Test that the component mounts successfully
     expect(wrapper.exists()).toBe(true);
@@ -109,7 +109,7 @@ describe("CycleSelector Pinia", () => {
 
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue(mockCycles);
 
-    const wrapper = mount(CycleSelectorPinia);
+    const wrapper = mount(CycleSelector);
 
     // Simulate cycle change
     await wrapper.vm.handleCycleChange("cycle1");
@@ -129,7 +129,7 @@ describe("CycleSelector Pinia", () => {
     // Initially no cycles, then cycles are loaded
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue([]);
 
-    const wrapper = mount(CycleSelectorPinia);
+    const wrapper = mount(CycleSelector);
 
     // Simulate cycles being loaded
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue(mockCycles);

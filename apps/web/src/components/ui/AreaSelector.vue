@@ -14,27 +14,33 @@
 
 <script>
 import { computed, onMounted } from "vue";
-import { useStore } from "vuex";
+import { useDataStore, useFilterStore } from "../../stores/registry";
 
 export default {
   name: "AreaSelector",
   setup() {
-    const store = useStore();
+    const dataStore = useDataStore();
+    const filterStore = useFilterStore();
 
     const areas = computed(() => {
-      const data = store.getters.areas;
+      const data = dataStore.areas;
       return Array.isArray(data) ? data : [];
     });
-    const activeFilters = computed(() => store.getters.activeFilters);
+
+    const activeFilters = computed(() => filterStore.activeFilters);
 
     const selectedArea = computed({
       get: () => activeFilters.value.area || "all",
-      set: (value) => {
-        // If "all" is selected, remove the area filter (set to undefined)
-        store.dispatch("updateFilter", {
-          key: "area",
-          value: value === "all" ? undefined : value,
-        });
+      set: async (value) => {
+        try {
+          // If "all" is selected, remove the area filter (set to undefined)
+          await filterStore.updateFilter(
+            "area",
+            value === "all" ? undefined : value,
+          );
+        } catch (error) {
+          console.error("Failed to update area filter:", error);
+        }
       },
     });
 
@@ -43,10 +49,9 @@ export default {
     };
 
     onMounted(() => {
-      // Load areas if not already loaded
-      if (areas.value.length === 0) {
-        store.dispatch("fetchAndProcessData");
-      }
+      // Areas will be loaded automatically when data is fetched
+      // No need to manually trigger data fetching here
+      console.log("AreaSelector mounted, areas available:", areas.value.length);
     });
 
     return {
