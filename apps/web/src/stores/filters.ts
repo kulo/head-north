@@ -14,6 +14,7 @@ import type { ViewFilterCriteria } from "../types/ui-types";
 import type { ViewFilterManager } from "../services/view-filter-manager";
 import type { Router } from "vue-router";
 import type { Cycle } from "@omega/types";
+import type { FilterKey } from "../types/filter-types";
 
 export function createFilterStore(
   viewFilterManager: ViewFilterManager,
@@ -35,6 +36,9 @@ export function createFilterStore(
     const currentFilters = computed(() => filters.value);
 
     const activeFilters = computed(() => {
+      // Depend on filters.value to ensure reactivity when filters change
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      filters.value; // This makes the computed reactive to filter changes
       return filterManager.getActiveFilters();
     });
 
@@ -54,10 +58,10 @@ export function createFilterStore(
       }
     }
 
-    async function updateFilter(key: string, value: any) {
+    async function updateFilter(key: FilterKey, value: unknown) {
       try {
         // Use ViewFilterManager to handle filter updates
-        const activeFilters = filterManager.updateFilter(key as any, value);
+        const activeFilters = filterManager.updateFilter(key, value);
         const allViewFilters = filterManager.getAllViewFilters();
 
         setFilters(allViewFilters);
@@ -75,14 +79,16 @@ export function createFilterStore(
 
     async function switchView(
       page: string,
-      appStore: ReturnType<typeof import("./app").createAppStore>,
+      appStore: ReturnType<ReturnType<typeof import("./app").createAppStore>>,
     ) {
       try {
         appStore.setCurrentPage(page);
         console.log("Switched to page", page);
 
         // Use ViewFilterManager to handle view switching and filter management
-        const activeFilters = filterManager.switchView(page as any);
+        const activeFilters = filterManager.switchView(
+          page as "cycle-overview" | "roadmap",
+        );
         const allViewFilters = filterManager.getAllViewFilters();
 
         // Update store with the structured filters from ViewFilterManager
@@ -140,6 +146,41 @@ export function createFilterStore(
       }
     }
 
+    async function updateArrayFilter(
+      filterKey: FilterKey,
+      values: unknown[],
+      allValue: string = "all",
+    ) {
+      try {
+        // If "all" is selected or no values, clear the filter
+        if (!values || values.length === 0 || values.includes(allValue)) {
+          await updateFilter(filterKey, []);
+          return;
+        }
+
+        // Update store with new values
+        await updateFilter(filterKey, values);
+      } catch (error) {
+        console.error(`Failed to update ${filterKey} filter:`, error);
+        throw new Error(`Failed to update ${filterKey} filter`);
+      }
+    }
+
+    async function updateSingleFilter(
+      filterKey: FilterKey,
+      value: unknown,
+      allValue: string = "all",
+    ) {
+      try {
+        // If "all" is selected, clear the filter (set to undefined)
+        const filterValue = value === allValue ? undefined : value;
+        await updateFilter(filterKey, filterValue);
+      } catch (error) {
+        console.error(`Failed to update ${filterKey} filter:`, error);
+        throw new Error(`Failed to update ${filterKey} filter`);
+      }
+    }
+
     return {
       // State
       filters,
@@ -156,6 +197,8 @@ export function createFilterStore(
       initializeFilters,
       clearFilters,
       initializeDefaultFilters,
+      updateArrayFilter,
+      updateSingleFilter,
     };
   });
 }

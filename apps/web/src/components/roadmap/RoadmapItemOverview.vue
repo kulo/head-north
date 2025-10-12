@@ -45,9 +45,18 @@
 </template>
 
 <script>
+import { useDataStore } from "../../stores/registry";
+
 export default {
   name: "roadmap-item-overview",
   props: ["roadmapItem", "orderedCycles", "itemIndex"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    };
+  },
   computed: {
     validations() {
       return this.roadmapItem.validations;
@@ -78,15 +87,7 @@ export default {
   },
   methods: {
     getReleaseItemsForCycle(cycleId) {
-      if (!this.roadmapItem.releaseItems) {
-        return [];
-      }
-
-      // Filter release items that belong to this cycle
-      // Use == for type coercion to handle string/number mismatches
-      return this.roadmapItem.releaseItems.filter(
-        (releaseItem) => releaseItem.cycle && releaseItem.cycle.id == cycleId,
-      );
+      return this.dataStore.getReleaseItemsForCycle(this.roadmapItem, cycleId);
     },
   },
 };

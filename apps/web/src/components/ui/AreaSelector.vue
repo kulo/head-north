@@ -33,11 +33,7 @@ export default {
       get: () => activeFilters.value.area || "all",
       set: async (value) => {
         try {
-          // If "all" is selected, remove the area filter (set to undefined)
-          await filterStore.updateFilter(
-            "area",
-            value === "all" ? undefined : value,
-          );
+          await filterStore.updateSingleFilter("area", value, "all");
         } catch (error) {
           console.error("Failed to update area filter:", error);
         }

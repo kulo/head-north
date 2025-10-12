@@ -65,32 +65,9 @@ export default {
     );
 
     const handleStageChange = async (stageIds) => {
-      // If "all" is selected, clear all selections
-      if (stageIds && stageIds.includes("all")) {
-        selectedStages.value = [];
-        try {
-          await filterStore.updateFilter("stages", []);
-        } catch (error) {
-          console.error("Failed to clear stages filter:", error);
-        }
-        return;
-      }
-
       selectedStages.value = stageIds;
-
-      // If no stages selected, clear the store (equivalent to "All Stages" selection)
-      if (!stageIds || stageIds.length === 0) {
-        try {
-          await filterStore.updateFilter("stages", []);
-        } catch (error) {
-          console.error("Failed to clear stages filter:", error);
-        }
-        return;
-      }
-
-      // Update store with new stage IDs
       try {
-        await filterStore.updateFilter("stages", stageIds);
+        await filterStore.updateArrayFilter("stages", stageIds, "all");
       } catch (error) {
         console.error("Failed to update stages filter:", error);
       }

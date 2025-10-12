@@ -57,32 +57,13 @@ export default {
     );
 
     const handleInitiativeChange = async (initiativeIds) => {
-      // If "all" is selected, clear all selections
-      if (initiativeIds && initiativeIds.includes("all")) {
-        selectedInitiatives.value = [];
-        try {
-          await filterStore.updateFilter("initiatives", []);
-        } catch (error) {
-          console.error("Failed to clear initiatives filter:", error);
-        }
-        return;
-      }
-
       selectedInitiatives.value = initiativeIds;
-
-      // If no initiatives selected, clear the store (equivalent to "All Initiatives" selection)
-      if (!initiativeIds || initiativeIds.length === 0) {
-        try {
-          await filterStore.updateFilter("initiatives", []);
-        } catch (error) {
-          console.error("Failed to clear initiatives filter:", error);
-        }
-        return;
-      }
-
-      // Update store with new initiative IDs
       try {
-        await filterStore.updateFilter("initiatives", initiativeIds);
+        await filterStore.updateArrayFilter(
+          "initiatives",
+          initiativeIds,
+          "all",
+        );
       } catch (error) {
         console.error("Failed to update initiatives filter:", error);
       }

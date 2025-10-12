@@ -122,6 +122,7 @@
 import { computed, ref } from "vue";
 import { useValidationStore } from "../../stores/registry";
 import { DEFAULT_UNKNOWN } from "../../lib/constants/default-values";
+import { getStatusClass, getStageClass } from "../../lib/utils/css-classes";
 
 export default {
   name: "RoadmapItemListItem",
@@ -151,18 +152,6 @@ export default {
 
     const closePopover = () => {
       popoverVisible.value = false;
-    };
-
-    const getStatusClass = (status) => {
-      if (!status) return "";
-      const normalizedStatus = status.toLowerCase().replace(/[^a-z0-9]/g, "-");
-      return `status-${normalizedStatus}`;
-    };
-
-    const getStageClass = (stage) => {
-      if (!stage) return "";
-      const normalizedStage = stage.toLowerCase().replace(/[^a-z0-9]/g, "-");
-      return `stage-${normalizedStage}`;
     };
 
     return {

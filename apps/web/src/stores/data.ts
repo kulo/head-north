@@ -43,6 +43,16 @@ export function createDataStore(
     const stages = computed(() => rawData.value?.stages || []);
     const cycles = computed(() => rawData.value?.cycles || []);
 
+    // Sorted cycles for consistent ordering across components
+    const orderedCycles = computed(() => {
+      if (!cycles.value || cycles.value.length === 0) return [];
+      return [...cycles.value].sort(
+        (a, b) =>
+          new Date(a.start || a.delivery || 0).getTime() -
+          new Date(b.start || b.delivery || 0).getTime(),
+      );
+    });
+
     // Complex getters that were in Vuex
     const roadmapData = computed((): RoadmapData => {
       console.log("🔍 Computing roadmapData:", {
@@ -230,6 +240,22 @@ export function createDataStore(
       processedData.value = null;
     }
 
+    function getReleaseItemsForCycle(
+      roadmapItem: { releaseItems?: unknown[] },
+      cycleId: string | number,
+    ) {
+      if (!roadmapItem?.releaseItems) {
+        return [];
+      }
+
+      // Filter release items that belong to this cycle
+      // Use == for type coercion to handle string/number mismatches
+      return roadmapItem.releaseItems.filter(
+        (releaseItem: { cycle?: { id: string | number } }) =>
+          releaseItem.cycle && releaseItem.cycle.id == cycleId,
+      );
+    }
+
     return {
       // State
       rawData,
@@ -243,6 +269,7 @@ export function createDataStore(
       assignees,
       stages,
       cycles,
+      orderedCycles,
       roadmapData,
       filteredRoadmapData,
       cycleOverviewData,
@@ -253,6 +280,7 @@ export function createDataStore(
       setProcessedData,
       fetchAndProcessData,
       clearData,
+      getReleaseItemsForCycle,
     };
   });
 }

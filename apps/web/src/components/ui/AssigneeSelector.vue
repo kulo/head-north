@@ -51,32 +51,13 @@ export default {
     );
 
     const handleAssigneeChange = async (assigneeIds) => {
-      // If "all" is selected, clear all selections
-      if (assigneeIds && assigneeIds.includes(ALL_ASSIGNEES_FILTER.id)) {
-        selectedAssignees.value = [];
-        try {
-          await filterStore.updateFilter("assignees", []);
-        } catch (error) {
-          console.error("Failed to clear assignees filter:", error);
-        }
-        return;
-      }
-
       selectedAssignees.value = assigneeIds;
-
-      // If no assignees selected, clear the store (equivalent to "All Assignees" selection)
-      if (!assigneeIds || assigneeIds.length === 0) {
-        try {
-          await filterStore.updateFilter("assignees", []);
-        } catch (error) {
-          console.error("Failed to clear assignees filter:", error);
-        }
-        return;
-      }
-
-      // Update store with new assignee IDs
       try {
-        await filterStore.updateFilter("assignees", assigneeIds);
+        await filterStore.updateArrayFilter(
+          "assignees",
+          assigneeIds,
+          ALL_ASSIGNEES_FILTER.id,
+        );
       } catch (error) {
         console.error("Failed to update assignees filter:", error);
       }

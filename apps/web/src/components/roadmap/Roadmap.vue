@@ -92,17 +92,7 @@ export default {
 
     const loading = computed(() => appStore.loading);
     const error = computed(() => appStore.error);
-    const cycles = computed(() => dataStore.cycles);
-
-    // Extract cycles from store
-    const orderedCycles = computed(() => {
-      if (!cycles.value || cycles.value.length === 0) return [];
-      return [...cycles.value].sort(
-        (a, b) =>
-          new Date(a.start || a.delivery || 0) -
-          new Date(b.start || b.delivery || 0),
-      );
-    });
+    const orderedCycles = computed(() => dataStore.orderedCycles);
 
     onMounted(async () => {
       try {
