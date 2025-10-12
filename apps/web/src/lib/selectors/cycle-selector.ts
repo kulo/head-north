@@ -13,7 +13,7 @@ import type { Cycle } from "@omega/types";
  * @param cycles - Array of available cycles
  * @returns Selected cycle or null if no cycles available
  */
-export const selectBestCycle = (cycles: Cycle[]): Cycle | null => {
+export function selectDefaultCycle(cycles: Cycle[]): Cycle | null {
   if (!cycles || !Array.isArray(cycles) || cycles.length === 0) {
     return null;
   }
@@ -53,4 +53,4 @@ export const selectBestCycle = (cycles: Cycle[]): Cycle | null => {
 
   // 4. Last resort: return the first cycle (oldest by our sort)
   return sortedCycles[0];
-};
+}

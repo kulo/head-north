@@ -14,7 +14,7 @@
 <script>
 import { computed, watch, ref } from "vue";
 import { useDataStore, useFilterStore } from "../../stores/registry";
-import { selectBestCycle } from "../../lib/selectors/cycle-selector";
+import { selectDefaultCycle } from "../../lib/selectors/cycle-selector";
 
 export default {
   name: "CycleSelector",
@@ -40,8 +40,8 @@ export default {
           selectedCycle.value = newCycleId;
         } else {
           // If no cycle filter is set, use the best cycle
-          const bestCycle = selectBestCycle(cycles.value);
-          selectedCycle.value = bestCycle ? bestCycle.id : null;
+          const defaultCycle = selectDefaultCycle(cycles.value);
+          selectedCycle.value = defaultCycle ? defaultCycle.id : null;
         }
       },
       { immediate: true },
@@ -52,7 +52,7 @@ export default {
       () => cycles.value,
       (newCycles) => {
         if (newCycles && newCycles.length > 0 && !activeFilters.value.cycle) {
-          const bestCycle = selectBestCycle(newCycles);
+          const bestCycle = selectDefaultCycle(newCycles);
           selectedCycle.value = bestCycle ? bestCycle.id : null;
         }
       },
@@ -65,7 +65,7 @@ export default {
       async (newCycles) => {
         if (newCycles && newCycles.length > 0 && !activeFilters.value.cycle) {
           // Select the best cycle using the same logic as data transformer
-          const bestCycle = selectBestCycle(newCycles);
+          const bestCycle = selectDefaultCycle(newCycles);
           if (bestCycle) {
             try {
               await filterStore.updateFilter("cycle", bestCycle.id);

@@ -17,7 +17,7 @@ import type {
   CycleOverviewData,
 } from "../../types/ui-types";
 import { filter } from "../utils/filter";
-import { selectBestCycle } from "../selectors/cycle-selector";
+import { selectDefaultCycle } from "../selectors/cycle-selector";
 import { calculateCycleProgress } from "../cycle-progress-calculator";
 import {
   calculateReleaseItemProgress,
@@ -241,7 +241,7 @@ export class DataTransformer {
     return {
       orderedCycles: rawData?.cycles || [],
       roadmapItems: [],
-      activeCycle: selectBestCycle(rawData?.cycles || []),
+      activeCycle: selectDefaultCycle(rawData?.cycles || []),
       initiatives: processedData.initiatives || [],
     };
   }
@@ -258,7 +258,7 @@ export class DataTransformer {
       return null;
     }
 
-    const selectedCycle = selectBestCycle(rawData.cycles);
+    const selectedCycle = selectDefaultCycle(rawData.cycles);
     if (!selectedCycle) {
       return null;
     }
@@ -293,7 +293,7 @@ export class DataTransformer {
     return {
       orderedCycles: rawData?.cycles || [],
       roadmapItems: [],
-      activeCycle: selectBestCycle(rawData?.cycles || []),
+      activeCycle: selectDefaultCycle(rawData?.cycles || []),
       initiatives: filteredData.data.initiatives || [],
     };
   }
@@ -311,7 +311,7 @@ export class DataTransformer {
       return null;
     }
 
-    const selectedCycle = selectBestCycle(rawData.cycles);
+    const selectedCycle = selectDefaultCycle(rawData.cycles);
     if (!selectedCycle) {
       return null;
     }
