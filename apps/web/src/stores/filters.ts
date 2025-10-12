@@ -9,9 +9,11 @@
 
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type { ViewFilterManager } from "../services/view-filter-manager";
 import type { Router } from "vue-router";
+import type { Cycle } from "@omega/types";
 
 export function createFilterStore(
   viewFilterManager: ViewFilterManager,
@@ -122,6 +124,22 @@ export function createFilterStore(
       };
     }
 
+    async function initializeDefaultFilters(cycles: Cycle[]) {
+      try {
+        // Only set default cycle if no cycle filter is currently active
+        if (!activeFilters.value.cycle && cycles && cycles.length > 0) {
+          const defaultCycle = selectDefaultCycle(cycles);
+          if (defaultCycle) {
+            await updateFilter("cycle", defaultCycle.id);
+            console.log("Default cycle filter initialized:", defaultCycle.id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to initialize default filters:", error);
+        throw new Error("Failed to initialize default filters");
+      }
+    }
+
     return {
       // State
       filters,
@@ -137,6 +155,7 @@ export function createFilterStore(
       switchView,
       initializeFilters,
       clearFilters,
+      initializeDefaultFilters,
     };
   });
 }

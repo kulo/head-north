@@ -10,6 +10,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { DataTransformer } from "../lib/transformers/data-transformer";
+import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import type { CycleData } from "@omega/types";
 import type {
   NestedCycleData,
@@ -64,7 +65,7 @@ export function createDataStore(
       const result = {
         orderedCycles: rawData.value?.cycles || [],
         roadmapItems: [],
-        activeCycle: selectBestCycle(rawData.value?.cycles || []),
+        activeCycle: selectDefaultCycle(rawData.value?.cycles || []),
         initiatives: processedData.value.initiatives || [],
       };
 
@@ -121,7 +122,7 @@ export function createDataStore(
       if (!processedData.value || !rawData.value?.cycles?.length) {
         return null;
       }
-      const selectedCycle = selectBestCycle(rawData.value.cycles);
+      const selectedCycle = selectDefaultCycle(rawData.value.cycles);
       if (!selectedCycle) {
         return null;
       }
@@ -254,50 +255,4 @@ export function createDataStore(
       clearData,
     };
   });
-}
-
-/**
- * Helper function moved from Vuex store
- * Determines the best cycle to select based on availability and priority
- */
-function selectBestCycle(cycles: any[]): any | null {
-  if (!cycles || !Array.isArray(cycles) || cycles.length === 0) {
-    return null;
-  }
-
-  // Sort cycles by start date (oldest first)
-  const sortedCycles = [...cycles].sort((a, b) => {
-    const dateA = new Date(a.start || a.delivery || 0).getTime();
-    const dateB = new Date(b.start || b.delivery || 0).getTime();
-    return dateA - dateB;
-  });
-
-  // 1. Try to find active cycles (oldest first)
-  const activeCycles = sortedCycles.filter((cycle) => cycle.state === "active");
-  if (activeCycles.length > 0) {
-    return activeCycles[0]; // Oldest active cycle
-  }
-
-  // 2. Try to find future cycles (oldest first)
-  const futureCycles = sortedCycles.filter((cycle) => {
-    const cycleDate = new Date(cycle.start || cycle.delivery || 0);
-    const now = new Date();
-    return (
-      cycleDate > now && cycle.state !== "closed" && cycle.state !== "completed"
-    );
-  });
-  if (futureCycles.length > 0) {
-    return futureCycles[0]; // Oldest future cycle
-  }
-
-  // 3. Fall back to closed cycles (oldest first)
-  const closedCycles = sortedCycles.filter(
-    (cycle) => cycle.state === "closed" || cycle.state === "completed",
-  );
-  if (closedCycles.length > 0) {
-    return closedCycles[0]; // Oldest closed cycle
-  }
-
-  // 4. Last resort: return the first cycle (oldest by our sort)
-  return sortedCycles[0];
 }

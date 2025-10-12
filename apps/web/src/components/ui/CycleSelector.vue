@@ -14,7 +14,6 @@
 <script>
 import { computed, watch, ref } from "vue";
 import { useDataStore, useFilterStore } from "../../stores/registry";
-import { selectDefaultCycle } from "../../lib/selectors/cycle-selector";
 
 export default {
   name: "CycleSelector",
@@ -36,42 +35,20 @@ export default {
     watch(
       () => activeFilters.value.cycle,
       (newCycleId) => {
-        if (newCycleId) {
-          selectedCycle.value = newCycleId;
-        } else {
-          // If no cycle filter is set, use the best cycle
-          const defaultCycle = selectDefaultCycle(cycles.value);
-          selectedCycle.value = defaultCycle ? defaultCycle.id : null;
-        }
+        selectedCycle.value = newCycleId || null;
       },
       { immediate: true },
     );
 
-    // Watch for changes in cycles and update selectedCycle if no filter is set
-    watch(
-      () => cycles.value,
-      (newCycles) => {
-        if (newCycles && newCycles.length > 0 && !activeFilters.value.cycle) {
-          const bestCycle = selectDefaultCycle(newCycles);
-          selectedCycle.value = bestCycle ? bestCycle.id : null;
-        }
-      },
-      { immediate: true },
-    );
-
-    // Watch for cycles to be loaded and set default selection if no filter exists
+    // Watch for cycles to be loaded and initialize default filters
     watch(
       () => cycles.value,
       async (newCycles) => {
-        if (newCycles && newCycles.length > 0 && !activeFilters.value.cycle) {
-          // Select the best cycle using the same logic as data transformer
-          const bestCycle = selectDefaultCycle(newCycles);
-          if (bestCycle) {
-            try {
-              await filterStore.updateFilter("cycle", bestCycle.id);
-            } catch (error) {
-              console.error("Failed to set default cycle:", error);
-            }
+        if (newCycles && newCycles.length > 0) {
+          try {
+            await filterStore.initializeDefaultFilters(newCycles);
+          } catch (error) {
+            console.error("Failed to initialize default cycle filter:", error);
           }
         }
       },
