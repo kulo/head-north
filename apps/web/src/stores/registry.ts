@@ -5,10 +5,10 @@
  * while maintaining the familiar useStore() API.
  */
 
-import { createDataStore } from "./data";
-import { createFilterStore } from "./filters";
-import { createAppStore } from "./app";
-import { createValidationStore } from "./validation";
+import { createDataStore } from "./data-store";
+import { createFilterStore } from "./filters-store";
+import { createAppStore } from "./app-store";
+import { createValidationStore } from "./validation-store";
 import type { default as CycleDataService } from "../services/cycle-data-service";
 import type { ViewFilterManager } from "../services/view-filter-manager";
 import type { CycleDataViewCoordinator } from "../services/cycle-data-view-coordinator";

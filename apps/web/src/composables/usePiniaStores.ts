@@ -6,28 +6,35 @@
  */
 
 import { computed } from "vue";
-import { useStores } from "../stores";
+import {
+  useAppStore,
+  useDataStore,
+  useFilterStore,
+  useValidationStore,
+} from "../stores/registry";
 import { useCycleData } from "./useCycleData";
 import { useFilters } from "./useFilters";
 import type { CycleDataViewCoordinator } from "../services/cycle-data-view-coordinator";
+import type { FilterKey } from "../types/filter-types";
 
 export function usePiniaStores(
   cycleDataViewCoordinator: CycleDataViewCoordinator,
 ) {
-  const stores = useStores();
+  const appStore = useAppStore();
+  const dataStore = useDataStore();
+  const filterStore = useFilterStore();
+  const validationStore = useValidationStore();
 
   // Store state - direct access to reactive state
-  const loading = computed(() => stores.app.isLoading);
-  const error = computed(() => stores.app.errorMessage);
-  const validationEnabled = computed(
-    () => stores.validation.isValidationEnabled,
-  );
-  const validationSummary = computed(() => stores.validation.summary);
-  const pages = computed(() => stores.app.allPages);
-  const currentPage = computed(() => stores.app.currentPageId);
-  const rawData = computed(() => stores.data.rawData);
-  const processedData = computed(() => stores.data.processedData);
-  const filters = computed(() => stores.filter.currentFilters);
+  const loading = computed(() => appStore.isLoading);
+  const error = computed(() => appStore.errorMessage);
+  const validationEnabled = computed(() => validationStore.isValidationEnabled);
+  const validationSummary = computed(() => validationStore.summary);
+  const pages = computed(() => appStore.allPages);
+  const currentPage = computed(() => appStore.currentPageId);
+  const rawData = computed(() => dataStore.rawData);
+  const processedData = computed(() => dataStore.processedData);
+  const filters = computed(() => filterStore.currentFilters);
 
   // Cycle data with complex calculations
   const cycleData = useCycleData(cycleDataViewCoordinator, {
@@ -46,19 +53,19 @@ export function usePiniaStores(
   };
 
   const updateFilters = async (newFilters: any) => {
-    await stores.filter.updateFilters(newFilters);
+    await filterStore.updateFilters(newFilters);
   };
 
-  const updateFilter = async (key: string, value: any) => {
-    await stores.filter.updateFilter(key, value);
+  const updateFilter = async (key: FilterKey, value: any) => {
+    await filterStore.updateFilter(key, value);
   };
 
   const switchView = async (page: string) => {
-    await stores.filter.switchView(page, stores.app);
+    await filterStore.switchView(page, appStore);
   };
 
   const initializeFilters = () => {
-    stores.filter.initializeFilters();
+    filterStore.initializeFilters();
   };
 
   // Simplified fetch actions
@@ -103,6 +110,9 @@ export function usePiniaStores(
     fetchCycles,
 
     // Direct store access for advanced usage
-    stores,
+    appStore,
+    dataStore,
+    filterStore,
+    validationStore,
   };
 }

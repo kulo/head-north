@@ -79,7 +79,9 @@ export function createFilterStore(
 
     async function switchView(
       page: string,
-      appStore: ReturnType<ReturnType<typeof import("./app").createAppStore>>,
+      appStore: ReturnType<
+        ReturnType<typeof import("./app-store").createAppStore>
+      >,
     ) {
       try {
         appStore.setCurrentPage(page);
