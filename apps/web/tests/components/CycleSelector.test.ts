@@ -7,11 +7,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { setActivePinia, createPinia } from "pinia";
-import {
-  useDataStore,
-  useFilterStore,
-  initializeStores,
-} from "../../src/stores/registry";
+import { useDataStore, useFilterStore } from "../../src/stores";
 import CycleSelector from "../../src/components/ui/CycleSelector.vue";
 
 // Mock Ant Design Vue components

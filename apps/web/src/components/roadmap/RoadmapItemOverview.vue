@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { useDataStore } from "../../stores/registry";
+import { useDataStore } from "../../stores";
 
 export default {
   name: "roadmap-item-overview",

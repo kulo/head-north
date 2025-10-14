@@ -14,7 +14,7 @@
 
 <script>
 import { computed, onMounted } from "vue";
-import { useDataStore, useFilterStore } from "../../stores/registry";
+import { useDataStore, useFilterStore } from "../../stores";
 
 export default {
   name: "AreaSelector",

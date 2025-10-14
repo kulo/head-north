@@ -13,7 +13,6 @@ import VueApexCharts from "vue3-apexcharts";
 
 // Pinia imports
 import { createPinia } from "pinia";
-import { initializeStores } from "./stores/registry";
 
 // Create services
 const omegaConfig = new OmegaConfig({
@@ -37,27 +36,25 @@ const router = createAppRouter(omegaConfig);
 app.use(router);
 app.use(pinia);
 
+// Provide services for dependency injection
+app.provide("config", omegaConfig);
+app.provide("dataService", cycleDataService);
+app.provide("filterManager", viewFilterManager);
+app.provide("coordinator", cycleDataViewCoordinator);
+app.provide("router", router);
+
 app.use(Antd);
 app.use(VueApexCharts);
 
-// Initialize Pinia services
+// Initialize app
 async function initializeApp() {
   try {
-    // Initialize stores with immutable service injection
-    initializeStores({
-      cycleDataService,
-      viewFilterManager,
-      cycleDataViewCoordinator,
-      router,
-      config: omegaConfig,
-    });
-
     // Mount the app
     app.mount("#app");
 
-    // Initialize stores and fetch data
+    // Import stores after app is mounted
     const { useAppStore, useDataStore, useValidationStore, useFilterStore } =
-      await import("./stores/registry");
+      await import("./stores");
 
     const appStore = useAppStore();
     const dataStore = useDataStore();
@@ -70,7 +67,7 @@ async function initializeApp() {
     filterStore.initializeFilters();
 
     // Fetch initial data
-    await dataStore.fetchAndProcessData(appStore);
+    await dataStore.fetchAndProcessData();
 
     logger.default.info("Omega One frontend started successfully with Pinia!");
   } catch (error) {

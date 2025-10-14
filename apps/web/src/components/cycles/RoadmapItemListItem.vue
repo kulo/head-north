@@ -120,7 +120,7 @@
 
 <script>
 import { computed, ref } from "vue";
-import { useValidationStore } from "../../stores/registry";
+import { useValidationStore } from "../../stores";
 import { DEFAULT_UNKNOWN } from "../../lib/constants/default-values";
 import { getStatusClass, getStageClass } from "../../lib/utils/css-classes";
 

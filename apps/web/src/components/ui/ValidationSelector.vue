@@ -8,7 +8,7 @@
 </template>
 <script>
 import { computed } from "vue";
-import { useValidationStore } from "../../stores/registry";
+import { useValidationStore } from "../../stores";
 import { FlagOutlined } from "@ant-design/icons-vue";
 
 export default {

@@ -21,7 +21,7 @@
 
 <script>
 import { ref, computed, watch } from "vue";
-import { useDataStore, useFilterStore } from "../../stores/registry";
+import { useDataStore, useFilterStore } from "../../stores";
 import { ALL_INITIATIVES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {

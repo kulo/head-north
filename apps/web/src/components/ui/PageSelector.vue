@@ -13,7 +13,7 @@
 
 <script>
 import { computed, ref, watch } from "vue";
-import { useAppStore, useFilterStore } from "../../stores/registry";
+import { useAppStore, useFilterStore } from "../../stores";
 
 export default {
   name: "PageSelector",
@@ -41,7 +41,7 @@ export default {
     const handlePageChange = async (pageId) => {
       selectedPageValue.value = pageId;
       try {
-        await filterStore.switchView(pageId, appStore);
+        await filterStore.switchView(pageId);
       } catch (error) {
         console.error("Failed to switch view:", error);
       }

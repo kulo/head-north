@@ -62,11 +62,7 @@
 
 <script>
 import { computed, onMounted } from "vue";
-import {
-  useAppStore,
-  useDataStore,
-  useFilterStore,
-} from "../../stores/registry";
+import { useAppStore, useDataStore, useFilterStore } from "../../stores";
 import RoadmapItemOverview from "./RoadmapItemOverview.vue";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
@@ -97,7 +93,7 @@ export default {
     onMounted(async () => {
       try {
         // Switch to roadmap view and reset view-specific filters
-        await filterStore.switchView("roadmap", appStore);
+        await filterStore.switchView("roadmap");
       } catch (error) {
         console.error("Failed to switch to roadmap view:", error);
       }

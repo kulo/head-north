@@ -13,7 +13,7 @@
 
 <script>
 import { computed, watch, ref } from "vue";
-import { useDataStore, useFilterStore } from "../../stores/registry";
+import { useDataStore, useFilterStore } from "../../stores";
 
 export default {
   name: "CycleSelector",

@@ -24,7 +24,7 @@
 
 <script>
 import { computed, ref, watch } from "vue";
-import { useDataStore, useFilterStore } from "../../stores/registry";
+import { useDataStore, useFilterStore } from "../../stores";
 import { ALL_STAGES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {

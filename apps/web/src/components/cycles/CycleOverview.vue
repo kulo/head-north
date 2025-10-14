@@ -106,11 +106,7 @@
 
 <script>
 import { computed, onMounted, ref } from "vue";
-import {
-  useAppStore,
-  useDataStore,
-  useFilterStore,
-} from "../../stores/registry";
+import { useAppStore, useDataStore, useFilterStore } from "../../stores";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
 import ValidationSelector from "../ui/ValidationSelector.vue";
@@ -167,7 +163,7 @@ export default {
     onMounted(async () => {
       try {
         // Switch to cycle overview view
-        await filterStore.switchView("cycle-overview", appStore);
+        await filterStore.switchView("cycle-overview");
       } catch (error) {
         console.error("Failed to switch to cycle overview view:", error);
       }
