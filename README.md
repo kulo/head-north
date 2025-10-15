@@ -19,9 +19,8 @@ omega-one/
 │   └── api/           # Node.js/Koa API service (port 3000)
 ├── packages/
 │   ├── types/         # Shared TypeScript types and interfaces
-│   ├── utils/         # Shared utility functions
-│   ├── config/        # Shared configuration files
-│   └── ui/            # Shared UI components
+│   ├── utils/         # Shared utility functions (logging)
+│   └── config/        # Shared configuration files
 ├── tools/
 │   ├── eslint-config/ # Shared ESLint configuration
 │   ├── prettier-config/ # Shared Prettier configuration
@@ -41,16 +40,29 @@ omega-one/
 - Node.js 22.x LTS
 - npm 10.x
 
+### Development Mode with Fake Data
+
+For development and testing, the API can run with fake data to avoid Jira authentication requirements:
+
+```bash
+# Start API with fake data
+cd apps/api
+USE_FAKE_DATA=true npm run start-dev
+
+# Or start both apps with fake data
+USE_FAKE_DATA=true npm run dev
+```
+
 ### Installation
 
 ```bash
 # Install all dependencies
-npm run install:all
+npm install
 
 # Or install individually
 npm run install:web     # Web application
 npm run install:api     # API service
-npm run install:packages # Shared packages
+npm run install:packages # Shared packages (types, utils, config)
 ```
 
 ### Development
@@ -109,7 +121,7 @@ Common TypeScript types and interfaces used across web app and API service. Prov
 
 ### Utils (`@omega/utils`)
 
-Utility functions that can be used by both web app and API service applications. Includes logging, data processing, and common helper functions.
+Shared utility functions used by both web app and API service applications. Currently includes logging functionality for consistent log formatting across the monorepo.
 
 ### Config (`@omega/config`)
 
@@ -123,10 +135,6 @@ Utility functions that can be used by both web app and API service applications.
 - **Page definitions and routing** - Centralized page configuration for the frontend
 - **Filter system configuration** - Type-safe filter definitions and validation rules
 
-### UI (`@omega/ui`)
-
-Shared Vue.js components that can be reused across different parts of the web application. Provides consistent UI components and design system elements.
-
 ## 📦 Package Usage Examples
 
 ```typescript
@@ -138,9 +146,6 @@ import { logger } from "@omega/utils";
 
 // Import configuration
 import { OmegaConfig } from "@omega/config";
-
-// Import UI components
-import { Button, Modal } from "@omega/ui";
 ```
 
 ### Tools
@@ -175,7 +180,6 @@ npm run dev:packages
 npm run dev:types    # Watch types package
 npm run dev:utils    # Watch utils package
 npm run dev:config   # Watch config package
-npm run dev:ui       # Watch UI package
 ```
 
 ## 🔧 Individual Package Management
@@ -250,6 +254,30 @@ The project uses a **Single Source of Truth** approach for configuration:
 - **Frontend**: Uses shared endpoints for API calls
 - **Backend**: Uses shared endpoints for route registration
 - **Consistency**: Frontend and backend automatically stay in sync
+
+## 🧹 Recent Cleanup
+
+The codebase has been recently cleaned up to remove unused artifacts and improve maintainability:
+
+### Removed Components
+
+- **UI Package**: Removed `packages/ui` as it contained only placeholder components
+- **Unused Dependencies**: Removed unused npm packages (vuex, @vueuse/core, sass-loader, etc.)
+- **Unused Files**: Cleaned up unused utility files, test duplicates, and empty directories
+- **Unused Scripts**: Removed redundant npm scripts across all packages
+
+### Current Package Structure
+
+- **Types** (`@omega/types`): Shared TypeScript interfaces and types
+- **Utils** (`@omega/utils`): Logging utilities and shared helper functions
+- **Config** (`@omega/config`): Centralized configuration and API endpoint definitions
+
+### Build Status
+
+- ✅ All packages build successfully
+- ✅ Web application runs on http://localhost:8080
+- ✅ API service runs on http://localhost:3000
+- ✅ Fake data mode available for development without Jira authentication
 
 ## 🤝 Contributing
 
