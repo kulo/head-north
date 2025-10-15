@@ -6,10 +6,8 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import {
-  useValidationStore,
-  initializeStores,
-} from "../../src/stores/registry";
+import { useValidationStore } from "../../src/stores/validation-store";
+import { setupTestApp } from "../setup-stores";
 
 // Mock services
 const mockCycleDataService = {
@@ -47,16 +45,8 @@ const mockOmegaConfig = {
 
 describe("Validation Store", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
-
-    // Initialize stores with mock services
-    initializeStores({
-      cycleDataService: mockCycleDataService,
-      viewFilterManager: mockViewFilterManager,
-      cycleDataViewCoordinator: mockCycleDataViewCoordinator,
-      router: mockRouter,
-      config: mockOmegaConfig,
-    });
+    const { app, pinia } = setupTestApp();
+    setActivePinia(pinia);
   });
 
   it("should initialize with default state", () => {

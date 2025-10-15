@@ -70,6 +70,23 @@ const deepCopy = function (src) {
   return JSON.parse(JSON.stringify(src));
 };
 
+// Safety function to ensure chart options don't cause negative radii
+const validateChartOptions = (options, initiativeCount) => {
+  const safeOptions = deepCopy(options);
+
+  // For many initiatives, ensure we have enough space for the radial bars
+  if (initiativeCount > 4) {
+    // Ensure hollow size is large enough to prevent negative inner radius
+    safeOptions.plotOptions.radialBar.hollow.size = "35%";
+    safeOptions.plotOptions.radialBar.hollow.margin = 20;
+
+    // Reduce track margin to give more space
+    safeOptions.plotOptions.radialBar.track.margin = 3;
+  }
+
+  return safeOptions;
+};
+
 const sortInitiatives = (initiatives) => {
   return deepCopy(initiatives).sort(
     (init1, init2) => init2.weeks - init1.weeks,
@@ -304,25 +321,24 @@ export default {
     });
 
     const options1 = computed(() => {
-      let options = deepCopy(options1Default);
-      if (summarizedInitiatives.value.length > 4)
-        options.plotOptions.radialBar.hollow.size = "25%"; // Increased from 15% to prevent negative radii
-
-      return options;
+      return validateChartOptions(
+        options1Default,
+        summarizedInitiatives.value.length,
+      );
     });
 
     const options2 = computed(() => {
-      let options = deepCopy(options2Default);
-      if (summarizedInitiatives.value.length > 4)
-        options.plotOptions.radialBar.hollow.size = "25%"; // Increased from 15% to prevent negative radii
-      return options;
+      return validateChartOptions(
+        options2Default,
+        summarizedInitiatives.value.length,
+      );
     });
 
     const inProgressOptions = computed(() => {
-      let options = deepCopy(inProgressOptionsDefault);
-      if (summarizedInitiatives.value.length > 4)
-        options.plotOptions.radialBar.hollow.size = "25%"; // Increased from 15% to prevent negative radii
-      return options;
+      return validateChartOptions(
+        inProgressOptionsDefault,
+        summarizedInitiatives.value.length,
+      );
     });
 
     const initiativesWithRelativeValues = computed(() => {

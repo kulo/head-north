@@ -6,11 +6,9 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import {
-  useDataStore,
-  useAppStore,
-  initializeStores,
-} from "../../src/stores/registry";
+import { useDataStore } from "../../src/stores/data-store";
+import { useAppStore } from "../../src/stores/app-store";
+import { setupTestApp, getMockServices } from "../setup-stores";
 import type { CycleData } from "@omega/types";
 
 // Mock DataTransformer
@@ -77,17 +75,9 @@ const mockCycleData: CycleData = {
 
 describe("Data Store", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
+    const { app, pinia } = setupTestApp();
+    setActivePinia(pinia);
     vi.clearAllMocks();
-
-    // Initialize stores with mock services
-    initializeStores({
-      cycleDataService: mockCycleDataService,
-      viewFilterManager: mockViewFilterManager,
-      cycleDataViewCoordinator: mockCycleDataViewCoordinator,
-      router: mockRouter,
-      config: mockOmegaConfig,
-    });
   });
 
   it("should initialize with default state", () => {
@@ -127,13 +117,14 @@ describe("Data Store", () => {
   it("should fetch and process data successfully", async () => {
     const store = useDataStore();
     const appStore = useAppStore();
-    mockCycleDataService.getCycleData.mockResolvedValue(mockCycleData);
+    const { cycleDataService } = getMockServices();
+    cycleDataService.getCycleData.mockResolvedValue(mockCycleData);
 
-    await store.fetchAndProcessData(appStore);
+    await store.fetchAndProcessData();
 
     expect(appStore.isLoading).toBe(false);
     expect(appStore.hasError).toBe(false);
-    expect(mockCycleDataService.getCycleData).toHaveBeenCalled();
+    expect(cycleDataService.getCycleData).toHaveBeenCalled();
     expect(store.hasRawData).toBe(true);
     expect(store.hasProcessedData).toBe(true);
   });
@@ -141,10 +132,11 @@ describe("Data Store", () => {
   it("should handle fetch error", async () => {
     const store = useDataStore();
     const appStore = useAppStore();
+    const { cycleDataService } = getMockServices();
     const error = new Error("API Error");
-    mockCycleDataService.getCycleData.mockRejectedValue(error);
+    cycleDataService.getCycleData.mockRejectedValue(error);
 
-    await store.fetchAndProcessData(appStore);
+    await store.fetchAndProcessData();
 
     expect(appStore.hasError).toBe(true);
     expect(appStore.errorMessage).toBe("API Error");

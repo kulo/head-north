@@ -6,7 +6,8 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import { useAppStore, initializeStores } from "../../src/stores/registry";
+import { useAppStore } from "../../src/stores/app-store";
+import { setupTestApp } from "../setup-stores";
 import type { OmegaConfig } from "@omega/config";
 
 // Mock services
@@ -50,16 +51,8 @@ const mockRouter = {
 
 describe("App Store", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
-
-    // Initialize stores with mock services
-    initializeStores({
-      cycleDataService: mockCycleDataService,
-      viewFilterManager: mockViewFilterManager,
-      cycleDataViewCoordinator: mockCycleDataViewCoordinator,
-      router: mockRouter,
-      config: mockOmegaConfig,
-    });
+    const { app, pinia } = setupTestApp();
+    setActivePinia(pinia);
   });
 
   it("should initialize with default state", () => {

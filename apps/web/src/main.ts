@@ -10,6 +10,12 @@ import Antd from "ant-design-vue";
 import "ant-design-vue/dist/reset.css";
 import "./assets/css/style.css";
 import VueApexCharts from "vue3-apexcharts";
+import {
+  useAppStore,
+  useDataStore,
+  useValidationStore,
+  useFilterStore,
+} from "./stores/index";
 
 // Pinia imports
 import { createPinia } from "pinia";
@@ -51,10 +57,6 @@ async function initializeApp() {
   try {
     // Mount the app
     app.mount("#app");
-
-    // Import stores after app is mounted
-    const { useAppStore, useDataStore, useValidationStore, useFilterStore } =
-      await import("./stores");
 
     const appStore = useAppStore();
     const dataStore = useDataStore();

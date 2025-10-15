@@ -7,12 +7,10 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import {
-  useDataStore,
-  useAppStore,
-  useFilterStore,
-  initializeStores,
-} from "../../src/stores/registry";
+import { useDataStore } from "../../src/stores/data-store";
+import { useAppStore } from "../../src/stores/app-store";
+import { useFilterStore } from "../../src/stores/filters-store";
+import { setupTestApp, getMockServices } from "../setup-stores";
 
 // Mock services
 const mockCycleDataService = {
@@ -54,17 +52,9 @@ const mockOmegaConfig = {
 
 describe("Roadmap Data Debug", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
+    const { app, pinia } = setupTestApp();
+    setActivePinia(pinia);
     vi.clearAllMocks();
-
-    // Initialize stores with mock services
-    initializeStores({
-      cycleDataService: mockCycleDataService as any,
-      viewFilterManager: mockViewFilterManager as any,
-      cycleDataViewCoordinator: mockCycleDataViewCoordinator as any,
-      router: mockRouter as any,
-      config: mockOmegaConfig as any,
-    });
   });
 
   it("should have roadmapData computed property in data store", () => {
@@ -97,6 +87,7 @@ describe("Roadmap Data Debug", () => {
   it("should process data correctly when raw data is available", async () => {
     const dataStore = useDataStore();
     const appStore = useAppStore();
+    const { cycleDataService } = getMockServices();
 
     // Mock successful API response
     const mockCycleData = {
@@ -118,10 +109,10 @@ describe("Roadmap Data Debug", () => {
       initiatives: [],
     };
 
-    mockCycleDataService.getCycleData.mockResolvedValue(mockCycleData);
+    cycleDataService.getCycleData.mockResolvedValue(mockCycleData);
 
     // Fetch and process data
-    await dataStore.fetchAndProcessData(appStore);
+    await dataStore.fetchAndProcessData();
 
     // Verify data was processed
     expect(dataStore.hasRawData).toBe(true);
@@ -134,6 +125,7 @@ describe("Roadmap Data Debug", () => {
   it("should handle empty data gracefully", async () => {
     const dataStore = useDataStore();
     const appStore = useAppStore();
+    const { cycleDataService } = getMockServices();
 
     // Mock empty API response
     const mockEmptyData = {
@@ -146,10 +138,10 @@ describe("Roadmap Data Debug", () => {
       initiatives: [],
     };
 
-    mockCycleDataService.getCycleData.mockResolvedValue(mockEmptyData);
+    cycleDataService.getCycleData.mockResolvedValue(mockEmptyData);
 
     // Fetch and process data
-    await dataStore.fetchAndProcessData(appStore);
+    await dataStore.fetchAndProcessData();
 
     // Verify empty data is handled
     expect(dataStore.hasRawData).toBe(true);

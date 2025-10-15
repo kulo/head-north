@@ -7,7 +7,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { setActivePinia, createPinia } from "pinia";
-import { useDataStore, useFilterStore } from "../../src/stores";
+import { useDataStore } from "../../src/stores/data-store";
+import { useFilterStore } from "../../src/stores/filters-store";
+import { setupTestApp, getMockServices } from "../setup-stores";
 import CycleSelector from "../../src/components/ui/CycleSelector.vue";
 
 // Mock Ant Design Vue components
@@ -65,16 +67,8 @@ const mockOmegaConfig = {
 
 describe("CycleSelector", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
-
-    // Initialize stores with mock services
-    initializeStores({
-      cycleDataService: mockCycleDataService,
-      viewFilterManager: mockViewFilterManager,
-      cycleDataViewCoordinator: mockCycleDataViewCoordinator,
-      router: mockRouter,
-      config: mockOmegaConfig,
-    });
+    const { app, pinia } = setupTestApp();
+    setActivePinia(pinia);
   });
 
   it("should render with cycles from store", () => {
@@ -100,6 +94,7 @@ describe("CycleSelector", () => {
   it("should handle cycle selection", async () => {
     const dataStore = useDataStore();
     const filterStore = useFilterStore();
+    const { viewFilterManager } = getMockServices();
 
     const mockCycles = [{ id: "cycle1", name: "Cycle 1", state: "active" }];
 
@@ -110,7 +105,7 @@ describe("CycleSelector", () => {
     // Simulate cycle change
     await wrapper.vm.handleCycleChange("cycle1");
 
-    expect(mockViewFilterManager.updateFilter).toHaveBeenCalledWith(
+    expect(viewFilterManager.updateFilter).toHaveBeenCalledWith(
       "cycle",
       "cycle1",
     );
@@ -119,6 +114,7 @@ describe("CycleSelector", () => {
   it("should set default cycle when cycles are loaded", async () => {
     const dataStore = useDataStore();
     const filterStore = useFilterStore();
+    const { viewFilterManager } = getMockServices();
 
     const mockCycles = [{ id: "cycle1", name: "Cycle 1", state: "active" }];
 
@@ -134,7 +130,7 @@ describe("CycleSelector", () => {
     await wrapper.vm.$nextTick();
 
     // The component should automatically select the first cycle
-    expect(mockViewFilterManager.updateFilter).toHaveBeenCalledWith(
+    expect(viewFilterManager.updateFilter).toHaveBeenCalledWith(
       "cycle",
       "cycle1",
     );

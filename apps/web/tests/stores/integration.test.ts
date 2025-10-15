@@ -6,13 +6,11 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import {
-  useAppStore,
-  useDataStore,
-  useFilterStore,
-  useValidationStore,
-  initializeStores,
-} from "../../src/stores/registry";
+import { useAppStore } from "../../src/stores/app-store";
+import { useDataStore } from "../../src/stores/data-store";
+import { useFilterStore } from "../../src/stores/filters-store";
+import { useValidationStore } from "../../src/stores/validation-store";
+import { setupTestApp, getMockServices } from "../setup-stores";
 
 // Mock services
 const mockViewFilterManager = {
@@ -66,22 +64,15 @@ const mockOmegaConfig = {
 
 describe("Store Integration", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
+    const { app, pinia } = setupTestApp();
+    setActivePinia(pinia);
     vi.clearAllMocks();
-
-    // Initialize stores with mock services
-    initializeStores({
-      cycleDataService: mockCycleDataService,
-      viewFilterManager: mockViewFilterManager,
-      cycleDataViewCoordinator: mockCycleDataViewCoordinator as any,
-      router: mockRouter,
-      config: mockOmegaConfig as any,
-    });
   });
 
   it("should coordinate data fetching with app state", async () => {
     const appStore = useAppStore();
     const dataStore = useDataStore();
+    const { cycleDataService } = getMockServices();
 
     const mockData = {
       cycles: [{ id: "cycle1", name: "Cycle 1", state: "active" }],
@@ -93,14 +84,14 @@ describe("Store Integration", () => {
       releaseItems: [],
     };
 
-    mockCycleDataService.getCycleData.mockResolvedValue(mockData);
+    cycleDataService.getCycleData.mockResolvedValue(mockData);
 
     // Initial state
     expect(appStore.isLoading).toBe(false);
     expect(dataStore.hasRawData).toBe(false);
 
     // Fetch data
-    await dataStore.fetchAndProcessData(appStore);
+    await dataStore.fetchAndProcessData();
 
     // Verify coordination
     expect(appStore.isLoading).toBe(false);
@@ -119,13 +110,13 @@ describe("Store Integration", () => {
     ]);
 
     // Switch view
-    await filterStore.switchView("cycle-overview", appStore);
+    await filterStore.switchView("cycle-overview");
 
     expect(appStore.currentPageId).toBe("cycle-overview");
-    expect(mockViewFilterManager.switchView).toHaveBeenCalledWith(
-      "cycle-overview",
-    );
-    expect(mockRouter.push).toHaveBeenCalledWith("/cycle-overview");
+    const { viewFilterManager } = getMockServices();
+    expect(viewFilterManager.switchView).toHaveBeenCalledWith("cycle-overview");
+    const { router } = getMockServices();
+    expect(router.push).toHaveBeenCalledWith("/cycle-overview");
   });
 
   it("should coordinate validation state across stores", () => {
@@ -152,6 +143,7 @@ describe("Store Integration", () => {
     const appStore = useAppStore();
     const dataStore = useDataStore();
     const filterStore = useFilterStore();
+    const { cycleDataService, viewFilterManager } = getMockServices();
 
     const mockData = {
       cycles: [{ id: "cycle1", name: "Cycle 1", state: "active" }],
@@ -163,13 +155,13 @@ describe("Store Integration", () => {
       releaseItems: [],
     };
 
-    mockCycleDataService.getCycleData.mockResolvedValue(mockData);
+    cycleDataService.getCycleData.mockResolvedValue(mockData);
 
     // 1. Fetch data
-    await dataStore.fetchAndProcessData(appStore);
+    await dataStore.fetchAndProcessData();
 
     // 2. Switch view
-    await filterStore.switchView("roadmap", appStore);
+    await filterStore.switchView("roadmap");
 
     // 3. Update filter
     await filterStore.updateFilter("area", "area1");
@@ -177,7 +169,7 @@ describe("Store Integration", () => {
     // Verify final state
     expect(dataStore.hasRawData).toBe(true);
     expect(appStore.currentPageId).toBe("roadmap");
-    expect(mockViewFilterManager.updateFilter).toHaveBeenCalledWith(
+    expect(viewFilterManager.updateFilter).toHaveBeenCalledWith(
       "area",
       "area1",
     );

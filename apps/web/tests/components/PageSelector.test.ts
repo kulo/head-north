@@ -7,11 +7,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { setActivePinia, createPinia } from "pinia";
-import {
-  useAppStore,
-  useFilterStore,
-  initializeStores,
-} from "../../src/stores/registry";
+import { useAppStore } from "../../src/stores/app-store";
+import { useFilterStore } from "../../src/stores/filters-store";
+import { setupTestApp, getMockServices } from "../setup-stores";
 import PageSelector from "../../src/components/ui/PageSelector.vue";
 
 // Mock Ant Design Vue components
@@ -65,16 +63,8 @@ const mockOmegaConfig = {
 
 describe("PageSelector", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
-
-    // Initialize stores with mock services
-    initializeStores({
-      cycleDataService: mockCycleDataService,
-      viewFilterManager: mockViewFilterManager,
-      cycleDataViewCoordinator: mockCycleDataViewCoordinator,
-      router: mockRouter,
-      config: mockOmegaConfig,
-    });
+    const { app, pinia } = setupTestApp();
+    setActivePinia(pinia);
   });
 
   it("should render with pages from store", () => {
@@ -120,7 +110,7 @@ describe("PageSelector", () => {
     // Simulate page change
     await wrapper.vm.handlePageChange("cycle-overview");
 
-    expect(switchViewSpy).toHaveBeenCalledWith("cycle-overview", appStore);
+    expect(switchViewSpy).toHaveBeenCalledWith("cycle-overview");
   });
 
   it("should update selected value when current page changes", async () => {
