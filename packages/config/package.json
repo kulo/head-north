@@ -11,8 +11,6 @@
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "vitest run",
-    "test:run": "vitest run",
-    "test:watch": "vitest --watch",
     "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
     "type-check": "tsc --noEmit"
   },

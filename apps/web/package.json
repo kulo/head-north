@@ -9,14 +9,10 @@
     "dev": "webpack serve --config webpack.config.mjs --mode development",
     "start": "npm run dev",
     "build": "webpack --config webpack.config.mjs --mode production",
-    "preview": "webpack serve --config webpack.config.mjs --mode production",
     "test": "vitest run",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run",
     "lint": "eslint . --ext .vue,.ts,.tsx,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "type-check": "tsc --noEmit",
-    "type-check:strict": "tsc --noEmit",
-    "type-check:test": "tsc --noEmit --project tsconfig.test.json"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.28.3",
@@ -24,18 +20,13 @@
     "@omega/config": "file:../../packages/config",
     "@omega/types": "file:../../packages/types",
     "@omega/utils": "file:../../packages/utils",
-    "@vueuse/core": "^10.11.1",
-    "@vueuse/shared": "^10.11.1",
     "ant-design-vue": "^4.2.6",
     "apexcharts": "^4.0.0",
-    "babel-code-frame": "^6.26.0",
-    "invariant": "^2.2.4",
     "pinia": "^3.0.3",
     "vue": "^3.4.15",
     "vue-demi": "^0.14.10",
     "vue-router": "^4.2.5",
-    "vue3-apexcharts": "^1.4.0",
-    "vuex": "^4.1.0"
+    "vue3-apexcharts": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
@@ -55,8 +46,6 @@
     "jsdom": "^27.0.0",
     "postcss": "^8.5.6",
     "postcss-loader": "^7.3.3",
-    "sass": "^1.69.5",
-    "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.4.0",
     "typescript": "^5.0.0",

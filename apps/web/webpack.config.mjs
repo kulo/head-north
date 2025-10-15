@@ -38,7 +38,7 @@ export default (env, argv) => {
           }
         },
         {
-          test: /\.(css|scss|sass)$/,
+          test: /\.css$/,
           use: [
             'style-loader',
             'css-loader',
@@ -49,15 +49,6 @@ export default (env, argv) => {
                   plugins: [['autoprefixer']]
                 }
               }
-            },
-            {
-              loader: 'sass-loader',
-              options: {
-                api: 'modern', // Use modern Sass API
-                sassOptions: {
-                  silenceDeprecations: ['legacy-js-api']
-                }
-              },
             }
           ]
         },

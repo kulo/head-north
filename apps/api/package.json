@@ -11,12 +11,9 @@
     "@omega/config": "file:../../packages/config",
     "@omega/types": "file:../../packages/types",
     "axios": "^1.6.0",
-    "csv-parse": "^5.5.0",
     "jira.js": "^5.2.2",
     "koa": "^2.14.2",
-    "lodash": "4.17.21",
-    "node-cache": "4.1.1",
-    "retry": "^0.13.1"
+    "lodash": "4.17.21"
   },
   "devDependencies": {
     "@types/koa": "^2.15.0",
@@ -25,7 +22,6 @@
     "@types/koa-router": "^7.4.8",
     "@types/lodash": "^4.14.0",
     "@types/node": "^20.0.0",
-    "@types/node-cache": "^4.2.0",
     "dotenv": "^16.3.0",
     "esbuild": "^0.25.10",
     "nodemon": "^3.0.0",
@@ -38,13 +34,11 @@
   },
   "scripts": {
     "build": "node esbuild.config.js",
-    "build:tsc": "tsc -p tsconfig.relaxed.json",
     "dev": "tsc --watch",
     "start": "node --import=extensionless/register dist/index.js",
     "start-dev": "nodemon --exec \"node --import=extensionless/register\" -r dotenv/config dist/index.js",
     "clean": "rm -rf dist",
     "test": "vitest run",
-    "test:run": "vitest run",
     "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
     "type-check": "tsc --noEmit"
   }
