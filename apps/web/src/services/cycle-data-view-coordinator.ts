@@ -16,7 +16,6 @@ import type {
   RoadmapData,
   CycleOverviewData,
   ViewFilterCriteria,
-  FilterCriteria,
 } from "../types/ui-types";
 import type { FilterKey, PageId } from "../types/filter-types";
 
