@@ -42,7 +42,6 @@ describe("RoadmapItemParser", () => {
       expect(result).toEqual({
         id: "ROADMAP-001",
         initiativeId: "init-1",
-        initiative: { id: "init-1", name: "Initiative One" },
         name: "Test Roadmap Item",
         theme: { name: "Platform" },
         area: { name: "Frontend" },
@@ -76,7 +75,6 @@ describe("RoadmapItemParser", () => {
       expect(result).toEqual({
         id: "ROADMAP-MISSING",
         initiativeId: null,
-        initiative: null,
         name: "",
         theme: {},
         area: {},
@@ -97,7 +95,6 @@ describe("RoadmapItemParser", () => {
       expect(result).toEqual({
         id: "ROADMAP-001",
         initiativeId: null,
-        initiative: null,
         name: "",
         theme: {},
         area: {},

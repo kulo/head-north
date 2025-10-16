@@ -25,15 +25,8 @@ describe("cycle-progress-calculator", () => {
           if (args.length === 0) {
             super(mockDate);
           } else {
-            super(
-              args[0],
-              args[1],
-              args[2],
-              args[3],
-              args[4],
-              args[5],
-              args[6],
-            );
+            // Properly delegate to the original Date constructor
+            super(...args);
           }
         }
         static now() {

@@ -14,6 +14,7 @@ import type {
   Area,
   Person,
   Stage,
+  Team,
 } from "@omega/types";
 import type {
   NestedCycleData,
@@ -50,13 +51,27 @@ export function createMockInitiative(
 }
 
 /**
+ * Create a mock team
+ */
+export function createMockTeam(overrides: Partial<Team> = {}): Team {
+  return {
+    id: "team-a",
+    name: "Team A",
+    ...overrides,
+  };
+}
+
+/**
  * Create a mock area
  */
 export function createMockArea(overrides: Partial<Area> = {}): Area {
   return {
     id: "frontend",
     name: "Frontend",
-    teams: ["team-a", "team-b"],
+    teams: [
+      createMockTeam({ id: "team-a", name: "Team A" }),
+      createMockTeam({ id: "team-b", name: "Team B" }),
+    ],
     ...overrides,
   };
 }
@@ -93,7 +108,6 @@ export function createMockReleaseItem(
     id: "RELEASE-001",
     ticketId: "RELEASE-001",
     effort: 2.0,
-    projectId: "ROADMAP-001",
     name: "Test Release Item",
     areaIds: ["frontend"],
     teams: ["team-a"],
@@ -166,7 +180,7 @@ export function createMockRoadmapItemWithAreaObject(): RoadmapItem {
     area: {
       id: "backend",
       name: "Backend",
-      teams: ["team-c"],
+      teams: [createMockTeam({ id: "team-c", name: "Team C" })],
     },
   });
 }
@@ -321,7 +335,7 @@ export function createMockNestedCycleData(): NestedCycleData {
         daysFromStartOfCycle: 15,
         daysInCycle: 90,
         currentDayPercentage: 17,
-      },
+      } as RoadmapItemWithProgress,
     ],
     weeks: 4.0,
     weeksDone: 2.0,

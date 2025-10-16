@@ -127,6 +127,12 @@ export function createMockOmegaConfig(
       data: "Data Platform",
     }),
 
+    getInitiatives: () => ({
+      "init-1": "Initiative One",
+      "init-2": "Initiative Two",
+      "init-3": "Initiative Three",
+    }),
+
     isExternalStage: (stage: string) =>
       ["s1", "s2", "s3", "s3+"].includes(stage),
     isReleasableStage: (stage: string) => ["s2", "s3", "s3+"].includes(stage),

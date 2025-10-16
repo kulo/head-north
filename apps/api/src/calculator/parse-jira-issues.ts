@@ -55,18 +55,22 @@ class IssueParser {
       (roadmapItem) => roadmapItem.theme !== virtualLabel,
     );
 
-    // Group by initiative instead of theme + initiative
+    // Group by initiativeId instead of initiative.name
     const grouped = _.groupBy(
       nonVirtuals,
-      (roadmapItem) => roadmapItem.initiative?.name,
+      (roadmapItem) => roadmapItem.initiativeId,
     );
 
     const initiatives = Object.entries(grouped).map(([initiativeId, value]) => {
+      // Look up the initiative from config
+      const initiativesConfig = this.omegaConfig.getInitiatives();
+      const initiativeName = initiativesConfig[initiativeId];
+
       return {
-        initiative: _.get(value, "0.initiative"),
+        initiative: { id: initiativeId, name: initiativeName || initiativeId },
         id: initiativeId,
         roadmapItems: value.map((roadmapItem) =>
-          _.omit(roadmapItem, ["theme", "initiative", "initiativeId"]),
+          _.omit(roadmapItem, ["theme", "initiativeId"]),
         ),
       };
     });
@@ -74,10 +78,10 @@ class IssueParser {
     // Add virtual items as a separate initiative
     if (virtuals.length > 0) {
       initiatives.push({
-        initiative: virtualLabel,
+        initiative: { id: virtualId, name: virtualLabel },
         id: virtualId,
         roadmapItems: virtuals.map((roadmapItem) =>
-          _.omit(roadmapItem, ["theme", "initiative"]),
+          _.omit(roadmapItem, ["theme"]),
         ),
       });
     }

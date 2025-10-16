@@ -142,14 +142,32 @@ export const calculateCycleMetadata = (cycle: Cycle): CycleMetadata => {
   const endDate = new Date(cycle.end);
   const now = new Date();
 
+  // Check if dates are valid
+  if (
+    isNaN(startDate.getTime()) ||
+    isNaN(endDate.getTime()) ||
+    isNaN(now.getTime())
+  ) {
+    return {
+      startMonth: "",
+      endMonth: "",
+      daysFromStartOfCycle: 0,
+      daysInCycle: 0,
+      currentDayPercentage: 0,
+    };
+  }
+
   const startMonth = startDate.toLocaleString("en-us", { month: "short" });
   const endMonth = endDate.toLocaleString("en-us", { month: "short" });
+
+  // Calculate days using proper date arithmetic
   const daysFromStartOfCycle = Math.floor(
-    Math.abs((startDate as any) - (now as any)) / 1000 / 86400,
+    (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
   );
   const daysInCycle = Math.floor(
-    Math.abs((startDate as any) - (endDate as any)) / 1000 / 86400,
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
   );
+
   const currentDayPercentage =
     daysInCycle > 0
       ? Math.round((daysFromStartOfCycle / daysInCycle) * 100)
@@ -158,9 +176,9 @@ export const calculateCycleMetadata = (cycle: Cycle): CycleMetadata => {
   return {
     startMonth,
     endMonth,
-    daysFromStartOfCycle,
-    daysInCycle,
-    currentDayPercentage: Math.min(currentDayPercentage, 100),
+    daysFromStartOfCycle: Math.max(0, daysFromStartOfCycle),
+    daysInCycle: Math.max(0, daysInCycle),
+    currentDayPercentage: Math.min(Math.max(0, currentDayPercentage), 100),
   };
 };
 
