@@ -11,7 +11,7 @@
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "vitest run",
-    "lint": "eslint . --ext .ts,.js --fix --ignore-path .gitignore",
+    "lint": "eslint . --fix",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {

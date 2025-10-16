@@ -128,7 +128,7 @@ export const calculateReleaseItemProgress = (
  * @returns {CycleMetadata} Cycle metadata
  */
 export const calculateCycleMetadata = (cycle: Cycle): CycleMetadata => {
-  if (!cycle || !cycle.delivery || !cycle.end) {
+  if (!cycle || !cycle.start || !cycle.end) {
     return {
       startMonth: "",
       endMonth: "",
@@ -138,7 +138,7 @@ export const calculateCycleMetadata = (cycle: Cycle): CycleMetadata => {
     };
   }
 
-  const startDate = new Date(cycle.delivery);
+  const startDate = new Date(cycle.start);
   const endDate = new Date(cycle.end);
   const now = new Date();
 

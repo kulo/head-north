@@ -81,6 +81,12 @@ export interface JiraIssueFields {
 export interface JiraStatus {
   id: string;
   name: string;
+  statusCategory?: {
+    id: number;
+    key: string;
+    colorName: string;
+    name: string;
+  };
 }
 
 export interface JiraUser {

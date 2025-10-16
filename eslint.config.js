@@ -11,13 +11,14 @@ export default [
   // Global ignores
   {
     ignores: [
-      "dist/",
-      "node_modules/",
-      "*.min.js",
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/*.min.js",
       "**/*.d.ts",
       "**/__tests__/**",
       "**/*.test.ts",
       "**/*.test.js",
+      "**/*.map",
     ],
   },
 
