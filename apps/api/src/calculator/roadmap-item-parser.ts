@@ -20,7 +20,10 @@ import {
 export class RoadmapItemParser {
   private roadmapItems: Record<string, RoadmapItem>;
   private omegaConfig: OmegaConfig;
-  private validationDictionary: any;
+  private validationDictionary: Record<
+    string,
+    ValidationRule | ((team: string) => ValidationRule)
+  >;
 
   constructor(
     roadmapItems: Record<string, RoadmapItem>,
@@ -28,7 +31,8 @@ export class RoadmapItemParser {
   ) {
     this.roadmapItems = roadmapItems;
     this.omegaConfig = omegaConfig;
-    this.validationDictionary = omegaConfig.getValidationDictionary();
+    this.validationDictionary =
+      omegaConfig.getValidationDictionary().roadmapItem;
   }
 
   private _convertValidationRulesToItems(
@@ -42,6 +46,15 @@ export class RoadmapItemParser {
     }));
   }
 
+  private convertToValidationItem(rule: ValidationRule): ValidationItem {
+    return {
+      id: rule.reference,
+      name: rule.label,
+      status: "error",
+      description: rule.reference,
+    };
+  }
+
   parse(
     projectId: string,
     releaseItems: ReleaseItem[] = [],
@@ -50,7 +63,7 @@ export class RoadmapItemParser {
     const owningTeam: TeamId = getDefaultTeamId(allTeamIds[0]);
     const url = getJiraLink(projectId, this.omegaConfig);
 
-    if (!this.roadmapItems.hasOwnProperty(projectId)) {
+    if (!Object.hasOwn(this.roadmapItems, projectId)) {
       const ticketIds = releaseItems.map((releaseItem) => releaseItem.ticketId);
       logger.calculator.info("not-found-project", {
         project_id: projectId,
@@ -159,8 +172,10 @@ export class RoadmapItemParser {
       }
       const validationErrors = hasStageViolation
         ? [
-            this.validationDictionary.releaseItem
-              .tooLowStageWithoutProperRoadmapItem,
+            this.convertToValidationItem(
+              this.validationDictionary
+                .tooLowStageWithoutProperRoadmapItem as ValidationRule,
+            ),
           ]
         : [];
       if (hasStageViolation) {
@@ -172,10 +187,7 @@ export class RoadmapItemParser {
       }
       return {
         ...item,
-        validations: [
-          ...validations,
-          ...this._convertValidationRulesToItems(validationErrors),
-        ],
+        validations: [...validations, ...validationErrors],
         isExternal: newIsExternal,
       };
     });

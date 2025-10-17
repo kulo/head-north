@@ -32,7 +32,11 @@ function registerApiRoutes(
 
     if (handlerFunction) {
       const fullPath = prefix + route.path;
-      (router as any)[route.method.toLowerCase()](fullPath, handlerFunction);
+      (
+        router as unknown as {
+          [key: string]: (path: string, handler: unknown) => void;
+        }
+      )[route.method.toLowerCase()]?.(fullPath, handlerFunction);
 
       if (logRoutes) {
         logger.default.info("Route registered", {

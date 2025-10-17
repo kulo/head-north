@@ -135,7 +135,10 @@ class CycleDataService {
    * @param {object} options - Fetch options
    * @returns {Promise<any>} The response data
    */
-  async #request(endpoint: string, options: RequestInit = {}): Promise<any> {
+  async #request(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<RawCycleData> {
     const url = this.#config.getUrl(endpoint);
 
     const defaultOptions = {
@@ -159,7 +162,7 @@ class CycleDataService {
         }
 
         const data = await response.json();
-        return data;
+        return data as RawCycleData;
       } catch (error) {
         const errorInfo = {
           attempt,

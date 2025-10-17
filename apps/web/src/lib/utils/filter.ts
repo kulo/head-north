@@ -50,7 +50,7 @@ export class Filter {
     }
 
     // Count original data for metadata
-    const originalCounts = this.countData(data);
+    // const originalCounts = this.countData(data);
 
     // Filter initiatives, which will cascade down to roadmap items and release items
     const filteredInitiatives = data.initiatives

@@ -11,6 +11,7 @@ import type {
   Area,
   Team,
   RawCycleData,
+  ValidationItem,
 } from "@omega/types";
 import type { JiraIssue, JiraSprint } from "../types/jira-types";
 
@@ -28,11 +29,12 @@ export default async (
   // Initialize enhancedAreas early to avoid hoisting issues
   let enhancedAreas: Record<string, Area> = {};
 
-  const { sprints } = await jiraApi.getSprintsData();
+  const sprintsData = await jiraApi.getSprintsData();
+  const sprints = (sprintsData as { sprints: JiraSprint[] }).sprints;
 
   // Convert sprints to cycles for our domain
   const cycles: Cycle[] = sprints.map((sprint: JiraSprint) => ({
-    id: sprint.id,
+    id: String(sprint.id),
     name: sprint.name,
     start: sprint.startDate,
     end: sprint.endDate,
@@ -47,122 +49,146 @@ export default async (
   ]);
 
   // Get issues for all cycles
-  const allIssues = await Promise.all(
+  const allIssues = (await Promise.all(
     sprints.map(({ id }: JiraSprint) => jiraApi.getIssuesForSprint(id)),
-  );
+  )) as JiraIssue[][];
 
   // Process assignees from all issues (will be overridden for fake data)
   const allIssuesFlat = allIssues.flat().filter(Boolean);
-  let assignees = getAssignees(allIssuesFlat);
+  let assignees = getAssignees(allIssuesFlat as JiraIssue[]);
 
   // Parse release items using existing parsers
   const parsedReleaseItems: ReleaseItem[] = [];
   const roadmapItemsFlat: RoadmapItem[] = [];
 
   // Process release items from getReleaseItemsData() which have proper roadmapItemId
-  releaseItems.forEach((rawReleaseItem: JiraIssue) => {
-    if (!rawReleaseItem.roadmapItemId) return; // Skip items without roadmapItemId
+  (releaseItems as unknown as JiraIssue[]).forEach(
+    (rawReleaseItem: JiraIssue) => {
+      if (!rawReleaseItem.roadmapItemId) return; // Skip items without roadmapItemId
 
-    // Find the corresponding issue for additional fields
-    const matchingIssue = allIssues
-      .flat()
-      .find((issue: JiraIssue) => issue && issue.key === rawReleaseItem.id);
+      // Find the corresponding issue for additional fields
+      const matchingIssue = (allIssues as unknown as JiraIssue[][])
+        .flat()
+        .find((issue: JiraIssue) => issue && issue.key === rawReleaseItem.id);
 
-    // Use existing ReleaseItemParser if we have an issue, otherwise create basic data
-    let parsedReleaseItem: ReleaseItem | undefined;
-    if (matchingIssue) {
-      const cycle = cycles.find((c) => c.id === rawReleaseItem.cycleId);
-      if (cycle) {
-        const releaseItemParser = new ReleaseItemParser(cycle, omegaConfig);
-        parsedReleaseItem = releaseItemParser.parse(matchingIssue);
-      }
-    }
-
-    // Create flat release item with foreign keys
-    const releaseItem: ReleaseItem = {
-      id: rawReleaseItem.id,
-      ticketId: rawReleaseItem.id,
-      effort: parsedReleaseItem?.effort || rawReleaseItem.effort || 0,
-      name: parsedReleaseItem?.name || rawReleaseItem.summary || "",
-      areaIds: parsedReleaseItem?.areaIds || rawReleaseItem.areaIds || [],
-      teams: parsedReleaseItem?.teams || rawReleaseItem.teams || [],
-      status: parsedReleaseItem?.status || rawReleaseItem.status || "",
-      url: parsedReleaseItem?.url || rawReleaseItem.url || "",
-      isExternal:
-        parsedReleaseItem?.isExternal || rawReleaseItem.isExternal || false,
-      stage: parsedReleaseItem?.stage || rawReleaseItem.stage || "",
-      assignee: parsedReleaseItem?.assignee || rawReleaseItem.assignee || {},
-      validations:
-        parsedReleaseItem?.validations || rawReleaseItem.validations || [],
-      roadmapItemId: rawReleaseItem.roadmapItemId, // Foreign key from getReleaseItemsData()
-      cycleId: rawReleaseItem.cycleId?.toString() || "", // Foreign key
-      cycle: (() => {
-        // Always look up the actual cycle by ID to get the correct name
-        const matchingCycle = cycles.find(
-          (c) => c.id === rawReleaseItem.cycleId?.toString(),
-        );
-        return {
-          id: rawReleaseItem.cycleId?.toString() || "",
-          name: matchingCycle?.name || `Cycle ${rawReleaseItem.cycleId}`,
-        };
-      })(),
-      created: matchingIssue?.fields?.created || new Date().toISOString(),
-      updated: matchingIssue?.fields?.updated || new Date().toISOString(),
-    };
-
-    parsedReleaseItems.push(releaseItem);
-  });
-
-  // Parse roadmap items using existing parser
-  const roadmapItemParser = new RoadmapItemParser(roadmapItems, omegaConfig);
-
-  Object.entries(roadmapItems).forEach(([projectId, _roadmapItem]) => {
-    // Get release items for this roadmap item
-    const itemReleaseItems = parsedReleaseItems.filter(
-      (ri) => ri.roadmapItemId === projectId,
-    );
-
-    // Parse using existing RoadmapItemParser
-    const parsedRoadmapItem = roadmapItemParser.parse(
-      projectId,
-      itemReleaseItems,
-    );
-
-    // Convert TeamId to Team object
-    const owningTeamId = parsedRoadmapItem.owningTeam;
-    const owningTeam: Team = (() => {
-      // Find the team in enhanced areas
-      for (const area of Object.values(enhancedAreas)) {
-        const team = area.teams.find((t) => t.id === owningTeamId);
-        if (team) {
-          return team;
+      // Use existing ReleaseItemParser if we have an issue, otherwise create basic data
+      let parsedReleaseItem: ReleaseItem | undefined;
+      if (matchingIssue) {
+        const cycle = cycles.find((c) => c.id === rawReleaseItem.cycleId);
+        if (cycle) {
+          const jiraSprint: JiraSprint = {
+            id: cycle.id,
+            name: cycle.name,
+            state: cycle.state as "active" | "closed" | "future",
+            startDate: cycle.start,
+            endDate: cycle.end,
+          };
+          const releaseItemParser = new ReleaseItemParser(
+            jiraSprint,
+            omegaConfig,
+          );
+          parsedReleaseItem = releaseItemParser.parse(
+            matchingIssue as JiraIssue,
+          );
         }
       }
-      // Fallback: create a basic team object if not found
-      return {
-        id: owningTeamId,
-        name: `Team ${owningTeamId}`,
+
+      // Create flat release item with foreign keys
+      const releaseItem: ReleaseItem = {
+        id: rawReleaseItem.id,
+        ticketId: rawReleaseItem.id,
+        effort: parsedReleaseItem?.effort || rawReleaseItem.effort || 0,
+        name: parsedReleaseItem?.name || rawReleaseItem.summary || "",
+        areaIds: parsedReleaseItem?.areaIds || rawReleaseItem.areaIds || [],
+        teams: parsedReleaseItem?.teams || rawReleaseItem.teams || [],
+        status: parsedReleaseItem?.status || rawReleaseItem.status || "",
+        url: parsedReleaseItem?.url || rawReleaseItem.url || "",
+        isExternal:
+          parsedReleaseItem?.isExternal || rawReleaseItem.isExternal || false,
+        stage: parsedReleaseItem?.stage || rawReleaseItem.stage || "",
+        assignee: parsedReleaseItem?.assignee || rawReleaseItem.assignee || {},
+        validations: (parsedReleaseItem?.validations ||
+          rawReleaseItem.validations ||
+          []) as ValidationItem[],
+        roadmapItemId: rawReleaseItem.roadmapItemId, // Foreign key from getReleaseItemsData()
+        cycleId: rawReleaseItem.cycleId?.toString() || "", // Foreign key
+        cycle: (() => {
+          // Always look up the actual cycle by ID to get the correct name
+          const matchingCycle = cycles.find(
+            (c) => c.id === rawReleaseItem.cycleId?.toString(),
+          );
+          return {
+            id: rawReleaseItem.cycleId?.toString() || "",
+            name: matchingCycle?.name || `Cycle ${rawReleaseItem.cycleId}`,
+          };
+        })(),
+        created:
+          (matchingIssue as JiraIssue)?.fields?.created ||
+          new Date().toISOString(),
+        updated:
+          (matchingIssue as JiraIssue)?.fields?.updated ||
+          new Date().toISOString(),
       };
-    })();
 
-    // Create flat roadmap item
-    const flatRoadmapItem: RoadmapItem = {
-      id: projectId,
-      name: parsedRoadmapItem.name,
-      summary: parsedRoadmapItem.name,
-      labels: [],
-      initiativeId: parsedRoadmapItem.initiativeId,
-      theme: parsedRoadmapItem.theme,
-      area: parsedRoadmapItem.area as unknown as Area,
-      isExternal: parsedRoadmapItem.isExternal,
-      owningTeam: owningTeam,
-      url: parsedRoadmapItem.url,
-      validations: parsedRoadmapItem.validations,
-      // Remove the nested releaseItems - they're in the flat releaseItems array
-    };
+      parsedReleaseItems.push(releaseItem);
+    },
+  );
 
-    roadmapItemsFlat.push(flatRoadmapItem);
-  });
+  // Parse roadmap items using existing parser
+  const roadmapItemParser = new RoadmapItemParser(
+    roadmapItems as unknown as Record<string, RoadmapItem>,
+    omegaConfig,
+  );
+
+  Object.entries(roadmapItems as Record<string, unknown>).forEach(
+    ([projectId, _roadmapItem]) => {
+      // Get release items for this roadmap item
+      const itemReleaseItems = parsedReleaseItems.filter(
+        (ri) => ri.roadmapItemId === projectId,
+      );
+
+      // Parse using existing RoadmapItemParser
+      const parsedRoadmapItem = roadmapItemParser.parse(
+        projectId,
+        itemReleaseItems as ReleaseItem[],
+      );
+
+      // Convert TeamId to Team object
+      const owningTeamId = parsedRoadmapItem.owningTeam;
+      const owningTeam: Team = (() => {
+        // Find the team in enhanced areas
+        for (const area of Object.values(enhancedAreas)) {
+          const team = area.teams.find((t) => t.id === owningTeamId);
+          if (team) {
+            return team;
+          }
+        }
+        // Fallback: create a basic team object if not found
+        return {
+          id: owningTeamId,
+          name: `Team ${owningTeamId}`,
+        };
+      })();
+
+      // Create flat roadmap item
+      const flatRoadmapItem: RoadmapItem = {
+        id: projectId,
+        name: parsedRoadmapItem.name,
+        summary: parsedRoadmapItem.name,
+        labels: [],
+        initiativeId: parsedRoadmapItem.initiativeId,
+        theme: parsedRoadmapItem.theme,
+        area: parsedRoadmapItem.area as unknown as Area,
+        isExternal: parsedRoadmapItem.isExternal,
+        owningTeam: owningTeam,
+        url: parsedRoadmapItem.url,
+        validations: parsedRoadmapItem.validations,
+        // Remove the nested releaseItems - they're in the flat releaseItems array
+      };
+
+      roadmapItemsFlat.push(flatRoadmapItem);
+    },
+  );
 
   // Get areas and initiatives from config
   const areas = omegaConfig.getAreas();

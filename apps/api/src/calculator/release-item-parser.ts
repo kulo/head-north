@@ -6,22 +6,35 @@ import {
   translateLabelWithoutFallback,
 } from "./parse-common";
 import { resolveStage } from "./resolve-stage";
-import type { OmegaConfig } from "@omega/config";
-import type { JiraIssue } from "../types";
+import type { OmegaConfig, ValidationRule } from "@omega/config";
+import type { ValidationItem } from "@omega/types";
+import type { JiraIssue, JiraSprint } from "../types";
 import type { ParsedReleaseItem } from "../types";
 
 export class ReleaseItemParser {
-  private sprint: any;
+  private sprint: JiraSprint;
   private omegaConfig: OmegaConfig;
-  private labelTranslations: any;
-  private releaseItemValidation: any;
+  private labelTranslations: Record<string, Record<string, string>>;
+  private releaseItemValidation: Record<
+    string,
+    ValidationRule | ((team: string) => ValidationRule)
+  >;
 
-  constructor(sprint: any, omegaConfig: OmegaConfig) {
+  constructor(sprint: JiraSprint, omegaConfig: OmegaConfig) {
     this.sprint = sprint;
     this.omegaConfig = omegaConfig;
     this.labelTranslations = omegaConfig.getLabelTranslations();
     this.releaseItemValidation =
       omegaConfig.getValidationDictionary().releaseItem;
+  }
+
+  private convertToValidationItem(rule: ValidationRule): ValidationItem {
+    return {
+      id: rule.reference,
+      name: rule.label,
+      status: "error",
+      description: rule.reference,
+    };
   }
 
   parse(issue: JiraIssue): ParsedReleaseItem {
@@ -58,20 +71,28 @@ export class ReleaseItemParser {
 
   private _collectEffort(issue: JiraIssue): {
     value: number;
-    validations: any[];
+    validations: ValidationItem[];
   } {
     const estimate = issue.fields.effort;
     if (!estimate && estimate !== 0) {
       return {
         value: 0,
-        validations: [this.releaseItemValidation.missingEstimate],
+        validations: [
+          this.convertToValidationItem(
+            this.releaseItemValidation.missingEstimate as ValidationRule,
+          ),
+        ],
       };
     }
 
     if (estimate % 0.5 !== 0) {
       return {
         value: estimate,
-        validations: [this.releaseItemValidation.tooGranularEstimate],
+        validations: [
+          this.convertToValidationItem(
+            this.releaseItemValidation.tooGranularEstimate as ValidationRule,
+          ),
+        ],
       };
     }
 
@@ -80,12 +101,16 @@ export class ReleaseItemParser {
 
   private _collectProjectId(issue: JiraIssue): {
     value: string | null;
-    validations: any[];
+    validations: ValidationItem[];
   } {
     if (!issue.fields.parent) {
       return {
         value: null,
-        validations: [this.releaseItemValidation.noProjectId],
+        validations: [
+          this.convertToValidationItem(
+            this.releaseItemValidation.noProjectId as ValidationRule,
+          ),
+        ],
       };
     }
 
@@ -94,13 +119,17 @@ export class ReleaseItemParser {
 
   private _collectAreaIds(issue: JiraIssue): {
     value: string[];
-    validations: any[];
+    validations: ValidationItem[];
   } {
     const areaIds = this._parseArea(issue.fields.labels);
     if (areaIds.length === 0) {
       return {
         value: [],
-        validations: [this.releaseItemValidation.missingAreaLabel],
+        validations: [
+          this.convertToValidationItem(
+            this.releaseItemValidation.missingAreaLabel as ValidationRule,
+          ),
+        ],
       };
     }
 
@@ -109,14 +138,18 @@ export class ReleaseItemParser {
 
   private _collectTeams(issue: JiraIssue): {
     value: string[];
-    validations: any[];
+    validations: ValidationItem[];
   } {
     const teamLabels = getLabelsWithPrefix(issue.fields.labels, "team");
 
     if (teamLabels.length === 0) {
       return {
         value: [],
-        validations: [this.releaseItemValidation.missingTeamLabel],
+        validations: [
+          this.convertToValidationItem(
+            this.releaseItemValidation.missingTeamLabel as ValidationRule,
+          ),
+        ],
       };
     }
 
@@ -130,7 +163,13 @@ export class ReleaseItemParser {
         return {
           value: team,
           validations: [
-            this.releaseItemValidation.missingTeamTranslation(team),
+            this.convertToValidationItem(
+              (
+                this.releaseItemValidation.missingTeamTranslation as (
+                  team: string,
+                ) => ValidationRule
+              )(team),
+            ),
           ],
         };
       }
@@ -145,23 +184,30 @@ export class ReleaseItemParser {
 
   private _collectStage(issue: JiraIssue): {
     value: string;
-    validations: any[];
+    validations: ValidationItem[];
   } {
     const stage = resolveStage(issue.fields.summary, this.omegaConfig);
     return { value: stage, validations: [] };
   }
 
   private _collectAssignee(issue: JiraIssue): {
-    value: any;
-    validations: any[];
+    value: Record<string, unknown>;
+    validations: ValidationItem[];
   } {
     if (!issue.fields.assignee) {
       return {
-        value: issue.fields.reporter,
-        validations: [this.releaseItemValidation.missingAssignee],
+        value: issue.fields.reporter as unknown as Record<string, unknown>,
+        validations: [
+          this.convertToValidationItem(
+            this.releaseItemValidation.missingAssignee as ValidationRule,
+          ),
+        ],
       };
     }
-    return { value: issue.fields.assignee, validations: [] };
+    return {
+      value: issue.fields.assignee as unknown as Record<string, unknown>,
+      validations: [],
+    };
   }
 
   private _parseEpicName(originalName: string): string {
@@ -190,7 +236,7 @@ export class ReleaseItemParser {
     return getJiraLink(id, this.omegaConfig);
   }
 
-  private _isExternalRoadmap(issue: JiraIssue): boolean {
+  private _isExternalRoadmap(_issue: JiraIssue): boolean {
     return false;
   }
 }

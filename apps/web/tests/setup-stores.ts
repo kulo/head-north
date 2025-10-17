@@ -7,11 +7,18 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { vi } from "vitest";
+import {
+  CycleDataService,
+  CycleDataViewCoordinator,
+  ViewFilterManager,
+} from "@/services";
+import OmegaConfig from "@omega/config";
+import type { Router } from "vue-router";
 
 // Mock services
 const mockCycleDataService = {
   getCycleData: vi.fn(() => Promise.resolve({})),
-} as any;
+} as unknown as CycleDataService;
 
 const mockViewFilterManager = {
   getActiveFilters: vi.fn(() => ({})),
@@ -29,7 +36,7 @@ const mockViewFilterManager = {
   getCurrentView: vi.fn(() => "cycle-overview"),
   getViewFilters: vi.fn(() => ({ common: {}, cycleOverview: {}, roadmap: {} })),
   resetViewFilters: vi.fn(),
-} as any;
+} as unknown as ViewFilterManager;
 
 const mockCycleDataViewCoordinator = {
   generateFilteredRoadmapData: vi.fn(() => ({
@@ -42,11 +49,11 @@ const mockCycleDataViewCoordinator = {
     cycle: null,
     initiatives: [],
   })),
-} as any;
+} as unknown as CycleDataViewCoordinator;
 
 const mockRouter = {
   push: vi.fn(),
-} as any;
+} as unknown as Router;
 
 const mockOmegaConfig = {
   getFrontendConfig: vi.fn(() => ({
@@ -59,7 +66,7 @@ const mockOmegaConfig = {
     },
   })),
   getValidationEnabled: vi.fn(() => false),
-} as any;
+} as unknown as OmegaConfig;
 
 /**
  * Sets up a test app with all required dependencies provided

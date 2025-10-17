@@ -118,13 +118,13 @@ describe("Data Store", () => {
     const store = useDataStore();
     const appStore = useAppStore();
     const { cycleDataService } = getMockServices();
-    cycleDataService.getCycleData.mockResolvedValue(mockCycleData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(mockCycleData);
 
     await store.fetchAndProcessData();
 
     expect(appStore.isLoading).toBe(false);
     expect(appStore.hasError).toBe(false);
-    expect(cycleDataService.getCycleData).toHaveBeenCalled();
+    expect((cycleDataService as any).getCycleData).toHaveBeenCalled();
     expect(store.hasRawData).toBe(true);
     expect(store.hasProcessedData).toBe(true);
   });
@@ -134,7 +134,7 @@ describe("Data Store", () => {
     const appStore = useAppStore();
     const { cycleDataService } = getMockServices();
     const error = new Error("API Error");
-    cycleDataService.getCycleData.mockRejectedValue(error);
+    (cycleDataService as any).getCycleData.mockRejectedValue(error);
 
     await store.fetchAndProcessData();
 

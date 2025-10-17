@@ -263,6 +263,7 @@ export default class OmegaConfig {
    * Deep merge objects
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _deepMerge(target: any, source: any): any {
     const result = { ...target };
 
@@ -328,7 +329,9 @@ export default class OmegaConfig {
    * @param key - Configuration key (supports dot notation)
    * @returns Configuration value
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(key: string): any {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return key.split(".").reduce((obj: any, k) => obj?.[k], this.config);
   }
 
@@ -337,12 +340,14 @@ export default class OmegaConfig {
    * @param key - Configuration key (supports dot notation)
    * @param value - Configuration value
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set(key: string, value: any): void {
     const keys = key.split(".");
     const lastKey = keys.pop()!;
     const target = keys.reduce((obj, k) => {
       if (!obj[k]) obj[k] = {};
       return obj[k];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }, this.config as any);
     target[lastKey] = value;
   }
@@ -404,7 +409,7 @@ export default class OmegaConfig {
    * @returns Jira configuration
    */
   getJiraConfig(): JiraConfigData | undefined {
-    return this.config.backend.jira;
+    return this.config.backend.jira as JiraConfigData | undefined;
   }
 
   /**

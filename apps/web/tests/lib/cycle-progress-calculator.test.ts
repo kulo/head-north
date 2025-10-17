@@ -26,7 +26,7 @@ describe("cycle-progress-calculator", () => {
             super(mockDate);
           } else {
             // Properly delegate to the original Date constructor
-            super(...args);
+            super(...(args as [number, number, number]));
           }
         }
         static now() {

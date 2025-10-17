@@ -44,7 +44,7 @@ export interface JiraIssue {
   isExternal?: boolean;
   stage?: string;
   assignee?: Person | Record<string, unknown>;
-  validations?: any[];
+  validations?: unknown[];
 }
 
 export interface JiraIssueFields {

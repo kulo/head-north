@@ -70,7 +70,7 @@ export const getDefaultInitiativeId = (
  * @param assignee - The assignee to check
  * @returns The assignee name or default if null/undefined
  */
-export const getDefaultAssigneeName = (assignee: any): string => {
+export const getDefaultAssigneeName = (assignee: unknown): string => {
   if (!assignee) {
     return DEFAULT_ASSIGNEE.NAME;
   }
@@ -80,7 +80,13 @@ export const getDefaultAssigneeName = (assignee: any): string => {
   }
 
   if (typeof assignee === "object" && assignee !== null) {
-    return assignee.displayName || assignee.accountId || DEFAULT_ASSIGNEE.NAME;
+    const assigneeObj = assignee as {
+      displayName?: string;
+      accountId?: string;
+    };
+    return (
+      assigneeObj.displayName || assigneeObj.accountId || DEFAULT_ASSIGNEE.NAME
+    );
   }
 
   return DEFAULT_ASSIGNEE.NAME;
@@ -91,7 +97,7 @@ export const getDefaultAssigneeName = (assignee: any): string => {
  * @param area - The area to check
  * @returns The area name or default if null/undefined
  */
-export const getDefaultAreaName = (area: any): string => {
+export const getDefaultAreaName = (area: unknown): string => {
   if (!area) {
     return DEFAULT_AREA.NAME;
   }
@@ -101,7 +107,8 @@ export const getDefaultAreaName = (area: any): string => {
   }
 
   if (typeof area === "object" && area !== null) {
-    return area.name || DEFAULT_AREA.NAME;
+    const areaObj = area as { name?: string };
+    return areaObj.name || DEFAULT_AREA.NAME;
   }
 
   return DEFAULT_AREA.NAME;

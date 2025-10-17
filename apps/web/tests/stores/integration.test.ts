@@ -84,7 +84,7 @@ describe("Store Integration", () => {
       releaseItems: [],
     };
 
-    cycleDataService.getCycleData.mockResolvedValue(mockData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(mockData);
 
     // Initial state
     expect(appStore.isLoading).toBe(false);
@@ -114,9 +114,11 @@ describe("Store Integration", () => {
 
     expect(appStore.currentPageId).toBe("cycle-overview");
     const { viewFilterManager } = getMockServices();
-    expect(viewFilterManager.switchView).toHaveBeenCalledWith("cycle-overview");
+    expect((viewFilterManager as any).switchView).toHaveBeenCalledWith(
+      "cycle-overview",
+    );
     const { router } = getMockServices();
-    expect(router.push).toHaveBeenCalledWith("/cycle-overview");
+    expect((router as any).push).toHaveBeenCalledWith("/cycle-overview");
   });
 
   it("should coordinate validation state across stores", () => {
@@ -155,7 +157,7 @@ describe("Store Integration", () => {
       releaseItems: [],
     };
 
-    cycleDataService.getCycleData.mockResolvedValue(mockData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(mockData);
 
     // 1. Fetch data
     await dataStore.fetchAndProcessData();
@@ -169,7 +171,7 @@ describe("Store Integration", () => {
     // Verify final state
     expect(dataStore.hasRawData).toBe(true);
     expect(appStore.currentPageId).toBe("roadmap");
-    expect(viewFilterManager.updateFilter).toHaveBeenCalledWith(
+    expect((viewFilterManager as any).updateFilter).toHaveBeenCalledWith(
       "area",
       "area1",
     );

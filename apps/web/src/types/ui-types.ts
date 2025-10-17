@@ -1,21 +1,14 @@
 // Re-export types from types package for convenience
 import type {
-  Area,
   AreaId,
   Cycle,
   CycleId,
   CycleData,
   Initiative,
   InitiativeId,
-  Person,
   PersonId,
-  ReleaseItem,
-  ReleaseItemId,
   RoadmapItem,
-  RoadmapItemId,
   StageId,
-  Stage,
-  ValidationItem,
 } from "@omega/types";
 
 /**
@@ -186,9 +179,7 @@ export interface ViewFilterCriteria {
     cycle?: CycleId;
   };
   // Roadmap specific filters (currently none, but extensible)
-  roadmap: {
-    // Future roadmap-specific filters can be added here
-  };
+  roadmap: Record<string, never>;
 }
 
 /**

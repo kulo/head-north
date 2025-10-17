@@ -177,7 +177,8 @@ export default class FakeDataGenerator {
       const releaseItems = this._getReleaseItemsForRoadmapItem(roadmapItemKey);
       // Add roadmapItemId foreign key to each release item
       releaseItems.forEach((item) => {
-        const { cycle: _cycle, ...itemWithoutCycle } = item;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { cycle, ...itemWithoutCycle } = item;
         allReleaseItems.push({
           ...itemWithoutCycle,
           roadmapItemId: roadmapItemKey,

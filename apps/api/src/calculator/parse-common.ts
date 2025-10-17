@@ -35,13 +35,15 @@ export function translateLabel(
   };
 
   const pluralLabelType = labelTypeMapping[labelType] || labelType;
-  const translationMap = (labelTranslations as any)[pluralLabelType];
+  const translationMap = (labelTranslations as Record<string, unknown>)[
+    pluralLabelType
+  ];
 
   if (!translationMap) {
     return value;
   }
 
-  return translationMap[value] || value;
+  return (translationMap as Record<string, string>)[value] || value;
 }
 
 export function translateLabelWithoutFallback(
@@ -60,11 +62,13 @@ export function translateLabelWithoutFallback(
   };
 
   const pluralLabelType = labelTypeMapping[labelType] || labelType;
-  const translationMap = (labelTranslations as any)[pluralLabelType];
+  const translationMap = (labelTranslations as Record<string, unknown>)[
+    pluralLabelType
+  ];
 
   if (!translationMap) {
     return undefined;
   }
 
-  return translationMap[value];
+  return (translationMap as Record<string, string>)[value];
 }

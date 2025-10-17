@@ -109,7 +109,7 @@ describe("Roadmap Data Debug", () => {
       initiatives: [],
     };
 
-    cycleDataService.getCycleData.mockResolvedValue(mockCycleData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(mockCycleData);
 
     // Fetch and process data
     await dataStore.fetchAndProcessData();
@@ -138,7 +138,7 @@ describe("Roadmap Data Debug", () => {
       initiatives: [],
     };
 
-    cycleDataService.getCycleData.mockResolvedValue(mockEmptyData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(mockEmptyData);
 
     // Fetch and process data
     await dataStore.fetchAndProcessData();

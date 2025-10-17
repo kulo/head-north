@@ -10,14 +10,7 @@
  */
 
 import type { OmegaConfig } from "@omega/config";
-import type { FilterCriteria, ViewFilterCriteria } from "../types/ui-types";
-import type {
-  AreaId,
-  InitiativeId,
-  StageId,
-  PersonId,
-  CycleId,
-} from "@omega/types";
+import type { ViewFilterCriteria } from "../types/ui-types";
 import type {
   ViewFilterManager as IViewFilterManager,
   FilterKey,
@@ -65,7 +58,7 @@ export class ViewFilterManager implements IViewFilterManager {
   /**
    * Update a filter for the current view
    */
-  updateFilter(filterKey: FilterKey, value: any): TypedFilterCriteria {
+  updateFilter(filterKey: FilterKey, value: unknown): TypedFilterCriteria {
     // Validate that this filter is valid for the current view
     if (!this.filterConfig.isValidFilterForView(filterKey, this.currentView)) {
       throw new Error(
@@ -82,7 +75,7 @@ export class ViewFilterManager implements IViewFilterManager {
       } else {
         this.viewFilters.common[
           filterKey as keyof typeof this.viewFilters.common
-        ] = value;
+        ] = value as string[] & string;
       }
     } else {
       // Update view-specific filter
@@ -94,13 +87,16 @@ export class ViewFilterManager implements IViewFilterManager {
         } else {
           this.viewFilters.cycleOverview[
             filterKey as keyof typeof this.viewFilters.cycleOverview
-          ] = value;
+          ] = value as string[] & string;
         }
       } else if (this.currentView === "roadmap") {
         if (value === undefined) {
-          delete (this.viewFilters.roadmap as any)[filterKey];
+          delete (this.viewFilters.roadmap as Record<string, unknown>)[
+            filterKey
+          ];
         } else {
-          (this.viewFilters.roadmap as any)[filterKey] = value;
+          (this.viewFilters.roadmap as Record<string, unknown>)[filterKey] =
+            value;
         }
       }
     }

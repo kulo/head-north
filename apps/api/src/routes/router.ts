@@ -2,13 +2,14 @@ import Router from "@koa/router";
 import { registerApiRoutes } from "../utils/route-registry";
 import { getCycleData } from "../controllers/actions/get-cycle-data";
 import type { OmegaConfig } from "@omega/config";
+import type { Router as ApiRouter } from "../types/api-response-types";
 
 /**
  * Create router with OmegaConfig dependency injection
  * @param omegaConfig - OmegaConfig instance
  * @returns Koa router instance
  */
-function createRouter(omegaConfig: OmegaConfig): Router {
+function createRouter(_omegaConfig: OmegaConfig): Router {
   const router = new Router();
 
   // Root endpoint
@@ -35,11 +36,11 @@ function createRouter(omegaConfig: OmegaConfig): Router {
 
   // Define route handlers
   const handlers = {
-    cycleData: getCycleData as any,
+    cycleData: getCycleData as (context: unknown) => void | Promise<void>,
   };
 
   // Register API routes
-  registerApiRoutes(router as any, routes, handlers);
+  registerApiRoutes(router as unknown as ApiRouter, routes, handlers);
 
   return router;
 }

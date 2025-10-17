@@ -10,7 +10,8 @@ import type { OmegaConfig } from "@omega/config";
 
 export const useValidationStore = defineStore("validation", () => {
   // Inject services
-  const config = inject<OmegaConfig>("config")!;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _config = inject<OmegaConfig>("config")!;
 
   // State
   const validationEnabled = ref(false);

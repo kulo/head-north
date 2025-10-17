@@ -1,6 +1,4 @@
 import esbuild from "esbuild";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
 
 const config = {
   entryPoints: ["src/index.ts"],

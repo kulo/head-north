@@ -1,6 +1,6 @@
 import JiraAPI from "./jira-api";
 import FakeDataGenerator from "./fake-data-generator";
-import { logger } from "@omega/utils";
+// import { logger } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
 
 /**
@@ -43,7 +43,7 @@ export default class JiraApiProxy {
    * Get sprints data (raw)
    * @returns Raw sprint data
    */
-  async getSprintsData(): Promise<any> {
+  async getSprintsData(): Promise<unknown> {
     const dataSource = this._getDataSource();
     return await dataSource.getSprintsData();
   }
@@ -52,7 +52,7 @@ export default class JiraApiProxy {
    * Get roadmap items data (raw)
    * @returns Raw roadmap items data
    */
-  async getRoadmapItemsData(): Promise<any> {
+  async getRoadmapItemsData(): Promise<unknown> {
     const dataSource = this._getDataSource();
     return await dataSource.getRoadmapItemsData();
   }
@@ -61,7 +61,7 @@ export default class JiraApiProxy {
    * Get release items data (raw)
    * @returns Raw release items data
    */
-  async getReleaseItemsData(): Promise<any> {
+  async getReleaseItemsData(): Promise<unknown> {
     const dataSource = this._getDataSource();
     return await dataSource.getReleaseItemsData();
   }
@@ -75,7 +75,7 @@ export default class JiraApiProxy {
   async getIssuesForSprint(
     sprintId: string | number,
     extraFields: string[] = [],
-  ): Promise<any> {
+  ): Promise<unknown> {
     const dataSource = this._getDataSource();
     return await dataSource.getIssuesForSprint(sprintId, extraFields);
   }

@@ -32,7 +32,5 @@ try {
   app.listen(port);
   logger.default.info("started", { port });
 } catch (error) {
-  const errorMessage =
-    (error as Error)?.message || error?.toString() || "Unknown error";
   logger.error.errorSafe("app-crashed", error);
 }

@@ -11,7 +11,7 @@ export interface ConfigOverrides {
   api?: {
     host?: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface StageCategories {
@@ -102,7 +102,8 @@ export interface BackendConfig {
   maxRetry?: string;
   delayBetweenRetry?: string;
   useFakeData?: boolean;
-  jira?: any; // Jira configuration - will be properly typed when needed
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  jira?: any; // Jira configuration - using any for flexibility with complex nested types
 }
 
 export interface OmegaConfigData {

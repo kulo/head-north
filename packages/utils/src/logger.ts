@@ -1,5 +1,4 @@
-// Check if we're in a browser environment
-const isBrowser = typeof window !== "undefined";
+// Logger utility functions
 
 // Safe error message extraction
 export const getSafeErrorMessage = (error: unknown): string => {
@@ -22,22 +21,22 @@ export const getSafeErrorStack = (error: unknown): string => {
 
 // Logger interface
 export interface Logger {
-  debug: (...args: any[]) => void;
-  info: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  fatal: (...args: any[]) => void;
-  trace: (...args: any[]) => void;
+  debug: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+  fatal: (...args: unknown[]) => void;
+  trace: (...args: unknown[]) => void;
   child: (meta: { component?: string }) => Logger;
   errorSafe: (
     message: string,
     error: unknown,
-    additionalData?: Record<string, any>,
+    additionalData?: Record<string, unknown>,
   ) => void;
   warnSafe: (
     message: string,
     error: unknown,
-    additionalData?: Record<string, any>,
+    additionalData?: Record<string, unknown>,
   ) => void;
 }
 
@@ -46,12 +45,12 @@ const createConsoleLogger = (component?: string): Logger => {
   const prefix = component ? `[${component}]` : "";
 
   return {
-    debug: (...args: any[]) => console.debug(prefix, ...args),
-    info: (...args: any[]) => console.info(prefix, ...args),
-    warn: (...args: any[]) => console.warn(prefix, ...args),
-    error: (...args: any[]) => console.error(prefix, ...args),
-    fatal: (...args: any[]) => console.error(prefix, ...args),
-    trace: (...args: any[]) => console.trace(prefix, ...args),
+    debug: (...args: unknown[]) => console.debug(prefix, ...args),
+    info: (...args: unknown[]) => console.info(prefix, ...args),
+    warn: (...args: unknown[]) => console.warn(prefix, ...args),
+    error: (...args: unknown[]) => console.error(prefix, ...args),
+    fatal: (...args: unknown[]) => console.error(prefix, ...args),
+    trace: (...args: unknown[]) => console.trace(prefix, ...args),
     child: (meta: { component?: string }) =>
       createConsoleLogger(meta.component || component),
 
@@ -59,7 +58,7 @@ const createConsoleLogger = (component?: string): Logger => {
     errorSafe: (
       message: string,
       error: unknown,
-      additionalData: Record<string, any> = {},
+      additionalData: Record<string, unknown> = {},
     ) => {
       const errorMessage = getSafeErrorMessage(error);
       const errorStack = getSafeErrorStack(error);
@@ -73,7 +72,7 @@ const createConsoleLogger = (component?: string): Logger => {
     warnSafe: (
       message: string,
       error: unknown,
-      additionalData: Record<string, any> = {},
+      additionalData: Record<string, unknown> = {},
     ) => {
       const errorMessage = getSafeErrorMessage(error);
       const errorStack = getSafeErrorStack(error);

@@ -3,25 +3,30 @@ import { ReleaseItemParser } from "./release-item-parser";
 import { RoadmapItemParser } from "./roadmap-item-parser";
 import { translateLabel } from "./parse-common";
 import type { OmegaConfig } from "@omega/config";
+import type { JiraIssue, JiraSprint, JiraRoadmapItemsData } from "../types";
+import type { RoadmapItem, ReleaseItem } from "@omega/types";
 
 class IssueParser {
-  private issues: any[];
-  private roadmapItems: any;
+  private issues: JiraIssue[];
+  private roadmapItems: JiraRoadmapItemsData;
   private omegaConfig: OmegaConfig;
   private _releaseItemParser: ReleaseItemParser;
   private _roadmapItemParser: RoadmapItemParser;
 
   constructor(
-    issues: any[],
-    roadmapItems: any,
-    sprint: any,
+    issues: JiraIssue[],
+    roadmapItems: JiraRoadmapItemsData,
+    sprint: JiraSprint,
     omegaConfig: OmegaConfig,
   ) {
     this.issues = issues;
     this.roadmapItems = roadmapItems;
     this.omegaConfig = omegaConfig;
     this._releaseItemParser = new ReleaseItemParser(sprint, omegaConfig);
-    this._roadmapItemParser = new RoadmapItemParser(roadmapItems, omegaConfig);
+    this._roadmapItemParser = new RoadmapItemParser(
+      roadmapItems as unknown as Record<string, RoadmapItem>,
+      omegaConfig,
+    );
   }
 
   parse() {
@@ -33,32 +38,38 @@ class IssueParser {
     return this._groupByInitiatives(roadmapItems);
   }
 
-  private _groupByRoadmapItems(parsed: any[]) {
-    const grouped = _.groupBy(parsed, (releaseItem) => releaseItem.projectId);
+  private _groupByRoadmapItems(parsed: unknown[]) {
+    const grouped = _.groupBy(parsed, (releaseItem) => {
+      const item = releaseItem as { projectId?: string };
+      return item.projectId;
+    });
 
     return Object.values(grouped).map((roadmapItemGroup) => {
-      const projectId = roadmapItemGroup[0].projectId;
+      const firstItem = roadmapItemGroup[0] as { projectId?: string };
+      const projectId = firstItem.projectId;
       const releaseItems = roadmapItemGroup.map((releaseItem) =>
-        _.omit(releaseItem, ["projectId"]),
-      ) as any[];
-      return this._roadmapItemParser.parse(projectId, releaseItems);
+        _.omit(releaseItem as Record<string, unknown>, ["projectId"]),
+      ) as unknown as ReleaseItem[];
+      return this._roadmapItemParser.parse(projectId || "", releaseItems);
     });
   }
 
-  private _groupByInitiatives(roadmapItems: any[]) {
+  private _groupByInitiatives(roadmapItems: unknown[]) {
     const virtualId = "virtual";
     const virtualLabel = translateLabel("theme", virtualId, this.omegaConfig);
     const virtuals = roadmapItems.filter(
-      (roadmapItem) => roadmapItem.theme === virtualLabel,
+      (roadmapItem) =>
+        (roadmapItem as { theme?: string }).theme === virtualLabel,
     );
     const nonVirtuals = roadmapItems.filter(
-      (roadmapItem) => roadmapItem.theme !== virtualLabel,
+      (roadmapItem) =>
+        (roadmapItem as { theme?: string }).theme !== virtualLabel,
     );
 
     // Group by initiativeId instead of initiative.name
     const grouped = _.groupBy(
       nonVirtuals,
-      (roadmapItem) => roadmapItem.initiativeId,
+      (roadmapItem) => (roadmapItem as { initiativeId?: string }).initiativeId,
     );
 
     const initiatives = Object.entries(grouped).map(([initiativeId, value]) => {
@@ -70,7 +81,10 @@ class IssueParser {
         initiative: { id: initiativeId, name: initiativeName || initiativeId },
         id: initiativeId,
         roadmapItems: value.map((roadmapItem) =>
-          _.omit(roadmapItem, ["theme", "initiativeId"]),
+          _.omit(roadmapItem as Record<string, unknown>, [
+            "theme",
+            "initiativeId",
+          ]),
         ),
       };
     });
@@ -81,7 +95,7 @@ class IssueParser {
         initiative: { id: virtualId, name: virtualLabel },
         id: virtualId,
         roadmapItems: virtuals.map((roadmapItem) =>
-          _.omit(roadmapItem, ["theme"]),
+          _.omit(roadmapItem as Record<string, unknown>, ["theme"]),
         ),
       });
     }
@@ -91,9 +105,9 @@ class IssueParser {
 }
 
 export default (
-  issues: any[],
-  roadmapItems: any,
-  sprint: any,
+  issues: JiraIssue[],
+  roadmapItems: JiraRoadmapItemsData,
+  sprint: JiraSprint,
   omegaConfig: OmegaConfig,
 ) => {
   return new IssueParser(issues, roadmapItems, sprint, omegaConfig).parse();

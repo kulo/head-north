@@ -7,7 +7,8 @@ import type {
   JiraSprint,
   JiraRoadmapItemsData,
 } from "../types/jira-types";
-import type { ApiResponse } from "../types/api-response-types";
+import type { ISODateString } from "@omega/types";
+// import type { ApiResponse } from "../types/api-response-types";
 
 class JiraAPI {
   private omegaConfig: OmegaConfig;
@@ -16,6 +17,25 @@ class JiraAPI {
   constructor(omegaConfig: OmegaConfig) {
     this.omegaConfig = omegaConfig;
     this._client = this._createClient();
+  }
+
+  /**
+   * Transform a date string to ISODateString format (YYYY-MM-DD)
+   * @param dateString - Date string from Jira API
+   * @returns ISODateString in YYYY-MM-DD format
+   */
+  private transformToISODateString(dateString: string): ISODateString {
+    if (!dateString) return "1970-01-01" as ISODateString;
+
+    try {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}` as ISODateString;
+    } catch {
+      return "1970-01-01" as ISODateString;
+    }
   }
 
   /**
@@ -101,9 +121,12 @@ class JiraAPI {
                     | "active"
                     | "closed"
                     | "future") || "active",
-                startDate:
-                  (_.get(issue, "fields.sprint.startDate") as any) || "",
-                endDate: (_.get(issue, "fields.sprint.endDate") as any) || "",
+                startDate: this.transformToISODateString(
+                  (_.get(issue, "fields.sprint.startDate") as string) || "",
+                ),
+                endDate: this.transformToISODateString(
+                  (_.get(issue, "fields.sprint.endDate") as string) || "",
+                ),
                 originBoardId: _.get(issue, "fields.sprint.originBoardId") || 0,
                 ...(_.get(issue, "fields.sprint.goal") && {
                   goal: _.get(issue, "fields.sprint.goal") as string,
@@ -164,8 +187,16 @@ class JiraAPI {
         cycleId: _.get(issue, "fields.sprint.id") || "", // Foreign key
       }))
       .filter((x) => !!x.parent)
-      .filter((x) => !(x.sprint === null && (x.status as any)?.name === "Done"))
-      .filter((x) => (x.status as any)?.name !== "Cancelled");
+      .filter(
+        (x) =>
+          !(
+            x.sprint === null &&
+            (x.status as unknown as { name: string })?.name === "Done"
+          ),
+      )
+      .filter(
+        (x) => (x.status as unknown as { name: string })?.name !== "Cancelled",
+      );
   }
 
   /**
@@ -198,57 +229,56 @@ class JiraAPI {
       ].concat(extraFields),
     });
 
-    return (response as { issues: JiraIssue[] }).issues.map(
-      (issue: JiraIssue) => {
-        return {
-          ...issue,
-          fields: {
-            ..._.omit(issue.fields, ["customfield_10002"]),
-            ...(issue.fields.customfield_10002 !== undefined && {
-              effort: issue.fields.customfield_10002,
-            }),
-            assignee: issue.fields.assignee
-              ? {
-                  accountId: issue.fields.assignee.accountId,
-                  displayName: issue.fields.assignee.displayName,
-                  ...(issue.fields.assignee.emailAddress && {
-                    emailAddress: issue.fields.assignee.emailAddress,
-                  }),
-                  ...(issue.fields.assignee.avatarUrls && {
-                    avatarUrls: issue.fields.assignee.avatarUrls as Record<
-                      string,
-                      string
-                    >,
-                  }),
-                  active: issue.fields.assignee.active,
-                  ...(issue.fields.assignee.timeZone && {
-                    timeZone: issue.fields.assignee.timeZone,
-                  }),
-                }
-              : null,
-            ...(issue.fields.reporter && {
-              reporter: {
-                accountId: issue.fields.reporter.accountId,
-                displayName: issue.fields.reporter.displayName,
-                ...(issue.fields.reporter.emailAddress && {
-                  emailAddress: issue.fields.reporter.emailAddress,
+    return (response as { issues: unknown[] }).issues.map((issue: unknown) => {
+      const issueObj = issue as JiraIssue;
+      return {
+        ...issueObj,
+        fields: {
+          ..._.omit(issueObj.fields, ["customfield_10002"]),
+          ...(issueObj.fields.customfield_10002 !== undefined && {
+            effort: issueObj.fields.customfield_10002,
+          }),
+          assignee: issueObj.fields.assignee
+            ? {
+                accountId: issueObj.fields.assignee.accountId,
+                displayName: issueObj.fields.assignee.displayName,
+                ...(issueObj.fields.assignee.emailAddress && {
+                  emailAddress: issueObj.fields.assignee.emailAddress,
                 }),
-                ...(issue.fields.reporter.avatarUrls && {
-                  avatarUrls: issue.fields.reporter.avatarUrls as Record<
+                ...(issueObj.fields.assignee.avatarUrls && {
+                  avatarUrls: issueObj.fields.assignee.avatarUrls as Record<
                     string,
                     string
                   >,
                 }),
-                active: issue.fields.reporter.active,
-                ...(issue.fields.reporter.timeZone && {
-                  timeZone: issue.fields.reporter.timeZone,
+                active: issueObj.fields.assignee.active,
+                ...(issueObj.fields.assignee.timeZone && {
+                  timeZone: issueObj.fields.assignee.timeZone,
                 }),
-              },
-            }),
-          },
-        };
-      },
-    );
+              }
+            : null,
+          ...(issueObj.fields.reporter && {
+            reporter: {
+              accountId: issueObj.fields.reporter.accountId,
+              displayName: issueObj.fields.reporter.displayName,
+              ...(issueObj.fields.reporter.emailAddress && {
+                emailAddress: issueObj.fields.reporter.emailAddress,
+              }),
+              ...(issueObj.fields.reporter.avatarUrls && {
+                avatarUrls: issueObj.fields.reporter.avatarUrls as Record<
+                  string,
+                  string
+                >,
+              }),
+              active: issueObj.fields.reporter.active,
+              ...(issueObj.fields.reporter.timeZone && {
+                timeZone: issueObj.fields.reporter.timeZone,
+              }),
+            },
+          }),
+        },
+      };
+    }) as JiraIssue[];
   }
 
   private _createClient(): AgileClient {

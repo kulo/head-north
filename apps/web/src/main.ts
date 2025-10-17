@@ -22,7 +22,10 @@ import { createPinia } from "pinia";
 
 // Create services
 const omegaConfig = new OmegaConfig({
-  overrides: { environment: (import.meta as any).env?.MODE || "development" },
+  overrides: {
+    environment:
+      (import.meta as { env?: { MODE?: string } }).env?.MODE || "development",
+  },
 });
 const cycleDataService = new CycleDataService(omegaConfig);
 
@@ -73,7 +76,6 @@ async function initializeApp() {
 
     logger.default.info("Omega One frontend started successfully with Pinia!");
   } catch (error) {
-    const errorMessage = error?.message || error?.toString() || "Unknown error";
     logger.error.errorSafe("Error initializing Pinia app", error);
   }
 }

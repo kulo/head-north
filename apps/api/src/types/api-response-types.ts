@@ -1,7 +1,7 @@
 // API Response Types
 // Comprehensive types for all API responses and data structures
 
-import type { ISODateString, Stage, Team } from "@omega/types";
+// import type { ISODateString, Stage, Team } from "@omega/types";
 import type { ApiError, ValidationError, ProcessingError } from "./error-types";
 
 // ============================================================================

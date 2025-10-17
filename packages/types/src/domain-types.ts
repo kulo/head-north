@@ -13,6 +13,7 @@
 export type AreaId = string;
 export type TeamId = string;
 export type PersonId = string;
+export type ProjectId = string;
 
 export interface Area {
   id: AreaId;

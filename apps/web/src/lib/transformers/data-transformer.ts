@@ -7,7 +7,7 @@
  * This belongs in /lib because it contains only pure functions with no external dependencies.
  */
 
-import type { CycleData, InitiativeId, RoadmapItem } from "@omega/types";
+import type { CycleData, InitiativeId } from "@omega/types";
 import type {
   FilterCriteria,
   InitiativeWithProgress,
@@ -19,16 +19,10 @@ import type {
 import { filter } from "../utils/filter";
 import { selectDefaultCycle } from "../selectors/cycle-selector";
 import { calculateCycleProgress } from "../cycle-progress-calculator";
-import {
-  calculateReleaseItemProgress,
-  calculateCycleMetadata,
-  aggregateProgressMetrics,
-} from "../calculations/cycle-calculations";
+import { calculateReleaseItemProgress } from "../calculations/cycle-calculations";
 import {
   DEFAULT_INITIATIVE,
-  DEFAULT_ASSIGNEE,
   getDefaultInitiativeId,
-  getDefaultAssigneeName,
 } from "../constants/default-values";
 
 /**
@@ -336,12 +330,17 @@ export class DataTransformer {
    * Get cycle name by ID
    * Pure function - no side effects
    */
-  private static getCycleName(cycles: any[], cycleId: string): string {
+  private static getCycleName(cycles: unknown[], cycleId: string): string {
     if (!Array.isArray(cycles)) {
       return `Cycle ${cycleId}`;
     }
 
-    const cycle = cycles.find((c) => c.id === cycleId);
-    return cycle ? cycle.name : `Cycle ${String(cycleId)}`;
+    const cycle = cycles.find((c) => {
+      const cycleObj = c as { id?: string };
+      return cycleObj.id === cycleId;
+    });
+    return cycle
+      ? (cycle as { name?: string }).name || `Cycle ${String(cycleId)}`
+      : `Cycle ${String(cycleId)}`;
   }
 }

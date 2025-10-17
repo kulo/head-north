@@ -77,8 +77,22 @@ describe("CycleSelector", () => {
 
     // Set up mock cycles
     const mockCycles = [
-      { id: "cycle1", name: "Cycle 1", state: "active" },
-      { id: "cycle2", name: "Cycle 2", state: "future" },
+      {
+        id: "cycle1",
+        name: "Cycle 1",
+        state: "active" as const,
+        start: "2024-01-01" as const,
+        end: "2024-01-31" as const,
+        delivery: "2024-01-31" as const,
+      },
+      {
+        id: "cycle2",
+        name: "Cycle 2",
+        state: "future" as const,
+        start: "2024-02-01" as const,
+        end: "2024-02-29" as const,
+        delivery: "2024-02-29" as const,
+      },
     ];
 
     // Mock the data store
@@ -96,7 +110,16 @@ describe("CycleSelector", () => {
     const filterStore = useFilterStore();
     const { viewFilterManager } = getMockServices();
 
-    const mockCycles = [{ id: "cycle1", name: "Cycle 1", state: "active" }];
+    const mockCycles = [
+      {
+        id: "cycle1",
+        name: "Cycle 1",
+        state: "active" as const,
+        start: "2024-01-01" as const,
+        end: "2024-01-31" as const,
+        delivery: "2024-01-31" as const,
+      },
+    ];
 
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue(mockCycles);
 
@@ -105,7 +128,7 @@ describe("CycleSelector", () => {
     // Simulate cycle change
     await wrapper.vm.handleCycleChange("cycle1");
 
-    expect(viewFilterManager.updateFilter).toHaveBeenCalledWith(
+    expect((viewFilterManager as any).updateFilter).toHaveBeenCalledWith(
       "cycle",
       "cycle1",
     );
@@ -116,7 +139,16 @@ describe("CycleSelector", () => {
     const filterStore = useFilterStore();
     const { viewFilterManager } = getMockServices();
 
-    const mockCycles = [{ id: "cycle1", name: "Cycle 1", state: "active" }];
+    const mockCycles = [
+      {
+        id: "cycle1",
+        name: "Cycle 1",
+        state: "active" as const,
+        start: "2024-01-01" as const,
+        end: "2024-01-31" as const,
+        delivery: "2024-01-31" as const,
+      },
+    ];
 
     // Initially no cycles, then cycles are loaded
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue([]);
@@ -130,7 +162,7 @@ describe("CycleSelector", () => {
     await wrapper.vm.$nextTick();
 
     // The component should automatically select the first cycle
-    expect(viewFilterManager.updateFilter).toHaveBeenCalledWith(
+    expect((viewFilterManager as any).updateFilter).toHaveBeenCalledWith(
       "cycle",
       "cycle1",
     );

@@ -15,10 +15,11 @@
  * // Returns: 'inprogress', 'done', 'todo', etc.
  */
 import type { OmegaConfig } from "@omega/config";
+import type { JiraIssueFields, JiraSprint } from "../types";
 
 export function resolveStatus(
-  issueFields: any,
-  sprint: any,
+  issueFields: JiraIssueFields,
+  sprint: JiraSprint,
   omegaConfig: OmegaConfig,
 ): string {
   const statusId = issueFields.status.id;

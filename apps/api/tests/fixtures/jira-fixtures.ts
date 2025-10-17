@@ -201,7 +201,9 @@ export function createJiraIssueWithoutAssignee(): JiraIssue {
  */
 export function createJiraIssueWithoutParent(): JiraIssue {
   const baseIssue = createMockJiraIssue();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { parent, ...fieldsWithoutParent } = baseIssue.fields;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { roadmapItemId, ...issueWithoutRoadmapId } = baseIssue;
   return {
     ...issueWithoutRoadmapId,

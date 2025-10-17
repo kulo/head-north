@@ -3,15 +3,20 @@ import {
   getLabelsWithPrefix,
 } from "./parse-common";
 import type { OmegaConfig } from "@omega/config";
+import type { ValidationItem } from "@omega/types";
+import type { JiraRoadmapItemData } from "../types";
 
 class LabelResolver {
-  private validationDictionary: any;
+  private validationDictionary: Record<string, ValidationItem>;
 
-  constructor(validationDictionary: any) {
+  constructor(validationDictionary: Record<string, ValidationItem>) {
     this.validationDictionary = validationDictionary;
   }
 
-  static collectInitiative(project: any, omegaConfig: OmegaConfig) {
+  static collectInitiative(
+    project: JiraRoadmapItemData,
+    omegaConfig: OmegaConfig,
+  ) {
     const fallbackInitiative = "uncategorized";
     const initiative = this.parseInitiative(project.labels);
 
@@ -46,7 +51,7 @@ class LabelResolver {
     return { value: translatedInitiative, id: initiative, validations: [] };
   }
 
-  static collectTheme(project: any, omegaConfig: OmegaConfig) {
+  static collectTheme(project: JiraRoadmapItemData, omegaConfig: OmegaConfig) {
     const theme = this.parseTheme(project.labels);
     if (!theme) {
       return {
@@ -76,7 +81,7 @@ class LabelResolver {
     return { value: translatedTheme, validations: [] };
   }
 
-  static collectArea(project: any, omegaConfig: OmegaConfig) {
+  static collectArea(project: JiraRoadmapItemData, omegaConfig: OmegaConfig) {
     const areaIds = this.parseArea(project.labels);
     if (areaIds.length === 0) {
       return {

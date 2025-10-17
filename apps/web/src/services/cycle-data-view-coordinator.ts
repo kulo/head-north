@@ -102,8 +102,8 @@ export class CycleDataViewCoordinator {
    * Update filters using ViewFilterManager
    * Business operation - has side effects (updates filter manager state)
    */
-  updateFilter(filterKey: FilterKey, value: any): ViewFilterCriteria {
-    const activeFilters = this.viewFilterManager.updateFilter(filterKey, value);
+  updateFilter(filterKey: FilterKey, value: unknown): ViewFilterCriteria {
+    this.viewFilterManager.updateFilter(filterKey, value);
     return this.viewFilterManager.getAllViewFilters();
   }
 
@@ -112,7 +112,7 @@ export class CycleDataViewCoordinator {
    * Business operation - has side effects (updates filter manager state)
    */
   switchView(pageId: PageId): ViewFilterCriteria {
-    const activeFilters = this.viewFilterManager.switchView(pageId);
+    this.viewFilterManager.switchView(pageId);
     return this.viewFilterManager.getAllViewFilters();
   }
 

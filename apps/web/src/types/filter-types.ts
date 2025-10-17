@@ -5,7 +5,7 @@
  * ensuring compile-time safety and consistency with OmegaConfig.
  */
 
-import type { FilterCriteria } from "./ui-types";
+// import type { FilterCriteria } from "./ui-types";
 import type {
   AreaId,
   InitiativeId,
@@ -161,7 +161,7 @@ export interface ViewFilterManager {
    * @param value - The filter value
    * @returns Updated active filters
    */
-  updateFilter(filterKey: FilterKey, value: any): TypedFilterCriteria;
+  updateFilter(filterKey: FilterKey, value: unknown): TypedFilterCriteria;
 
   /**
    * Get active filters for the current view
@@ -209,7 +209,5 @@ export interface ViewFilterCriteria {
     assignees?: PersonId[];
     cycle?: CycleId;
   };
-  roadmap: {
-    // Future roadmap-specific filters can be added here
-  };
+  roadmap: Record<string, never>;
 }
