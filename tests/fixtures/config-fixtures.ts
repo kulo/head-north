@@ -6,6 +6,7 @@
  */
 
 import type { OmegaConfig } from "@omega/config";
+import { createURL } from "@omega/config/utils";
 
 /**
  * Create a mock OmegaConfig with default test values
@@ -69,44 +70,74 @@ export function createMockOmegaConfig(
     getValidationDictionary: () => ({
       releaseItem: {
         missingEstimate: {
-          type: "warning",
-          message: "Missing effort estimate",
+          label: "Missing effort estimate",
+          reference: createURL(
+            "https://docs.example.com/estimation-conventions",
+          ),
         },
         tooGranularEstimate: {
-          type: "warning",
-          message: "Effort estimate too granular",
+          label: "Effort estimate too granular",
+          reference: createURL(
+            "https://docs.example.com/estimation-guidelines",
+          ),
         },
-        noProjectId: { type: "error", message: "No parent project ID" },
-        missingAreaLabel: { type: "warning", message: "Missing area label" },
-        missingTeamLabel: { type: "warning", message: "Missing team label" },
+        noProjectId: {
+          label: "No parent project ID",
+          reference: createURL(
+            "https://docs.example.com/release-item-conventions",
+          ),
+        },
+        missingAreaLabel: {
+          label: "Missing area label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
+        missingTeamLabel: {
+          label: "Missing team label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
         missingTeamTranslation: (team: string) => ({
-          type: "error",
-          message: `Missing translation for team: ${team}`,
+          label: `Missing translation for team: ${team}`,
+          reference: createURL("https://docs.example.com/team-translations"),
         }),
-        missingAssignee: { type: "warning", message: "Missing assignee" },
+        missingAssignee: {
+          label: "Missing assignee",
+          reference: createURL(
+            "https://docs.example.com/assignment-requirements",
+          ),
+        },
         tooLowStageWithoutProperRoadmapItem: {
-          type: "error",
-          message: "Stage too low without proper roadmap item",
+          label: "Stage too low without proper roadmap item",
+          reference: createURL(
+            "https://docs.example.com/roadmap-item-requirements",
+          ),
         },
       },
       roadmapItem: {
-        missingAreaLabel: { type: "warning", message: "Missing area label" },
+        missingAreaLabel: {
+          label: "Missing area label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
         missingAreaTranslation: (area: string) => ({
-          type: "error",
-          message: `Missing translation for area: ${area}`,
+          label: `Missing translation for area: ${area}`,
+          reference: createURL("https://docs.example.com/area-translations"),
         }),
-        missingThemeLabel: { type: "warning", message: "Missing theme label" },
+        missingThemeLabel: {
+          label: "Missing theme label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
         missingThemeTranslation: (theme: string) => ({
-          type: "error",
-          message: `Missing translation for theme: ${theme}`,
+          label: `Missing translation for theme: ${theme}`,
+          reference: createURL("https://docs.example.com/theme-translations"),
         }),
         missingInitiativeLabel: {
-          type: "warning",
-          message: "Missing initiative label",
+          label: "Missing initiative label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
         },
         missingInitiativeTranslation: (initiative: string) => ({
-          type: "error",
-          message: `Missing translation for initiative: ${initiative}`,
+          label: `Missing translation for initiative: ${initiative}`,
+          reference: createURL(
+            "https://docs.example.com/initiative-translations",
+          ),
         }),
       },
     }),
@@ -172,44 +203,74 @@ export function createMinimalMockOmegaConfig(): OmegaConfig {
     getValidationDictionary: () => ({
       releaseItem: {
         missingEstimate: {
-          type: "warning",
-          message: "Missing effort estimate",
+          label: "Missing effort estimate",
+          reference: createURL(
+            "https://docs.example.com/estimation-conventions",
+          ),
         },
         tooGranularEstimate: {
-          type: "warning",
-          message: "Effort estimate too granular",
+          label: "Effort estimate too granular",
+          reference: createURL(
+            "https://docs.example.com/estimation-guidelines",
+          ),
         },
-        noProjectId: { type: "error", message: "No parent project ID" },
-        missingAreaLabel: { type: "warning", message: "Missing area label" },
-        missingTeamLabel: { type: "warning", message: "Missing team label" },
+        noProjectId: {
+          label: "No parent project ID",
+          reference: createURL(
+            "https://docs.example.com/release-item-conventions",
+          ),
+        },
+        missingAreaLabel: {
+          label: "Missing area label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
+        missingTeamLabel: {
+          label: "Missing team label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
         missingTeamTranslation: (team: string) => ({
-          type: "error",
-          message: `Missing translation for team: ${team}`,
+          label: `Missing translation for team: ${team}`,
+          reference: createURL("https://docs.example.com/team-translations"),
         }),
-        missingAssignee: { type: "warning", message: "Missing assignee" },
+        missingAssignee: {
+          label: "Missing assignee",
+          reference: createURL(
+            "https://docs.example.com/assignment-requirements",
+          ),
+        },
         tooLowStageWithoutProperRoadmapItem: {
-          type: "error",
-          message: "Stage too low without proper roadmap item",
+          label: "Stage too low without proper roadmap item",
+          reference: createURL(
+            "https://docs.example.com/roadmap-item-requirements",
+          ),
         },
       },
       roadmapItem: {
-        missingAreaLabel: { type: "warning", message: "Missing area label" },
+        missingAreaLabel: {
+          label: "Missing area label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
         missingAreaTranslation: (area: string) => ({
-          type: "error",
-          message: `Missing translation for area: ${area}`,
+          label: `Missing translation for area: ${area}`,
+          reference: createURL("https://docs.example.com/area-translations"),
         }),
-        missingThemeLabel: { type: "warning", message: "Missing theme label" },
+        missingThemeLabel: {
+          label: "Missing theme label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
+        },
         missingThemeTranslation: (theme: string) => ({
-          type: "error",
-          message: `Missing translation for theme: ${theme}`,
+          label: `Missing translation for theme: ${theme}`,
+          reference: createURL("https://docs.example.com/theme-translations"),
         }),
         missingInitiativeLabel: {
-          type: "warning",
-          message: "Missing initiative label",
+          label: "Missing initiative label",
+          reference: createURL("https://docs.example.com/labeling-conventions"),
         },
         missingInitiativeTranslation: (initiative: string) => ({
-          type: "error",
-          message: `Missing translation for initiative: ${initiative}`,
+          label: `Missing translation for initiative: ${initiative}`,
+          reference: createURL(
+            "https://docs.example.com/initiative-translations",
+          ),
         }),
       },
     }),

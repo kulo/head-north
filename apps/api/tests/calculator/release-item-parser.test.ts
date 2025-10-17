@@ -92,7 +92,7 @@ describe("ReleaseItemParser", () => {
         timeZone: "UTC",
       });
       expect(result.validations).toHaveLength(1);
-      expect(result.validations[0].message).toBe("Missing assignee");
+      expect(result.validations[0].name).toBe("Missing assignee");
     });
 
     it("should handle issue with no parent (missing project ID)", () => {
@@ -102,7 +102,7 @@ describe("ReleaseItemParser", () => {
 
       expect(result.projectId).toBeNull();
       expect(result.validations).toHaveLength(1);
-      expect(result.validations[0].message).toBe("No parent project ID");
+      expect(result.validations[0].name).toBe("No parent project ID");
     });
 
     it("should handle issue with invalid effort estimate", () => {
@@ -112,9 +112,7 @@ describe("ReleaseItemParser", () => {
 
       expect(result.effort).toBe(1.3);
       expect(result.validations).toHaveLength(1);
-      expect(result.validations[0].message).toBe(
-        "Effort estimate too granular",
-      );
+      expect(result.validations[0].name).toBe("Effort estimate too granular");
     });
 
     it("should handle issue with missing effort estimate", () => {
@@ -129,7 +127,7 @@ describe("ReleaseItemParser", () => {
 
       expect(result.effort).toBe(0);
       expect(result.validations).toHaveLength(1);
-      expect(result.validations[0].message).toBe("Missing effort estimate");
+      expect(result.validations[0].name).toBe("Missing effort estimate");
     });
 
     it("should handle issue with zero effort estimate", () => {
@@ -153,7 +151,7 @@ describe("ReleaseItemParser", () => {
 
       expect(result.areaIds).toEqual([]);
       expect(result.validations).toHaveLength(1);
-      expect(result.validations[0].message).toBe("Missing area label");
+      expect(result.validations[0].name).toBe("Missing area label");
     });
 
     it("should handle issue with missing team label", () => {
@@ -163,7 +161,7 @@ describe("ReleaseItemParser", () => {
 
       expect(result.teams).toEqual([]);
       expect(result.validations).toHaveLength(1);
-      expect(result.validations[0].message).toBe("Missing team label");
+      expect(result.validations[0].name).toBe("Missing team label");
     });
 
     it("should handle issue with untranslated team label", () => {
@@ -173,7 +171,7 @@ describe("ReleaseItemParser", () => {
 
       expect(result.teams).toEqual(["unknown-team"]);
       expect(result.validations).toHaveLength(1);
-      expect(result.validations[0].message).toBe(
+      expect(result.validations[0].name).toBe(
         "Missing translation for team: unknown-team",
       );
     });
@@ -322,12 +320,10 @@ describe("ReleaseItemParser", () => {
       const result = parser.parse(issue);
 
       expect(result.validations).toHaveLength(4);
-      expect(result.validations[0].message).toBe("Missing area label");
-      expect(result.validations[1].message).toBe("Missing team label");
-      expect(result.validations[2].message).toBe(
-        "Effort estimate too granular",
-      );
-      expect(result.validations[3].message).toBe("Missing assignee");
+      expect(result.validations[0].name).toBe("Missing area label");
+      expect(result.validations[1].name).toBe("Missing team label");
+      expect(result.validations[2].name).toBe("Effort estimate too granular");
+      expect(result.validations[3].name).toBe("Missing assignee");
     });
   });
 });

@@ -2,7 +2,7 @@
  * Shared utility functions for configuration classes
  */
 
-import type { ProcessEnv } from "./types";
+import type { ProcessEnv, URL } from "./types";
 
 /**
  * Get required environment variable
@@ -46,4 +46,23 @@ export function getEnvVarWithFallback(
     return fallback;
   }
   return value;
+}
+
+/**
+ * Create a URL with validation
+ * @param url - URL string to validate and convert
+ * @returns Validated URL type
+ * @throws Error if URL is invalid
+ */
+export function createURL(url: string): URL {
+  try {
+    const validatedUrl = new URL(url);
+    // Ensure it's http or https
+    if (!validatedUrl.protocol.startsWith("http")) {
+      throw new Error(`URL must use http or https protocol: ${url}`);
+    }
+    return url as URL;
+  } catch {
+    throw new Error(`Invalid URL: ${url}`);
+  }
 }

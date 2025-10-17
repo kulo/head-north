@@ -113,9 +113,12 @@ export interface OmegaConfigData {
   backend: BackendConfig;
 }
 
+// Branded URL type for strict typing
+export type URL = string & { readonly __brand: "URL" };
+
 export interface ValidationRule {
   label: string;
-  reference: string;
+  reference: URL;
 }
 
 export interface ValidationRules {

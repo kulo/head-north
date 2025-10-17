@@ -26,3 +26,6 @@ export { default } from "./omega-config";
 // Export types for external use
 export type * from "./types";
 export type * from "./jira-config";
+
+// Export utility functions
+export { createURL } from "./utils";
