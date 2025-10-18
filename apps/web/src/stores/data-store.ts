@@ -7,7 +7,6 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
-import { DataTransformer } from "../lib/transformers/data-transformer";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
 import type { CycleData } from "@omega/types";
@@ -202,9 +201,9 @@ export const useDataStore = defineStore("data", () => {
       // Store raw data
       setRawData(cycleData);
 
-      // Process data using DataProcessor
+      // Process data using coordinator
       console.log("Processing data with DataProcessor");
-      const processed = DataTransformer.processCycleData(cycleData, {});
+      const processed = coordinator.processCycleData(cycleData);
 
       if (!processed) {
         throw new Error("Data processing failed");

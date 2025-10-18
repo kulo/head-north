@@ -8,7 +8,7 @@
  * This belongs in /services because it manages state and has side effects.
  */
 
-import { DataTransformer } from "../lib/transformers/data-transformer";
+import { dataTransformer } from "../lib/transformers/data-transformer";
 import type { ViewFilterManager } from "./view-filter-manager";
 import type { CycleData } from "@omega/types";
 import type {
@@ -24,10 +24,7 @@ export class CycleDataViewCoordinator {
   constructor(
     private viewFilterManager: ViewFilterManager,
     private config: OmegaConfig,
-  ) {
-    // Set config for DataTransformer
-    DataTransformer.setConfig(config);
-  }
+  ) {}
   /**
    * Process raw cycle data into nested structure
    * Business operation - coordinates pure transformation
@@ -38,7 +35,11 @@ export class CycleDataViewCoordinator {
     }
 
     console.log("Processing data with DataTransformer");
-    const processedData = DataTransformer.processCycleData(rawData, {});
+    const processedData = dataTransformer.processCycleData(
+      this.config,
+      rawData,
+      {},
+    );
 
     if (!processedData) {
       throw new Error("Data processing failed");
@@ -59,7 +60,7 @@ export class CycleDataViewCoordinator {
     rawData: CycleData | null,
     processedData: NestedCycleData | null,
   ): RoadmapData {
-    return DataTransformer.generateRoadmapData(rawData, processedData);
+    return dataTransformer.generateRoadmapData(rawData, processedData);
   }
 
   /**
@@ -70,7 +71,7 @@ export class CycleDataViewCoordinator {
     rawData: CycleData | null,
     processedData: NestedCycleData | null,
   ): CycleOverviewData | null {
-    return DataTransformer.generateCycleOverviewData(rawData, processedData);
+    return dataTransformer.generateCycleOverviewData(rawData, processedData);
   }
 
   /**
@@ -82,7 +83,7 @@ export class CycleDataViewCoordinator {
     processedData: NestedCycleData | null,
   ): RoadmapData {
     const activeFilters = this.viewFilterManager.getActiveFilters();
-    return DataTransformer.generateFilteredRoadmapData(
+    return dataTransformer.generateFilteredRoadmapData(
       rawData,
       processedData,
       activeFilters,
@@ -98,7 +99,7 @@ export class CycleDataViewCoordinator {
     processedData: NestedCycleData | null,
   ): CycleOverviewData | null {
     const activeFilters = this.viewFilterManager.getActiveFilters();
-    return DataTransformer.generateFilteredCycleOverviewData(
+    return dataTransformer.generateFilteredCycleOverviewData(
       rawData,
       processedData,
       activeFilters,

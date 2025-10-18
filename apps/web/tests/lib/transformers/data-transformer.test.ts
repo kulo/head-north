@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { DataTransformer } from "../../../src/lib/transformers/data-transformer";
+import { dataTransformer } from "../../../src/lib/transformers/data-transformer";
 import {
   createMockCycleData,
   createEmptyCycleData,
@@ -17,6 +17,7 @@ import type {
   RoadmapItemWithProgress,
 } from "../../../src/types/ui-types";
 import { CycleData } from "@omega/types";
+import type { default as OmegaConfig } from "@omega/config";
 
 // Mock the filter module
 vi.mock("../../../src/lib/utils/filter", () => ({
@@ -30,6 +31,19 @@ vi.mock("../../../src/lib/utils/filter", () => ({
     })),
   },
 }));
+
+// Mock config
+const mockConfig: OmegaConfig = {
+  getValidationDictionary: vi.fn(() => ({
+    releaseItem: {
+      missingAssignee: { label: "Missing assignee", reference: "ref1" },
+      missingAreaLabel: { label: "Missing area label", reference: "ref2" },
+    },
+    roadmapItem: {
+      missingThemeLabel: { label: "Missing theme label", reference: "ref3" },
+    },
+  })),
+} as unknown as OmegaConfig;
 
 // Mock the cycle selector
 vi.mock("../../../src/lib/selectors/cycle-selector", () => ({
@@ -66,7 +80,10 @@ describe("DataTransformer", () => {
     it("should transform raw cycle data to nested structure", () => {
       const rawData = createMockCycleData();
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives).toHaveLength(2);
       expect(result.initiatives[0].id).toBe("init-1");
@@ -78,7 +95,10 @@ describe("DataTransformer", () => {
     it("should handle empty cycle data", () => {
       const rawData = createEmptyCycleData();
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives).toHaveLength(0);
     });
@@ -89,7 +109,10 @@ describe("DataTransformer", () => {
         initiatives: null,
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives).toHaveLength(2);
       expect(result.initiatives[0].name).toBe("Unassigned Initiative");
@@ -101,7 +124,10 @@ describe("DataTransformer", () => {
         initiatives: "not-an-array" as any,
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives).toHaveLength(2);
       expect(result.initiatives[0].name).toBe("Unassigned Initiative");
@@ -110,7 +136,10 @@ describe("DataTransformer", () => {
     it("should group roadmap items by initiative", () => {
       const rawData = createMockCycleData();
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives).toHaveLength(2);
       expect(result.initiatives[0].roadmapItems).toHaveLength(1);
@@ -128,7 +157,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives).toHaveLength(1);
       expect(result.initiatives[0].id).toBe("unassigned");
@@ -146,7 +178,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives).toHaveLength(1);
       expect(result.initiatives[0].id).toBe("unassigned");
@@ -156,7 +191,10 @@ describe("DataTransformer", () => {
     it("should calculate progress metrics for roadmap items", () => {
       const rawData = createMockCycleDataWithMixedStatuses();
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(
         (result.initiatives[0].roadmapItems[0] as RoadmapItemWithProgress)
@@ -175,7 +213,10 @@ describe("DataTransformer", () => {
     it("should aggregate progress metrics to initiative level", () => {
       const rawData = createMockCycleDataWithMixedStatuses();
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].weeks).toBeGreaterThan(0);
       expect(result.initiatives[0].progress).toBeGreaterThanOrEqual(0);
@@ -185,7 +226,10 @@ describe("DataTransformer", () => {
     it("should sort initiatives by weeks (largest first)", () => {
       const rawData = createMockCycleDataWithMixedStatuses();
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       if (result.initiatives.length > 1) {
         expect(result.initiatives[0].weeks).toBeGreaterThanOrEqual(
@@ -205,7 +249,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].roadmapItems[0].area).toBe("frontend");
     });
@@ -221,7 +268,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].roadmapItems[0].area).toBe("Frontend");
     });
@@ -237,7 +287,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].roadmapItems[0].area).toBe("");
     });
@@ -253,7 +306,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].roadmapItems[0].theme).toBe("platform");
     });
@@ -269,7 +325,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].roadmapItems[0].theme).toBe("");
     });
@@ -293,7 +352,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].roadmapItems[0].validations).toEqual([
         {
@@ -317,7 +379,10 @@ describe("DataTransformer", () => {
         ],
       };
 
-      const result = DataTransformer.transformToNestedStructure(rawData);
+      const result = dataTransformer.transformToNestedStructure(
+        mockConfig,
+        rawData,
+      );
 
       expect(result.initiatives[0].roadmapItems[0].validations).toEqual([]);
     });
@@ -327,7 +392,7 @@ describe("DataTransformer", () => {
     it("should return original data when no initiatives specified", () => {
       const data = createMockNestedCycleData();
 
-      const result = DataTransformer.applyInitiativeFilter(data, []);
+      const result = dataTransformer.applyInitiativeFilter(data, []);
 
       expect(result).toEqual(data);
     });
@@ -335,8 +400,8 @@ describe("DataTransformer", () => {
     it("should return original data when initiatives is null/undefined", () => {
       const data = createMockNestedCycleData();
 
-      const result1 = DataTransformer.applyInitiativeFilter(data, null as any);
-      const result2 = DataTransformer.applyInitiativeFilter(
+      const result1 = dataTransformer.applyInitiativeFilter(data, null as any);
+      const result2 = dataTransformer.applyInitiativeFilter(
         data,
         undefined as any,
       );
@@ -348,7 +413,7 @@ describe("DataTransformer", () => {
     it("should filter by specific initiatives", () => {
       const data = createMockNestedCycleData();
 
-      const result = DataTransformer.applyInitiativeFilter(data, ["init-1"]);
+      const result = dataTransformer.applyInitiativeFilter(data, ["init-1"]);
 
       expect(result.initiatives).toHaveLength(1);
       expect(result.initiatives[0].id).toBe("init-1");
@@ -357,7 +422,7 @@ describe("DataTransformer", () => {
     it("should filter by multiple initiatives", () => {
       const data = createMockNestedCycleData();
 
-      const result = DataTransformer.applyInitiativeFilter(data, [
+      const result = dataTransformer.applyInitiativeFilter(data, [
         "init-1",
         "init-2",
       ]);
@@ -369,7 +434,7 @@ describe("DataTransformer", () => {
     it("should return empty initiatives when none match", () => {
       const data = createMockNestedCycleData();
 
-      const result = DataTransformer.applyInitiativeFilter(data, [
+      const result = dataTransformer.applyInitiativeFilter(data, [
         "nonexistent",
       ]);
 
@@ -381,7 +446,7 @@ describe("DataTransformer", () => {
     it("should process cycle data with no filters", () => {
       const rawData = createMockCycleData();
 
-      const result = DataTransformer.processCycleData(rawData);
+      const result = dataTransformer.processCycleData(mockConfig, rawData);
 
       expect(result.initiatives).toHaveLength(2);
     });
@@ -390,7 +455,11 @@ describe("DataTransformer", () => {
       const rawData = createMockCycleData();
       const filters: FilterCriteria = { initiatives: ["init-1"] };
 
-      const result = DataTransformer.processCycleData(rawData, filters);
+      const result = dataTransformer.processCycleData(
+        mockConfig,
+        rawData,
+        filters,
+      );
 
       expect(result.initiatives).toHaveLength(1);
       expect(result.initiatives[0].id).toBe("init-1");
@@ -404,7 +473,11 @@ describe("DataTransformer", () => {
         stages: ["s2"],
       };
 
-      const result = DataTransformer.processCycleData(rawData, filters);
+      const result = dataTransformer.processCycleData(
+        mockConfig,
+        rawData,
+        filters,
+      );
 
       expect(result.initiatives).toHaveLength(1);
       expect(result.initiatives[0].id).toBe("init-1");
@@ -413,7 +486,7 @@ describe("DataTransformer", () => {
     it("should handle empty raw data", () => {
       const rawData = createEmptyCycleData();
 
-      const result = DataTransformer.processCycleData(rawData);
+      const result = dataTransformer.processCycleData(mockConfig, rawData);
 
       expect(result.initiatives).toHaveLength(0);
     });
@@ -424,7 +497,7 @@ describe("DataTransformer", () => {
       const rawData = createMockCycleData();
       const processedData = createMockNestedCycleData();
 
-      const result = DataTransformer.generateRoadmapData(
+      const result = dataTransformer.generateRoadmapData(
         rawData,
         processedData,
       );
@@ -438,7 +511,7 @@ describe("DataTransformer", () => {
     it("should handle null processed data", () => {
       const rawData = createMockCycleData();
 
-      const result = DataTransformer.generateRoadmapData(rawData, null);
+      const result = dataTransformer.generateRoadmapData(rawData, null);
 
       expect(result.orderedCycles).toEqual([]);
       expect(result.roadmapItems).toEqual([]);
@@ -449,7 +522,7 @@ describe("DataTransformer", () => {
     it("should handle null raw data", () => {
       const processedData = createMockNestedCycleData();
 
-      const result = DataTransformer.generateRoadmapData(null, processedData);
+      const result = dataTransformer.generateRoadmapData(null, processedData);
 
       expect(result.orderedCycles).toEqual([]);
       expect(result.roadmapItems).toEqual([]);
@@ -458,7 +531,7 @@ describe("DataTransformer", () => {
     });
 
     it("should handle both null data", () => {
-      const result = DataTransformer.generateRoadmapData(null, null);
+      const result = dataTransformer.generateRoadmapData(null, null);
 
       expect(result.orderedCycles).toEqual([]);
       expect(result.roadmapItems).toEqual([]);
@@ -472,7 +545,7 @@ describe("DataTransformer", () => {
       const rawData = createMockCycleData();
       const processedData = createMockNestedCycleData();
 
-      const result = DataTransformer.generateCycleOverviewData(
+      const result = dataTransformer.generateCycleOverviewData(
         rawData,
         processedData,
       );
@@ -485,7 +558,7 @@ describe("DataTransformer", () => {
     it("should return null for null processed data", () => {
       const rawData = createMockCycleData();
 
-      const result = DataTransformer.generateCycleOverviewData(rawData, null);
+      const result = dataTransformer.generateCycleOverviewData(rawData, null);
 
       expect(result).toBeNull();
     });
@@ -493,7 +566,7 @@ describe("DataTransformer", () => {
     it("should return null for null raw data", () => {
       const processedData = createMockNestedCycleData();
 
-      const result = DataTransformer.generateCycleOverviewData(
+      const result = dataTransformer.generateCycleOverviewData(
         null,
         processedData,
       );
@@ -505,7 +578,7 @@ describe("DataTransformer", () => {
       const rawData = { ...createMockCycleData(), cycles: [] };
       const processedData = createMockNestedCycleData();
 
-      const result = DataTransformer.generateCycleOverviewData(
+      const result = dataTransformer.generateCycleOverviewData(
         rawData,
         processedData,
       );
@@ -517,7 +590,7 @@ describe("DataTransformer", () => {
       const rawData = { ...createMockCycleData(), cycles: null as any };
       const processedData = createMockNestedCycleData();
 
-      const result = DataTransformer.generateCycleOverviewData(
+      const result = dataTransformer.generateCycleOverviewData(
         rawData,
         processedData,
       );
@@ -532,7 +605,7 @@ describe("DataTransformer", () => {
       const processedData = createMockNestedCycleData();
       const filters: FilterCriteria = { area: "frontend" };
 
-      const result = DataTransformer.generateFilteredRoadmapData(
+      const result = dataTransformer.generateFilteredRoadmapData(
         rawData,
         processedData,
         filters,
@@ -548,7 +621,7 @@ describe("DataTransformer", () => {
       const rawData = createMockCycleData();
       const filters: FilterCriteria = { area: "frontend" };
 
-      const result = DataTransformer.generateFilteredRoadmapData(
+      const result = dataTransformer.generateFilteredRoadmapData(
         rawData,
         null,
         filters,
@@ -567,7 +640,7 @@ describe("DataTransformer", () => {
       const processedData = createMockNestedCycleData();
       const filters: FilterCriteria = { area: "frontend" };
 
-      const result = DataTransformer.generateFilteredCycleOverviewData(
+      const result = dataTransformer.generateFilteredCycleOverviewData(
         rawData,
         processedData,
         filters,
@@ -594,7 +667,7 @@ describe("DataTransformer", () => {
       const rawData = createMockCycleData();
       const filters: FilterCriteria = { area: "frontend" };
 
-      const result = DataTransformer.generateFilteredCycleOverviewData(
+      const result = dataTransformer.generateFilteredCycleOverviewData(
         rawData,
         null,
         filters,
@@ -607,7 +680,7 @@ describe("DataTransformer", () => {
       const processedData = createMockNestedCycleData();
       const filters: FilterCriteria = { area: "frontend" };
 
-      const result = DataTransformer.generateFilteredCycleOverviewData(
+      const result = dataTransformer.generateFilteredCycleOverviewData(
         null,
         processedData,
         filters,
@@ -621,7 +694,7 @@ describe("DataTransformer", () => {
       const processedData = createMockNestedCycleData();
       const filters: FilterCriteria = { area: "frontend" };
 
-      const result = DataTransformer.generateFilteredCycleOverviewData(
+      const result = dataTransformer.generateFilteredCycleOverviewData(
         rawData,
         processedData,
         filters,

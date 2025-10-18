@@ -104,11 +104,11 @@ export class RoadmapItemParser {
       ),
       owningTeam,
       url: getJiraLink(projectId, this.omegaConfig),
-      validations: this._collectValidations(
-        projectId,
-        project,
-        [area, theme, initiative],
-      ),
+      validations: this._collectValidations(projectId, project, [
+        area,
+        theme,
+        initiative,
+      ]),
     };
 
     return res;
@@ -147,7 +147,12 @@ export class RoadmapItemParser {
         });
       }
       const validationErrors = hasStageViolation
-        ? [createValidationItem(ticketId, "tooLowStageWithoutProperRoadmapItem")]
+        ? [
+            createValidationItem(
+              ticketId,
+              "tooLowStageWithoutProperRoadmapItem",
+            ),
+          ]
         : [];
       if (hasStageViolation) {
         logger.calculator.info("pre-release-violation-found", {
@@ -195,14 +200,10 @@ export class RoadmapItemParser {
     labelResults.forEach((result) => {
       result.validationCodes.forEach((code) => {
         if (result.validationParameter) {
-          validations.push(
-            createValidationItem(projectId, code, "error"),
-          );
+          validations.push(createValidationItem(projectId, code, "error"));
         } else if (result.validationParameters) {
-          result.validationParameters.forEach((param) => {
-            validations.push(
-              createValidationItem(projectId, code, "error"),
-            );
+          result.validationParameters.forEach((_param) => {
+            validations.push(createValidationItem(projectId, code, "error"));
           });
         } else {
           validations.push(createValidationItem(projectId, code));
@@ -213,7 +214,11 @@ export class RoadmapItemParser {
     // Add missing validation checks for roadmap items
     this._checkMissingExternalRoadmap(projectId, project, validations);
     this._checkInternalWithStagedReleaseItem(projectId, project, validations);
-    this._checkMissingExternalRoadmapDescription(projectId, project, validations);
+    this._checkMissingExternalRoadmapDescription(
+      projectId,
+      project,
+      validations,
+    );
 
     return validations;
   }
@@ -227,7 +232,9 @@ export class RoadmapItemParser {
     // This would need to be implemented based on how external roadmap is determined
     // For now, we'll add a placeholder check
     if (project.isExternal === undefined) {
-      validations.push(createValidationItem(projectId, "missingExternalRoadmap"));
+      validations.push(
+        createValidationItem(projectId, "missingExternalRoadmap"),
+      );
     }
   }
 
@@ -244,7 +251,9 @@ export class RoadmapItemParser {
       });
 
       if (hasExternalStages) {
-        validations.push(createValidationItem(projectId, "iternalWithStagedReleaseItem"));
+        validations.push(
+          createValidationItem(projectId, "iternalWithStagedReleaseItem"),
+        );
       }
     }
   }
@@ -255,8 +264,13 @@ export class RoadmapItemParser {
     validations: ValidationItem[],
   ): void {
     // Check if external roadmap items have descriptions
-    if (project.isExternal === true && (!project.summary || project.summary.trim() === "")) {
-      validations.push(createValidationItem(projectId, "missingExternalRoadmapDescription"));
+    if (
+      project.isExternal === true &&
+      (!project.summary || project.summary.trim() === "")
+    ) {
+      validations.push(
+        createValidationItem(projectId, "missingExternalRoadmapDescription"),
+      );
     }
   }
 }

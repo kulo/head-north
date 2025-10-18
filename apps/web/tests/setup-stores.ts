@@ -39,6 +39,26 @@ const mockViewFilterManager = {
 } as unknown as ViewFilterManager;
 
 const mockCycleDataViewCoordinator = {
+  processCycleData: vi.fn(() => ({
+    initiatives: [],
+  })),
+  generateRoadmapData: vi.fn(() => ({
+    orderedCycles: [],
+    roadmapItems: [],
+    activeCycle: null,
+    initiatives: [],
+  })),
+  generateCycleOverviewData: vi.fn(() => ({
+    cycle: {
+      id: "cycle1",
+      name: "Cycle 1",
+      start: "2024-01-01",
+      end: "2024-03-31",
+      delivery: "2024-04-15",
+      state: "active",
+    },
+    initiatives: [],
+  })),
   generateFilteredRoadmapData: vi.fn(() => ({
     orderedCycles: [],
     roadmapItems: [],
