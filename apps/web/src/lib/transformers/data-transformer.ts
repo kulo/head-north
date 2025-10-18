@@ -7,7 +7,7 @@
  * This belongs in /lib because it contains only pure functions with no external dependencies.
  */
 
-import type { CycleData, InitiativeId } from "@omega/types";
+import type { CycleData, InitiativeId, ValidationItem } from "@omega/types";
 import type {
   FilterCriteria,
   InitiativeWithProgress,
@@ -29,6 +29,59 @@ import {
  * Pure data transformation functions
  */
 export class DataTransformer {
+  private static config: any; // Will be injected
+
+  static setConfig(config: any) {
+    this.config = config;
+  }
+
+  /**
+   * Hydrate ValidationItems with dictionary data
+   */
+  private static hydrateValidations(
+    validations: ValidationItem[],
+  ): ValidationItem[] {
+    if (!this.config) return validations;
+
+    const dictionary = this.config.getValidationDictionary();
+
+    return validations.map((v) => {
+      // Parse code to determine if it's releaseItem or roadmapItem
+      const [category, ruleKey] = this.parseValidationCode(v.code);
+      const rule = dictionary[category]?.[ruleKey];
+
+      return {
+        ...v,
+        name: rule?.label || v.name,
+        description: rule?.reference || v.description,
+      };
+    });
+  }
+
+  /**
+   * Parse validation code to determine category and rule key
+   */
+  private static parseValidationCode(code: string): [string, string] {
+    // Check if it's a release item validation
+    const releaseItemValidations = [
+      "noProjectId",
+      "missingAreaLabel",
+      "missingTeamLabel",
+      "missingTeamTranslation",
+      "missingEstimate",
+      "tooGranularEstimate",
+      "missingStage",
+      "missingAssignee",
+      "tooLowStageWithoutProperRoadmapItem",
+    ];
+
+    if (releaseItemValidations.includes(code)) {
+      return ["releaseItem", code];
+    }
+
+    // Otherwise it's a roadmap item validation
+    return ["roadmapItem", code];
+  }
   /**
    * Transform raw CycleData to NestedCycleData structure
    * Pure function - no side effects
@@ -94,11 +147,16 @@ export class DataTransformer {
         area: typeof item.area === "string" ? item.area : item.area?.name || "",
         theme: typeof item.theme === "string" ? item.theme : "",
         url: item.url || `https://example.com/browse/${item.id}`,
-        validations: Array.isArray(item.validations) ? item.validations : [],
+        validations: Array.isArray(item.validations)
+          ? this.hydrateValidations(item.validations)
+          : [],
         startDate: item.startDate,
         endDate: item.endDate,
         releaseItems: itemReleaseItems.map((releaseItem) => ({
           ...releaseItem,
+          validations: Array.isArray(releaseItem.validations)
+            ? this.hydrateValidations(releaseItem.validations)
+            : [],
           cycle: releaseItem.cycle || {
             id: releaseItem.cycleId,
             name: DataTransformer.getCycleName(cycles, releaseItem.cycleId),

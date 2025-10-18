@@ -117,6 +117,7 @@ export interface Stage {
 
 export interface ValidationItem {
   id: ValidationItemId;
+  code: string;
   name: string;
   status: string;
   description?: string;

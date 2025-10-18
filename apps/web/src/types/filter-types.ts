@@ -32,7 +32,8 @@ export type FilterKey =
   | "initiatives"
   | "stages"
   | "assignees"
-  | "cycle";
+  | "cycle"
+  | "showValidationErrors";
 
 /**
  * Filter types - common filters are shared across views, specific filters are view-only
@@ -76,6 +77,7 @@ export interface TypedFilterCriteria {
   stages?: StageId[];
   assignees?: PersonId[];
   cycle?: CycleId;
+  showValidationErrors?: boolean;
 }
 
 // ============================================================================
@@ -203,6 +205,7 @@ export interface ViewFilterCriteria {
   common: {
     area?: AreaId;
     initiatives?: InitiativeId[];
+    showValidationErrors?: boolean;
   };
   cycleOverview: {
     stages?: StageId[];

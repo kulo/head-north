@@ -160,6 +160,7 @@ export interface FilterCriteria {
   stages?: StageId[];
   assignees?: PersonId[];
   cycle?: CycleId;
+  showValidationErrors?: boolean;
 }
 
 /**

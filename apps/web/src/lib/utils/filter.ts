@@ -143,6 +143,21 @@ export class Filter {
       criteria,
     );
 
+    // Check validation filter for roadmap items
+    if (criteria.showValidationErrors) {
+      const hasRoadmapValidationErrors = roadmapItem.validations?.length > 0;
+      const hasReleaseItemValidationErrors = filteredReleaseItems.some(
+        (item) => item.validations?.length > 0,
+      );
+
+      if (!hasRoadmapValidationErrors && !hasReleaseItemValidationErrors) {
+        return {
+          ...roadmapItem,
+          releaseItems: [],
+        };
+      }
+    }
+
     // If roadmap item should not be included, return it with empty release items
     if (!shouldIncludeRoadmapItem) {
       return {
@@ -231,6 +246,12 @@ export class Filter {
     // Cycle filter
     if (criteria.cycle && criteria.cycle !== "all") {
       if (!this.matchesCycle(releaseItem, criteria.cycle)) return false;
+    }
+
+    // Validation filter - show only items with validation errors
+    if (criteria.showValidationErrors) {
+      const hasErrors = releaseItem.validations?.length > 0;
+      if (!hasErrors) return false;
     }
 
     // Initiative filter is handled at the initiative level

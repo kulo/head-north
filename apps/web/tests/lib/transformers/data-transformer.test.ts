@@ -283,6 +283,7 @@ describe("DataTransformer", () => {
             validations: [
               {
                 id: "val-1",
+                code: "testValidation",
                 name: "Test validation",
                 status: "warning",
                 description: "Test validation description",
@@ -297,6 +298,7 @@ describe("DataTransformer", () => {
       expect(result.initiatives[0].roadmapItems[0].validations).toEqual([
         {
           id: "val-1",
+          code: "testValidation",
           name: "Test validation",
           status: "warning",
           description: "Test validation description",

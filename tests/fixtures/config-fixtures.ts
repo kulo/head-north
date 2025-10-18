@@ -6,7 +6,7 @@
  */
 
 import type { OmegaConfig } from "@omega/config";
-import { createURL } from "@omega/config/utils";
+import { createURL } from "@omega/config";
 
 /**
  * Create a mock OmegaConfig with default test values

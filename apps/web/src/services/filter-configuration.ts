@@ -50,6 +50,12 @@ const DEFAULT_FILTER_CATEGORIES: FilterCategory[] = [
     views: ["cycle-overview"],
     description: "Filter by specific cycle",
   },
+  {
+    key: "showValidationErrors",
+    type: "common",
+    views: ["cycle-overview", "roadmap"],
+    description: "Show only items with validation errors",
+  },
 ];
 
 /**

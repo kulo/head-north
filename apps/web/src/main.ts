@@ -31,8 +31,10 @@ const cycleDataService = new CycleDataService(omegaConfig);
 
 // Create filter services with dependency injection
 const viewFilterManager = createViewFilterManager(omegaConfig);
-const cycleDataViewCoordinator =
-  createCycleDataViewCoordinator(viewFilterManager);
+const cycleDataViewCoordinator = createCycleDataViewCoordinator(
+  viewFilterManager,
+  omegaConfig,
+);
 
 // Create the Vue app
 const app = createApp(App);

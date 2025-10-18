@@ -18,9 +18,16 @@ import type {
   ViewFilterCriteria,
 } from "../types/ui-types";
 import type { FilterKey, PageId } from "../types/filter-types";
+import type { OmegaConfig } from "@omega/config";
 
 export class CycleDataViewCoordinator {
-  constructor(private viewFilterManager: ViewFilterManager) {}
+  constructor(
+    private viewFilterManager: ViewFilterManager,
+    private config: OmegaConfig,
+  ) {
+    // Set config for DataTransformer
+    DataTransformer.setConfig(config);
+  }
   /**
    * Process raw cycle data into nested structure
    * Business operation - coordinates pure transformation
@@ -132,6 +139,7 @@ export class CycleDataViewCoordinator {
  */
 export function createCycleDataViewCoordinator(
   viewFilterManager: ViewFilterManager,
+  config: OmegaConfig,
 ): CycleDataViewCoordinator {
-  return new CycleDataViewCoordinator(viewFilterManager);
+  return new CycleDataViewCoordinator(viewFilterManager, config);
 }

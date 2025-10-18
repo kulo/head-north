@@ -3,15 +3,9 @@ import {
   getLabelsWithPrefix,
 } from "./parse-common";
 import type { OmegaConfig } from "@omega/config";
-import type { ValidationItem } from "@omega/types";
 import type { JiraRoadmapItemData } from "../types";
 
 class LabelResolver {
-  private validationDictionary: Record<string, ValidationItem>;
-
-  constructor(validationDictionary: Record<string, ValidationItem>) {
-    this.validationDictionary = validationDictionary;
-  }
 
   static collectInitiative(
     project: JiraRoadmapItemData,
@@ -23,11 +17,10 @@ class LabelResolver {
     if (!initiative) {
       const isNonRoadmapTheme =
         this.parseTheme(project.labels) === "non-roadmap";
-      const validationDictionary = omegaConfig.getValidationDictionary();
-      const validations = isNonRoadmapTheme
+      const validationCodes = isNonRoadmapTheme
         ? []
-        : [validationDictionary.roadmapItem.missingInitiativeLabel];
-      return { value: fallbackInitiative, id: fallbackInitiative, validations };
+        : ["missingInitiativeLabel"];
+      return { value: fallbackInitiative, id: fallbackInitiative, validationCodes };
     }
 
     const translatedInitiative = translateLabelWithoutFallback(
@@ -40,15 +33,12 @@ class LabelResolver {
       return {
         value: initiative,
         id: initiative,
-        validations: [
-          omegaConfig
-            .getValidationDictionary()
-            .roadmapItem.missingInitiativeTranslation(initiative),
-        ],
+        validationCodes: ["missingInitiativeTranslation"],
+        validationParameter: initiative,
       };
     }
 
-    return { value: translatedInitiative, id: initiative, validations: [] };
+    return { value: translatedInitiative, id: initiative, validationCodes: [] };
   }
 
   static collectTheme(project: JiraRoadmapItemData, omegaConfig: OmegaConfig) {
@@ -56,9 +46,7 @@ class LabelResolver {
     if (!theme) {
       return {
         value: undefined,
-        validations: [
-          omegaConfig.getValidationDictionary().roadmapItem.missingThemeLabel,
-        ],
+        validationCodes: ["missingThemeLabel"],
       };
     }
 
@@ -70,15 +58,12 @@ class LabelResolver {
     if (!translatedTheme) {
       return {
         value: theme,
-        validations: [
-          omegaConfig
-            .getValidationDictionary()
-            .roadmapItem.missingThemeTranslation(theme),
-        ],
+        validationCodes: ["missingThemeTranslation"],
+        validationParameter: theme,
       };
     }
 
-    return { value: translatedTheme, validations: [] };
+    return { value: translatedTheme, validationCodes: [] };
   }
 
   static collectArea(project: JiraRoadmapItemData, omegaConfig: OmegaConfig) {
@@ -86,9 +71,7 @@ class LabelResolver {
     if (areaIds.length === 0) {
       return {
         value: [],
-        validations: [
-          omegaConfig.getValidationDictionary().roadmapItem.missingAreaLabel,
-        ],
+        validationCodes: ["missingAreaLabel"],
       };
     }
 
@@ -102,20 +85,24 @@ class LabelResolver {
       if (!translatedArea) {
         return {
           value: area,
-          validations: [
-            omegaConfig
-              .getValidationDictionary()
-              .roadmapItem.missingAreaTranslation(area),
-          ],
+          validationCodes: ["missingAreaTranslation"],
+          validationParameter: area,
         };
       }
 
-      return { value: translatedArea, validations: [] };
+      return { value: translatedArea, validationCodes: [] };
     });
+
+    const allValidationCodes = areas.map((area) => area.validationCodes).flat();
+    const validationParameters = areas
+      .filter((area) => area.validationParameter)
+      .map((area) => area.validationParameter)
+      .filter((param): param is string => param !== undefined);
 
     return {
       value: areas.map((area) => area.value).join(", "),
-      validations: areas.map((area) => area.validations).flat(),
+      validationCodes: allValidationCodes,
+      validationParameters,
     };
   }
 

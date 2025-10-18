@@ -6,7 +6,8 @@ import {
   translateLabelWithoutFallback,
 } from "./parse-common";
 import { resolveStage } from "./resolve-stage";
-import type { OmegaConfig, ValidationRule } from "@omega/config";
+import { createValidationItem, createParameterizedValidationItem } from "./validation-helper";
+import type { OmegaConfig } from "@omega/config";
 import type { ValidationItem } from "@omega/types";
 import type { JiraIssue, JiraSprint } from "../types";
 import type { ParsedReleaseItem } from "../types";
@@ -15,26 +16,11 @@ export class ReleaseItemParser {
   private sprint: JiraSprint;
   private omegaConfig: OmegaConfig;
   private labelTranslations: Record<string, Record<string, string>>;
-  private releaseItemValidation: Record<
-    string,
-    ValidationRule | ((team: string) => ValidationRule)
-  >;
 
   constructor(sprint: JiraSprint, omegaConfig: OmegaConfig) {
     this.sprint = sprint;
     this.omegaConfig = omegaConfig;
     this.labelTranslations = omegaConfig.getLabelTranslations();
-    this.releaseItemValidation =
-      omegaConfig.getValidationDictionary().releaseItem;
-  }
-
-  private convertToValidationItem(rule: ValidationRule): ValidationItem {
-    return {
-      id: rule.reference,
-      name: rule.label,
-      status: "error",
-      description: rule.reference,
-    };
   }
 
   parse(issue: JiraIssue): ParsedReleaseItem {
@@ -77,22 +63,14 @@ export class ReleaseItemParser {
     if (!estimate && estimate !== 0) {
       return {
         value: 0,
-        validations: [
-          this.convertToValidationItem(
-            this.releaseItemValidation.missingEstimate as ValidationRule,
-          ),
-        ],
+        validations: [createValidationItem(issue.key, "missingEstimate")],
       };
     }
 
     if (estimate % 0.5 !== 0) {
       return {
         value: estimate,
-        validations: [
-          this.convertToValidationItem(
-            this.releaseItemValidation.tooGranularEstimate as ValidationRule,
-          ),
-        ],
+        validations: [createValidationItem(issue.key, "tooGranularEstimate")],
       };
     }
 
@@ -106,11 +84,7 @@ export class ReleaseItemParser {
     if (!issue.fields.parent) {
       return {
         value: null,
-        validations: [
-          this.convertToValidationItem(
-            this.releaseItemValidation.noProjectId as ValidationRule,
-          ),
-        ],
+        validations: [createValidationItem(issue.key, "noProjectId")],
       };
     }
 
@@ -125,11 +99,7 @@ export class ReleaseItemParser {
     if (areaIds.length === 0) {
       return {
         value: [],
-        validations: [
-          this.convertToValidationItem(
-            this.releaseItemValidation.missingAreaLabel as ValidationRule,
-          ),
-        ],
+        validations: [createValidationItem(issue.key, "missingAreaLabel")],
       };
     }
 
@@ -145,11 +115,7 @@ export class ReleaseItemParser {
     if (teamLabels.length === 0) {
       return {
         value: [],
-        validations: [
-          this.convertToValidationItem(
-            this.releaseItemValidation.missingTeamLabel as ValidationRule,
-          ),
-        ],
+        validations: [createValidationItem(issue.key, "missingTeamLabel")],
       };
     }
 
@@ -162,15 +128,7 @@ export class ReleaseItemParser {
       if (!translatedTeam) {
         return {
           value: team,
-          validations: [
-            this.convertToValidationItem(
-              (
-                this.releaseItemValidation.missingTeamTranslation as (
-                  team: string,
-                ) => ValidationRule
-              )(team),
-            ),
-          ],
+          validations: [createParameterizedValidationItem(issue.key, "missingTeamTranslation", team)],
         };
       }
       return { value: translatedTeam, validations: [] };
@@ -197,11 +155,7 @@ export class ReleaseItemParser {
     if (!issue.fields.assignee) {
       return {
         value: issue.fields.reporter as unknown as Record<string, unknown>,
-        validations: [
-          this.convertToValidationItem(
-            this.releaseItemValidation.missingAssignee as ValidationRule,
-          ),
-        ],
+        validations: [createValidationItem(issue.key, "missingAssignee")],
       };
     }
     return {

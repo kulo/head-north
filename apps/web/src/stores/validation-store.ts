@@ -7,11 +7,13 @@
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
 import type { OmegaConfig } from "@omega/config";
+import type { ViewFilterManager } from "../services/view-filter-manager";
 
 export const useValidationStore = defineStore("validation", () => {
   // Inject services
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _config = inject<OmegaConfig>("config")!;
+  const filterManager = inject<ViewFilterManager>("filterManager")!;
 
   // State
   const validationEnabled = ref(false);
@@ -51,6 +53,16 @@ export const useValidationStore = defineStore("validation", () => {
 
   function toggleValidation() {
     validationEnabled.value = !validationEnabled.value;
+
+    // Update the filter to show/hide validation errors
+    try {
+      filterManager.updateFilter(
+        "showValidationErrors",
+        validationEnabled.value,
+      );
+    } catch (error) {
+      console.error("Failed to update validation filter:", error);
+    }
   }
 
   // Initialize validation from config
