@@ -1,0 +1,266 @@
+// Default JIRA Adapter
+// Handles standard JIRA setup: separate Roadmap Item and Release Item issue types
+
+import type { OmegaConfig } from "@omega/config";
+import type {
+  RawCycleData,
+  Cycle,
+  RoadmapItem,
+  ReleaseItem,
+  Area,
+  Team,
+  Initiative,
+  ValidationItem,
+} from "@omega/types";
+import type { JiraAdapter } from "./jira-adapter.interface";
+import {
+  JiraClient,
+  extractLabelsWithPrefix,
+  extractCustomField,
+  extractParent,
+  extractAssignee,
+  extractAllAssignees,
+  extractStageFromName,
+  extractProjectName,
+  jiraSprintToCycle,
+  mapJiraStatus,
+  createJiraUrl,
+  validateRequired,
+} from "@omega/jira-primitives";
+import type { JiraIssue } from "@omega/jira-primitives";
+
+export class DefaultJiraAdapter implements JiraAdapter {
+  constructor(
+    private jiraClient: JiraClient,
+    private config: OmegaConfig,
+  ) {}
+
+  async fetchCycleData(): Promise<RawCycleData> {
+    // 1. Fetch all JIRA data in parallel
+    const [sprints, roadmapIssues, releaseIssues] = await Promise.all([
+      this.jiraClient.getSprints(
+        this.config.getJiraConfig()?.connection?.boardId || 0,
+      ),
+      this.jiraClient.searchIssues('issuetype = "Roadmap Item"', [
+        "summary",
+        "labels",
+      ]),
+      this.jiraClient.searchIssues('issuetype = "Release Item"', ["*"]),
+    ]);
+
+    // 2. Transform sprints to cycles
+    const cycles = sprints.map(jiraSprintToCycle);
+
+    // 3. Transform issues to roadmap/release items
+    const roadmapItems = roadmapIssues.map((issue) =>
+      this.transformRoadmapItem(issue, releaseIssues),
+    );
+
+    const releaseItems = releaseIssues.map((issue) =>
+      this.transformReleaseItem(issue, cycles),
+    );
+
+    // 4. Extract metadata from all issues
+    const allIssues = [...roadmapIssues, ...releaseIssues];
+    const areas = this.extractAreas(allIssues);
+    const initiatives = this.extractInitiatives(allIssues);
+    const teams = this.extractTeams(allIssues);
+    const assignees = extractAllAssignees(allIssues);
+
+    return {
+      cycles,
+      roadmapItems,
+      releaseItems,
+      areas,
+      initiatives,
+      assignees,
+      stages: this.config.getStages(),
+      teams,
+    };
+  }
+
+  private transformRoadmapItem(
+    issue: JiraIssue,
+    releaseIssues: JiraIssue[],
+  ): RoadmapItem {
+    // Extract labels using primitives
+    const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
+    const themeLabel = extractLabelsWithPrefix(
+      issue.fields.labels,
+      "theme:",
+    )[0];
+    const initiativeLabel = extractLabelsWithPrefix(
+      issue.fields.labels,
+      "initiative:",
+    )[0];
+
+    // Translate labels using config
+    const area =
+      (areaLabels[0]
+        ? this.config.getLabelTranslations().areas[areaLabels[0]]
+        : undefined) ||
+      areaLabels[0] ||
+      "unknown";
+    const theme =
+      (themeLabel
+        ? this.config.getLabelTranslations().themes[themeLabel]
+        : undefined) ||
+      themeLabel ||
+      "unknown";
+    const initiative =
+      (initiativeLabel
+        ? this.config.getLabelTranslations().initiatives[initiativeLabel]
+        : undefined) ||
+      initiativeLabel ||
+      "unknown";
+
+    // Generate validations
+    const validations: ValidationItem[] = [
+      ...validateRequired(area, issue.key, "area"),
+      ...validateRequired(theme, issue.key, "theme"),
+      ...validateRequired(initiative, issue.key, "initiative"),
+    ];
+
+    // Parse project name
+    const name = extractProjectName(issue.fields.summary);
+
+    // Find related release items
+    const relatedReleaseItems = releaseIssues.filter(
+      (ri) => extractParent(ri) === issue.key,
+    );
+
+    // Determine owning team from release items
+    const teamLabels = relatedReleaseItems.flatMap((ri) =>
+      extractLabelsWithPrefix(ri.fields.labels, "team:"),
+    );
+    const owningTeamId = teamLabels[0] || "unknown";
+
+    return {
+      id: issue.key,
+      name,
+      summary: issue.fields.summary,
+      area: { id: areaLabels[0] || "unknown", name: area, teams: [] },
+      theme: { id: themeLabel || "unknown", name: theme },
+      initiativeId: initiativeLabel || null,
+      labels: issue.fields.labels,
+      validations,
+      owningTeam: {
+        id: owningTeamId,
+        name:
+          this.config.getLabelTranslations().teams[owningTeamId] ||
+          owningTeamId,
+      },
+      url: createJiraUrl(
+        issue.key,
+        this.config.getJiraConfig()?.connection?.host || "",
+      ),
+      isExternal: false, // Will be determined by business logic
+    };
+  }
+
+  private transformReleaseItem(issue: JiraIssue, cycles: Cycle[]): ReleaseItem {
+    // Extract effort from custom field
+    const effort = extractCustomField<number>(issue, "customfield_10002") || 0;
+
+    // Extract labels
+    const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
+    const teamLabels = extractLabelsWithPrefix(issue.fields.labels, "team:");
+
+    // Extract stage from name
+    const stage = extractStageFromName(issue.fields.summary);
+
+    // Map status
+    const status = mapJiraStatus(
+      issue.fields.status,
+      this.config.getJiraConfig()?.statusMappings || {},
+      this.config.getItemStatusValues().TODO,
+    );
+
+    // Extract assignee
+    const assignee = extractAssignee(issue) || {};
+
+    // Extract parent (roadmapItemId)
+    const roadmapItemId = extractParent(issue);
+
+    // Extract cycleId from sprint
+    const cycleId = issue.fields.sprint?.id?.toString() || "";
+
+    // Find cycle name
+    const cycle = cycles.find((c) => c.id === cycleId);
+
+    // Generate validations
+    const validations: ValidationItem[] = [
+      ...validateRequired(effort, issue.key, "effort"),
+      ...validateRequired(areaLabels[0], issue.key, "area"),
+      ...validateRequired(teamLabels[0], issue.key, "team"),
+    ];
+
+    return {
+      id: issue.key,
+      ticketId: issue.key,
+      effort,
+      name: issue.fields.summary,
+      areaIds: areaLabels,
+      teams: teamLabels,
+      status,
+      url: createJiraUrl(
+        issue.key,
+        this.config.getJiraConfig()?.connection?.host || "",
+      ),
+      isExternal: false, // Will be determined by business logic
+      stage,
+      assignee,
+      validations,
+      roadmapItemId: roadmapItemId || "",
+      cycleId,
+      cycle: cycle ? { id: cycle.id, name: cycle.name } : { id: "", name: "" },
+      created: issue.fields.created || new Date().toISOString(),
+      updated: issue.fields.updated || new Date().toISOString(),
+    };
+  }
+
+  private extractAreas(allIssues: JiraIssue[]): Record<string, Area> {
+    const areaLabels = new Set(
+      allIssues.flatMap((issue) =>
+        extractLabelsWithPrefix(issue.fields.labels, "area:"),
+      ),
+    );
+
+    const areas: Record<string, Area> = {};
+    areaLabels.forEach((label) => {
+      areas[label] = {
+        id: label,
+        name: this.config.getLabelTranslations().areas[label] || label,
+        teams: [], // Will be populated elsewhere
+      };
+    });
+
+    return areas;
+  }
+
+  private extractInitiatives(allIssues: JiraIssue[]): Initiative[] {
+    const initiativeLabels = new Set(
+      allIssues.flatMap((issue) =>
+        extractLabelsWithPrefix(issue.fields.labels, "initiative:"),
+      ),
+    );
+
+    return Array.from(initiativeLabels).map((label) => ({
+      id: label,
+      name: this.config.getLabelTranslations().initiatives[label] || label,
+    }));
+  }
+
+  private extractTeams(allIssues: JiraIssue[]): Team[] {
+    const teamLabels = new Set(
+      allIssues.flatMap((issue) =>
+        extractLabelsWithPrefix(issue.fields.labels, "team:"),
+      ),
+    );
+
+    return Array.from(teamLabels).map((label) => ({
+      id: label,
+      name: this.config.getLabelTranslations().teams[label] || label,
+    }));
+  }
+}

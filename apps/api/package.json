@@ -9,6 +9,7 @@
     "@koa/router": "^12.0.0",
     "@omega/utils": "file:../../packages/utils",
     "@omega/config": "file:../../packages/config",
+    "@omega/jira-primitives": "file:../../packages/jira-primitives",
     "@omega/types": "file:../../packages/types",
     "axios": "^1.6.0",
     "jira.js": "^5.2.2",

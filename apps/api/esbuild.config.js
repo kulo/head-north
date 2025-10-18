@@ -23,6 +23,7 @@ const config = {
     "@omega/config",
     "@omega/types",
     "@omega/utils",
+    "@omega/jira-primitives",
   ],
   sourcemap: true,
   minify: false,

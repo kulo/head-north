@@ -1,3 +1,5 @@
+// Legacy JiraAPI - DEPRECATED
+// Use JiraClient from @omega/jira-primitives instead
 import { AgileClient } from "jira.js";
 import _ from "lodash";
 import type { OmegaConfig } from "@omega/config";
@@ -8,8 +10,10 @@ import type {
   JiraRoadmapItemsData,
 } from "../types/jira-types";
 import type { ISODateString } from "@omega/types";
-// import type { ApiResponse } from "../types/api-response-types";
 
+/**
+ * @deprecated Use JiraClient from @omega/jira-primitives instead
+ */
 class JiraAPI {
   private omegaConfig: OmegaConfig;
   private _client: AgileClient;
@@ -39,8 +43,7 @@ class JiraAPI {
   }
 
   /**
-   * Get all sprints data (raw from Jira)
-   * @returns Raw sprint data
+   * @deprecated Use JiraClient.getSprints() instead
    */
   async getSprintsData(): Promise<JiraSprintsData> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
@@ -58,8 +61,7 @@ class JiraAPI {
   }
 
   /**
-   * Get roadmap items data (raw from Jira)
-   * @returns Raw roadmap items data
+   * @deprecated Use JiraClient.searchIssues() instead
    */
   async getRoadmapItemsData(): Promise<JiraRoadmapItemsData> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
@@ -67,7 +69,7 @@ class JiraAPI {
       boardId: jiraConfig?.connection?.boardId || 0,
       maxResults: jiraConfig?.limits?.maxResults || 100,
       jql: 'issuetype = "Roadmap Item"',
-      fields: ["summary", "labels"], // Using generic field names for now
+      fields: ["summary", "labels"],
     });
 
     const roadmapItemData = response.issues.map((issue) => ({
@@ -81,8 +83,7 @@ class JiraAPI {
   }
 
   /**
-   * Get release items data (raw from Jira)
-   * @returns Raw release items data
+   * @deprecated Use JiraClient.searchIssues() instead
    */
   async getReleaseItemsData(): Promise<JiraIssue[]> {
     const jiraConfig = this.omegaConfig.getJiraConfig();
@@ -183,8 +184,8 @@ class JiraAPI {
         parent: _.get(issue, "fields.parent.key"),
         status: _.get(issue, "fields.status")?.name || "",
         sprint: _.get(issue, "fields.sprint"),
-        roadmapItemId: _.get(issue, "fields.parent.key"), // Foreign key
-        cycleId: _.get(issue, "fields.sprint.id") || "", // Foreign key
+        roadmapItemId: _.get(issue, "fields.parent.key"),
+        cycleId: _.get(issue, "fields.sprint.id") || "",
       }))
       .filter((x) => !!x.parent)
       .filter(
@@ -200,10 +201,7 @@ class JiraAPI {
   }
 
   /**
-   * Get issues for a specific sprint (raw from Jira)
-   * @param sprintId - Sprint ID
-   * @param extraFields - Additional fields to fetch
-   * @returns Raw issues data
+   * @deprecated Use JiraClient.getIssuesForSprint() instead
    */
   async getIssuesForSprint(
     sprintId: string | number,

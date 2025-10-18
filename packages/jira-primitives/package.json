@@ -1,0 +1,38 @@
+{
+  "name": "@omega/jira-primitives",
+  "version": "1.0.0",
+  "description": "JIRA data extraction and transformation utilities for Omega",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:@omega/config --external:@omega/types --external:jira.js --external:lodash",
+    "build:types": "tsc --project tsconfig.declaration.json",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "lint": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@omega/config": "file:../config",
+    "@omega/types": "file:../types",
+    "jira.js": "^3.0.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.195",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ]
+}
