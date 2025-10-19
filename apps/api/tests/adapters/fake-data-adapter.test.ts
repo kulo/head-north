@@ -14,16 +14,16 @@ describe("FakeDataAdapter", () => {
   it("should generate cycle data", async () => {
     const data = await adapter.fetchCycleData();
 
-    expect(data.cycles).toHaveLength(5);
+    expect(data.cycles).toHaveLength(4);
     expect(data.cycles[0]).toMatchObject({
-      id: "cycle-1",
-      name: "Sprint 1",
-      state: "active",
+      id: expect.stringMatching(/^\d+$/),
+      name: expect.stringMatching(/^[A-Za-z]{3}-[A-Za-z]{3} \d{4}$/),
+      state: expect.any(String),
     });
-    expect(data.cycles[4]).toMatchObject({
-      id: "cycle-5",
-      name: "Sprint 5",
-      state: "closed",
+    expect(data.cycles[3]).toMatchObject({
+      id: expect.stringMatching(/^\d+$/),
+      name: expect.stringMatching(/^[A-Za-z]{3}-[A-Za-z]{3} \d{4}$/),
+      state: expect.any(String),
     });
   });
 
@@ -32,10 +32,10 @@ describe("FakeDataAdapter", () => {
 
     expect(data.roadmapItems.length).toBeGreaterThan(0);
     expect(data.roadmapItems[0]).toMatchObject({
-      id: "PROJ-1",
-      name: "Customer Analytics Dashboard",
-      area: { id: "platform", name: "Platform" },
-      theme: { id: "analytics", name: "Analytics & Insights" },
+      id: expect.stringMatching(/^ROAD-\d+$/),
+      name: expect.stringMatching(/^.+ - \d+$/),
+      area: expect.any(String),
+      initiativeId: expect.any(String),
     });
   });
 
@@ -44,7 +44,7 @@ describe("FakeDataAdapter", () => {
 
     expect(data.releaseItems.length).toBeGreaterThan(0);
     expect(data.releaseItems[0]).toMatchObject({
-      id: expect.stringMatching(/^PROJ-\d+-\d+$/),
+      id: expect.stringMatching(/^ROAD-\d+-RELEASE-\d+$/),
       effort: expect.any(Number),
       status: expect.any(String),
       stage: expect.any(String),

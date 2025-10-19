@@ -174,7 +174,7 @@ export class FakeDataAdapter implements JiraAdapter {
     let roadmapItemCounter = 1;
 
     // Generate roadmap items for each initiative (1-5 items per initiative)
-    this.initiatives.forEach((initiative, initiativeIndex) => {
+    this.initiatives.forEach((initiative, _initiativeIndex) => {
       // Generate between 1 and 5 roadmap items per initiative
       const numRoadmapItems = Math.floor(Math.random() * 5) + 1; // 1-5 items
 
