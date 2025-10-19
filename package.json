@@ -131,8 +131,8 @@
     "node",
     "koa"
   ],
-  "author": "Prewave Team",
-  "license": "UNLICENSED",
+  "author": "Michael Wagner-Kulovits",
+  "license": "MIT",
   "dependencies": {
     "vue": "^3.5.21"
   }
