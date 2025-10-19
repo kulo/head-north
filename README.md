@@ -1,16 +1,63 @@
 # Omega One - Development Cycle Dashboard
 
-_Omega_ is a visualisation tool or dashboard for product development organisations that work in common cadence via high-level iterations called "development cycles" or just "cycles".
+_Omega_ is a visualisation tool or dashboard for product development organisations that work in a common cadence via high-level iterations called "development cycles" or just "cycles".
 
-_Omega_ provides a _Cycle Overview_ screen which shows the current progress or latest status of any completed, currently active for future planned cycle and contains all kinds of items teams plan into their cycles.
+Omega provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making.
 
-The _Roadmap_ view visualises all customer-facing items for the last completed, the currently active and the next two upcoming cycles – while omitting any kind of non-customer-facing items.
+## 🎯 Core Concepts
 
-## 🏗️ Architecture & Structure
+Omega organizes product development around several key concepts that work together to provide comprehensive visibility into your development process:
 
-_Omega_ consists of two processes: First, a web application user interface which is visualising the cycle data and, second, a backend API service which is collecting and preparing said cycle data from a correspondingly configured source like a jira project.
+### Development Cycles
 
-Both these apps are part of a 'monorepo' with the following structure:
+High-level iterations that represent major development phases. Each cycle typically spans several weeks and contains multiple work items. Cycles are mapped to JIRA Sprints and provide the primary timeline structure for planning and tracking progress.
+
+### Roadmap Items
+
+Customer-facing features or capabilities that represent value delivered to end users. These are the high-level items that appear on product roadmaps and are typically planned across multiple cycles. Roadmap items serve as the primary organizing principle for customer-facing work and might or might not be mapped to dedicated JIRA issue types.
+
+### Release Items
+
+Concrete work packages that implement roadmap items. These usually group togehter one or more epics from one or more teams that work on the same topicwithin a specific cycle. Release items are linked to their parent roadmap items and represent the granular work that moves roadmap items toward completion.
+
+### Product Areas
+
+Organizational units that group related functionality or business domains (e.g., "Frontend", "Backend", "Mobile", "Analytics"). Areas help organize work and provide visibility into how different parts of the product are progressing across cycles. Another word often used for product areas are Tribes (stemming from the "Spotify Model").
+
+### Teams
+
+Development teams responsible for delivering work. Teams are assigned to release items and provide accountability and resource planning visibility. Team assignments help track capacity and identify bottlenecks.
+
+### Assignees
+
+Individual contributors assigned to specific release items. Assignee information provides granular visibility into individual workloads and helps with capacity planning and knowledge distribution.
+
+### Initiatives
+
+Strategic programs or themes that span multiple roadmap items and cycles. Initiatives represent larger business objectives and help align individual roadmap items with broader organizational goals.
+
+### Release Stages
+
+The current state of roadmap items in the development process (e.g., "Discovery", "Development", "Testing", "Released"). Release stages provide status visibility and help track progress from conception to delivery.
+
+## 📊 Views & Dashboards
+
+_Omega_ provides two main views:
+
+- **Cycle Overview**: Shows the current progress and status of completed, active, and planned cycles, containing all work packages that teams have planned into their cycles.
+
+- **Roadmap View**: Visualizes all customer-facing roadmap items for the last completed, currently active, and next two upcoming cycles – while omitting non-customer-facing items to focus on user value delivery.
+
+## 🏗️ Architecture & Repository Structure
+
+_Omega_ is built as a modern web application with a clear separation between data collection, processing, and visualization. The system consists of:
+
+1. **Web Application**: A Vue.js frontend that provides interactive dashboards for cycle visualization and roadmap planning
+2. **API Service**: A Node.js/Koa backend that collects, transforms, and serves cycle data through RESTful endpoints
+3. **Data Adapters**: Flexible integration layer that connects to external data sources (primarily JIRA) and transforms raw data into Omega's standardized domain model
+4. **Shared Packages**: Common TypeScript types, utilities, and configuration shared across the entire application
+
+The architecture follows a **monorepo structure** with the following organization:
 
 ```
 omega-one/
@@ -20,7 +67,8 @@ omega-one/
 ├── packages/
 │   ├── types/         # Shared TypeScript types and interfaces
 │   ├── utils/         # Shared utility functions (logging)
-│   └── config/        # Shared configuration files
+│   ├── config/        # Shared configuration files
+│   └── jira-primitives/ # JIRA data transformation utilities
 ├── tools/
 │   ├── eslint-config/ # Shared ESLint configuration
 │   ├── prettier-config/ # Shared Prettier configuration
@@ -32,6 +80,27 @@ omega-one/
 ├── package.json       # Root package.json with workspace configuration
 └── README.md          # This file
 ```
+
+## 🔌 Data Source Adapter Architecture
+
+Omega's default data source is **JIRA** with a specific model that maps Omega's internal domain model 1:1 to JIRA concepts:
+
+- **Roadmap Items** → JIRA issue type "Roadmap Item"
+- **Release Items** → JIRA issue type "Release Item"
+- **Cycles** → JIRA Sprints
+- **Metadata** (areas, teams, release stages, etc.) → Fields within these issue types
+
+This direct mapping allows for straightforward data transformation and ensures consistency between your JIRA setup and Omega's visualization.
+
+### Customization Options
+
+You have two main approaches:
+
+1. **Use the Default Adapter**: Model your JIRA setup to fit Omega's expected structure (separate issue types, label-based metadata, etc.)
+
+2. **Create a Custom Adapter**: If you already have a different JIRA setup or prefer a different structure, you can create your own data adapter. The `@omega/jira-primitives` package provides reusable utilities for JIRA data transformation, validation, and API interaction to simplify this process.
+
+For detailed information about creating custom adapters, see the [JIRA Adapters documentation](apps/api/src/adapters/README.md).
 
 ## 🚀 Quick Start
 
@@ -135,6 +204,16 @@ Shared utility functions used by both web app and API service applications. Curr
 - **Page definitions and routing** - Centralized page configuration for the frontend
 - **Filter system configuration** - Type-safe filter definitions and validation rules
 
+### JIRA Primitives (`@omega/jira-primitives`)
+
+Specialized utilities for JIRA data transformation and validation. Provides reusable building blocks for creating custom JIRA adapters:
+
+- **Data Extractors**: Extract metadata from JIRA issues (labels, custom fields, etc.)
+- **Transformers**: Convert JIRA objects to Omega domain objects
+- **Validators**: Validate data quality and create validation reports
+- **JIRA Client**: Standardized JIRA API client with authentication
+- **Type Definitions**: JIRA-specific TypeScript types and interfaces
+
 ## 📦 Package Usage Examples
 
 ```typescript
@@ -146,6 +225,13 @@ import { logger } from "@omega/utils";
 
 // Import configuration
 import { OmegaConfig } from "@omega/config";
+
+// Import JIRA primitives for adapter development
+import {
+  extractLabelsWithPrefix,
+  jiraSprintToCycle,
+  JiraClient,
+} from "@omega/jira-primitives";
 ```
 
 ### Tools
