@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:@omega/config --external:@omega/types --external:jira.js --external:lodash",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:@omega/config --external:@omega/types --external:jira.js --external:lodash",
     "build:types": "tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "test": "vitest run",

@@ -3,7 +3,6 @@ import {
   jiraSprintToCycle,
   mapJiraStatus,
   createJiraUrl,
-  transformToISODateString,
 } from "../src/transformers";
 import type { JiraSprint, JiraStatus } from "../src/types";
 
@@ -103,28 +102,6 @@ describe("transformers", () => {
     it("should return fallback URL when no host", () => {
       const result = createJiraUrl("TEST-1", "");
       expect(result).toBe("https://example.com/browse/TEST-1");
-    });
-  });
-
-  describe("transformToISODateString", () => {
-    it("should transform valid date string", () => {
-      const result = transformToISODateString("2024-01-15T10:30:00.000Z");
-      expect(result).toBe("2024-01-15");
-    });
-
-    it("should handle date without time", () => {
-      const result = transformToISODateString("2024-01-15");
-      expect(result).toBe("2024-01-15");
-    });
-
-    it("should return fallback for invalid date", () => {
-      const result = transformToISODateString("invalid-date");
-      expect(result).toBe("1970-01-01");
-    });
-
-    it("should return fallback for empty string", () => {
-      const result = transformToISODateString("");
-      expect(result).toBe("1970-01-01");
     });
   });
 });
