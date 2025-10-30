@@ -43,6 +43,28 @@ const parseEffort = (item: ReleaseItem): number =>
     .orDefault(0);
 
 /**
+ * Helper: Calculate sum of efforts for items matching a predicate
+ * Pure functional composition for repeated pattern
+ */
+const sumEfforts = (
+  items: readonly ReleaseItem[],
+  predicate?: (item: ReleaseItem) => boolean,
+): number => {
+  const filteredItems = predicate ? items.filter(predicate) : items;
+  return roundToTwoDigit(
+    filteredItems.map(parseEffort).reduce((acc, effort) => acc + effort, 0),
+  );
+};
+
+/**
+ * Helper: Count items matching a predicate
+ */
+const countItems = <T>(
+  items: readonly T[],
+  predicate: (item: T) => boolean,
+): number => items.filter(predicate).length;
+
+/**
  * Calculate progress metrics for release items
  * @param {ReleaseItem[]} releaseItems - Array of release items
  * @returns {ProgressMetrics} Progress metrics
@@ -69,54 +91,37 @@ export const calculateReleaseItemProgress = (
   }
 
   // Filter out REPLANNED items for count calculation (functional with readonly)
-  const nonReplannedItems = releaseItems.filter(
-    (item) => normalizeStatus(item.status) !== STATUS.REPLANNED,
-  );
+  const isNotReplanned = (item: ReleaseItem): boolean =>
+    normalizeStatus(item.status) !== STATUS.REPLANNED;
+  const nonReplannedItems = releaseItems.filter(isNotReplanned);
 
-  // Calculate total weeks from non-replanned items using functional reduce
-  const weeks = roundToTwoDigit(
-    nonReplannedItems.map(parseEffort).reduce((acc, effort) => acc + effort, 0),
-  );
+  // Calculate total weeks from non-replanned items using functional helper
+  const weeks = sumEfforts(nonReplannedItems);
 
   // Count release items
   const releaseItemsCount = nonReplannedItems.length;
 
-  // Calculate weeks by status using functional operations
-  const completedItems = releaseItems.filter((item) =>
-    isCompletedStatus(normalizeStatus(item.status)),
-  );
-  const weeksDone = completedItems
-    .map(parseEffort)
-    .reduce((acc, effort) => acc + effort, 0);
-  const releaseItemsDoneCount = completedItems.length;
+  // Calculate weeks by status using functional composition helpers
+  const isCompleted = (item: ReleaseItem): boolean =>
+    isCompletedStatus(normalizeStatus(item.status));
+  const weeksDone = sumEfforts(releaseItems, isCompleted);
+  const releaseItemsDoneCount = countItems(releaseItems, isCompleted);
 
-  const inProgressItems = releaseItems.filter((item) =>
-    isInProgressStatus(normalizeStatus(item.status)),
-  );
-  const weeksInProgress = inProgressItems
-    .map(parseEffort)
-    .reduce((acc, effort) => acc + effort, 0);
+  const isInProgress = (item: ReleaseItem): boolean =>
+    isInProgressStatus(normalizeStatus(item.status));
+  const weeksInProgress = sumEfforts(releaseItems, isInProgress);
 
-  const todoItems = releaseItems.filter(
-    (item) => normalizeStatus(item.status) === STATUS.TODO,
-  );
-  const weeksTodo = todoItems
-    .map(parseEffort)
-    .reduce((acc, effort) => acc + effort, 0);
+  const isTodo = (item: ReleaseItem): boolean =>
+    normalizeStatus(item.status) === STATUS.TODO;
+  const weeksTodo = sumEfforts(releaseItems, isTodo);
 
-  const postponedItems = releaseItems.filter(
-    (item) => normalizeStatus(item.status) === STATUS.POSTPONED,
-  );
-  const weeksPostponed = postponedItems
-    .map(parseEffort)
-    .reduce((acc, effort) => acc + effort, 0);
+  const isPostponed = (item: ReleaseItem): boolean =>
+    normalizeStatus(item.status) === STATUS.POSTPONED;
+  const weeksPostponed = sumEfforts(releaseItems, isPostponed);
 
-  const cancelledItems = releaseItems.filter(
-    (item) => normalizeStatus(item.status) === STATUS.CANCELLED,
-  );
-  const weeksCancelled = cancelledItems
-    .map(parseEffort)
-    .reduce((acc, effort) => acc + effort, 0);
+  const isCancelled = (item: ReleaseItem): boolean =>
+    normalizeStatus(item.status) === STATUS.CANCELLED;
+  const weeksCancelled = sumEfforts(releaseItems, isCancelled);
 
   const weeksNotToDo = weeksPostponed + weeksCancelled;
 
@@ -234,42 +239,29 @@ export const aggregateProgressMetrics = (
     };
   }
 
-  // Aggregate all numeric fields using functional reduce (readonly arrays work fine)
-  const weeks = normalize(
-    metricsArray.map((m) => m.weeks || 0).reduce((acc, val) => acc + val, 0),
-  );
+  /**
+   * Helper: Sum a field from all metrics
+   */
+  const sumField = (
+    field: keyof ProgressMetrics,
+    useNormalize = false,
+  ): number => {
+    const sum = metricsArray
+      .map((m) => (m[field] as number) || 0)
+      .reduce((acc, val) => acc + val, 0);
+    return useNormalize ? normalize(sum) : sum;
+  };
 
-  const weeksDone = metricsArray
-    .map((m) => m.weeksDone || 0)
-    .reduce((acc, val) => acc + val, 0);
-
-  const weeksInProgress = metricsArray
-    .map((m) => m.weeksInProgress || 0)
-    .reduce((acc, val) => acc + val, 0);
-
-  const weeksTodo = metricsArray
-    .map((m) => m.weeksTodo || 0)
-    .reduce((acc, val) => acc + val, 0);
-
-  const weeksNotToDo = metricsArray
-    .map((m) => m.weeksNotToDo || 0)
-    .reduce((acc, val) => acc + val, 0);
-
-  const weeksCancelled = metricsArray
-    .map((m) => m.weeksCancelled || 0)
-    .reduce((acc, val) => acc + val, 0);
-
-  const weeksPostponed = metricsArray
-    .map((m) => m.weeksPostponed || 0)
-    .reduce((acc, val) => acc + val, 0);
-
-  const releaseItemsCount = metricsArray
-    .map((m) => m.releaseItemsCount || 0)
-    .reduce((acc, val) => acc + val, 0);
-
-  const releaseItemsDoneCount = metricsArray
-    .map((m) => m.releaseItemsDoneCount || 0)
-    .reduce((acc, val) => acc + val, 0);
+  // Aggregate all numeric fields using functional helper
+  const weeks = sumField("weeks", true);
+  const weeksDone = sumField("weeksDone");
+  const weeksInProgress = sumField("weeksInProgress");
+  const weeksTodo = sumField("weeksTodo");
+  const weeksNotToDo = sumField("weeksNotToDo");
+  const weeksCancelled = sumField("weeksCancelled");
+  const weeksPostponed = sumField("weeksPostponed");
+  const releaseItemsCount = sumField("releaseItemsCount");
+  const releaseItemsDoneCount = sumField("releaseItemsDoneCount");
 
   // Calculate percentages
   const progress =
