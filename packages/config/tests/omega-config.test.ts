@@ -151,11 +151,6 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
       config = new OmegaConfig({ overrides: { environment: "test" } });
     });
 
-    it("should set and get custom configuration", () => {
-      config.set("customKey", "customValue");
-      expect(config.get("customKey")).toBe("customValue");
-    });
-
     it("should return undefined for non-existent keys", () => {
       expect(config.get("nonExistentKey")).toBeUndefined();
     });

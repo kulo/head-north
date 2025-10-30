@@ -19,9 +19,9 @@ import type {
 
 // Page type is now defined locally
 export interface Page {
-  id: string;
-  name: string;
-  path: string;
+  readonly id: string;
+  readonly name: string;
+  readonly path: string;
 }
 
 // ============================================================================
@@ -29,10 +29,10 @@ export interface Page {
 // ============================================================================
 
 export interface RoadmapData {
-  orderedCycles: Cycle[];
-  roadmapItems: RoadmapItem[];
-  activeCycle: Cycle | null;
-  initiatives?: InitiativeWithProgress[];
+  readonly orderedCycles: readonly Cycle[];
+  readonly roadmapItems: readonly RoadmapItem[];
+  readonly activeCycle: Cycle | null;
+  readonly initiatives?: readonly InitiativeWithProgress[];
 }
 
 // ============================================================================
@@ -46,24 +46,24 @@ export interface RoadmapData {
  * both progress calculations and contextual cycle information.
  */
 export interface ProgressWithinCycle {
-  progress: number;
-  progressWithInProgress: number;
-  progressByReleaseItems: number;
-  weeks: number;
-  weeksDone: number;
-  weeksInProgress: number;
-  weeksNotToDo: number;
-  weeksCancelled: number;
-  weeksPostponed: number;
-  weeksTodo: number;
-  releaseItemsCount: number;
-  releaseItemsDoneCount: number;
-  percentageNotToDo: number;
-  startMonth: string;
-  endMonth: string;
-  daysFromStartOfCycle: number;
-  daysInCycle: number;
-  currentDayPercentage: number;
+  readonly progress: number;
+  readonly progressWithInProgress: number;
+  readonly progressByReleaseItems: number;
+  readonly weeks: number;
+  readonly weeksDone: number;
+  readonly weeksInProgress: number;
+  readonly weeksNotToDo: number;
+  readonly weeksCancelled: number;
+  readonly weeksPostponed: number;
+  readonly weeksTodo: number;
+  readonly releaseItemsCount: number;
+  readonly releaseItemsDoneCount: number;
+  readonly percentageNotToDo: number;
+  readonly startMonth: string;
+  readonly endMonth: string;
+  readonly daysFromStartOfCycle: number;
+  readonly daysInCycle: number;
+  readonly currentDayPercentage: number;
 }
 
 // Cycle with calculated progress data - extends core cycle
@@ -84,11 +84,11 @@ export interface RoadmapItemWithProgress
  * days elapsed, and percentage completion within the cycle timeframe.
  */
 export interface CycleMetadata {
-  startMonth: string;
-  endMonth: string;
-  daysFromStartOfCycle: number;
-  daysInCycle: number;
-  currentDayPercentage: number;
+  readonly startMonth: string;
+  readonly endMonth: string;
+  readonly daysFromStartOfCycle: number;
+  readonly daysInCycle: number;
+  readonly currentDayPercentage: number;
 }
 
 /**
@@ -98,19 +98,19 @@ export interface CycleMetadata {
  * without the overhead of cycle-specific metadata like dates and months.
  */
 export interface ProgressMetrics {
-  progress: number;
-  progressWithInProgress: number;
-  progressByReleaseItems: number;
-  weeks: number;
-  weeksDone: number;
-  weeksInProgress: number;
-  weeksNotToDo: number;
-  weeksCancelled: number;
-  weeksPostponed: number;
-  weeksTodo: number;
-  releaseItemsCount: number;
-  releaseItemsDoneCount: number;
-  percentageNotToDo: number;
+  readonly progress: number;
+  readonly progressWithInProgress: number;
+  readonly progressByReleaseItems: number;
+  readonly weeks: number;
+  readonly weeksDone: number;
+  readonly weeksInProgress: number;
+  readonly weeksNotToDo: number;
+  readonly weeksCancelled: number;
+  readonly weeksPostponed: number;
+  readonly weeksTodo: number;
+  readonly releaseItemsCount: number;
+  readonly releaseItemsDoneCount: number;
+  readonly percentageNotToDo: number;
 }
 
 /**
@@ -121,7 +121,7 @@ export interface ProgressMetrics {
  * views work with, ensuring consistent filtering across the application.
  */
 export interface NestedCycleData {
-  initiatives: InitiativeWithProgress[];
+  readonly initiatives: readonly InitiativeWithProgress[];
 }
 
 /**
@@ -130,19 +130,19 @@ export interface NestedCycleData {
  * calculated progress metrics for the cycle overview view.
  */
 export interface CycleOverviewData extends NestedCycleData {
-  cycle: Cycle;
+  readonly cycle: Cycle;
 }
 
 export interface StoreState {
-  loading: boolean;
-  error: string | null;
-  validationEnabled: boolean;
-  pages: Page[];
-  currentPage: string;
-  rawData: CycleData | null;
-  processedData: NestedCycleData | null;
-  filters: ViewFilterCriteria;
-  validationSummary: Record<string, unknown>[];
+  readonly loading: boolean;
+  readonly error: string | null;
+  readonly validationEnabled: boolean;
+  readonly pages: readonly Page[];
+  readonly currentPage: string;
+  readonly rawData: CycleData | null;
+  readonly processedData: NestedCycleData | null;
+  readonly filters: ViewFilterCriteria;
+  readonly validationSummary: readonly Readonly<Record<string, unknown>>[];
 }
 
 // ============================================================================
@@ -155,12 +155,12 @@ export interface StoreState {
  * Uses strong domain types for better type safety
  */
 export interface FilterCriteria {
-  area?: AreaId;
-  initiatives?: InitiativeId[];
-  stages?: StageId[];
-  assignees?: PersonId[];
-  cycle?: CycleId;
-  showValidationErrors?: boolean;
+  readonly area?: AreaId;
+  readonly initiatives?: readonly InitiativeId[];
+  readonly stages?: readonly StageId[];
+  readonly assignees?: readonly PersonId[];
+  readonly cycle?: CycleId;
+  readonly showValidationErrors?: boolean;
 }
 
 /**
@@ -169,27 +169,27 @@ export interface FilterCriteria {
  */
 export interface ViewFilterCriteria {
   // Common filters (shared between all views)
-  common: {
-    area?: AreaId;
-    initiatives?: InitiativeId[];
+  readonly common: {
+    readonly area?: AreaId;
+    readonly initiatives?: readonly InitiativeId[];
   };
   // Cycle overview specific filters
-  cycleOverview: {
-    stages?: StageId[];
-    assignees?: PersonId[];
-    cycle?: CycleId;
+  readonly cycleOverview: {
+    readonly stages?: readonly StageId[];
+    readonly assignees?: readonly PersonId[];
+    readonly cycle?: CycleId;
   };
   // Roadmap specific filters (currently none, but extensible)
-  roadmap: Record<string, never>;
+  readonly roadmap: Readonly<Record<string, never>>;
 }
 
 /**
  * Filter result containing both the filtered data and metadata
  */
 export interface FilterResult {
-  data: NestedCycleData;
-  appliedFilters: FilterCriteria;
-  totalInitiatives: number;
-  totalRoadmapItems: number;
-  totalReleaseItems: number;
+  readonly data: NestedCycleData;
+  readonly appliedFilters: FilterCriteria;
+  readonly totalInitiatives: number;
+  readonly totalRoadmapItems: number;
+  readonly totalReleaseItems: number;
 }

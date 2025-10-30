@@ -16,19 +16,19 @@ export type PersonId = string;
 export type ProjectId = string;
 
 export interface Area {
-  id: AreaId;
-  name: string;
-  teams: Team[];
+  readonly id: AreaId;
+  readonly name: string;
+  readonly teams: readonly Team[];
 }
 
 export interface Team {
-  id: TeamId;
-  name: string;
+  readonly id: TeamId;
+  readonly name: string;
 }
 
 export interface Person {
-  id: PersonId;
-  name: string;
+  readonly id: PersonId;
+  readonly name: string;
 }
 
 // ============================================================================
@@ -49,66 +49,66 @@ export type ISODateString = `${number}-${number}-${number}`;
 
 // Core cycle - immutable properties
 export interface Cycle {
-  id: CycleId;
-  name: string;
-  start: ISODateString;
-  end: ISODateString;
-  delivery: ISODateString;
-  state: CycleState;
+  readonly id: CycleId;
+  readonly name: string;
+  readonly start: ISODateString;
+  readonly end: ISODateString;
+  readonly delivery: ISODateString;
+  readonly state: CycleState;
 }
 
 export interface Initiative {
-  id: InitiativeId;
-  name: string;
-  roadmapItems?: RoadmapItem[];
+  readonly id: InitiativeId;
+  readonly name: string;
+  readonly roadmapItems?: readonly RoadmapItem[];
 }
 
 export interface RoadmapItem {
-  id: RoadmapItemId;
-  name: string;
-  summary: string;
-  area?: string | Area;
-  theme?: string | Record<string, unknown>;
-  initiative?: Record<string, unknown>;
-  initiativeId?: InitiativeId | null;
-  isExternal?: boolean;
-  owningTeam?: Team;
-  url?: string;
-  validations?: ValidationItem[];
-  releaseItems?: ReleaseItem[];
-  labels: string[];
-  startDate?: ISODateString;
-  endDate?: ISODateString;
+  readonly id: RoadmapItemId;
+  readonly name: string;
+  readonly summary: string;
+  readonly area?: string | Area;
+  readonly theme?: string | Readonly<Record<string, unknown>>;
+  readonly initiative?: Readonly<Record<string, unknown>>;
+  readonly initiativeId?: InitiativeId | null;
+  readonly isExternal?: boolean;
+  readonly owningTeam?: Team;
+  readonly url?: string;
+  readonly validations?: readonly ValidationItem[];
+  readonly releaseItems?: readonly ReleaseItem[];
+  readonly labels: readonly string[];
+  readonly startDate?: ISODateString;
+  readonly endDate?: ISODateString;
 }
 
 export interface ReleaseItem {
-  id: ReleaseItemId;
-  ticketId: TicketId;
-  effort: number;
-  name: string;
-  areaIds: AreaId[];
-  teams: string[];
-  status: string;
-  url: string;
-  isExternal: boolean;
-  stage: string;
-  assignee: Person | Record<string, unknown>;
-  validations: ValidationItem[];
-  roadmapItemId?: RoadmapItemId;
-  cycleId?: CycleId | null;
-  cycle?: { id: CycleId; name: string };
-  created?: string;
-  updated?: string;
-  summary?: string;
-  closedSprints?: Record<string, unknown>[];
-  parent?: string;
-  area?: string | Area;
-  sprint?: { id: string; name: string } | null;
+  readonly id: ReleaseItemId;
+  readonly ticketId: TicketId;
+  readonly effort: number;
+  readonly name: string;
+  readonly areaIds: readonly AreaId[];
+  readonly teams: readonly string[];
+  readonly status: string;
+  readonly url: string;
+  readonly isExternal: boolean;
+  readonly stage: string;
+  readonly assignee: Person | Readonly<Record<string, unknown>>;
+  readonly validations: readonly ValidationItem[];
+  readonly roadmapItemId?: RoadmapItemId;
+  readonly cycleId?: CycleId | null;
+  readonly cycle?: { readonly id: CycleId; readonly name: string };
+  readonly created?: string;
+  readonly updated?: string;
+  readonly summary?: string;
+  readonly closedSprints?: readonly Readonly<Record<string, unknown>>[];
+  readonly parent?: string;
+  readonly area?: string | Area;
+  readonly sprint?: { readonly id: string; readonly name: string } | null;
 }
 
 export interface Stage {
-  id: StageId;
-  name: string;
+  readonly id: StageId;
+  readonly name: string;
 }
 
 // ============================================================================
@@ -116,11 +116,11 @@ export interface Stage {
 // ============================================================================
 
 export interface ValidationItem {
-  id: ValidationItemId;
-  code: string;
-  name: string;
-  status: string;
-  description?: string;
+  readonly id: ValidationItemId;
+  readonly code: string;
+  readonly name: string;
+  readonly status: string;
+  readonly description?: string;
 }
 
 // ============================================================================
@@ -133,14 +133,14 @@ export interface ValidationItem {
  * Contains raw Jira objects and domain entities in their original form.
  */
 export interface RawCycleData {
-  cycles: Cycle[];
-  roadmapItems: RoadmapItem[];
-  releaseItems: ReleaseItem[];
-  assignees: Person[];
-  areas: Record<string, Area>;
-  initiatives: Initiative[];
-  stages: Stage[];
-  teams?: Team[];
+  readonly cycles: readonly Cycle[];
+  readonly roadmapItems: readonly RoadmapItem[];
+  readonly releaseItems: readonly ReleaseItem[];
+  readonly assignees: readonly Person[];
+  readonly areas: Readonly<Record<string, Area>>;
+  readonly initiatives: readonly Initiative[];
+  readonly stages: readonly Stage[];
+  readonly teams?: readonly Team[];
 }
 
 /**
@@ -149,11 +149,11 @@ export interface RawCycleData {
  * Contains raw cycles without progress calculations - progress is added in the transformation layer.
  */
 export interface CycleData {
-  cycles: Cycle[];
-  roadmapItems: RoadmapItem[];
-  releaseItems: ReleaseItem[];
-  areas: Area[];
-  initiatives: Initiative[];
-  assignees: Person[];
-  stages: Stage[];
+  readonly cycles: readonly Cycle[];
+  readonly roadmapItems: readonly RoadmapItem[];
+  readonly releaseItems: readonly ReleaseItem[];
+  readonly areas: readonly Area[];
+  readonly initiatives: readonly Initiative[];
+  readonly assignees: readonly Person[];
+  readonly stages: readonly Stage[];
 }

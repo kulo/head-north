@@ -43,27 +43,32 @@ import type {
 } from "./types";
 
 export default class OmegaConfig {
-  private processEnv: ProcessEnv;
-  private overrides: ConfigOverrides;
-  private environment: string;
-  private config: OmegaConfigData;
+  private readonly processEnv: Readonly<ProcessEnv>;
+  private readonly overrides: Readonly<ConfigOverrides>;
+  private readonly environment: string;
+  private readonly config: Readonly<OmegaConfigData>;
 
   constructor({
     processEnv = {},
     overrides = {},
   }: { processEnv?: ProcessEnv; overrides?: ConfigOverrides } = {}) {
-    this.processEnv = processEnv;
-    this.overrides = overrides;
+    // Store as readonly - immutability enforced by TypeScript types
+    this.processEnv = processEnv as Readonly<ProcessEnv>;
+    this.overrides = overrides as Readonly<ConfigOverrides>;
 
     // Extract environment from overrides or processEnv, with fallback
     this.environment =
       overrides.environment || processEnv.NODE_ENV || "development";
 
     // Initialize configuration
-    this.config = this._initializeConfig();
+    const config = this._initializeConfig();
 
     // Apply overrides
-    this._applyOverrides();
+    const finalConfig = this._applyOverrides(config, overrides);
+
+    // Store as readonly - immutability enforced by TypeScript types
+    // Note: Not using Object.freeze() as config contains methods that can't be frozen
+    this.config = finalConfig as Readonly<OmegaConfigData>;
   }
 
   /**
@@ -253,10 +258,14 @@ export default class OmegaConfig {
    * Apply configuration overrides
    * @private
    */
-  private _applyOverrides(): void {
-    if (this.overrides) {
-      this.config = this._deepMerge(this.config, this.overrides);
+  private _applyOverrides(
+    config: OmegaConfigData,
+    overrides: ConfigOverrides,
+  ): OmegaConfigData {
+    if (overrides && Object.keys(overrides).length > 0) {
+      return this._deepMerge(config, overrides);
     }
+    return config;
   }
 
   /**
@@ -336,27 +345,10 @@ export default class OmegaConfig {
   }
 
   /**
-   * Set configuration value by key
-   * @param key - Configuration key (supports dot notation)
-   * @param value - Configuration value
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set(key: string, value: any): void {
-    const keys = key.split(".");
-    const lastKey = keys.pop()!;
-    const target = keys.reduce((obj, k) => {
-      if (!obj[k]) obj[k] = {};
-      return obj[k];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }, this.config as any);
-    target[lastKey] = value;
-  }
-
-  /**
    * Get full configuration object
-   * @returns Full configuration
+   * @returns Full configuration (readonly)
    */
-  getConfig(): OmegaConfigData {
+  getConfig(): Readonly<OmegaConfigData> {
     return this.config;
   }
 
