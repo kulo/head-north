@@ -1,6 +1,11 @@
 import { Context } from "koa";
+import { Either } from "purify-ts";
 import collectCycleData from "../../services/collect-cycle-data";
 import { logger } from "@omega/utils";
+import {
+  validateRawCycleData,
+  formatValidationErrors,
+} from "../../middleware/validation";
 import type { OmegaConfig } from "@omega/config";
 import type { RawCycleData } from "@omega/types";
 
@@ -28,8 +33,37 @@ export const getCycleData = async (context: Context): Promise<void> => {
       teams,
     } = rawData;
 
-    // Basic data validation - fail fast on invalid data
-    validateRawData(rawData);
+    // Validate data using Zod schema with purify-ts Either for functional error handling
+    const validationResult = validateRawCycleData(rawData);
+
+    // Handle validation errors functionally
+    validationResult.caseOf({
+      Left: (error) => {
+        logger.default.error("Raw cycle data validation failed", {
+          errors: formatValidationErrors(error),
+        });
+        context.status = 500;
+        context.body = {
+          success: false,
+          error: "Data validation failed",
+          message: "Collected data does not match expected schema",
+          validationErrors: formatValidationErrors(error),
+        };
+        return;
+      },
+      Right: () => {
+        // Validation passed - continue with processing
+      },
+    });
+
+    // If validation failed, exit early
+    if (validationResult.isLeft()) {
+      return;
+    }
+
+    logger.default.info(
+      `Raw cycle data validated successfully: ${roadmapItems?.length || 0} roadmap items, ${releaseItems?.length || 0} release items, ${cycles?.length || 0} cycles`,
+    );
 
     // Convert areas object to array for consistency
     const areasArray = Object.entries(areas).map(([id, areaData]) => ({
@@ -58,61 +92,3 @@ export const getCycleData = async (context: Context): Promise<void> => {
     };
   }
 };
-
-/**
- * Validate raw data structure - fail fast on invalid data
- */
-function validateRawData(data: RawCycleData): void {
-  const {
-    cycles,
-    roadmapItems,
-    releaseItems,
-    assignees,
-    areas,
-    stages,
-    initiatives,
-  } = data;
-
-  // Validate required arrays exist
-  if (!Array.isArray(cycles)) {
-    throw new Error("Invalid cycles data: expected array");
-  }
-  if (!Array.isArray(roadmapItems)) {
-    throw new Error("Invalid roadmapItems data: expected array");
-  }
-  if (!Array.isArray(releaseItems)) {
-    throw new Error("Invalid releaseItems data: expected array");
-  }
-  if (!Array.isArray(assignees)) {
-    throw new Error("Invalid assignees data: expected array");
-  }
-  if (!Array.isArray(stages)) {
-    throw new Error("Invalid stages data: expected array");
-  }
-  if (typeof initiatives !== "object" || initiatives === null) {
-    throw new Error("Invalid initiatives data: expected object");
-  }
-
-  // Validate areas (can be object or array)
-  if (typeof areas !== "object" || areas === null) {
-    throw new Error("Invalid areas data: expected object");
-  }
-
-  // Validate cycles have required fields
-  cycles.forEach((cycle, index) => {
-    if (!cycle.id || !cycle.name) {
-      throw new Error(`Invalid cycle at index ${index}: missing id or name`);
-    }
-  });
-
-  // Validate assignees have required fields
-  assignees.forEach((assignee, index) => {
-    if (!assignee.id || !assignee.name) {
-      throw new Error(`Invalid assignee at index ${index}: missing id or name`);
-    }
-  });
-
-  logger.default.info(
-    `Raw data validation passed: ${roadmapItems?.length || 0} roadmap items, ${releaseItems?.length || 0} release items, ${cycles?.length || 0} cycles`,
-  );
-}
