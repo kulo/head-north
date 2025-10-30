@@ -153,6 +153,30 @@ describe("Filter", () => {
       expect(result.data.initiatives[0].id).toBe("init-1");
     });
 
+    it("should return all initiatives when initiatives filter is empty array (no filter)", () => {
+      // Empty array should mean "no filter" - same as undefined
+      const criteria: FilterCriteria = { initiatives: [] };
+
+      const result = filter.apply(mockData, criteria);
+
+      // Should return all initiatives, not filter them out
+      expect(result.data.initiatives).toHaveLength(mockData.initiatives.length);
+      expect(result.data).toEqual(mockData);
+    });
+
+    it("should handle empty arrays for stages and assignees (no filter)", () => {
+      // Empty arrays should mean "no filter"
+      const criteria: FilterCriteria = {
+        stages: [],
+        assignees: [],
+      };
+
+      const result = filter.apply(mockData, criteria);
+
+      // Should return all data, not filter anything out
+      expect(result.data).toEqual(mockData);
+    });
+
     it("should apply multiple filters simultaneously", () => {
       const criteria: FilterCriteria = {
         area: "frontend",
