@@ -3,6 +3,7 @@
  * Extracted from CycleProgressData class for reuse across the application
  */
 
+import { Maybe } from "purify-ts";
 import {
   STATUS,
   normalizeStatus,
@@ -31,12 +32,23 @@ export const roundToTwoDigit = (number: number): number => {
 };
 
 /**
+ * Parse effort from release item safely
+ */
+const parseEffort = (item: ReleaseItem): number =>
+  Maybe.fromNullable(item.effort)
+    .map((effort) =>
+      typeof effort === "number" ? effort : parseFloat(String(effort)),
+    )
+    .filter((effort) => !isNaN(effort))
+    .orDefault(0);
+
+/**
  * Calculate progress metrics for release items
  * @param {ReleaseItem[]} releaseItems - Array of release items
  * @returns {ProgressMetrics} Progress metrics
  */
 export const calculateReleaseItemProgress = (
-  releaseItems: ReleaseItem[],
+  releaseItems: readonly ReleaseItem[],
 ): ProgressMetrics => {
   if (!Array.isArray(releaseItems) || releaseItems.length === 0) {
     return {
@@ -56,45 +68,59 @@ export const calculateReleaseItemProgress = (
     };
   }
 
-  let weeks = 0;
-  let weeksDone = 0;
-  let weeksInProgress = 0;
-  let weeksTodo = 0;
-  let weeksNotToDo = 0;
-  let weeksCancelled = 0;
-  let weeksPostponed = 0;
-  let releaseItemsCount = 0;
-  let releaseItemsDoneCount = 0;
+  // Filter out REPLANNED items for count calculation (functional with readonly)
+  const nonReplannedItems = releaseItems.filter(
+    (item) => normalizeStatus(item.status) !== STATUS.REPLANNED,
+  );
 
-  releaseItems.forEach((releaseItem) => {
-    const effort =
-      typeof releaseItem.effort === "number"
-        ? releaseItem.effort
-        : parseFloat(String(releaseItem.effort)) || 0;
-    const status = normalizeStatus(releaseItem.status);
+  // Calculate total weeks from non-replanned items using functional reduce
+  const weeks = roundToTwoDigit(
+    nonReplannedItems.map(parseEffort).reduce((acc, effort) => acc + effort, 0),
+  );
 
-    if (status !== STATUS.REPLANNED) {
-      weeks += effort;
-      releaseItemsCount += 1;
-    }
+  // Count release items
+  const releaseItemsCount = nonReplannedItems.length;
 
-    if (status === STATUS.TODO) {
-      weeksTodo += effort;
-    } else if (isCompletedStatus(status)) {
-      weeksDone += effort;
-      releaseItemsDoneCount += 1;
-    } else if (isInProgressStatus(status)) {
-      weeksInProgress += effort;
-    } else if (status === STATUS.POSTPONED) {
-      weeksNotToDo += effort;
-      weeksPostponed += effort;
-    } else if (status === STATUS.CANCELLED) {
-      weeksNotToDo += effort;
-      weeksCancelled += effort;
-    }
-  });
+  // Calculate weeks by status using functional operations
+  const completedItems = releaseItems.filter((item) =>
+    isCompletedStatus(normalizeStatus(item.status)),
+  );
+  const weeksDone = completedItems
+    .map(parseEffort)
+    .reduce((acc, effort) => acc + effort, 0);
+  const releaseItemsDoneCount = completedItems.length;
 
-  weeks = roundToTwoDigit(weeks);
+  const inProgressItems = releaseItems.filter((item) =>
+    isInProgressStatus(normalizeStatus(item.status)),
+  );
+  const weeksInProgress = inProgressItems
+    .map(parseEffort)
+    .reduce((acc, effort) => acc + effort, 0);
+
+  const todoItems = releaseItems.filter(
+    (item) => normalizeStatus(item.status) === STATUS.TODO,
+  );
+  const weeksTodo = todoItems
+    .map(parseEffort)
+    .reduce((acc, effort) => acc + effort, 0);
+
+  const postponedItems = releaseItems.filter(
+    (item) => normalizeStatus(item.status) === STATUS.POSTPONED,
+  );
+  const weeksPostponed = postponedItems
+    .map(parseEffort)
+    .reduce((acc, effort) => acc + effort, 0);
+
+  const cancelledItems = releaseItems.filter(
+    (item) => normalizeStatus(item.status) === STATUS.CANCELLED,
+  );
+  const weeksCancelled = cancelledItems
+    .map(parseEffort)
+    .reduce((acc, effort) => acc + effort, 0);
+
+  const weeksNotToDo = weeksPostponed + weeksCancelled;
+
+  // Calculate percentages
   const progress = weeks > 0 ? Math.round((weeksDone / weeks) * 100) : 0;
   const progressWithInProgress =
     weeks > 0 ? Math.round(((weeksDone + weeksInProgress) / weeks) * 100) : 0;
@@ -188,7 +214,7 @@ export const calculateCycleMetadata = (cycle: Cycle): CycleMetadata => {
  * @returns {ProgressMetrics} Aggregated progress metrics
  */
 export const aggregateProgressMetrics = (
-  metricsArray: ProgressMetrics[],
+  metricsArray: readonly ProgressMetrics[],
 ): ProgressMetrics => {
   if (!Array.isArray(metricsArray) || metricsArray.length === 0) {
     return {
@@ -208,70 +234,76 @@ export const aggregateProgressMetrics = (
     };
   }
 
-  const aggregated = metricsArray.reduce(
-    (acc, metrics) => {
-      acc.weeks += metrics.weeks || 0;
-      acc.weeksDone += metrics.weeksDone || 0;
-      acc.weeksInProgress += metrics.weeksInProgress || 0;
-      acc.weeksTodo += metrics.weeksTodo || 0;
-      acc.weeksNotToDo += metrics.weeksNotToDo || 0;
-      acc.weeksCancelled += metrics.weeksCancelled || 0;
-      acc.weeksPostponed += metrics.weeksPostponed || 0;
-      acc.releaseItemsCount += metrics.releaseItemsCount || 0;
-      acc.releaseItemsDoneCount += metrics.releaseItemsDoneCount || 0;
-      return acc;
-    },
-    {
-      weeks: 0,
-      weeksDone: 0,
-      weeksInProgress: 0,
-      weeksTodo: 0,
-      weeksNotToDo: 0,
-      weeksCancelled: 0,
-      weeksPostponed: 0,
-      releaseItemsCount: 0,
-      releaseItemsDoneCount: 0,
-      progress: 0,
-      progressWithInProgress: 0,
-      progressByReleaseItems: 0,
-      percentageNotToDo: 0,
-    },
+  // Aggregate all numeric fields using functional reduce (readonly arrays work fine)
+  const weeks = normalize(
+    metricsArray.map((m) => m.weeks || 0).reduce((acc, val) => acc + val, 0),
   );
 
+  const weeksDone = metricsArray
+    .map((m) => m.weeksDone || 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  const weeksInProgress = metricsArray
+    .map((m) => m.weeksInProgress || 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  const weeksTodo = metricsArray
+    .map((m) => m.weeksTodo || 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  const weeksNotToDo = metricsArray
+    .map((m) => m.weeksNotToDo || 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  const weeksCancelled = metricsArray
+    .map((m) => m.weeksCancelled || 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  const weeksPostponed = metricsArray
+    .map((m) => m.weeksPostponed || 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  const releaseItemsCount = metricsArray
+    .map((m) => m.releaseItemsCount || 0)
+    .reduce((acc, val) => acc + val, 0);
+
+  const releaseItemsDoneCount = metricsArray
+    .map((m) => m.releaseItemsDoneCount || 0)
+    .reduce((acc, val) => acc + val, 0);
+
   // Calculate percentages
-  aggregated.weeks = normalize(aggregated.weeks);
-  aggregated.progress =
-    aggregated.weeks > 0
-      ? Math.max(0, Math.round((aggregated.weeksDone / aggregated.weeks) * 100))
+  const progress =
+    weeks > 0 ? Math.max(0, Math.round((weeksDone / weeks) * 100)) : 0;
+
+  const progressWithInProgress =
+    weeks > 0
+      ? Math.max(0, Math.round(((weeksDone + weeksInProgress) / weeks) * 100))
       : 0;
-  aggregated.progressWithInProgress =
-    aggregated.weeks > 0
+
+  const progressByReleaseItems =
+    releaseItemsCount > 0
       ? Math.max(
           0,
-          Math.round(
-            ((aggregated.weeksDone + aggregated.weeksInProgress) /
-              aggregated.weeks) *
-              100,
-          ),
-        )
-      : 0;
-  aggregated.progressByReleaseItems =
-    aggregated.releaseItemsCount > 0
-      ? Math.max(
-          0,
-          Math.round(
-            (aggregated.releaseItemsDoneCount / aggregated.releaseItemsCount) *
-              100,
-          ),
-        )
-      : 0;
-  aggregated.percentageNotToDo =
-    aggregated.weeks > 0
-      ? Math.max(
-          0,
-          Math.round((aggregated.weeksNotToDo / aggregated.weeks) * 100),
+          Math.round((releaseItemsDoneCount / releaseItemsCount) * 100),
         )
       : 0;
 
-  return aggregated;
+  const percentageNotToDo =
+    weeks > 0 ? Math.max(0, Math.round((weeksNotToDo / weeks) * 100)) : 0;
+
+  return {
+    weeks,
+    weeksDone,
+    weeksInProgress,
+    weeksTodo,
+    weeksNotToDo,
+    weeksCancelled,
+    weeksPostponed,
+    releaseItemsCount,
+    releaseItemsDoneCount,
+    progress,
+    progressWithInProgress,
+    progressByReleaseItems,
+    percentageNotToDo,
+  };
 };

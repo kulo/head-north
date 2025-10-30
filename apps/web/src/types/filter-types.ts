@@ -5,7 +5,7 @@
  * ensuring compile-time safety and consistency with OmegaConfig.
  */
 
-// import type { FilterCriteria } from "./ui-types";
+import type { ViewFilterCriteria } from "./ui-types";
 import type {
   AreaId,
   InitiativeId,
@@ -197,20 +197,6 @@ export interface ViewFilterManager {
 // Legacy Compatibility Types
 // ============================================================================
 
-/**
- * Legacy ViewFilterCriteria for backward compatibility
- * TODO: Remove this once all consumers are updated
- */
-export interface ViewFilterCriteria {
-  common: {
-    area?: AreaId;
-    initiatives?: InitiativeId[];
-    showValidationErrors?: boolean;
-  };
-  cycleOverview: {
-    stages?: StageId[];
-    assignees?: PersonId[];
-    cycle?: CycleId;
-  };
-  roadmap: Record<string, never>;
-}
+// ViewFilterCriteria is now imported from ui-types.ts
+// This export is kept for backward compatibility only
+export type { ViewFilterCriteria };

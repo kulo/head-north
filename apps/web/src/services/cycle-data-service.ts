@@ -196,7 +196,7 @@ class CycleDataService {
    * Get all initiatives from the unified data
    * @returns {Promise<Initiative[]>} Array of initiatives with id and name properties
    */
-  async getAllInitiatives(): Promise<Initiative[]> {
+  async getAllInitiatives(): Promise<readonly Initiative[]> {
     const data = await this.#getCachedCycleData();
     return data.initiatives;
   }
@@ -229,7 +229,7 @@ class CycleDataService {
    * Get all cycles from the unified data
    * @returns {Promise<Cycle[]>} Array of cycles
    */
-  async getAllCycles(): Promise<Cycle[]> {
+  async getAllCycles(): Promise<readonly Cycle[]> {
     const data = await this.#getCachedCycleData();
     return data.cycles;
   }
@@ -238,7 +238,7 @@ class CycleDataService {
    * Get all stages from the unified data
    * @returns {Promise<Stage[]>} Array of stages
    */
-  async getAllStages(): Promise<Stage[]> {
+  async getAllStages(): Promise<readonly Stage[]> {
     const data = await this.#getCachedCycleData();
     return data.stages;
   }
@@ -247,7 +247,7 @@ class CycleDataService {
    * Get all assignees from the organisation
    * @returns {Promise<Person[]>} Array of assignees
    */
-  async getAllAssignees(): Promise<Person[]> {
+  async getAllAssignees(): Promise<readonly Person[]> {
     const data = await this.#getCachedCycleData();
     return data.assignees;
   }

@@ -23,7 +23,7 @@ import type {
  */
 export const calculateCycleProgress = (
   cycle: Cycle,
-  initiatives: InitiativeWithProgress[],
+  initiatives: readonly InitiativeWithProgress[],
 ): CycleWithProgress => {
   // Calculate cycle metadata (months, days, etc.)
   const cycleMetadata = calculateCycleMetadata(cycle);

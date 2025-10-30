@@ -7,7 +7,12 @@
  * This belongs in /lib because it contains only pure functions with no external dependencies.
  */
 
-import type { CycleData, InitiativeId, ValidationItem } from "@omega/types";
+import type {
+  Cycle,
+  CycleData,
+  InitiativeId,
+  ValidationItem,
+} from "@omega/types";
 import type {
   FilterCriteria,
   InitiativeWithProgress,
@@ -92,7 +97,31 @@ export function transformToNestedStructure(
   }
 
   // Group roadmap items by initiative
-  const groupedInitiatives: Record<string, InitiativeWithProgress> = {};
+  // Using mutable type during construction, will be cast to readonly at return
+  type MutableInitiative = {
+    id: string;
+    name: string;
+    roadmapItems: RoadmapItemWithProgress[];
+    weeks: number;
+    weeksDone: number;
+    weeksInProgress: number;
+    weeksTodo: number;
+    weeksNotToDo: number;
+    weeksCancelled: number;
+    weeksPostponed: number;
+    releaseItemsCount: number;
+    releaseItemsDoneCount: number;
+    progress: number;
+    progressWithInProgress: number;
+    progressByReleaseItems: number;
+    percentageNotToDo: number;
+    startMonth: string;
+    endMonth: string;
+    daysFromStartOfCycle: number;
+    daysInCycle: number;
+    currentDayPercentage: number;
+  };
+  const groupedInitiatives: Record<string, MutableInitiative> = {};
 
   roadmapItems.forEach((item) => {
     const initiativeId = getDefaultInitiativeId(item.initiativeId);
@@ -165,56 +194,75 @@ export function transformToNestedStructure(
       currentDayPercentage: 0,
     };
 
-    groupedInitiatives[initiativeId].roadmapItems.push(roadmapItem);
-
-    // Aggregate metrics to initiative level
-    const initiative = groupedInitiatives[initiativeId];
-    initiative.weeks += roadmapItemMetrics.weeks;
-    initiative.weeksDone += roadmapItemMetrics.weeksDone;
-    initiative.weeksInProgress += roadmapItemMetrics.weeksInProgress;
-    initiative.weeksTodo += roadmapItemMetrics.weeksTodo;
-    initiative.weeksNotToDo += roadmapItemMetrics.weeksNotToDo;
-    initiative.weeksCancelled += roadmapItemMetrics.weeksCancelled;
-    initiative.weeksPostponed += roadmapItemMetrics.weeksPostponed;
-    initiative.releaseItemsCount += roadmapItemMetrics.releaseItemsCount;
-    initiative.releaseItemsDoneCount +=
-      roadmapItemMetrics.releaseItemsDoneCount;
+    // Create new initiative with updated values (functional style - no mutations)
+    const currentInitiative = groupedInitiatives[initiativeId];
+    groupedInitiatives[initiativeId] = {
+      ...currentInitiative,
+      roadmapItems: [...currentInitiative.roadmapItems, roadmapItem],
+      // Aggregate metrics to initiative level (calculate new values)
+      weeks: currentInitiative.weeks + roadmapItemMetrics.weeks,
+      weeksDone: currentInitiative.weeksDone + roadmapItemMetrics.weeksDone,
+      weeksInProgress:
+        currentInitiative.weeksInProgress + roadmapItemMetrics.weeksInProgress,
+      weeksTodo: currentInitiative.weeksTodo + roadmapItemMetrics.weeksTodo,
+      weeksNotToDo:
+        currentInitiative.weeksNotToDo + roadmapItemMetrics.weeksNotToDo,
+      weeksCancelled:
+        currentInitiative.weeksCancelled + roadmapItemMetrics.weeksCancelled,
+      weeksPostponed:
+        currentInitiative.weeksPostponed + roadmapItemMetrics.weeksPostponed,
+      releaseItemsCount:
+        currentInitiative.releaseItemsCount +
+        roadmapItemMetrics.releaseItemsCount,
+      releaseItemsDoneCount:
+        currentInitiative.releaseItemsDoneCount +
+        roadmapItemMetrics.releaseItemsDoneCount,
+    };
   });
 
-  // Calculate final initiative-level percentages
-  Object.values(groupedInitiatives).forEach((initiative) => {
-    initiative.progress =
-      initiative.weeks > 0
-        ? Math.round((initiative.weeksDone / initiative.weeks) * 100)
-        : 0;
-    initiative.progressWithInProgress =
-      initiative.weeks > 0
-        ? Math.round(
-            ((initiative.weeksDone + initiative.weeksInProgress) /
-              initiative.weeks) *
-              100,
-          )
-        : 0;
-    initiative.progressByReleaseItems =
-      initiative.releaseItemsCount > 0
-        ? Math.round(
-            (initiative.releaseItemsDoneCount / initiative.releaseItemsCount) *
-              100,
-          )
-        : 0;
-    initiative.percentageNotToDo =
-      initiative.weeks > 0
-        ? Math.max(
-            0,
-            Math.round((initiative.weeksNotToDo / initiative.weeks) * 100),
-          )
-        : 0;
-  });
-
-  // Sort initiatives by weeks (largest first)
-  const sortedInitiatives = Object.values(groupedInitiatives).sort(
-    (a, b) => b.weeks - a.weeks,
+  // Calculate final initiative-level percentages (functional style)
+  const initiativesWithPercentages = Object.values(groupedInitiatives).map(
+    (initiative): MutableInitiative => ({
+      ...initiative,
+      progress:
+        initiative.weeks > 0
+          ? Math.round((initiative.weeksDone / initiative.weeks) * 100)
+          : 0,
+      progressWithInProgress:
+        initiative.weeks > 0
+          ? Math.round(
+              ((initiative.weeksDone + initiative.weeksInProgress) /
+                initiative.weeks) *
+                100,
+            )
+          : 0,
+      progressByReleaseItems:
+        initiative.releaseItemsCount > 0
+          ? Math.round(
+              (initiative.releaseItemsDoneCount /
+                initiative.releaseItemsCount) *
+                100,
+            )
+          : 0,
+      percentageNotToDo:
+        initiative.weeks > 0
+          ? Math.max(
+              0,
+              Math.round((initiative.weeksNotToDo / initiative.weeks) * 100),
+            )
+          : 0,
+    }),
   );
+
+  // Sort initiatives by weeks (largest first) and cast to readonly at return
+  const sortedInitiatives = initiativesWithPercentages
+    .sort((a, b) => b.weeks - a.weeks)
+    .map(
+      (init): InitiativeWithProgress => ({
+        ...init,
+        roadmapItems: init.roadmapItems,
+      }),
+    ) as readonly InitiativeWithProgress[];
 
   return {
     initiatives: sortedInitiatives,
@@ -227,7 +275,7 @@ export function transformToNestedStructure(
  */
 export function applyInitiativeFilter(
   data: NestedCycleData,
-  initiatives?: InitiativeId[],
+  initiatives?: readonly InitiativeId[],
 ): NestedCycleData {
   if (!initiatives || initiatives.length === 0) {
     return data;
@@ -235,7 +283,7 @@ export function applyInitiativeFilter(
 
   const filteredInitiatives = data.initiatives.filter((initiative) =>
     initiatives.includes(initiative.id),
-  );
+  ) as readonly InitiativeWithProgress[];
 
   return {
     ...data,
@@ -285,7 +333,7 @@ export function generateRoadmapData(
   }
 
   return {
-    orderedCycles: rawData?.cycles || [],
+    orderedCycles: rawData?.cycles ? [...rawData.cycles] : [],
     roadmapItems: [],
     activeCycle: selectDefaultCycle(rawData?.cycles || []),
     initiatives: processedData.initiatives || [],
@@ -337,7 +385,7 @@ export function generateFilteredRoadmapData(
   const filteredData = filter.apply(processedData, activeFilters);
 
   return {
-    orderedCycles: rawData?.cycles || [],
+    orderedCycles: rawData?.cycles ? [...rawData.cycles] : [],
     roadmapItems: [],
     activeCycle: selectDefaultCycle(rawData?.cycles || []),
     initiatives: filteredData.data.initiatives || [],
@@ -382,7 +430,7 @@ export function generateFilteredCycleOverviewData(
  * Get cycle name by ID
  * Pure function - no side effects
  */
-function getCycleName(cycles: unknown[], cycleId: string): string {
+function getCycleName(cycles: readonly unknown[], cycleId: string): string {
   if (!Array.isArray(cycles)) {
     return `Cycle ${cycleId}`;
   }

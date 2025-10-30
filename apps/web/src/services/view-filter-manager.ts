@@ -10,6 +10,13 @@
  */
 
 import type { OmegaConfig } from "@omega/config";
+import type {
+  AreaId,
+  CycleId,
+  InitiativeId,
+  PersonId,
+  StageId,
+} from "@omega/types";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type {
   ViewFilterManager as IViewFilterManager,
@@ -22,9 +29,23 @@ import { FilterConfigurationService } from "./filter-configuration";
 /**
  * View Filter Manager class with dependency injection and type safety
  */
+// Internal mutable type for filter state (matches ViewFilterCriteria but mutable)
+type MutableViewFilterCriteria = {
+  common: {
+    area?: AreaId;
+    initiatives?: InitiativeId[];
+  };
+  cycleOverview: {
+    stages?: StageId[];
+    assignees?: PersonId[];
+    cycle?: CycleId;
+  };
+  roadmap: Record<string, never>;
+};
+
 export class ViewFilterManager implements IViewFilterManager {
   private currentView: PageId = "cycle-overview";
-  private viewFilters: ViewFilterCriteria = {
+  private viewFilters: MutableViewFilterCriteria = {
     common: {},
     cycleOverview: {},
     roadmap: {},
@@ -66,38 +87,41 @@ export class ViewFilterManager implements IViewFilterManager {
       );
     }
 
-    if (this.filterConfig.isCommonFilter(filterKey)) {
-      // Update common filter
-      if (value === undefined) {
-        delete this.viewFilters.common[
-          filterKey as keyof typeof this.viewFilters.common
-        ];
-      } else {
-        this.viewFilters.common[
-          filterKey as keyof typeof this.viewFilters.common
-        ] = value as string[] & string;
+    // Helper to convert value to mutable array if needed
+    const makeMutableValue = (val: unknown): unknown => {
+      if (Array.isArray(val)) {
+        return [...val]; // Create mutable copy
       }
+      return val;
+    };
+
+    if (this.filterConfig.isCommonFilter(filterKey)) {
+      // Update common filter - create new object to ensure reactivity
+      this.viewFilters = {
+        ...this.viewFilters,
+        common: {
+          ...this.viewFilters.common,
+          [filterKey]:
+            value === undefined ? undefined : makeMutableValue(value),
+        },
+      };
     } else {
       // Update view-specific filter
       if (this.currentView === "cycle-overview") {
-        if (value === undefined) {
-          delete this.viewFilters.cycleOverview[
-            filterKey as keyof typeof this.viewFilters.cycleOverview
-          ];
-        } else {
-          this.viewFilters.cycleOverview[
-            filterKey as keyof typeof this.viewFilters.cycleOverview
-          ] = value as string[] & string;
-        }
+        this.viewFilters = {
+          ...this.viewFilters,
+          cycleOverview: {
+            ...this.viewFilters.cycleOverview,
+            [filterKey]:
+              value === undefined ? undefined : makeMutableValue(value),
+          },
+        };
       } else if (this.currentView === "roadmap") {
-        if (value === undefined) {
-          delete (this.viewFilters.roadmap as Record<string, unknown>)[
-            filterKey
-          ];
-        } else {
-          (this.viewFilters.roadmap as Record<string, unknown>)[filterKey] =
-            value;
-        }
+        // Roadmap filters are currently empty, but handle for future extensibility
+        this.viewFilters = {
+          ...this.viewFilters,
+          roadmap: {} as Record<string, never>,
+        };
       }
     }
 
@@ -127,14 +151,50 @@ export class ViewFilterManager implements IViewFilterManager {
    * Get all view filters (for debugging/state management)
    */
   getAllViewFilters(): ViewFilterCriteria {
-    return { ...this.viewFilters };
+    // Create readonly copy when returning
+    return {
+      common: {
+        ...this.viewFilters.common,
+        initiatives: this.viewFilters.common.initiatives
+          ? [...this.viewFilters.common.initiatives]
+          : undefined,
+      },
+      cycleOverview: {
+        ...this.viewFilters.cycleOverview,
+        stages: this.viewFilters.cycleOverview.stages
+          ? [...this.viewFilters.cycleOverview.stages]
+          : undefined,
+        assignees: this.viewFilters.cycleOverview.assignees
+          ? [...this.viewFilters.cycleOverview.assignees]
+          : undefined,
+      },
+      roadmap: { ...this.viewFilters.roadmap },
+    } as ViewFilterCriteria;
   }
 
   /**
    * Set all view filters (for state restoration)
    */
   setAllViewFilters(filters: ViewFilterCriteria): void {
-    this.viewFilters = { ...filters };
+    // Create mutable copy (convert readonly arrays to mutable)
+    this.viewFilters = {
+      common: {
+        ...filters.common,
+        initiatives: filters.common.initiatives
+          ? [...filters.common.initiatives]
+          : undefined,
+      },
+      cycleOverview: {
+        ...filters.cycleOverview,
+        stages: filters.cycleOverview.stages
+          ? [...filters.cycleOverview.stages]
+          : undefined,
+        assignees: filters.cycleOverview.assignees
+          ? [...filters.cycleOverview.assignees]
+          : undefined,
+      },
+      roadmap: { ...filters.roadmap },
+    };
   }
 
   /**
@@ -149,9 +209,15 @@ export class ViewFilterManager implements IViewFilterManager {
    */
   resetViewSpecificFilters(pageId: PageId): void {
     if (pageId === "cycle-overview") {
-      this.viewFilters.cycleOverview = {};
+      this.viewFilters = {
+        ...this.viewFilters,
+        cycleOverview: {},
+      };
     } else if (pageId === "roadmap") {
-      this.viewFilters.roadmap = {};
+      this.viewFilters = {
+        ...this.viewFilters,
+        roadmap: {},
+      };
     }
   }
 

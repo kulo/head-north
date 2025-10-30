@@ -13,7 +13,7 @@ import type { Cycle } from "@omega/types";
  * @param cycles - Array of available cycles
  * @returns Selected cycle or null if no cycles available
  */
-export function selectDefaultCycle(cycles: Cycle[]): Cycle | null {
+export function selectDefaultCycle(cycles: readonly Cycle[]): Cycle | null {
   if (!cycles || !Array.isArray(cycles) || cycles.length === 0) {
     return null;
   }

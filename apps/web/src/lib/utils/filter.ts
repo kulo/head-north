@@ -287,7 +287,10 @@ export class Filter {
   /**
    * Check if release item matches stage filter
    */
-  private matchesStages(releaseItem: ReleaseItem, stages: StageId[]): boolean {
+  private matchesStages(
+    releaseItem: ReleaseItem,
+    stages: readonly StageId[],
+  ): boolean {
     if (!releaseItem.stage) return false;
     return stages.includes(releaseItem.stage as StageId);
   }
@@ -297,7 +300,7 @@ export class Filter {
    */
   private matchesAssignees(
     releaseItem: ReleaseItem,
-    assignees: PersonId[],
+    assignees: readonly PersonId[],
   ): boolean {
     if (!releaseItem.assignee) {
       return false;
@@ -343,7 +346,7 @@ export class Filter {
    */
   private matchesInitiatives(
     initiative: InitiativeWithProgress,
-    initiatives: InitiativeId[],
+    initiatives: readonly InitiativeId[],
   ): boolean {
     return initiatives.includes(initiative.id);
   }

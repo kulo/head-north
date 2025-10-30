@@ -9,6 +9,7 @@ import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
+import { useFilterStore } from "./filters-store";
 import type { CycleData } from "@omega/types";
 import type {
   NestedCycleData,
@@ -84,10 +85,16 @@ export const useDataStore = defineStore("data", () => {
 
   // Filtered roadmap data using CycleDataViewCoordinator
   const filteredRoadmapData = computed((): RoadmapData => {
+    // Depend on filter store's activeFilters to ensure reactivity when filters change
+    const filterStore = useFilterStore();
+    // Access activeFilters to create reactive dependency
+    const _ = filterStore.activeFilters;
+
     console.log("🔍 Computing filteredRoadmapData:", {
       hasCoordinator: !!coordinator,
       hasProcessedData: !!processedData.value,
       hasRawData: !!rawData.value,
+      activeFilters: filterStore.activeFilters,
     });
 
     if (!processedData.value || !rawData.value) {
@@ -138,10 +145,16 @@ export const useDataStore = defineStore("data", () => {
 
   // Filtered cycle overview data using CycleDataViewCoordinator
   const filteredCycleOverviewData = computed((): CycleOverviewData | null => {
+    // Depend on filter store's activeFilters to ensure reactivity when filters change
+    const filterStore = useFilterStore();
+    // Access activeFilters to create reactive dependency
+    const _ = filterStore.activeFilters;
+
     console.log("🔍 Computing filteredCycleOverviewData:", {
       hasCoordinator: !!coordinator,
       hasProcessedData: !!processedData.value,
       hasRawData: !!rawData.value,
+      activeFilters: filterStore.activeFilters,
     });
 
     if (!processedData.value || !rawData.value) {
