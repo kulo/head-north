@@ -8,7 +8,5 @@ export {
   CycleDataViewCoordinator,
   createCycleDataViewCoordinator,
 } from "./cycle-data-view-coordinator";
-export {
-  ViewFilterManager,
-  createViewFilterManager,
-} from "./view-filter-manager";
+export { createViewFilterManager } from "./view-filter-manager";
+export type { ViewFilterManager } from "../types/filter-types";

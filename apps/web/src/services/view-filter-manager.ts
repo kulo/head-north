@@ -7,6 +7,8 @@
  * 2. View-specific filters are reset when switching to incompatible views
  * 3. Filter state is maintained appropriately for each view
  * 4. All operations are type-safe and validated
+ *
+ * Implemented as a factory function for functional programming patterns.
  */
 
 import type { OmegaConfig } from "@omega/config";
@@ -19,7 +21,7 @@ import type {
 } from "@omega/types";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type {
-  ViewFilterManager as IViewFilterManager,
+  ViewFilterManager,
   FilterKey,
   PageId,
   TypedFilterCriteria,
@@ -27,218 +29,275 @@ import type {
 import { FilterConfigurationService } from "./filter-configuration";
 
 /**
- * View Filter Manager class with dependency injection and type safety
+ * Helper to create a deep readonly copy of arrays for return values
  */
-// Internal mutable type for filter state (matches ViewFilterCriteria but mutable)
-type MutableViewFilterCriteria = {
-  common: {
-    area?: AreaId;
-    initiatives?: InitiativeId[];
-  };
-  cycleOverview: {
-    stages?: StageId[];
-    assignees?: PersonId[];
-    cycle?: CycleId;
-  };
-  roadmap: Record<string, never>;
-};
+const createReadonlyArray = <T>(
+  arr: T[] | undefined,
+): readonly T[] | undefined => (arr ? [...arr] : undefined);
 
-export class ViewFilterManager implements IViewFilterManager {
-  private currentView: PageId = "cycle-overview";
-  private viewFilters: MutableViewFilterCriteria = {
+/**
+ * Helper to create mutable arrays for internal state
+ */
+const createMutableArray = <T>(
+  arr: readonly T[] | T[] | undefined,
+): T[] | undefined => (arr ? [...arr] : undefined);
+
+/**
+ * Helper to create a deep mutable copy of filter criteria for internal use
+ */
+const createMutableFilters = (
+  filters: ViewFilterCriteria,
+): ViewFilterCriteria => ({
+  common: {
+    ...filters.common,
+    initiatives: createMutableArray(filters.common.initiatives),
+  },
+  cycleOverview: {
+    ...filters.cycleOverview,
+    stages: createMutableArray(filters.cycleOverview.stages),
+    assignees: createMutableArray(filters.cycleOverview.assignees),
+  },
+  roadmap: { ...filters.roadmap },
+});
+
+/**
+ * Factory function to create ViewFilterManager with immutable state management
+ *
+ * @param config - OmegaConfig instance for filter configuration
+ * @returns ViewFilterManager instance with functional state management
+ */
+export function createViewFilterManager(
+  config: OmegaConfig,
+): ViewFilterManager {
+  // Immutable state held in closure
+  let currentView: PageId = "cycle-overview";
+  let viewFilters: ViewFilterCriteria = {
     common: {},
     cycleOverview: {},
     roadmap: {},
   };
-  private filterConfig: FilterConfigurationService;
 
-  constructor(config: OmegaConfig) {
-    this.filterConfig = new FilterConfigurationService(config);
-  }
+  const filterConfig = new FilterConfigurationService(config);
 
   /**
    * Switch to a new view and return appropriate filters
    */
-  switchView(pageId: PageId): TypedFilterCriteria {
+  const switchView = (pageId: PageId): TypedFilterCriteria => {
     // Validate that the page exists in configuration
-    if (!this.filterConfig.getViewFilters(pageId).length && pageId !== "root") {
+    if (!filterConfig.getViewFilters(pageId).length && pageId !== "root") {
       console.warn(`No filters configured for page: ${pageId}`);
     }
 
-    this.currentView = pageId;
-    return this.getActiveFilters();
-  }
+    // Create new state (immutable update)
+    currentView = pageId;
+    return getActiveFilters();
+  };
 
   /**
    * Get the current view
    */
-  getCurrentView(): PageId {
-    return this.currentView;
-  }
+  const getCurrentView = (): PageId => currentView;
+
+  /**
+   * Helper to create mutable value from unknown
+   */
+  const makeMutableValue = (val: unknown): unknown => {
+    if (Array.isArray(val)) {
+      return [...val]; // Create mutable copy
+    }
+    return val;
+  };
 
   /**
    * Update a filter for the current view
    */
-  updateFilter(filterKey: FilterKey, value: unknown): TypedFilterCriteria {
+  const updateFilter = (
+    filterKey: FilterKey,
+    value: unknown,
+  ): TypedFilterCriteria => {
     // Validate that this filter is valid for the current view
-    if (!this.filterConfig.isValidFilterForView(filterKey, this.currentView)) {
+    if (!filterConfig.isValidFilterForView(filterKey, currentView)) {
       throw new Error(
-        `Filter '${filterKey}' is not valid for view '${this.currentView}'`,
+        `Filter '${filterKey}' is not valid for view '${currentView}'`,
       );
     }
 
-    // Helper to convert value to mutable array if needed
-    const makeMutableValue = (val: unknown): unknown => {
-      if (Array.isArray(val)) {
-        return [...val]; // Create mutable copy
-      }
-      return val;
-    };
+    // Create new filter state (immutable update)
+    const newValue = value === undefined ? undefined : makeMutableValue(value);
 
-    if (this.filterConfig.isCommonFilter(filterKey)) {
+    if (filterConfig.isCommonFilter(filterKey)) {
       // Update common filter - create new object to ensure reactivity
-      this.viewFilters = {
-        ...this.viewFilters,
+      viewFilters = {
+        ...viewFilters,
         common: {
-          ...this.viewFilters.common,
-          [filterKey]:
-            value === undefined ? undefined : makeMutableValue(value),
+          ...viewFilters.common,
+          [filterKey]: newValue,
         },
       };
     } else {
       // Update view-specific filter
-      if (this.currentView === "cycle-overview") {
-        this.viewFilters = {
-          ...this.viewFilters,
+      if (currentView === "cycle-overview") {
+        viewFilters = {
+          ...viewFilters,
           cycleOverview: {
-            ...this.viewFilters.cycleOverview,
-            [filterKey]:
-              value === undefined ? undefined : makeMutableValue(value),
+            ...viewFilters.cycleOverview,
+            [filterKey]: newValue,
           },
         };
-      } else if (this.currentView === "roadmap") {
+      } else if (currentView === "roadmap") {
         // Roadmap filters are currently empty, but handle for future extensibility
-        this.viewFilters = {
-          ...this.viewFilters,
+        viewFilters = {
+          ...viewFilters,
           roadmap: {} as Record<string, never>,
         };
       }
     }
 
-    return this.getActiveFilters();
-  }
+    return getActiveFilters();
+  };
 
   /**
    * Get active filters for the current view
    */
-  getActiveFilters(): TypedFilterCriteria {
+  const getActiveFilters = (): TypedFilterCriteria => {
     const activeFilters: TypedFilterCriteria = {
-      ...this.viewFilters.common,
+      area: viewFilters.common.area,
+      initiatives: viewFilters.common.initiatives
+        ? [...viewFilters.common.initiatives]
+        : undefined,
     };
 
-    if (this.currentView === "cycle-overview") {
-      // Include cycle overview specific filters
-      Object.assign(activeFilters, this.viewFilters.cycleOverview);
-    } else if (this.currentView === "roadmap") {
+    if (currentView === "cycle-overview") {
+      // Include cycle overview specific filters (create mutable copies)
+      activeFilters.stages = viewFilters.cycleOverview.stages
+        ? [...viewFilters.cycleOverview.stages]
+        : undefined;
+      activeFilters.assignees = viewFilters.cycleOverview.assignees
+        ? [...viewFilters.cycleOverview.assignees]
+        : undefined;
+      activeFilters.cycle = viewFilters.cycleOverview.cycle;
+    } else if (currentView === "roadmap") {
       // Include roadmap specific filters (currently none)
-      Object.assign(activeFilters, this.viewFilters.roadmap);
+      // No additional filters for roadmap view
     }
 
     return activeFilters;
-  }
+  };
 
   /**
    * Get all view filters (for debugging/state management)
+   * Returns readonly copy (ViewFilterCriteria uses readonly arrays)
    */
-  getAllViewFilters(): ViewFilterCriteria {
-    // Create readonly copy when returning
+  const getAllViewFilters = (): ViewFilterCriteria => {
+    // ViewFilterCriteria expects readonly arrays, so we can return them directly
+    // but need to ensure they're proper readonly arrays
     return {
       common: {
-        ...this.viewFilters.common,
-        initiatives: this.viewFilters.common.initiatives
-          ? [...this.viewFilters.common.initiatives]
+        ...viewFilters.common,
+        initiatives: viewFilters.common.initiatives
+          ? (viewFilters.common.initiatives as readonly InitiativeId[])
           : undefined,
       },
       cycleOverview: {
-        ...this.viewFilters.cycleOverview,
-        stages: this.viewFilters.cycleOverview.stages
-          ? [...this.viewFilters.cycleOverview.stages]
+        ...viewFilters.cycleOverview,
+        stages: viewFilters.cycleOverview.stages
+          ? (viewFilters.cycleOverview.stages as readonly StageId[])
           : undefined,
-        assignees: this.viewFilters.cycleOverview.assignees
-          ? [...this.viewFilters.cycleOverview.assignees]
+        assignees: viewFilters.cycleOverview.assignees
+          ? (viewFilters.cycleOverview.assignees as readonly PersonId[])
           : undefined,
       },
-      roadmap: { ...this.viewFilters.roadmap },
+      roadmap: { ...viewFilters.roadmap },
     } as ViewFilterCriteria;
-  }
+  };
 
   /**
    * Set all view filters (for state restoration)
    */
-  setAllViewFilters(filters: ViewFilterCriteria): void {
-    // Create mutable copy (convert readonly arrays to mutable)
-    this.viewFilters = {
-      common: {
-        ...filters.common,
-        initiatives: filters.common.initiatives
-          ? [...filters.common.initiatives]
-          : undefined,
-      },
-      cycleOverview: {
-        ...filters.cycleOverview,
-        stages: filters.cycleOverview.stages
-          ? [...filters.cycleOverview.stages]
-          : undefined,
-        assignees: filters.cycleOverview.assignees
-          ? [...filters.cycleOverview.assignees]
-          : undefined,
-      },
-      roadmap: { ...filters.roadmap },
-    };
-  }
-
-  /**
-   * Get filter configuration for debugging/logging
-   */
-  getFilterConfiguration() {
-    return this.filterConfig.getFilterMetadata();
-  }
+  const setAllViewFilters = (filters: ViewFilterCriteria): void => {
+    // Create mutable copy for internal state (convert readonly arrays to mutable)
+    viewFilters = createMutableFilters(filters);
+  };
 
   /**
    * Reset view-specific filters for a given view
    */
-  resetViewSpecificFilters(pageId: PageId): void {
+  const resetViewSpecificFilters = (pageId: PageId): void => {
     if (pageId === "cycle-overview") {
-      this.viewFilters = {
-        ...this.viewFilters,
+      viewFilters = {
+        ...viewFilters,
         cycleOverview: {},
       };
     } else if (pageId === "roadmap") {
-      this.viewFilters = {
-        ...this.viewFilters,
+      viewFilters = {
+        ...viewFilters,
         roadmap: {},
       };
     }
-  }
+  };
 
   /**
    * Clear all filters
    */
-  clearAllFilters(): void {
-    this.viewFilters = {
+  const clearAllFilters = (): void => {
+    viewFilters = {
       common: {},
       cycleOverview: {},
       roadmap: {},
     };
-  }
+  };
+
+  // Return immutable manager object
+  return {
+    switchView,
+    getCurrentView,
+    updateFilter,
+    getActiveFilters,
+    getAllViewFilters,
+    setAllViewFilters,
+    resetViewSpecificFilters,
+    clearAllFilters,
+  };
 }
 
-/**
- * Factory function to create ViewFilterManager with dependencies
- * This replaces the singleton pattern with proper dependency injection
- */
-export function createViewFilterManager(
-  config: OmegaConfig,
-): ViewFilterManager {
-  return new ViewFilterManager(config);
+// Legacy class export for backward compatibility (deprecated)
+// Use createViewFilterManager() factory function instead
+export class ViewFilterManagerClass implements ViewFilterManager {
+  private manager: ViewFilterManager;
+
+  constructor(config: OmegaConfig) {
+    this.manager = createViewFilterManager(config);
+  }
+
+  switchView(pageId: PageId): TypedFilterCriteria {
+    return this.manager.switchView(pageId);
+  }
+
+  getCurrentView(): PageId {
+    return this.manager.getCurrentView();
+  }
+
+  updateFilter(filterKey: FilterKey, value: unknown): TypedFilterCriteria {
+    return this.manager.updateFilter(filterKey, value);
+  }
+
+  getActiveFilters(): TypedFilterCriteria {
+    return this.manager.getActiveFilters();
+  }
+
+  getAllViewFilters(): ViewFilterCriteria {
+    return this.manager.getAllViewFilters();
+  }
+
+  setAllViewFilters(filters: ViewFilterCriteria): void {
+    return this.manager.setAllViewFilters(filters);
+  }
+
+  resetViewSpecificFilters(pageId: PageId): void {
+    return this.manager.resetViewSpecificFilters(pageId);
+  }
+
+  clearAllFilters(): void {
+    return this.manager.clearAllFilters();
+  }
 }

@@ -9,7 +9,7 @@
  */
 
 import { dataTransformer } from "../lib/transformers/data-transformer";
-import type { ViewFilterManager } from "./view-filter-manager";
+import type { ViewFilterManager } from "../types/filter-types";
 import type { CycleData } from "@omega/types";
 import type {
   NestedCycleData,

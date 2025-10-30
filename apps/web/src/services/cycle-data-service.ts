@@ -6,6 +6,7 @@
  * for cycle-related data operations. All endpoints are defined in the shared configuration.
  */
 
+import { Maybe } from "purify-ts";
 import { logger } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
 import type {
@@ -42,13 +43,19 @@ import type {
  * @class CycleDataService
  * @since 1.0.0
  */
+// Immutable cache state
+type CacheState = {
+  readonly data: CycleData;
+  readonly timestamp: number;
+};
+
 class CycleDataService {
-  #config: OmegaConfig;
-  #cachedCycleData: CycleData | null;
-  #cacheTimestamp: number | null;
-  #cacheTTL: number;
-  #apiTimeout: number;
-  #apiRetries: number;
+  readonly #config: OmegaConfig;
+  readonly #cacheTTL: number;
+  readonly #apiTimeout: number;
+  readonly #apiRetries: number;
+  // Use Maybe for optional immutable cache
+  #cacheState: Maybe<CacheState>;
 
   constructor(omegaConfig: OmegaConfig) {
     if (!omegaConfig) {
@@ -58,9 +65,8 @@ class CycleDataService {
     }
     this.#config = omegaConfig;
 
-    // Unified cache management - single cache for all data
-    this.#cachedCycleData = null;
-    this.#cacheTimestamp = null;
+    // Initialize with empty cache (Maybe.Nothing)
+    this.#cacheState = Maybe.empty();
     this.#cacheTTL = this.#config.getCacheTTL();
     this.#apiTimeout = this.#config.getEnvironmentConfig().timeout;
     this.#apiRetries = this.#config.getEnvironmentConfig().retries;
@@ -71,16 +77,17 @@ class CycleDataService {
    * @returns True if cache is valid
    */
   #isCacheValid(): boolean {
-    if (!this.#cachedCycleData || !this.#cacheTimestamp) return false;
-    return Date.now() - this.#cacheTimestamp < this.#cacheTTL;
+    return this.#cacheState
+      .map((cache) => Date.now() - cache.timestamp < this.#cacheTTL)
+      .orDefault(false);
   }
 
   /**
-   * Clear unified cache
+   * Clear unified cache (creates new empty Maybe)
    */
-  clearCache() {
-    this.#cachedCycleData = null;
-    this.#cacheTimestamp = null;
+  clearCache(): void {
+    // Create new empty Maybe instead of mutating
+    this.#cacheState = Maybe.empty();
   }
 
   /**
@@ -102,19 +109,31 @@ class CycleDataService {
 
   /**
    * Get cached cycle data with automatic loading
-   * This method handles all cache management internally
+   * This method handles all cache management internally using Maybe for safe cache access
    * @returns {Promise<CycleData>} The cycle data
    */
   async #getCachedCycleData(): Promise<CycleData> {
-    // Check if unified cache is still valid
-    if (this.#isCacheValid()) {
-      return this.#cachedCycleData!;
-    } else {
-      const cycleData = await this.#loadCycleData();
-      this.#cachedCycleData = cycleData;
-      this.#cacheTimestamp = Date.now();
-      return cycleData;
-    }
+    // Check if unified cache is still valid using Maybe
+    const cachedData = this.#cacheState
+      .filter(() => this.#isCacheValid())
+      .map((cache) => cache.data);
+
+    // Use Maybe operations without extract() - chain to handle async loading
+    return cachedData.caseOf({
+      Just: (data) => Promise.resolve(data),
+      Nothing: async () => {
+        // Cache invalid or empty - load new data and create immutable cache state
+        const cycleData = await this.#loadCycleData();
+        const newCacheState: CacheState = {
+          data: cycleData,
+          timestamp: Date.now(),
+        };
+
+        // Create new Maybe with fresh cache (immutable update)
+        this.#cacheState = Maybe.of(newCacheState);
+        return cycleData;
+      },
+    });
   }
 
   /**
@@ -133,7 +152,7 @@ class CycleDataService {
    * Make an HTTP request with error handling and retry logic
    * @param {string} endpoint - The API endpoint
    * @param {object} options - Fetch options
-   * @returns {Promise<any>} The response data
+   * @returns {Promise<RawCycleData>} The response data
    */
   async #request(
     endpoint: string,
@@ -152,7 +171,13 @@ class CycleDataService {
 
     const requestOptions = { ...defaultOptions, ...options };
 
-    const errors = [];
+    // Collect errors immutably
+    const errors: Array<{
+      attempt: number;
+      error: string;
+      timestamp: string;
+    }> = [];
+
     for (let attempt = 1; attempt <= this.#apiRetries; attempt++) {
       try {
         const response = await fetch(url, requestOptions);
@@ -166,9 +191,10 @@ class CycleDataService {
       } catch (error) {
         const errorInfo = {
           attempt,
-          error: error.message || error.toString(),
+          error: error instanceof Error ? error.message : String(error),
           timestamp: new Date().toISOString(),
         };
+        // Create new array instead of mutating
         errors.push(errorInfo);
         logger.service.warnSafe(
           `API request attempt ${attempt} failed`,

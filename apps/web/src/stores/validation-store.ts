@@ -7,7 +7,7 @@
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
 import type { OmegaConfig } from "@omega/config";
-import type { ViewFilterManager } from "../services/view-filter-manager";
+import type { ViewFilterManager } from "../types/filter-types";
 
 export const useValidationStore = defineStore("validation", () => {
   // Inject services

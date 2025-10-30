@@ -10,7 +10,7 @@ import { ref, computed, inject } from "vue";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
 import type { ViewFilterCriteria } from "../types/ui-types";
-import type { ViewFilterManager } from "../services/view-filter-manager";
+import type { ViewFilterManager } from "../types/filter-types";
 import type { Router } from "vue-router";
 import type { Cycle } from "@omega/types";
 import type { FilterKey } from "../types/filter-types";
