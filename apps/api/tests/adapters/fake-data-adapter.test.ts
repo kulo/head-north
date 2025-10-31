@@ -1,6 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { FakeDataAdapter } from "../../src/adapters/fake-data-adapter";
 import { OmegaConfig } from "@omega/config";
+import { RawCycleData } from "@omega/types";
+import { Either } from "@omega/utils";
 
 describe("FakeDataAdapter", () => {
   let config: OmegaConfig;
@@ -12,8 +14,13 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should generate cycle data", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
     expect(data.cycles).toHaveLength(4);
     expect(data.cycles[0]).toMatchObject({
       id: expect.stringMatching(/^\d+$/),
@@ -28,8 +35,13 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should generate roadmap items", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
     expect(data.roadmapItems.length).toBeGreaterThan(0);
     expect(data.roadmapItems[0]).toMatchObject({
       id: expect.stringMatching(/^ROAD-\d+$/),
@@ -40,8 +52,13 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should generate release items", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
     expect(data.releaseItems.length).toBeGreaterThan(0);
     expect(data.releaseItems[0]).toMatchObject({
       id: expect.stringMatching(/^ROAD-\d+-RELEASE-\d+$/),
@@ -52,8 +69,13 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should generate areas", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
     expect(data.areas).toBeDefined();
     expect(Object.keys(data.areas).length).toBeGreaterThan(0);
     expect(data.areas.platform).toMatchObject({
@@ -64,8 +86,13 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should generate initiatives", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
     expect(data.initiatives.length).toBeGreaterThan(0);
     expect(data.initiatives[0]).toMatchObject({
       id: expect.any(String),
@@ -74,18 +101,28 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should generate teams", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
-    expect(data.teams.length).toBeGreaterThan(0);
-    expect(data.teams[0]).toMatchObject({
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
+    expect(data.teams?.length).toBeGreaterThan(0);
+    expect(data.teams?.[0]).toMatchObject({
       id: expect.any(String),
       name: expect.any(String),
     });
   });
 
   it("should generate assignees", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
     expect(data.assignees.length).toBeGreaterThan(0);
     expect(data.assignees[0]).toMatchObject({
       id: expect.any(String),
@@ -94,8 +131,13 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should generate stages", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
 
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
     expect(data.stages).toBeDefined();
     expect(data.stages.length).toBeGreaterThan(0);
     expect(data.stages[0]).toMatchObject({
@@ -105,7 +147,13 @@ describe("FakeDataAdapter", () => {
   });
 
   it("should have consistent data relationships", async () => {
-    const data = await adapter.fetchCycleData();
+    const result = (await adapter.fetchCycleData()) as Either<
+      Error,
+      RawCycleData
+    >;
+
+    expect(result.isRight()).toBe(true);
+    const data = result.extract() as RawCycleData;
 
     // Check that release items reference valid roadmap items
     data.releaseItems.forEach((releaseItem) => {

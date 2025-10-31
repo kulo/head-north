@@ -21,16 +21,19 @@ export const getCycleData = async (context: Context): Promise<void> => {
 
   logger.default.info("fetching raw cycle data");
 
-  try {
-    // Collect raw data (I/O operation)
-    const rawData: RawCycleData = await collectCycleData(omegaConfig);
+  // Collect raw data (I/O operation) - now returns Either
+  const collectResult = await collectCycleData(omegaConfig);
 
-    // Validate and prepare using pure business logic
-    const validationResult = validateAndPrepareCycleData(rawData);
+  // Chain validation and preparation, handling errors functionally
+  const validationResult = collectResult.chain((rawData: RawCycleData) =>
+    validateAndPrepareCycleData(rawData),
+  );
 
-    // Handle result functionally using Either
-    validationResult.caseOf({
-      Left: (error) => {
+  // Handle result functionally using Either
+  validationResult.caseOf({
+    Left: (error) => {
+      // Check if error is from collection or validation
+      if ("validationErrors" in error) {
         logger.default.error("Raw cycle data validation failed", {
           errors: error.validationErrors,
         });
@@ -41,23 +44,24 @@ export const getCycleData = async (context: Context): Promise<void> => {
           message: error.message,
           validationErrors: error.validationErrors,
         };
-      },
-      Right: (preparedData) => {
-        logger.default.info(
-          `Raw cycle data validated successfully: ${(preparedData.roadmapItems as unknown[])?.length || 0} roadmap items, ${(preparedData.releaseItems as unknown[])?.length || 0} release items, ${(preparedData.cycles as unknown[])?.length || 0} cycles`,
-        );
+      } else {
+        // Error from collection (adapter failure)
+        logger.default.error("Error fetching raw cycle data", error);
+        context.status = 500;
+        context.body = {
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+          message: "Failed to fetch cycle data",
+        };
+      }
+    },
+    Right: (preparedData) => {
+      logger.default.info(
+        `Raw cycle data validated successfully: ${(preparedData.roadmapItems as unknown[])?.length || 0} roadmap items, ${(preparedData.releaseItems as unknown[])?.length || 0} release items, ${(preparedData.cycles as unknown[])?.length || 0} cycles`,
+      );
 
-        // Return prepared data - all transformations handled in frontend
-        context.body = preparedData;
-      },
-    });
-  } catch (error: unknown) {
-    logger.default.error("Error fetching raw cycle data", error);
-    context.status = 500;
-    context.body = {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-      message: "Failed to fetch cycle data",
-    };
-  }
+      // Return prepared data - all transformations handled in frontend
+      context.body = preparedData;
+    },
+  });
 };

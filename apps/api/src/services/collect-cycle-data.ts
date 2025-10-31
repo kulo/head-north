@@ -1,4 +1,5 @@
-import { Either, Right, Left } from "purify-ts";
+import type { Either } from "@omega/utils";
+import { Right, Left } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
 import type { RawCycleData } from "@omega/types";
 import type { JiraAdapter } from "../adapters/jira-adapter.interface";
@@ -13,14 +14,17 @@ import {
 /**
  * Collect cycle data using the appropriate adapter
  * This service now focuses on business logic and adapter selection
+ * Uses Either for functional error handling
  */
 export default async function collectCycleData(
   omegaConfig: OmegaConfig,
   _extraFields: string[] = [],
-): Promise<RawCycleData> {
+): Promise<Either<Error, RawCycleData>> {
   const adapter = createAdapter(omegaConfig);
-  const rawData = await adapter.fetchCycleData();
-  return applyBusinessLogic(rawData, omegaConfig);
+  const result = await adapter.fetchCycleData();
+
+  // Chain business logic transformation, preserving Either context
+  return result.map((rawData) => applyBusinessLogic(rawData, omegaConfig));
 }
 
 /**

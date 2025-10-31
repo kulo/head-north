@@ -1,6 +1,7 @@
 // JIRA Adapter Interface
 // Defines the contract for organization-specific JIRA data adapters
 
+import type { Either } from "@omega/utils";
 import type { RawCycleData } from "@omega/types";
 
 /**
@@ -13,15 +14,15 @@ import type { RawCycleData } from "@omega/types";
  * - Fetching raw data from JIRA
  * - Transforming JIRA domain objects to Omega domain objects
  * - Applying organization-specific business rules
- * - Returning complete RawCycleData structure
+ * - Returning complete RawCycleData structure with functional error handling
  */
 export interface JiraAdapter {
   /**
    * Fetch and transform cycle data from JIRA
    *
-   * @returns Complete cycle data structure with all entities
+   * @returns Either<Error, RawCycleData> - Uses Either for explicit error handling
    */
-  fetchCycleData(): Promise<RawCycleData>;
+  fetchCycleData(): Promise<Either<Error, RawCycleData>>;
 }
 
 /**

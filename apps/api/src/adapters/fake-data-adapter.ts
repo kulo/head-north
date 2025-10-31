@@ -1,6 +1,9 @@
 // Fake Data Adapter for fast development without JIRA dependency
 // Generates realistic Omega domain data directly based on config
+// Uses Either for functional error handling
 
+import type { Either } from "@omega/utils";
+import { safeAsync } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
 import type {
   RawCycleData,
@@ -57,25 +60,27 @@ export class FakeDataAdapter implements JiraAdapter {
     this.sprints = this.generateSprints();
   }
 
-  async fetchCycleData(): Promise<RawCycleData> {
-    // Generate release items based on roadmap items and sprints
-    const releaseItems = this.generateReleaseItems();
-    const areas = this.generateAreas();
-    const initiatives = this.generateInitiatives();
-    const teams = this.generateTeams();
-    const assignees = this.generateAssignees();
-    const stages = this.config.getStages();
+  async fetchCycleData(): Promise<Either<Error, RawCycleData>> {
+    return safeAsync(async () => {
+      // Generate release items based on roadmap items and sprints
+      const releaseItems = this.generateReleaseItems();
+      const areas = this.generateAreas();
+      const initiatives = this.generateInitiatives();
+      const teams = this.generateTeams();
+      const assignees = this.generateAssignees();
+      const stages = this.config.getStages();
 
-    return {
-      cycles: this.sprints,
-      roadmapItems: Object.values(this.roadmapItems),
-      releaseItems,
-      areas,
-      initiatives,
-      assignees,
-      stages,
-      teams,
-    };
+      return {
+        cycles: this.sprints,
+        roadmapItems: Object.values(this.roadmapItems),
+        releaseItems,
+        areas,
+        initiatives,
+        assignees,
+        stages,
+        teams,
+      } as RawCycleData;
+    });
   }
 
   /**

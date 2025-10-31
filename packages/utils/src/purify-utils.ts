@@ -1,13 +1,14 @@
 /**
- * Functional Composition Pipelines
+ * Purify-ts Utilities
  *
- * Generic functional composition utilities for creating composable data transformation pipelines.
- * Works with any TypeScript codebase, designed to complement purify-ts ADTs.
+ * Generic functional composition utilities and helpers for working with purify-ts ADTs.
+ * Provides pipeline composition, monadic helpers, safe wrappers, and utility functions.
  *
  * Side note: Could be moved into it's own package outside of omega-monorepo.
  */
 
-import { Maybe, Either, Left, Right } from "purify-ts";
+import type { Either } from "purify-ts";
+import { Maybe, Left, Right } from "purify-ts";
 
 /**
  * Pipe function - chains functions left to right
@@ -187,7 +188,7 @@ export const whenMaybe = <T, U>(
 };
 
 /**
- * Safe pipeline - handles errors with Either
+ * Safe pipeline - handles errors with Either (sync)
  */
 export const safe = <T, U>(fn: (x: T) => U): ((x: T) => Either<Error, U>) => {
   return (x: T) => {
@@ -197,6 +198,20 @@ export const safe = <T, U>(fn: (x: T) => U): ((x: T) => Either<Error, U>) => {
       return Left(error instanceof Error ? error : new Error(String(error)));
     }
   };
+};
+
+/**
+ * Safe async pipeline - handles errors with Either for Promise-returning functions
+ * Wraps async functions with try-catch and returns Promise<Either<Error, T>>
+ */
+export const safeAsync = <T>(
+  fn: () => Promise<T>,
+): Promise<Either<Error, T>> => {
+  return fn()
+    .then((value) => Right(value))
+    .catch((error) =>
+      Left(error instanceof Error ? error : new Error(String(error))),
+    );
 };
 
 /**

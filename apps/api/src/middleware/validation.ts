@@ -6,7 +6,8 @@
  */
 
 import { z } from "zod";
-import { Either, Left, Right } from "purify-ts";
+import type { Either } from "@omega/utils";
+import { Left, Right } from "@omega/utils";
 import type { Context } from "koa";
 import type { RawCycleData } from "@omega/types";
 

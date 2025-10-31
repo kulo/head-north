@@ -1,6 +1,9 @@
 // Default JIRA Adapter
 // Handles standard JIRA setup: separate Roadmap Item and Release Item issue types
+// Uses Either for functional error handling
 
+import { safeAsync } from "@omega/utils";
+import type { Either } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
 import type {
   RawCycleData,
@@ -35,48 +38,52 @@ export class DefaultJiraAdapter implements JiraAdapter {
     private config: OmegaConfig,
   ) {}
 
-  async fetchCycleData(): Promise<RawCycleData> {
-    // 1. Fetch all JIRA data in parallel
-    const [sprints, roadmapIssues, releaseIssues] = await Promise.all([
-      this.jiraClient.getSprints(
-        this.config.getJiraConfig()?.connection?.boardId || 0,
-      ),
-      this.jiraClient.searchIssues('issuetype = "Roadmap Item"', [
-        "summary",
-        "labels",
-      ]),
-      this.jiraClient.searchIssues('issuetype = "Release Item"', ["*"]),
-    ]);
+  async fetchCycleData(): Promise<Either<Error, RawCycleData>> {
+    return safeAsync(async () => {
+      // 1. Fetch all JIRA data in parallel
+      const [sprints, roadmapIssues, releaseIssues] = await Promise.all([
+        this.jiraClient.getSprints(
+          this.config.getJiraConfig()?.connection?.boardId || 0,
+        ),
+        this.jiraClient.searchIssues('issuetype = "Roadmap Item"', [
+          "summary",
+          "labels",
+        ]),
+        this.jiraClient.searchIssues('issuetype = "Release Item"', ["*"]),
+      ]);
 
-    // 2. Transform sprints to cycles
-    const cycles = sprints.map(jiraSprintToCycle);
+      // 2. Transform sprints to cycles
+      const cycles = sprints.map(jiraSprintToCycle);
 
-    // 3. Transform issues to roadmap/release items
-    const roadmapItems = roadmapIssues.map((issue) =>
-      this.transformRoadmapItem(issue, releaseIssues),
-    );
+      // 3. Transform issues to roadmap/release items
+      const roadmapItems = roadmapIssues.map((issue: JiraIssue) =>
+        this.transformRoadmapItem(issue, releaseIssues),
+      );
 
-    const releaseItems = releaseIssues.map((issue) =>
-      this.transformReleaseItem(issue, cycles),
-    );
+      const releaseItems = releaseIssues.map((issue: JiraIssue) =>
+        this.transformReleaseItem(issue, cycles),
+      );
 
-    // 4. Extract metadata from all issues
-    const allIssues = [...roadmapIssues, ...releaseIssues];
-    const areas = this.extractAreas(allIssues);
-    const initiatives = this.extractInitiatives(allIssues);
-    const teams = this.extractTeams(allIssues);
-    const assignees = extractAllAssignees(allIssues);
+      // 4. Extract metadata from all issues
+      const allIssues = [...roadmapIssues, ...releaseIssues];
+      const areas = this.extractAreas(allIssues);
+      const initiatives = this.extractInitiatives(allIssues);
+      const teams = this.extractTeams(allIssues);
+      const assignees = extractAllAssignees(allIssues);
 
-    return {
-      cycles,
-      roadmapItems,
-      releaseItems,
-      areas,
-      initiatives,
-      assignees,
-      stages: this.config.getStages(),
-      teams,
-    };
+      const rawData: RawCycleData = {
+        cycles,
+        roadmapItems,
+        releaseItems,
+        areas,
+        initiatives,
+        assignees,
+        stages: this.config.getStages(),
+        teams,
+      };
+
+      return rawData;
+    });
   }
 
   private transformRoadmapItem(
