@@ -4,7 +4,7 @@
 
 import { safeAsync } from "@omega/utils";
 import type { Either } from "@omega/utils";
-import type { OmegaConfig } from "@omega/config";
+import type { OmegaConfig, JiraConfigData } from "@omega/config";
 import type {
   RawCycleData,
   Cycle,
@@ -33,18 +33,26 @@ import {
 import type { JiraIssue } from "@omega/jira-primitives";
 
 export class DefaultJiraAdapter implements JiraAdapter {
+  private readonly jiraConfig: JiraConfigData;
+  private readonly config: OmegaConfig;
+
   constructor(
     private jiraClient: JiraClient,
-    private config: OmegaConfig,
-  ) {}
+    config: OmegaConfig,
+    jiraConfig: JiraConfigData,
+  ) {
+    this.jiraConfig = jiraConfig;
+    // Store config reference for non-JIRA methods (e.g., getLabelTranslations)
+    this.config = config;
+  }
 
   async fetchCycleData(): Promise<Either<Error, RawCycleData>> {
     return safeAsync(async () => {
       // 1. Fetch all JIRA data in parallel
+      const boardId = this.jiraConfig.connection.boardId;
+
       const [sprints, roadmapIssues, releaseIssues] = await Promise.all([
-        this.jiraClient.getSprints(
-          this.config.getJiraConfig()?.connection?.boardId || 0,
-        ),
+        this.jiraClient.getSprints(boardId),
         this.jiraClient.searchIssues('issuetype = "Roadmap Item"', [
           "summary",
           "labels",
@@ -157,10 +165,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
           this.config.getLabelTranslations().teams[owningTeamId] ||
           owningTeamId,
       },
-      url: createJiraUrl(
-        issue.key,
-        this.config.getJiraConfig()?.connection?.host || "",
-      ),
+      url: createJiraUrl(issue.key, this.jiraConfig.connection.host || ""),
       isExternal: false, // Will be determined by business logic
     };
   }
@@ -179,7 +184,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
     // Map status
     const status = mapJiraStatus(
       issue.fields.status,
-      this.config.getJiraConfig()?.statusMappings || {},
+      this.jiraConfig.statusMappings,
       this.config.getItemStatusValues().TODO,
     );
 
@@ -210,10 +215,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
       areaIds: areaLabels,
       teams: teamLabels,
       status,
-      url: createJiraUrl(
-        issue.key,
-        this.config.getJiraConfig()?.connection?.host || "",
-      ),
+      url: createJiraUrl(issue.key, this.jiraConfig.connection.host || ""),
       isExternal: false, // Will be determined by business logic
       stage,
       assignee,

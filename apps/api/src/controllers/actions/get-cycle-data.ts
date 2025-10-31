@@ -1,10 +1,9 @@
-import { Context } from "koa";
 import collectCycleData, {
   validateAndPrepareCycleData,
 } from "../../services/collect-cycle-data";
-import { logger } from "@omega/utils";
-import type { OmegaConfig } from "@omega/config";
+import { Either, logger } from "@omega/utils";
 import type { RawCycleData } from "@omega/types";
+import type { OmegaContext } from "../../types/koa-context";
 
 /**
  * Get cycle data endpoint that provides raw data for frontend transformation
@@ -16,13 +15,17 @@ import type { RawCycleData } from "@omega/types";
  *
  * All business logic is in cycle-data-business-logic.ts
  */
-export const getCycleData = async (context: Context): Promise<void> => {
-  const omegaConfig = context.omegaConfig as OmegaConfig;
+export const getCycleData = async (context: OmegaContext): Promise<void> => {
+  const { omegaConfig, jiraAdapter } = context;
 
   logger.default.info("fetching raw cycle data");
 
   // Collect raw data (I/O operation) - now returns Either
-  const collectResult = await collectCycleData(omegaConfig);
+  // Adapter is pre-validated at app startup, so no config extraction needed
+  const collectResult: Either<Error, RawCycleData> = await collectCycleData(
+    jiraAdapter,
+    omegaConfig,
+  );
 
   // Chain validation and preparation, handling errors functionally
   const validationResult = collectResult.chain((rawData: RawCycleData) =>

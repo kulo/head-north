@@ -1,6 +1,9 @@
 // Jira Configuration Types
 // These are kept in config for now but should eventually move to API package
 
+import type { Either } from "purify-ts";
+import { validateJiraConfig } from "./jira-config-validation";
+
 export default class JiraConfig {
   private processEnv: Record<string, string | undefined>;
   private useFakeData: boolean;
@@ -37,6 +40,14 @@ export default class JiraConfig {
         boardId: parseInt(this.processEnv.JIRA_BOARD_ID || "0", 10),
       },
     };
+  }
+
+  /**
+   * Get validated JIRA configuration
+   * Returns Either with validation errors if configuration is invalid
+   */
+  getValidatedConfig(): Either<Error, JiraConfigData> {
+    return validateJiraConfig(this.getConfig());
   }
 }
 
@@ -83,3 +94,6 @@ export interface BackendConfigWithJira {
   jira?: JiraConfigData;
   useFakeData?: boolean;
 }
+
+// Re-export validation function
+export { validateJiraConfig } from "./jira-config-validation";

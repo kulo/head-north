@@ -35,5 +35,7 @@
   "files": [
     "dist/**/*",
     "README.md"
-  ]
+  ],
+  "author": "Michael Wagner-Kulovits",
+  "license": "MIT"
 }

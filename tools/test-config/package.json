@@ -29,6 +29,6 @@
     "shared",
     "typescript"
   ],
-  "author": "Prewave Team",
-  "license": "UNLICENSED"
+  "author": "Michael Wagner-Kulovits",
+  "license": "MIT"
 }

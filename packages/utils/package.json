@@ -22,5 +22,7 @@
     "test": "vitest run",
     "lint": "eslint . --fix",
     "type-check": "tsc --noEmit"
-  }
+  },
+  "author": "Michael Wagner-Kulovits",
+  "license": "MIT"
 }

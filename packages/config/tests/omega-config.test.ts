@@ -122,11 +122,19 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
           JIRA_USER: "test-user",
           JIRA_TOKEN: "test-token",
           JIRA_HOST: "https://test.atlassian.net",
+          JIRA_BOARD_ID: "123",
         },
       });
-      const jiraConfig = config.getJiraConfig();
+      const jiraConfigResult = config.getJiraConfig();
 
-      // Jira config should be available and be an object
+      // Jira config should be available and validated
+      expect(jiraConfigResult.isRight()).toBe(true);
+      const jiraConfig = jiraConfigResult.caseOf({
+        Left: () => {
+          throw new Error("Expected valid JIRA config");
+        },
+        Right: (validConfig) => validConfig,
+      });
       if (jiraConfig) {
         expect(typeof jiraConfig).toBe("object");
       } else {

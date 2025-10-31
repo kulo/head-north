@@ -33,6 +33,8 @@
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
+  "author": "Michael Wagner-Kulovits",
+  "license": "MIT",
   "scripts": {
     "build": "node esbuild.config.js",
     "dev": "tsc --watch",

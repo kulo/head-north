@@ -27,9 +27,11 @@
  *   const endpoints = config.getEndpoints()
  */
 
+import type { Either } from "purify-ts";
 import validationDictionary from "./validation-dictionary";
 import JiraConfig from "./jira-config";
 import type { JiraConfigData } from "./jira-config";
+import { validateJiraConfig } from "./jira-config-validation";
 import { getEnvVarWithFallback } from "./utils";
 import type {
   ProcessEnv,
@@ -397,11 +399,13 @@ export default class OmegaConfig {
   }
 
   /**
-   * Get Jira configuration
-   * @returns Jira configuration
+   * Get JIRA configuration with validation
+   * Validates that all required connection fields (user, token, host, boardId) are present
+   * @returns Either<Error, JiraConfigData>
    */
-  getJiraConfig(): JiraConfigData | undefined {
-    return this.config.backend.jira as JiraConfigData | undefined;
+  getJiraConfig(): Either<Error, JiraConfigData> {
+    const jiraConfig = this.config.backend.jira as JiraConfigData | undefined;
+    return validateJiraConfig(jiraConfig);
   }
 
   /**

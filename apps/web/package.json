@@ -2,7 +2,8 @@
   "name": "@omega/web",
   "version": "1.0.0",
   "description": "Omega Web Application - Development Cycle & Roadmap Dashboard",
-  "author": "Prewave Team",
+  "author": "Michael Wagner-Kulovits",
+  "license": "MIT",
   "type": "module",
   "private": true,
   "scripts": {
