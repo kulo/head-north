@@ -65,33 +65,15 @@
 
 <script>
 import { computed, nextTick, onMounted, ref } from "vue";
-
-const deepCopy = function (src) {
-  return JSON.parse(JSON.stringify(src));
-};
-
-// Safety function to ensure chart options don't cause negative radii
-const validateChartOptions = (options, initiativeCount) => {
-  const safeOptions = deepCopy(options);
-
-  // For many initiatives, ensure we have enough space for the radial bars
-  if (initiativeCount > 4) {
-    // Ensure hollow size is large enough to prevent negative inner radius
-    safeOptions.plotOptions.radialBar.hollow.size = "35%";
-    safeOptions.plotOptions.radialBar.hollow.margin = 20;
-
-    // Reduce track margin to give more space
-    safeOptions.plotOptions.radialBar.track.margin = 3;
-  }
-
-  return safeOptions;
-};
-
-const sortInitiatives = (initiatives) => {
-  return deepCopy(initiatives).sort(
-    (init1, init2) => init2.weeks - init1.weeks,
-  );
-};
+import {
+  summarizeInitiatives,
+  calculateInitiativeRelativeValues,
+  extractInitiativeTracks,
+  extractInitiativeProgresses,
+  extractInitiativeInProgress,
+  validateChartOptions,
+  getInitiativeLengthClass,
+} from "../../lib/charts/initiative-chart-calculations";
 
 export default {
   name: "initiative-chart",
@@ -274,51 +256,9 @@ export default {
       },
     };
 
-    const summarizedInitiatives = computed(() => {
-      const maxInitiativesOnPage = 8;
-      if (props.initiatives.length <= maxInitiativesOnPage) {
-        return props.initiatives;
-      }
-
-      const sortedInitiatives = sortInitiatives(props.initiatives);
-      const headInitiatives = sortedInitiatives.slice(
-        0,
-        maxInitiativesOnPage - 1,
-      );
-      const tailInitiatives = sortedInitiatives.slice(maxInitiativesOnPage - 1);
-      const defaultOtherInitiative = {
-        name: "Other Projects",
-        initiative: "Other Projects",
-        weeks: 0,
-        weeksDone: 0,
-        weeksInProgress: 0,
-      };
-
-      const summarizedOtherInitiative = tailInitiatives.reduce((acc, init) => {
-        acc.weeks += init.weeks;
-        acc.weeksDone += init.weeksDone;
-        acc.weeksInProgress += init.weeksInProgress;
-        return acc;
-      }, defaultOtherInitiative);
-
-      const progressRate =
-        summarizedOtherInitiative.weeks > 0
-          ? summarizedOtherInitiative.weeksDone /
-            summarizedOtherInitiative.weeks
-          : 0;
-      summarizedOtherInitiative.progress = Math.round(progressRate * 100) || 0;
-
-      const inprogressRate =
-        summarizedOtherInitiative.weeks > 0
-          ? (summarizedOtherInitiative.weeksDone +
-              summarizedOtherInitiative.weeksInProgress) /
-            summarizedOtherInitiative.weeks
-          : 0;
-      summarizedOtherInitiative.progressWithInProgress =
-        Math.round(inprogressRate * 100) || 0;
-
-      return sortInitiatives(headInitiatives.concat(summarizedOtherInitiative));
-    });
+    const summarizedInitiatives = computed(() =>
+      summarizeInitiatives(props.initiatives, 8),
+    );
 
     const options1 = computed(() => {
       return validateChartOptions(
@@ -341,179 +281,24 @@ export default {
       );
     });
 
-    const initiativesWithRelativeValues = computed(() => {
-      let initiatives = summarizedInitiatives.value.map((initiative) => {
-        return {
-          name: initiative.name,
-          weeks: initiative.weeks,
-          weeksDone: initiative.weeksDone,
-          progress: initiative.progress,
-          progressWithInProgress: initiative.progressWithInProgress,
-        };
-      });
+    const initiativesWithRelativeValues = computed(() =>
+      calculateInitiativeRelativeValues(summarizedInitiatives.value),
+    );
 
-      let longestInitiative = initiatives[0];
+    const initiativeTracks = computed(() =>
+      extractInitiativeTracks(initiativesWithRelativeValues.value),
+    );
 
-      return initiatives.map((initiative, i) => {
-        // Prevent division by zero and ensure positive values
-        let relativeModifierToLongest =
-          longestInitiative.weeks > 0
-            ? initiative.weeks / longestInitiative.weeks
-            : 0;
+    const initiativeProgresses = computed(() =>
+      extractInitiativeProgresses(initiativesWithRelativeValues.value),
+    );
 
-        // Ensure relativeModifierToLongest is always positive and finite
-        relativeModifierToLongest = Math.max(
-          0,
-          Math.min(10, relativeModifierToLongest),
-        ); // Cap at 10 to prevent extreme values
-        if (!isFinite(relativeModifierToLongest)) relativeModifierToLongest = 0;
+    const initiativeInProgress = computed(() =>
+      extractInitiativeInProgress(initiativesWithRelativeValues.value),
+    );
 
-        let trackLength = Math.max(
-          1,
-          Math.ceil(relativeModifierToLongest * 100 * 1.1),
-        ); // Start with minimum 1
-
-        // Apply multipliers with safety checks
-        if (trackLength < 10) {
-          trackLength = Math.max(1, Math.min(100, trackLength * 2.3));
-        } else if (trackLength < 30) {
-          trackLength = Math.max(1, Math.min(100, trackLength * 1.1));
-        } else if (trackLength < 80) {
-          trackLength = Math.max(1, Math.min(100, trackLength * 1.15));
-        }
-
-        // Final safety check - ensure trackLength is always positive and within bounds
-        trackLength = Math.max(1, Math.min(100, Math.abs(trackLength)));
-        if (!isFinite(trackLength)) trackLength = 1;
-
-        // Ensure progress values are not negative and within bounds
-        let safeProgress = Math.max(
-          0,
-          Math.min(100, Math.abs(initiative.progress || 0)),
-        );
-        let safeInProgress = Math.max(
-          0,
-          Math.min(100, Math.abs(initiative.progressWithInProgress || 0)),
-        );
-
-        // Ensure progress values are finite
-        if (!isFinite(safeProgress)) safeProgress = 0;
-        if (!isFinite(safeInProgress)) safeInProgress = 0;
-
-        let progressOnTrack = Math.max(
-          0,
-          Math.min(trackLength, Math.ceil((safeProgress / 100) * trackLength)),
-        );
-        let inprogressOnTrack = Math.max(
-          0,
-          Math.min(
-            trackLength,
-            Math.ceil((safeInProgress / 100) * trackLength),
-          ),
-        );
-
-        // Final safety check - ensure all values are non-negative and finite
-        trackLength = Math.abs(trackLength);
-        progressOnTrack = Math.abs(progressOnTrack);
-        inprogressOnTrack = Math.abs(inprogressOnTrack);
-
-        // Final validation for all values
-        if (!isFinite(trackLength) || trackLength <= 0) trackLength = 1;
-        if (!isFinite(progressOnTrack) || progressOnTrack < 0)
-          progressOnTrack = 0;
-        if (!isFinite(inprogressOnTrack) || inprogressOnTrack < 0)
-          inprogressOnTrack = 0;
-
-        return {
-          name: initiative.name,
-          weeks: initiative.weeks,
-          weeksDone: initiative.weeksDone,
-          progress: initiative.progress,
-          trackLength,
-          progressOnTrack,
-          inprogressOnTrack,
-        };
-      });
-    });
-
-    const initiativeTracks = computed(() => {
-      const result = initiativesWithRelativeValues.value.map((initiative) => {
-        const value = Math.max(
-          1,
-          Math.min(100, Math.abs(initiative.trackLength || 1)),
-        );
-        if (value <= 0 || isNaN(value) || !isFinite(value)) {
-          return 1;
-        }
-        return value;
-      });
-
-      // Final safety check - ensure no values are negative or invalid
-      const safeResult = result.map((value) => {
-        if (value <= 0 || !isFinite(value) || isNaN(value)) {
-          return 1;
-        }
-        return value;
-      });
-
-      return safeResult;
-    });
-
-    const initiativeProgresses = computed(() => {
-      const result = initiativesWithRelativeValues.value.map((initiative) => {
-        const value = Math.max(
-          0,
-          Math.min(100, Math.abs(initiative.progressOnTrack || 0)),
-        );
-        if (value < 0 || isNaN(value) || !isFinite(value)) {
-          return 0;
-        }
-        return value;
-      });
-
-      // Final safety check
-      const safeResult = result.map((value) => {
-        if (value < 0 || !isFinite(value) || isNaN(value)) {
-          return 0;
-        }
-        return value;
-      });
-
-      return safeResult;
-    });
-
-    const initiativeInProgress = computed(() => {
-      const result = initiativesWithRelativeValues.value.map((initiative) => {
-        const value = Math.max(
-          0,
-          Math.min(100, Math.abs(initiative.inprogressOnTrack || 0)),
-        );
-        if (value < 0 || isNaN(value) || !isFinite(value)) {
-          return 0;
-        }
-        return value;
-      });
-
-      // Final safety check
-      const safeResult = result.map((value) => {
-        if (value < 0 || !isFinite(value) || isNaN(value)) {
-          return 0;
-        }
-        return value;
-      });
-
-      return safeResult;
-    });
-
-    const initiativeLengthClass = () => {
-      let initiativeClass = {};
-      initiativeClass[
-        "global-initiatives__details-" + summarizedInitiatives.value.length
-      ] = true;
-      if (summarizedInitiatives.value.length > 4)
-        initiativeClass["global-initiatives__details-gt4"] = true;
-      return initiativeClass;
-    };
+    const initiativeLengthClass = () =>
+      getInitiativeLengthClass(summarizedInitiatives.value.length);
 
     return {
       isReady,
