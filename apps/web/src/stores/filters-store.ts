@@ -39,8 +39,12 @@ export const useFilterStore = defineStore("filters", () => {
 
   // Actions
 
+  /**
+   * Set filters - immutable update (creates new object)
+   */
   function setFilters(newFilters: ViewFilterCriteria) {
-    filters.value = newFilters;
+    // Create new object for immutability to ensure Vue reactivity
+    filters.value = { ...newFilters };
   }
 
   async function updateFilters(newFilters: ViewFilterCriteria) {

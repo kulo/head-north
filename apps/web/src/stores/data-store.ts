@@ -7,6 +7,7 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
+import { Maybe } from "purify-ts";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
 import { useFilterStore } from "./filters-store";
@@ -183,13 +184,20 @@ export const useDataStore = defineStore("data", () => {
     }
   });
 
-  // Actions
+  // Actions - All state updates are immutable (Vue refs track changes)
+
+  /**
+   * Set raw data - immutable update
+   */
   function setRawData(data: CycleData) {
-    rawData.value = data;
+    rawData.value = data; // Vue ref assignment - reactive update
   }
 
+  /**
+   * Set processed data - immutable update
+   */
   function setProcessedData(data: NestedCycleData) {
-    processedData.value = data;
+    processedData.value = data; // Vue ref assignment - reactive update
   }
 
   async function fetchAndProcessData() {
