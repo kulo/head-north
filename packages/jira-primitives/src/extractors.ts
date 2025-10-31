@@ -1,4 +1,5 @@
 // Data extraction utilities for JIRA data
+import { Maybe } from "purify-ts";
 import type { JiraIssue } from "./types";
 import type { Person } from "@omega/types";
 
@@ -28,10 +29,30 @@ export function extractCustomField<T>(
 }
 
 /**
+ * Extract custom field value from JIRA issue (functional version with Maybe)
+ * Returns Maybe<T> for safer optional value handling
+ */
+export function extractCustomFieldMaybe<T>(
+  issue: JiraIssue,
+  fieldName: string,
+): Maybe<T> {
+  const value = (issue.fields as unknown as Record<string, unknown>)[fieldName];
+  return Maybe.fromNullable(value as T | null | undefined);
+}
+
+/**
  * Extract parent issue key from JIRA issue
  */
 export function extractParent(issue: JiraIssue): string | undefined {
   return issue.fields.parent?.key;
+}
+
+/**
+ * Extract parent issue key from JIRA issue (functional version with Maybe)
+ * Returns Maybe<string> for safer optional value handling
+ */
+export function extractParentMaybe(issue: JiraIssue): Maybe<string> {
+  return Maybe.fromNullable(issue.fields.parent?.key);
 }
 
 /**
@@ -56,6 +77,17 @@ export function extractAssignee(issue: JiraIssue): Person | null {
     id: assignee.accountId,
     name: assignee.displayName,
   };
+}
+
+/**
+ * Extract assignee information from JIRA issue (functional version with Maybe)
+ * Returns Maybe<Person> for safer optional value handling
+ */
+export function extractAssigneeMaybe(issue: JiraIssue): Maybe<Person> {
+  return Maybe.fromNullable(issue.fields.assignee).map((assignee) => ({
+    id: assignee.accountId,
+    name: assignee.displayName,
+  }));
 }
 
 /**
@@ -88,6 +120,15 @@ export function extractStageFromName(name: string): string {
   }
 
   return name.substring(startPostfix + 1, endPostfix).toLowerCase();
+}
+
+/**
+ * Extract stage from issue name (functional version with Maybe)
+ * Returns Maybe<string> - empty string becomes Nothing
+ */
+export function extractStageFromNameMaybe(name: string): Maybe<string> {
+  const stage = extractStageFromName(name);
+  return stage.length > 0 ? Maybe.of(stage) : Maybe.empty();
 }
 
 /**
