@@ -495,7 +495,7 @@ describe("validateChartOptions", () => {
   });
 
   it("should handle options without plotOptions", () => {
-    const options = { chart: {} };
+    const options = { chart: {}, plotOptions: undefined };
 
     const result = validateChartOptions(options, 10);
 

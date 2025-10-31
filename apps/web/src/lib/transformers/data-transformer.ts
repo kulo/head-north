@@ -8,12 +8,7 @@
  */
 
 import { Maybe } from "purify-ts";
-import type {
-  Cycle,
-  CycleData,
-  InitiativeId,
-  ValidationItem,
-} from "@omega/types";
+import type { CycleData, InitiativeId, ValidationItem } from "@omega/types";
 import type {
   FilterCriteria,
   InitiativeWithProgress,
@@ -21,6 +16,7 @@ import type {
   RoadmapItemWithProgress,
   RoadmapData,
   CycleOverviewData,
+  FilterResult,
 } from "../../types/ui-types";
 import { filter } from "../utils/filter";
 import { selectDefaultCycle } from "../selectors/cycle-selector";
@@ -30,6 +26,7 @@ import {
   DEFAULT_INITIATIVE,
   getDefaultInitiativeId,
 } from "../constants/default-values";
+import { pipe } from "@omega/utils";
 import OmegaConfig from "@omega/config";
 
 /**
@@ -316,25 +313,21 @@ export function applyInitiativeFilter(
 /**
  * Process raw cycle data into nested structure with filtering
  * Pure function - no side effects
+ * Uses functional pipeline composition for clear data flow
  */
 export function processCycleData(
   config: OmegaConfig,
   rawData: CycleData,
   filters: FilterCriteria = {},
 ): NestedCycleData {
-  // Transform raw data to nested structure
-  const nestedData = transformToNestedStructure(config, rawData);
-
-  // Apply initiative filter first (at initiative level)
-  const initiativeFilteredData = applyInitiativeFilter(
-    nestedData,
-    filters.initiatives,
+  return pipe(
+    rawData,
+    (data: CycleData) => transformToNestedStructure(config, data),
+    (nestedData: NestedCycleData) =>
+      applyInitiativeFilter(nestedData, filters.initiatives),
+    (filteredData: NestedCycleData) => filter.apply(filteredData, filters),
+    (result: FilterResult) => result.data,
   );
-
-  // Apply all other filters (cascading from release items up)
-  const result = filter.apply(initiativeFilteredData, filters);
-
-  return result.data;
 }
 
 /**
@@ -417,35 +410,40 @@ export function generateFilteredRoadmapData(
 /**
  * Generate filtered cycle overview data with progress calculations
  * Pure function - no side effects
+ * Uses functional pipeline composition for clear data flow
  */
 export function generateFilteredCycleOverviewData(
   rawData: CycleData | null,
   processedData: NestedCycleData | null,
   activeFilters: FilterCriteria,
 ): CycleOverviewData | null {
+  // Early return for null/empty data
   if (!processedData || !rawData?.cycles?.length) {
     return null;
   }
 
-  const selectedCycle = selectDefaultCycle(rawData.cycles);
-  if (!selectedCycle) {
-    return null;
-  }
+  // Use Maybe for safe cycle selection
+  const selectedCycle = Maybe.fromNullable(selectDefaultCycle(rawData.cycles));
 
-  // Apply filters using unified filter system
-  const filteredData = filter.apply(processedData, activeFilters);
-  const filteredInitiatives = filteredData.data.initiatives || [];
+  // Compose pipeline using Maybe for safe transformations
+  return selectedCycle
+    .map((cycle) => {
+      // Apply filters using unified filter system
+      const filteredData = filter.apply(processedData, activeFilters);
+      const filteredInitiatives = filteredData.data.initiatives || [];
 
-  // Calculate cycle progress data
-  const cycleWithProgress = calculateCycleProgress(
-    selectedCycle,
-    filteredInitiatives,
-  );
+      // Calculate cycle progress data
+      const cycleWithProgress = calculateCycleProgress(
+        cycle,
+        filteredInitiatives,
+      );
 
-  return {
-    cycle: cycleWithProgress,
-    initiatives: filteredInitiatives,
-  };
+      return {
+        cycle: cycleWithProgress,
+        initiatives: filteredInitiatives,
+      };
+    })
+    .orDefault(null);
 }
 
 /**

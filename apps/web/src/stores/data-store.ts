@@ -7,7 +7,6 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
-import { Maybe } from "purify-ts";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
 import { useFilterStore } from "./filters-store";
@@ -88,8 +87,8 @@ export const useDataStore = defineStore("data", () => {
   const filteredRoadmapData = computed((): RoadmapData => {
     // Depend on filter store's activeFilters to ensure reactivity when filters change
     const filterStore = useFilterStore();
-    // Access activeFilters to create reactive dependency
-    const _ = filterStore.activeFilters;
+    // Access activeFilters to create reactive dependency (intentionally unused variable)
+    void filterStore.activeFilters;
 
     console.log("🔍 Computing filteredRoadmapData:", {
       hasCoordinator: !!coordinator,
@@ -148,8 +147,8 @@ export const useDataStore = defineStore("data", () => {
   const filteredCycleOverviewData = computed((): CycleOverviewData | null => {
     // Depend on filter store's activeFilters to ensure reactivity when filters change
     const filterStore = useFilterStore();
-    // Access activeFilters to create reactive dependency
-    const _ = filterStore.activeFilters;
+    // Access activeFilters to create reactive dependency (intentionally unused variable)
+    void filterStore.activeFilters;
 
     console.log("🔍 Computing filteredCycleOverviewData:", {
       hasCoordinator: !!coordinator,

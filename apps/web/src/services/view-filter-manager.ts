@@ -12,13 +12,7 @@
  */
 
 import type { OmegaConfig } from "@omega/config";
-import type {
-  AreaId,
-  CycleId,
-  InitiativeId,
-  PersonId,
-  StageId,
-} from "@omega/types";
+import type { InitiativeId, PersonId, StageId } from "@omega/types";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type {
   ViewFilterManager,
@@ -27,13 +21,6 @@ import type {
   TypedFilterCriteria,
 } from "../types/filter-types";
 import { FilterConfigurationService } from "./filter-configuration";
-
-/**
- * Helper to create a deep readonly copy of arrays for return values
- */
-const createReadonlyArray = <T>(
-  arr: T[] | undefined,
-): readonly T[] | undefined => (arr ? [...arr] : undefined);
 
 /**
  * Helper to create mutable arrays for internal state
