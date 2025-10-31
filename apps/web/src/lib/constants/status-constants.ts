@@ -1,3 +1,5 @@
+import { match } from "ts-pattern";
+
 /**
  * Status constants for release items and roadmap items
  * Extracted from the original AreaData class for reuse across the application
@@ -12,36 +14,32 @@ export const STATUS = {
 };
 
 /**
- * Normalize status string to match our constants
+ * Normalize status string to match our constants using pattern matching
  * @param status - Raw status string
  * @returns Normalized status
  */
 export const normalizeStatus = (status: string): string => {
+  // Handle invalid input
   if (!status || typeof status !== "string") {
     return STATUS.TODO;
   }
 
   const normalized = status.toLowerCase().trim();
 
-  // Map common variations to our constants
-  const statusMap = {
-    "to do": STATUS.TODO,
-    "not started": STATUS.TODO,
-    open: STATUS.TODO,
-    "in progress": STATUS.IN_PROGRESS,
-    "in-progress": STATUS.IN_PROGRESS,
-    wip: STATUS.IN_PROGRESS,
-    "work in progress": STATUS.IN_PROGRESS,
-    completed: STATUS.DONE,
-    closed: STATUS.DONE,
-    finished: STATUS.DONE,
-    cancelled: STATUS.CANCELLED,
-    canceled: STATUS.CANCELLED,
-    replanned: STATUS.REPLANNED,
-    rescheduled: STATUS.REPLANNED,
-  };
-
-  return statusMap[normalized] || normalized;
+  // Use ts-pattern for exhaustive pattern matching with multiple patterns per case
+  return match(normalized)
+    .with("to do", "not started", "open", () => STATUS.TODO)
+    .with(
+      "in progress",
+      "in-progress",
+      "wip",
+      "work in progress",
+      () => STATUS.IN_PROGRESS,
+    )
+    .with("completed", "closed", "finished", () => STATUS.DONE)
+    .with("cancelled", "canceled", () => STATUS.CANCELLED)
+    .with("replanned", "rescheduled", () => STATUS.REPLANNED)
+    .otherwise(() => normalized); // Return normalized if no pattern matches
 };
 
 /**

@@ -5,6 +5,7 @@
  * Extracted from Vuex store to improve separation of concerns.
  */
 
+import { isActiveState, isClosedState } from "../utils/cycle-state-utils";
 import type { Cycle } from "@omega/types";
 
 /**
@@ -26,7 +27,9 @@ export function selectDefaultCycle(cycles: readonly Cycle[]): Cycle | null {
   });
 
   // 1. Try to find active cycles (oldest first)
-  const activeCycles = sortedCycles.filter((cycle) => cycle.state === "active");
+  const activeCycles = sortedCycles.filter((cycle) =>
+    isActiveState(cycle.state),
+  );
   if (activeCycles.length > 0) {
     return activeCycles[0]; // Oldest active cycle
   }
@@ -35,17 +38,15 @@ export function selectDefaultCycle(cycles: readonly Cycle[]): Cycle | null {
   const futureCycles = sortedCycles.filter((cycle) => {
     const cycleDate = new Date(cycle.start || cycle.delivery || 0);
     const now = new Date();
-    return (
-      cycleDate > now && cycle.state !== "closed" && cycle.state !== "completed"
-    );
+    return cycleDate > now && !isClosedState(cycle.state);
   });
   if (futureCycles.length > 0) {
     return futureCycles[0]; // Oldest future cycle
   }
 
   // 3. Fall back to closed cycles (oldest first)
-  const closedCycles = sortedCycles.filter(
-    (cycle) => cycle.state === "closed" || cycle.state === "completed",
+  const closedCycles = sortedCycles.filter((cycle) =>
+    isClosedState(cycle.state),
   );
   if (closedCycles.length > 0) {
     return closedCycles[0]; // Oldest closed cycle
