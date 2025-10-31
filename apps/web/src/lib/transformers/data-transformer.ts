@@ -7,6 +7,7 @@
  * This belongs in /lib because it contains only pure functions with no external dependencies.
  */
 
+import { Maybe } from "purify-ts";
 import type {
   Cycle,
   CycleData,
@@ -33,22 +34,27 @@ import OmegaConfig from "@omega/config";
 
 /**
  * Hydrate ValidationItems with dictionary data
+ * Uses Maybe for safe dictionary lookup
  */
 function hydrateValidations(
   config: OmegaConfig,
-  validations: ValidationItem[],
-): ValidationItem[] {
+  validations: readonly ValidationItem[],
+): readonly ValidationItem[] {
   const dictionary = config.getValidationDictionary();
 
   return validations.map((v) => {
     // Parse code to determine if it's releaseItem or roadmapItem
     const [category, ruleKey] = parseValidationCode(v.code);
-    const rule = dictionary[category]?.[ruleKey];
+
+    // Use Maybe chain for safe dictionary lookup without extract()
+    const rule = Maybe.fromNullable(dictionary[category]).chain(
+      (categoryDict) => Maybe.fromNullable(categoryDict[ruleKey]),
+    );
 
     return {
       ...v,
-      name: rule?.label || v.name,
-      description: rule?.reference || v.description,
+      name: rule.map((r) => r.label).orDefault(v.name),
+      description: rule.map((r) => r.reference).orDefault(v.description),
     };
   });
 }
@@ -88,15 +94,18 @@ export function transformToNestedStructure(
 ): NestedCycleData {
   const { cycles, roadmapItems, releaseItems, initiatives } = rawData;
 
-  // Create initiatives lookup
-  const initiativesLookup: Record<string, string> = {};
-  if (Array.isArray(initiatives)) {
-    initiatives.forEach((init) => {
-      initiativesLookup[init.id] = init.name;
-    });
-  }
+  // Create initiatives lookup using functional reduce
+  const initiativesLookup: Record<string, string> = Array.isArray(initiatives)
+    ? initiatives.reduce(
+        (acc, init) => {
+          acc[init.id] = init.name;
+          return acc;
+        },
+        {} as Record<string, string>,
+      )
+    : {};
 
-  // Group roadmap items by initiative
+  // Group roadmap items by initiative using functional reduce
   // Using mutable type during construction, will be cast to readonly at return
   type MutableInitiative = {
     id: string;
@@ -121,14 +130,16 @@ export function transformToNestedStructure(
     daysInCycle: number;
     currentDayPercentage: number;
   };
-  const groupedInitiatives: Record<string, MutableInitiative> = {};
 
-  roadmapItems.forEach((item) => {
+  // Use reduce instead of forEach for functional aggregation
+  const groupedInitiatives = roadmapItems.reduce<
+    Record<string, MutableInitiative>
+  >((acc, item) => {
     const initiativeId = getDefaultInitiativeId(item.initiativeId);
 
     // Initialize initiative if not exists
-    if (!groupedInitiatives[initiativeId]) {
-      groupedInitiatives[initiativeId] = {
+    if (!acc[initiativeId]) {
+      acc[initiativeId] = {
         id: initiativeId,
         name: initiativesLookup[initiativeId] || DEFAULT_INITIATIVE.NAME,
         roadmapItems: [],
@@ -170,20 +181,26 @@ export function transformToNestedStructure(
       area: typeof item.area === "string" ? item.area : item.area?.name || "",
       theme: typeof item.theme === "string" ? item.theme : "",
       url: item.url || `https://example.com/browse/${item.id}`,
-      validations: Array.isArray(item.validations)
-        ? hydrateValidations(config, item.validations)
-        : [],
+      validations: Maybe.fromNullable(item.validations)
+        .filter(Array.isArray)
+        .map((vals) => hydrateValidations(config, vals))
+        .orDefault([]),
       startDate: item.startDate,
       endDate: item.endDate,
       releaseItems: itemReleaseItems.map((releaseItem) => ({
         ...releaseItem,
-        validations: Array.isArray(releaseItem.validations)
-          ? hydrateValidations(config, releaseItem.validations)
-          : [],
-        cycle: releaseItem.cycle || {
-          id: releaseItem.cycleId,
-          name: getCycleName(cycles, releaseItem.cycleId),
-        },
+        validations: Maybe.fromNullable(releaseItem.validations)
+          .filter(Array.isArray)
+          .map((vals) => hydrateValidations(config, vals))
+          .orDefault([]),
+        cycle:
+          releaseItem.cycle ||
+          Maybe.fromNullable(releaseItem.cycleId)
+            .map((cycleId) => ({
+              id: cycleId,
+              name: getCycleName(cycles, cycleId),
+            }))
+            .orDefault({ id: "", name: "" }),
       })),
       // Add calculated metrics
       ...roadmapItemMetrics,
@@ -194,9 +211,9 @@ export function transformToNestedStructure(
       currentDayPercentage: 0,
     };
 
-    // Create new initiative with updated values (functional style - no mutations)
-    const currentInitiative = groupedInitiatives[initiativeId];
-    groupedInitiatives[initiativeId] = {
+    // Create new initiative with updated values (functional style - immutable update)
+    const currentInitiative = acc[initiativeId];
+    acc[initiativeId] = {
       ...currentInitiative,
       roadmapItems: [...currentInitiative.roadmapItems, roadmapItem],
       // Aggregate metrics to initiative level (calculate new values)
@@ -218,7 +235,9 @@ export function transformToNestedStructure(
         currentInitiative.releaseItemsDoneCount +
         roadmapItemMetrics.releaseItemsDoneCount,
     };
-  });
+
+    return acc;
+  }, {});
 
   // Calculate final initiative-level percentages (functional style)
   const initiativesWithPercentages = Object.values(groupedInitiatives).map(
@@ -271,19 +290,22 @@ export function transformToNestedStructure(
 
 /**
  * Apply initiative filter at the initiative level
- * Pure function - no side effects
+ * Pure function - no side effects, uses Maybe for safe filtering
  */
 export function applyInitiativeFilter(
   data: NestedCycleData,
   initiatives?: readonly InitiativeId[],
 ): NestedCycleData {
-  if (!initiatives || initiatives.length === 0) {
-    return data;
-  }
-
-  const filteredInitiatives = data.initiatives.filter((initiative) =>
-    initiatives.includes(initiative.id),
-  ) as readonly InitiativeWithProgress[];
+  // Use Maybe to handle optional/empty filter arrays
+  const filteredInitiatives = Maybe.fromNullable(initiatives)
+    .filter((ids) => ids.length > 0)
+    .map(
+      (ids) =>
+        data.initiatives.filter((initiative) =>
+          ids.includes(initiative.id),
+        ) as readonly InitiativeWithProgress[],
+    )
+    .orDefault(data.initiatives);
 
   return {
     ...data,
@@ -427,21 +449,25 @@ export function generateFilteredCycleOverviewData(
 }
 
 /**
- * Get cycle name by ID
+ * Get cycle name by ID using Maybe for safe lookup
  * Pure function - no side effects
  */
 function getCycleName(cycles: readonly unknown[], cycleId: string): string {
-  if (!Array.isArray(cycles)) {
+  if (!Array.isArray(cycles) || !cycleId) {
     return `Cycle ${cycleId}`;
   }
 
-  const cycle = cycles.find((c) => {
-    const cycleObj = c as { id?: string };
-    return cycleObj.id === cycleId;
-  });
-  return cycle
-    ? (cycle as { name?: string }).name || `Cycle ${String(cycleId)}`
-    : `Cycle ${String(cycleId)}`;
+  return Maybe.fromNullable(
+    cycles.find((c) => {
+      const cycleObj = c as { id?: string };
+      return cycleObj.id === cycleId;
+    }),
+  )
+    .map((cycle) => {
+      const cycleWithName = cycle as { name?: string };
+      return cycleWithName.name || `Cycle ${String(cycleId)}`;
+    })
+    .orDefault(`Cycle ${String(cycleId)}`);
 }
 
 // Export all functions as a single object
