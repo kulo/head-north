@@ -224,14 +224,18 @@ function roadmapItemMatchesArea(
 ): boolean {
   return Maybe.fromNullable(roadmapItem.area)
     .map((areaValue) => {
-      // Handle string area
+      // Use pattern matching for type-safe area comparison
       if (typeof areaValue === "string") {
         return areaValue === area;
       }
 
       // Handle Area object
-      if (typeof areaValue === "object" && "name" in areaValue) {
-        return areaValue.name === area;
+      if (
+        typeof areaValue === "object" &&
+        areaValue !== null &&
+        "name" in areaValue
+      ) {
+        return (areaValue as { name: string }).name === area;
       }
 
       return false;

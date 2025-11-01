@@ -13,6 +13,7 @@
 
 import type { OmegaConfig } from "@omega/config";
 import type { InitiativeId, PersonId, StageId } from "@omega/types";
+import { match } from "ts-pattern";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type {
   ViewFilterManager,
@@ -122,22 +123,29 @@ export function createViewFilterManager(
         },
       };
     } else {
-      // Update view-specific filter
-      if (currentView === "cycle-overview") {
-        viewFilters = {
-          ...viewFilters,
-          cycleOverview: {
-            ...viewFilters.cycleOverview,
-            [filterKey]: newValue,
-          },
-        };
-      } else if (currentView === "roadmap") {
-        // Roadmap filters are currently empty, but handle for future extensibility
-        viewFilters = {
-          ...viewFilters,
-          roadmap: {} as Record<string, never>,
-        };
-      }
+      // Update view-specific filter using pattern matching
+      match(currentView)
+        .with("cycle-overview", () => {
+          viewFilters = {
+            ...viewFilters,
+            cycleOverview: {
+              ...viewFilters.cycleOverview,
+              [filterKey]: newValue,
+            },
+          };
+        })
+        .with("roadmap", () => {
+          // Roadmap filters are currently empty, but handle for future extensibility
+          viewFilters = {
+            ...viewFilters,
+            roadmap: {} as Record<string, never>,
+          };
+        })
+        .with("root", () => {
+          // Root view doesn't have view-specific filters
+          // This case shouldn't happen due to validation above, but handle gracefully
+        })
+        .exhaustive(); // Ensures all PageId cases are handled
     }
 
     return getActiveFilters();
@@ -154,19 +162,27 @@ export function createViewFilterManager(
         : undefined,
     };
 
-    if (currentView === "cycle-overview") {
-      // Include cycle overview specific filters (create mutable copies)
-      activeFilters.stages = viewFilters.cycleOverview.stages
-        ? [...viewFilters.cycleOverview.stages]
-        : undefined;
-      activeFilters.assignees = viewFilters.cycleOverview.assignees
-        ? [...viewFilters.cycleOverview.assignees]
-        : undefined;
-      activeFilters.cycle = viewFilters.cycleOverview.cycle;
-    } else if (currentView === "roadmap") {
-      // Include roadmap specific filters (currently none)
-      // No additional filters for roadmap view
-    }
+    // Use pattern matching to add view-specific filters
+    match(currentView)
+      .with("cycle-overview", () => {
+        // Include cycle overview specific filters (create mutable copies)
+        activeFilters.stages = viewFilters.cycleOverview.stages
+          ? [...viewFilters.cycleOverview.stages]
+          : undefined;
+        activeFilters.assignees = viewFilters.cycleOverview.assignees
+          ? [...viewFilters.cycleOverview.assignees]
+          : undefined;
+        activeFilters.cycle = viewFilters.cycleOverview.cycle;
+      })
+      .with("roadmap", () => {
+        // Include roadmap specific filters (currently none)
+        // No additional filters for roadmap view
+      })
+      .with("root", () => {
+        // Root view only has common filters
+        // No view-specific filters to add
+      })
+      .exhaustive(); // Ensures all PageId cases are handled
 
     return activeFilters;
   };
@@ -210,17 +226,23 @@ export function createViewFilterManager(
    * Reset view-specific filters for a given view
    */
   const resetViewSpecificFilters = (pageId: PageId): void => {
-    if (pageId === "cycle-overview") {
-      viewFilters = {
-        ...viewFilters,
-        cycleOverview: {},
-      };
-    } else if (pageId === "roadmap") {
-      viewFilters = {
-        ...viewFilters,
-        roadmap: {},
-      };
-    }
+    match(pageId)
+      .with("cycle-overview", () => {
+        viewFilters = {
+          ...viewFilters,
+          cycleOverview: {},
+        };
+      })
+      .with("roadmap", () => {
+        viewFilters = {
+          ...viewFilters,
+          roadmap: {},
+        };
+      })
+      .with("root", () => {
+        // Root view doesn't have view-specific filters to reset
+      })
+      .exhaustive(); // Ensures all PageId cases are handled
   };
 
   /**
