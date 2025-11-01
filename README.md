@@ -369,12 +369,23 @@ The codebase has been recently cleaned up to remove unused artifacts and improve
 
 ## 🤝 Contributing
 
-1. Make changes in the appropriate workspace directory
-2. Test your changes: `npm run test`
-3. Lint your code: `npm run lint`
-4. Commit your changes
-5. Create a pull request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines, including:
+
+- Development setup and workflow
+- Code style and coding standards
+- Pull request process and checklist
+- Commit message conventions
+
+## 📚 Documentation
+
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute, coding standards, PR process
+- **[Coding Guidelines](docs/CODING_GUIDELINES.md)** - Comprehensive coding standards and best practices (includes FP patterns, TypeScript, testing, migration patterns, quick reference)
+
+---
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2025 Michael Wagner-Kulovits
+Developed while employed at Prewave
