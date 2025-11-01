@@ -254,22 +254,6 @@ export const useDataStore = defineStore("data", () => {
     processedData.value = null;
   }
 
-  function getReleaseItemsForCycle(
-    roadmapItem: { releaseItems?: unknown[] },
-    cycleId: string | number,
-  ) {
-    if (!roadmapItem?.releaseItems) {
-      return [];
-    }
-
-    // Filter release items that belong to this cycle
-    // Use == for type coercion to handle string/number mismatches
-    return roadmapItem.releaseItems.filter(
-      (releaseItem: { cycle?: { id: string | number } }) =>
-        releaseItem.cycle && releaseItem.cycle.id == cycleId,
-    );
-  }
-
   return {
     // State
     rawData,
@@ -294,6 +278,5 @@ export const useDataStore = defineStore("data", () => {
     setProcessedData,
     fetchAndProcessData,
     clearData,
-    getReleaseItemsForCycle,
   };
 });

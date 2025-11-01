@@ -46,18 +46,16 @@
 
 <script>
 import { computed } from "vue";
-import { useDataStore } from "../../stores";
 import {
   hasValidationError,
   getValidationErrorText,
 } from "../../lib/utils/roadmap-validation";
+import { getReleaseItemsForCycle } from "../../lib/utils/roadmap-item-utils";
 
 export default {
   name: "roadmap-item-overview",
   props: ["roadmapItem", "orderedCycles", "itemIndex"],
   setup(props) {
-    const dataStore = useDataStore();
-
     // Extract validation logic to pure functions
     const validations = computed(() => props.roadmapItem.validations);
     const hasValidationErrorComputed = computed(() =>
@@ -67,16 +65,16 @@ export default {
       getValidationErrorText(validations.value),
     );
 
-    const getReleaseItemsForCycle = (cycleId) => {
-      return dataStore.getReleaseItemsForCycle(props.roadmapItem, cycleId);
+    // Use pure function instead of store method
+    const getReleaseItemsForCycleFn = (cycleId) => {
+      return getReleaseItemsForCycle(props.roadmapItem, cycleId);
     };
 
     return {
-      dataStore,
       validations,
       hasValidationError: hasValidationErrorComputed,
       validationErrorText: validationErrorTextComputed,
-      getReleaseItemsForCycle,
+      getReleaseItemsForCycle: getReleaseItemsForCycleFn,
     };
   },
 };
