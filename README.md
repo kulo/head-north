@@ -343,30 +343,6 @@ The project uses a **Single Source of Truth** approach for configuration:
 - **Backend**: Uses shared endpoints for route registration
 - **Consistency**: Frontend and backend automatically stay in sync
 
-## 🧹 Recent Cleanup
-
-The codebase has been recently cleaned up to remove unused artifacts and improve maintainability:
-
-### Removed Components
-
-- **UI Package**: Removed `packages/ui` as it contained only placeholder components
-- **Unused Dependencies**: Removed unused npm packages (vuex, @vueuse/core, sass-loader, etc.)
-- **Unused Files**: Cleaned up unused utility files, test duplicates, and empty directories
-- **Unused Scripts**: Removed redundant npm scripts across all packages
-
-### Current Package Structure
-
-- **Types** (`@omega/types`): Shared TypeScript interfaces and types
-- **Utils** (`@omega/utils`): Logging utilities and shared helper functions
-- **Config** (`@omega/config`): Centralized configuration and API endpoint definitions
-
-### Build Status
-
-- ✅ All packages build successfully
-- ✅ Web application runs on http://localhost:8080
-- ✅ API service runs on http://localhost:3000
-- ✅ Fake data mode available for development without Jira authentication
-
 ## 🤝 Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines, including:
