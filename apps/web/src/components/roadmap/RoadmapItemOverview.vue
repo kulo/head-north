@@ -45,50 +45,39 @@
 </template>
 
 <script>
+import { computed } from "vue";
 import { useDataStore } from "../../stores";
+import {
+  hasValidationError,
+  getValidationErrorText,
+} from "../../lib/utils/roadmap-validation";
 
 export default {
   name: "roadmap-item-overview",
   props: ["roadmapItem", "orderedCycles", "itemIndex"],
-  setup() {
+  setup(props) {
     const dataStore = useDataStore();
+
+    // Extract validation logic to pure functions
+    const validations = computed(() => props.roadmapItem.validations);
+    const hasValidationErrorComputed = computed(() =>
+      hasValidationError(validations.value),
+    );
+    const validationErrorTextComputed = computed(() =>
+      getValidationErrorText(validations.value),
+    );
+
+    const getReleaseItemsForCycle = (cycleId) => {
+      return dataStore.getReleaseItemsForCycle(props.roadmapItem, cycleId);
+    };
 
     return {
       dataStore,
+      validations,
+      hasValidationError: hasValidationErrorComputed,
+      validationErrorText: validationErrorTextComputed,
+      getReleaseItemsForCycle,
     };
-  },
-  computed: {
-    validations() {
-      return this.roadmapItem.validations;
-    },
-    hasValidationError() {
-      return (
-        this.validations &&
-        (!this.validations.hasScheduledRelease ||
-          !this.validations.hasGlobalReleaseInBacklog)
-      );
-    },
-    validationErrorText() {
-      if (!this.hasValidationError) {
-        return "";
-      }
-
-      return [
-        !this.validations.hasScheduledRelease
-          ? "No scheduled S1/S3 release."
-          : [],
-        !this.validations.hasGlobalReleaseInBacklog
-          ? "No planned S3 release."
-          : [],
-      ]
-        .flat()
-        .join(" ");
-    },
-  },
-  methods: {
-    getReleaseItemsForCycle(cycleId) {
-      return this.dataStore.getReleaseItemsForCycle(this.roadmapItem, cycleId);
-    },
   },
 };
 </script>

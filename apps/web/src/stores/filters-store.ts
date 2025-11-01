@@ -129,6 +129,13 @@ export const useFilterStore = defineStore("filters", () => {
 
   async function initializeDefaultFilters(cycles: Cycle[]) {
     try {
+      // Only initialize cycle filter if we're in cycle-overview view
+      // Cycle filter is not valid for other views (root, roadmap)
+      const currentView = filterManager.getCurrentView();
+      if (currentView !== "cycle-overview") {
+        return;
+      }
+
       // Only set default cycle if no cycle filter is currently active
       if (!activeFilters.value.cycle && cycles && cycles.length > 0) {
         const defaultCycle = selectDefaultCycle(cycles);
