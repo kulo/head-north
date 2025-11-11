@@ -11,7 +11,6 @@ import type {
   FilterCategory,
   FilterKey,
   PageId,
-  FilterType,
   ViewFilterConfig,
 } from "../types/filter-types";
 
@@ -59,168 +58,126 @@ const DEFAULT_FILTER_CATEGORIES: FilterCategory[] = [
 ];
 
 /**
- * Filter Configuration Service Implementation
- *
- * Provides type-safe access to filter definitions and rules.
- * This service is stateless and can be safely shared across the application.
+ * Build the view filter configuration from filter categories
+ * Pure function - uses reduce for immutable transformation
  */
-export class FilterConfigurationService implements FilterConfiguration {
-  private filterCategories: FilterCategory[];
-  private viewFilterConfig: ViewFilterConfig;
+function buildViewFilterConfig(
+  filterCategories: readonly FilterCategory[],
+): ViewFilterConfig {
+  const initialConfig: ViewFilterConfig = {
+    common: [],
+    specific: {
+      root: [],
+      "cycle-overview": [],
+      roadmap: [],
+    },
+  };
 
-  constructor(config: OmegaConfig) {
-    this.filterCategories = DEFAULT_FILTER_CATEGORIES;
-    this.viewFilterConfig = this.buildViewFilterConfig();
+  return filterCategories.reduce((acc, category) => {
+    if (category.type === "common") {
+      return {
+        ...acc,
+        common: [...acc.common, category.key],
+      };
+    }
 
-    // Validate that all configured pages exist in OmegaConfig
-    this.validatePageConfiguration(config);
+    // Add to specific filters for each view that supports it
+    const updatedSpecific = category.views.reduce((specificAcc, view) => {
+      if (!specificAcc[view]) {
+        return { ...specificAcc, [view]: [] };
+      }
+      return {
+        ...specificAcc,
+        [view]: [...specificAcc[view], category.key],
+      };
+    }, acc.specific);
+
+    return {
+      ...acc,
+      specific: updatedSpecific,
+    };
+  }, initialConfig);
+}
+
+/**
+ * Validate that all configured pages exist in OmegaConfig
+ * Pure function - validates page configuration
+ */
+function validatePageConfiguration(
+  filterCategories: readonly FilterCategory[],
+  config: OmegaConfig,
+): void {
+  // Collect all pages referenced in filter categories (immutable)
+  const configuredPages = new Set<PageId>(
+    filterCategories.flatMap((category) => category.views),
+  );
+
+  // Check that all referenced page IDs exist in OmegaConfig
+  // We need to check against the actual page.id values, not the page keys
+  const allPages = config.getFrontendConfig().getAllPages();
+  const pageIds = allPages.map((page) => page.id);
+
+  const invalidPages = Array.from(configuredPages).filter(
+    (pageId) => !pageIds.includes(pageId),
+  );
+
+  if (invalidPages.length > 0) {
+    throw new Error(
+      `Filter configuration references page(s) '${invalidPages.join(", ")}' which do not exist in OmegaConfig. Available pages: ${pageIds.join(", ")}`,
+    );
   }
+}
 
-  /**
-   * Get all filter categories with their metadata
-   */
-  getFilterCategories(): FilterCategory[] {
-    return [...this.filterCategories];
-  }
+/**
+ * Filter Configuration Service
+ *
+ * Factory function that provides type-safe access to filter definitions and rules.
+ * Returns an immutable configuration object with pure functional methods.
+ */
+export function createFilterConfigurationService(
+  config: OmegaConfig,
+): FilterConfiguration {
+  // Immutable configuration data
+  const filterCategories = [...DEFAULT_FILTER_CATEGORIES] as const;
+  const viewFilterConfig = buildViewFilterConfig(filterCategories);
+
+  // Validate that all configured pages exist in OmegaConfig
+  validatePageConfiguration(filterCategories, config);
 
   /**
    * Get filters available for a specific page/view
    */
-  getViewFilters(pageId: PageId): FilterKey[] {
-    const commonFilters = this.viewFilterConfig.common;
-    const specificFilters = this.viewFilterConfig.specific[pageId] || [];
+  const getViewFilters = (pageId: PageId): FilterKey[] => {
+    const commonFilters = viewFilterConfig.common;
+    const specificFilters = viewFilterConfig.specific[pageId] || [];
 
     return [...commonFilters, ...specificFilters];
-  }
+  };
 
   /**
    * Check if a filter is common across all views
    */
-  isCommonFilter(filterKey: FilterKey): boolean {
-    const category = this.filterCategories.find((cat) => cat.key === filterKey);
+  const isCommonFilter = (filterKey: FilterKey): boolean => {
+    const category = filterCategories.find((cat) => cat.key === filterKey);
     return category?.type === "common" || false;
-  }
-
-  /**
-   * Get the type of a filter (common or view-specific)
-   */
-  getFilterType(filterKey: FilterKey): FilterType {
-    const category = this.filterCategories.find((cat) => cat.key === filterKey);
-    return category?.type ?? "view-specific";
-  }
-
-  /**
-   * Get all views that support a specific filter
-   */
-  getViewsForFilter(filterKey: FilterKey): PageId[] {
-    const category = this.filterCategories.find((cat) => cat.key === filterKey);
-    return category?.views ?? [];
-  }
-
-  /**
-   * Get the complete view filter configuration
-   */
-  getViewFilterConfig(): ViewFilterConfig {
-    return { ...this.viewFilterConfig };
-  }
+  };
 
   /**
    * Validate that a filter key is valid for a specific view
    */
-  isValidFilterForView(filterKey: FilterKey, pageId: PageId): boolean {
-    const availableFilters = this.getViewFilters(pageId);
+  const isValidFilterForView = (
+    filterKey: FilterKey,
+    pageId: PageId,
+  ): boolean => {
+    const availableFilters = getViewFilters(pageId);
     return availableFilters.includes(filterKey);
-  }
+  };
 
-  /**
-   * Build the view filter configuration from filter categories
-   * @private
-   */
-  private buildViewFilterConfig(): ViewFilterConfig {
-    const common: FilterKey[] = [];
-    const specific: Record<PageId, FilterKey[]> = {
-      root: [],
-      "cycle-overview": [],
-      roadmap: [],
-    };
+  const service: FilterConfiguration = {
+    getViewFilters,
+    isCommonFilter,
+    isValidFilterForView,
+  };
 
-    // Process each filter category
-    for (const category of this.filterCategories) {
-      if (category.type === "common") {
-        common.push(category.key);
-      } else {
-        // Add to specific filters for each view that supports it
-        for (const view of category.views) {
-          if (!specific[view]) {
-            specific[view] = [];
-          }
-          specific[view].push(category.key);
-        }
-      }
-    }
-
-    return { common, specific };
-  }
-
-  /**
-   * Validate that all configured pages exist in OmegaConfig
-   * @private
-   */
-  private validatePageConfiguration(config: OmegaConfig): void {
-    const configuredPages = new Set<PageId>();
-
-    // Collect all pages referenced in filter categories
-    for (const category of this.filterCategories) {
-      for (const view of category.views) {
-        configuredPages.add(view);
-      }
-    }
-
-    // Check that all referenced page IDs exist in OmegaConfig
-    // We need to check against the actual page.id values, not the page keys
-    const allPages = config.getFrontendConfig().getAllPages();
-    const pageIds = allPages.map((page) => page.id);
-
-    for (const pageId of configuredPages) {
-      if (!pageIds.includes(pageId)) {
-        throw new Error(
-          `Filter configuration references page '${pageId}' which does not exist in OmegaConfig. Available pages: ${pageIds.join(", ")}`,
-        );
-      }
-    }
-  }
-
-  /**
-   * Get filter metadata for debugging/logging
-   */
-  getFilterMetadata(): {
-    totalFilters: number;
-    commonFilters: number;
-    viewSpecificFilters: number;
-    filtersByView: Record<PageId, number>;
-  } {
-    const commonFilters = this.filterCategories.filter(
-      (cat) => cat.type === "common",
-    ).length;
-    const viewSpecificFilters = this.filterCategories.filter(
-      (cat) => cat.type === "view-specific",
-    ).length;
-
-    const filtersByView: Record<PageId, number> = {
-      root: 0,
-      "cycle-overview": 0,
-      roadmap: 0,
-    };
-
-    for (const pageId of Object.keys(filtersByView) as PageId[]) {
-      filtersByView[pageId] = this.getViewFilters(pageId).length;
-    }
-
-    return {
-      totalFilters: this.filterCategories.length,
-      commonFilters,
-      viewSpecificFilters,
-      filtersByView,
-    };
-  }
+  return service;
 }

@@ -4,8 +4,6 @@ import {
   extractCustomField,
   extractParent,
   extractAssignee,
-  extractStageFromName,
-  extractProjectName,
 } from "../src/extractors";
 import type { JiraIssue } from "../src/types";
 
@@ -56,10 +54,11 @@ describe("extractors", () => {
       };
 
       const result = extractCustomField<number>(issue, "customfield_10002");
-      expect(result).toBe(5);
+      expect(result.isJust()).toBe(true);
+      expect(result.extract()).toBe(5);
     });
 
-    it("should return undefined for missing field", () => {
+    it("should return Nothing for missing field", () => {
       const issue: JiraIssue = {
         id: "TEST-1",
         key: "TEST-1",
@@ -73,7 +72,7 @@ describe("extractors", () => {
       };
 
       const result = extractCustomField<number>(issue, "customfield_10002");
-      expect(result).toBeUndefined();
+      expect(result.isNothing()).toBe(true);
     });
   });
 
@@ -100,10 +99,11 @@ describe("extractors", () => {
       };
 
       const result = extractParent(issue);
-      expect(result).toBe("PROJ-1");
+      expect(result.isJust()).toBe(true);
+      expect(result.extract()).toBe("PROJ-1");
     });
 
-    it("should return undefined when no parent", () => {
+    it("should return Nothing when no parent", () => {
       const issue: JiraIssue = {
         id: "TEST-1",
         key: "TEST-1",
@@ -117,7 +117,7 @@ describe("extractors", () => {
       };
 
       const result = extractParent(issue);
-      expect(result).toBeUndefined();
+      expect(result.isNothing()).toBe(true);
     });
   });
 
@@ -141,13 +141,14 @@ describe("extractors", () => {
       };
 
       const result = extractAssignee(issue);
-      expect(result).toEqual({
+      expect(result.isJust()).toBe(true);
+      expect(result.extract()).toEqual({
         id: "user123",
         name: "John Doe",
       });
     });
 
-    it("should return null when no assignee", () => {
+    it("should return Nothing when no assignee", () => {
       const issue: JiraIssue = {
         id: "TEST-1",
         key: "TEST-1",
@@ -161,57 +162,7 @@ describe("extractors", () => {
       };
 
       const result = extractAssignee(issue);
-      expect(result).toBeNull();
-    });
-  });
-
-  describe("extractStageFromName", () => {
-    it("should extract stage from issue name", () => {
-      const result = extractStageFromName("Feature Implementation (s1)");
-      expect(result).toBe("s1");
-    });
-
-    it("should extract stage from complex name", () => {
-      const result = extractStageFromName(
-        "Customer Analytics Dashboard [Platform] (s2)",
-      );
-      expect(result).toBe("s2");
-    });
-
-    it("should return empty string when no stage", () => {
-      const result = extractStageFromName("Feature Implementation");
-      expect(result).toBe("");
-    });
-
-    it("should return empty string for malformed brackets", () => {
-      const result = extractStageFromName("Feature (s1");
-      expect(result).toBe("");
-    });
-  });
-
-  describe("extractProjectName", () => {
-    it("should extract project name from summary", () => {
-      const result = extractProjectName(
-        "[Platform] Customer Analytics Dashboard",
-      );
-      expect(result).toBe("Customer Analytics Dashboard");
-    });
-
-    it("should extract project name with multiple brackets", () => {
-      const result = extractProjectName(
-        "[Platform] Customer Analytics Dashboard [Analytics]",
-      );
-      expect(result).toBe("Customer Analytics Dashboard");
-    });
-
-    it("should return full summary when no brackets", () => {
-      const result = extractProjectName("Customer Analytics Dashboard");
-      expect(result).toBe("Customer Analytics Dashboard");
-    });
-
-    it("should handle empty summary", () => {
-      const result = extractProjectName("");
-      expect(result).toBe("");
+      expect(result.isNothing()).toBe(true);
     });
   });
 });

@@ -6,6 +6,7 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
+import { Right } from "purify-ts";
 import { useAppStore } from "../../src/stores/app-store";
 import { useDataStore } from "../../src/stores/data-store";
 import { useFilterStore } from "../../src/stores/filters-store";
@@ -84,7 +85,7 @@ describe("Store Integration", () => {
       releaseItems: [],
     };
 
-    (cycleDataService as any).getCycleData.mockResolvedValue(mockData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(Right(mockData));
 
     // Initial state
     expect(appStore.isLoading).toBe(false);
@@ -157,7 +158,7 @@ describe("Store Integration", () => {
       releaseItems: [],
     };
 
-    (cycleDataService as any).getCycleData.mockResolvedValue(mockData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(Right(mockData));
 
     // 1. Fetch data
     await dataStore.fetchAndProcessData();

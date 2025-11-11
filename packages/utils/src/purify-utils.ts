@@ -224,3 +224,81 @@ export const tap = <T>(effect: (x: T) => void): ((x: T) => T) => {
     return x;
   };
 };
+
+/**
+ * Retry with exponential backoff - functional wrapper around p-retry
+ * Works with Either for functional error handling
+ * @param fn - Function that returns Promise<Either<Error, T>>
+ * @param options - Retry options (maxRetries, minTimeout, factor)
+ * @returns Promise<Either<Error, T>> with accumulated error information
+ */
+export const retryWithBackoff = async <T>(
+  fn: () => Promise<Either<Error, T>>,
+  options: {
+    maxRetries: number;
+    minTimeout?: number;
+    factor?: number;
+    onRetry?: (error: Error, attempt: number) => void;
+  },
+): Promise<Either<Error, T>> => {
+  // Import p-retry dynamically to avoid requiring it as a peer dependency
+  const pRetry = await import("p-retry").then((m) => m.default);
+
+  const { maxRetries, minTimeout = 1000, factor = 2, onRetry } = options;
+
+  const errors: Array<{ attempt: number; error: string; timestamp: string }> =
+    [];
+
+  try {
+    const result = await pRetry(
+      async (attemptNumber) => {
+        const attempt = attemptNumber - 1; // p-retry uses 1-based indexing
+        const eitherResult = await fn();
+
+        return eitherResult.caseOf({
+          Right: (value) => {
+            // Success - p-retry expects the value, not Either
+            return value as unknown as T;
+          },
+          Left: (error) => {
+            // Record error for summary
+            errors.push({
+              attempt,
+              error: error.message,
+              timestamp: new Date().toISOString(),
+            });
+
+            // Call onRetry callback if provided
+            if (onRetry) {
+              onRetry(error, attempt);
+            }
+
+            // Throw to trigger retry (p-retry expects thrown errors)
+            throw error;
+          },
+        });
+      },
+      {
+        retries: maxRetries,
+        minTimeout,
+        factor,
+      },
+    );
+
+    // Success case
+    return Right(result);
+  } catch (error) {
+    // All retries exhausted
+    const finalError =
+      error instanceof Error ? error : new Error(String(error));
+
+    // If we have accumulated errors, include them in the message
+    const errorSummary =
+      errors.length > 0
+        ? errors.map((e) => `Attempt ${e.attempt}: ${e.error}`).join("; ")
+        : finalError.message;
+
+    const message = `API request failed after ${maxRetries} attempts. Errors: ${errorSummary}`;
+    return Left(new Error(message));
+  }
+};

@@ -277,7 +277,7 @@ const validations = []; // No validation
 // ✅ Good
 const releaseItem = {
   id: issue.key,
-  roadmapItemId: extractParent(issue), // Links to roadmap item
+  roadmapItemId: extractParent(issue).orDefault(""), // Links to roadmap item
   cycleId: issue.fields.sprint?.id?.toString(), // Links to cycle
   // ...
 };

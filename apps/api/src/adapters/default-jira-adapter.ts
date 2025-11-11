@@ -2,8 +2,7 @@
 // Handles standard JIRA setup: separate Roadmap Item and Release Item issue types
 // Uses Either for functional error handling
 
-import { safeAsync } from "@omega/utils";
-import type { Either } from "@omega/utils";
+import { Either, Maybe, safeAsync } from "@omega/utils";
 import type { OmegaConfig, JiraConfigData } from "@omega/config";
 import type {
   RawCycleData,
@@ -14,6 +13,7 @@ import type {
   Team,
   Initiative,
   ValidationItem,
+  Person,
 } from "@omega/types";
 import type { JiraAdapter } from "./jira-adapter.interface";
 import {
@@ -23,8 +23,6 @@ import {
   extractParent,
   extractAssignee,
   extractAllAssignees,
-  extractStageFromName,
-  extractProjectName,
   jiraSprintToCycle,
   mapJiraStatus,
   createJiraUrl,
@@ -136,12 +134,13 @@ export class DefaultJiraAdapter implements JiraAdapter {
       ...validateRequired(initiative, issue.key, "initiative"),
     ];
 
-    // Parse project name
-    const name = extractProjectName(issue.fields.summary);
+    const name = this.extractRoadmapItemName(issue.fields.summary);
 
     // Find related release items
-    const relatedReleaseItems = releaseIssues.filter(
-      (ri) => extractParent(ri) === issue.key,
+    const relatedReleaseItems = releaseIssues.filter((ri) =>
+      extractParent(ri)
+        .map((parentKey: string) => parentKey === issue.key)
+        .orDefault(false),
     );
 
     // Determine owning team from release items
@@ -172,14 +171,17 @@ export class DefaultJiraAdapter implements JiraAdapter {
 
   private transformReleaseItem(issue: JiraIssue, cycles: Cycle[]): ReleaseItem {
     // Extract effort from custom field
-    const effort = extractCustomField<number>(issue, "customfield_10002") || 0;
+    const effort = extractCustomField<number>(
+      issue,
+      "customfield_10002",
+    ).orDefault(0);
 
     // Extract labels
     const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
     const teamLabels = extractLabelsWithPrefix(issue.fields.labels, "team:");
 
     // Extract stage from name
-    const stage = extractStageFromName(issue.fields.summary);
+    const stage = this.extractStageFromName(issue.fields.summary).orDefault("");
 
     // Map status
     const status = mapJiraStatus(
@@ -188,17 +190,22 @@ export class DefaultJiraAdapter implements JiraAdapter {
       this.config.getItemStatusValues().TODO,
     );
 
-    // Extract assignee
-    const assignee = extractAssignee(issue) || {};
+    // Extract assignee with empty object fallback
+    const assignee = extractAssignee(issue).orDefault({
+      id: "",
+      name: "",
+    } as Person);
 
     // Extract parent (roadmapItemId)
-    const roadmapItemId = extractParent(issue);
+    const roadmapItemId = extractParent(issue).orDefault("");
 
     // Extract cycleId from sprint
     const cycleId = issue.fields.sprint?.id?.toString() || "";
 
-    // Find cycle name
-    const cycle = cycles.find((c) => c.id === cycleId);
+    // Find cycle using Maybe for safe lookup and transform to required shape
+    const cycle = Maybe.fromNullable(cycles.find((c) => c.id === cycleId))
+      .map((c) => ({ id: c.id, name: c.name }))
+      .orDefault({ id: "", name: "" });
 
     // Generate validations
     const validations: ValidationItem[] = [
@@ -222,7 +229,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
       validations,
       roadmapItemId: roadmapItemId || "",
       cycleId,
-      cycle: cycle ? { id: cycle.id, name: cycle.name } : { id: "", name: "" },
+      cycle,
       created: issue.fields.created || new Date().toISOString(),
       updated: issue.fields.updated || new Date().toISOString(),
     };
@@ -235,16 +242,20 @@ export class DefaultJiraAdapter implements JiraAdapter {
       ),
     );
 
-    const areas: Record<string, Area> = {};
-    areaLabels.forEach((label) => {
-      areas[label] = {
-        id: label,
-        name: this.config.getLabelTranslations().areas[label] || label,
-        teams: [], // Will be populated elsewhere
-      };
-    });
-
-    return areas;
+    // Use reduce for immutable transformation instead of forEach
+    return Array.from(areaLabels).reduce(
+      (acc, label) => {
+        return {
+          ...acc,
+          [label]: {
+            id: label,
+            name: this.config.getLabelTranslations().areas[label] || label,
+            teams: [], // Will be populated elsewhere
+          },
+        };
+      },
+      {} as Record<string, Area>,
+    );
   }
 
   private extractInitiatives(allIssues: JiraIssue[]): Initiative[] {
@@ -271,5 +282,39 @@ export class DefaultJiraAdapter implements JiraAdapter {
       id: label,
       name: this.config.getLabelTranslations().teams[label] || label,
     }));
+  }
+
+  /**
+   * Extract stage from issue name (text in last parentheses)
+   * This is adapter-specific policy for DefaultJiraAdapter
+   * Returns Maybe<string> - empty string becomes Nothing
+   */
+  private extractStageFromName(name: string): Maybe<string> {
+    const startPostfix = name.lastIndexOf("(");
+    const endPostfix = name.lastIndexOf(")");
+
+    if (
+      startPostfix === -1 ||
+      endPostfix === -1 ||
+      startPostfix >= endPostfix
+    ) {
+      return Maybe.empty();
+    }
+
+    const stage = name.substring(startPostfix + 1, endPostfix).toLowerCase();
+    return stage.length > 0 ? Maybe.of(stage) : Maybe.empty();
+  }
+
+  /**
+   * Extract roadmap item name from summary (remove brackets)
+   * This is adapter-specific policy for DefaultJiraAdapter
+   */
+  private extractRoadmapItemName(summary: string): string {
+    const endOfPrefix = !summary.startsWith("[") ? 0 : summary.indexOf("]") + 1;
+    const beginningOfSuffix = summary.lastIndexOf("[");
+    const endOfProjectName =
+      beginningOfSuffix > 0 ? beginningOfSuffix : undefined;
+
+    return summary.substring(endOfPrefix, endOfProjectName).trim();
   }
 }

@@ -21,7 +21,7 @@ import type {
   PageId,
   TypedFilterCriteria,
 } from "../types/filter-types";
-import { FilterConfigurationService } from "./filter-configuration";
+import { createFilterConfigurationService } from "./filter-configuration";
 
 /**
  * Helper to create mutable arrays for internal state
@@ -65,7 +65,7 @@ export function createViewFilterManager(
     roadmap: {},
   };
 
-  const filterConfig = new FilterConfigurationService(config);
+  const filterConfig = createFilterConfigurationService(config);
 
   /**
    * Switch to a new view and return appropriate filters
@@ -266,47 +266,5 @@ export function createViewFilterManager(
     setAllViewFilters,
     resetViewSpecificFilters,
     clearAllFilters,
-  };
-}
-
-// Legacy class export for backward compatibility (deprecated)
-// Use createViewFilterManager() factory function instead
-export class ViewFilterManagerClass implements ViewFilterManager {
-  private manager: ViewFilterManager;
-
-  constructor(config: OmegaConfig) {
-    this.manager = createViewFilterManager(config);
-  }
-
-  switchView(pageId: PageId): TypedFilterCriteria {
-    return this.manager.switchView(pageId);
-  }
-
-  getCurrentView(): PageId {
-    return this.manager.getCurrentView();
-  }
-
-  updateFilter(filterKey: FilterKey, value: unknown): TypedFilterCriteria {
-    return this.manager.updateFilter(filterKey, value);
-  }
-
-  getActiveFilters(): TypedFilterCriteria {
-    return this.manager.getActiveFilters();
-  }
-
-  getAllViewFilters(): ViewFilterCriteria {
-    return this.manager.getAllViewFilters();
-  }
-
-  setAllViewFilters(filters: ViewFilterCriteria): void {
-    return this.manager.setAllViewFilters(filters);
-  }
-
-  resetViewSpecificFilters(pageId: PageId): void {
-    return this.manager.resetViewSpecificFilters(pageId);
-  }
-
-  clearAllFilters(): void {
-    return this.manager.clearAllFilters();
-  }
+  } as ViewFilterManager;
 }

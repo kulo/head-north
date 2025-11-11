@@ -6,6 +6,8 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
+import { Right, Left } from "purify-ts";
+import type { Either } from "purify-ts";
 import { useDataStore } from "../../src/stores/data-store";
 import { useAppStore } from "../../src/stores/app-store";
 import { setupTestApp, getMockServices } from "../setup-stores";
@@ -34,6 +36,11 @@ const mockViewFilterManager = {
 } as any;
 
 const mockCycleDataViewCoordinator = {
+  processCycleData: vi.fn((_rawData: Either<Error, CycleData>) =>
+    Right({
+      initiatives: [],
+    }),
+  ),
   generateFilteredRoadmapData: () => ({
     orderedCycles: [],
     roadmapItems: [],
@@ -118,7 +125,9 @@ describe("Data Store", () => {
     const store = useDataStore();
     const appStore = useAppStore();
     const { cycleDataService } = getMockServices();
-    (cycleDataService as any).getCycleData.mockResolvedValue(mockCycleData);
+    (cycleDataService as any).getCycleData.mockResolvedValue(
+      Right(mockCycleData),
+    );
 
     await store.fetchAndProcessData();
 
@@ -134,7 +143,8 @@ describe("Data Store", () => {
     const appStore = useAppStore();
     const { cycleDataService } = getMockServices();
     const error = new Error("API Error");
-    (cycleDataService as any).getCycleData.mockRejectedValue(error);
+    // getCycleData now returns Either, so we mock it to return Left(error)
+    (cycleDataService as any).getCycleData.mockResolvedValue(Left(error));
 
     await store.fetchAndProcessData();
 

@@ -4,6 +4,7 @@
  */
 
 import { vi } from "vitest";
+import { Right, Left } from "purify-ts";
 import CycleDataService from "../../src/services/cycle-data-service";
 import { OmegaConfig } from "@omega/config";
 
@@ -69,23 +70,40 @@ describe("Cycle Data Service", () => {
         "http://localhost:3000/cycle-data",
         expect.any(Object),
       );
-      expect(result).toEqual({
-        cycles: [],
-        roadmapItems: [],
-        releaseItems: [],
-        areas: [],
-        initiatives: [],
-        assignees: [],
-        stages: [],
+      expect(result.isRight()).toBe(true);
+      result.caseOf({
+        Right: (data) => {
+          expect(data).toEqual({
+            cycles: [],
+            roadmapItems: [],
+            releaseItems: [],
+            areas: [],
+            initiatives: [],
+            assignees: [],
+            stages: [],
+          });
+        },
+        Left: () => {
+          throw new Error("Expected Right, got Left");
+        },
       });
     });
 
     test("should handle API errors gracefully", async () => {
       vi.mocked(fetch).mockRejectedValue(new Error("Network error"));
 
-      await expect(cycleDataService.getCycleData()).rejects.toThrow(
-        "API request failed after 1 attempts",
-      );
+      const result = await cycleDataService.getCycleData();
+      expect(result.isLeft()).toBe(true);
+      result.caseOf({
+        Left: (error) => {
+          expect(error.message).toContain(
+            "API request failed after 1 attempts",
+          );
+        },
+        Right: () => {
+          throw new Error("Expected Left, got Right");
+        },
+      });
     }, 10000);
   });
 });

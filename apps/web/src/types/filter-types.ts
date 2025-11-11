@@ -90,11 +90,6 @@ export interface TypedFilterCriteria {
  */
 export interface FilterConfiguration {
   /**
-   * Get all filter categories with their metadata
-   */
-  getFilterCategories(): FilterCategory[];
-
-  /**
    * Get filters available for a specific page/view
    * @param pageId - The page ID (strongly typed)
    * @returns Array of filter keys available for this view
@@ -107,25 +102,6 @@ export interface FilterConfiguration {
    * @returns True if this is a common filter
    */
   isCommonFilter(filterKey: FilterKey): boolean;
-
-  /**
-   * Get the type of a filter (common or view-specific)
-   * @param filterKey - The filter key (strongly typed)
-   * @returns The filter type
-   */
-  getFilterType(filterKey: FilterKey): FilterType;
-
-  /**
-   * Get all views that support a specific filter
-   * @param filterKey - The filter key (strongly typed)
-   * @returns Array of page IDs that support this filter
-   */
-  getViewsForFilter(filterKey: FilterKey): PageId[];
-
-  /**
-   * Get the complete view filter configuration
-   */
-  getViewFilterConfig(): ViewFilterConfig;
 
   /**
    * Validate that a filter key is valid for a specific view

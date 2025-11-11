@@ -6,12 +6,17 @@
  * for cycle-related data operations. All endpoints are defined in the shared configuration.
  */
 
-import { Maybe } from "purify-ts";
-import { logger } from "@omega/utils";
+import {
+  Either,
+  logger,
+  Maybe,
+  retryWithBackoff,
+  Right,
+  safeAsync,
+} from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
 import type {
   Cycle,
-  CycleId,
   Initiative,
   Person,
   Area,
@@ -44,7 +49,7 @@ import type {
  * @since 1.0.0
  */
 // Immutable cache state
-type CacheState = {
+type CycleDataCache = {
   readonly data: CycleData;
   readonly timestamp: number;
 };
@@ -55,18 +60,13 @@ class CycleDataService {
   readonly #apiTimeout: number;
   readonly #apiRetries: number;
   // Use Maybe for optional immutable cache
-  #cacheState: Maybe<CacheState>;
+  #cache: Maybe<CycleDataCache>;
 
   constructor(omegaConfig: OmegaConfig) {
-    if (!omegaConfig) {
-      throw new Error(
-        "CycleDataService requires an OmegaConfig instance to be injected",
-      );
-    }
     this.#config = omegaConfig;
 
     // Initialize with empty cache (Maybe.Nothing)
-    this.#cacheState = Maybe.empty();
+    this.#cache = Maybe.empty();
     this.#cacheTTL = this.#config.getCacheTTL();
     this.#apiTimeout = this.#config.getEnvironmentConfig().timeout;
     this.#apiRetries = this.#config.getEnvironmentConfig().retries;
@@ -77,7 +77,7 @@ class CycleDataService {
    * @returns True if cache is valid
    */
   #isCacheValid(): boolean {
-    return this.#cacheState
+    return this.#cache
       .map((cache) => Date.now() - cache.timestamp < this.#cacheTTL)
       .orDefault(false);
   }
@@ -86,12 +86,14 @@ class CycleDataService {
    * Clear unified cache (creates new empty Maybe)
    */
   clearCache(): void {
-    // Create new empty Maybe instead of mutating
-    this.#cacheState = Maybe.empty();
+    this.#cache = Maybe.empty();
   }
 
   /**
    * Transform raw cycle data to processed cycle data for frontend consumption
+   *
+   * TODO check whether we can change RawCycleData to CycleData in the backend and remove this method and the RawCycleData type
+   *
    * @param {RawCycleData} rawData - Raw data from backend
    * @returns {CycleData} Processed data ready for frontend
    */
@@ -110,28 +112,32 @@ class CycleDataService {
   /**
    * Get cached cycle data with automatic loading
    * This method handles all cache management internally using Maybe for safe cache access
-   * @returns {Promise<CycleData>} The cycle data
+   * @returns {Promise<Either<Error, CycleData>>} The cycle data wrapped in Either
    */
-  async #getCachedCycleData(): Promise<CycleData> {
+  async #getCachedCycleData(): Promise<Either<Error, CycleData>> {
     // Check if unified cache is still valid using Maybe
-    const cachedData = this.#cacheState
+    const cachedData: Maybe<CycleData> = this.#cache
       .filter(() => this.#isCacheValid())
       .map((cache) => cache.data);
 
-    // Use Maybe operations without extract() - chain to handle async loading
     return cachedData.caseOf({
-      Just: (data) => Promise.resolve(data),
+      Just: (data) => Promise.resolve(Right(data)),
+
       Nothing: async () => {
         // Cache invalid or empty - load new data and create immutable cache state
-        const cycleData = await this.#loadCycleData();
-        const newCacheState: CacheState = {
-          data: cycleData,
-          timestamp: Date.now(),
-        };
+        const loadedCycleData = await this.#loadCycleData();
 
-        // Create new Maybe with fresh cache (immutable update)
-        this.#cacheState = Maybe.of(newCacheState);
-        return cycleData;
+        // Update cache only on success, maintaining Either chain
+        return loadedCycleData.map((cycleData) => {
+          const newCacheState: CycleDataCache = {
+            data: cycleData,
+            timestamp: Date.now(),
+          };
+
+          // Create new Maybe with fresh cache (immutable update)
+          this.#cache = Maybe.of(newCacheState);
+          return cycleData;
+        });
       },
     });
   }
@@ -139,25 +145,25 @@ class CycleDataService {
   /**
    * Load cycle data from the API and transform it
    * This method fetches data from the API and transforms it for caching
-   * @returns {Promise<CycleData>} The fetched and transformed cycle data
+   * @returns {Promise<Either<Error, CycleData>>} The fetched and transformed cycle data wrapped in Either
    */
-  async #loadCycleData(): Promise<CycleData> {
-    const endpoints = this.#config.getEndpoints();
-    const rawData: RawCycleData = await this.#request(endpoints.CYCLE_DATA);
-
-    return this.#transformRawToProcessed(rawData);
+  async #loadCycleData(): Promise<Either<Error, CycleData>> {
+    const rawData = await this.#request(this.#config.getEndpoints().CYCLE_DATA);
+    const cycleData = rawData.map(this.#transformRawToProcessed);
+    return cycleData;
   }
 
   /**
    * Make an HTTP request with error handling and retry logic
+   * Uses functional retry pattern with Either for error handling
    * @param {string} endpoint - The API endpoint
    * @param {object} options - Fetch options
-   * @returns {Promise<RawCycleData>} The response data
+   * @returns {Promise<Either<Error, RawCycleData>>} The response data wrapped in Either
    */
   async #request(
     endpoint: string,
     options: RequestInit = {},
-  ): Promise<RawCycleData> {
+  ): Promise<Either<Error, RawCycleData>> {
     const url = this.#config.getUrl(endpoint);
 
     const defaultOptions = {
@@ -171,60 +177,44 @@ class CycleDataService {
 
     const requestOptions = { ...defaultOptions, ...options };
 
-    // Collect errors immutably
-    const errors: Array<{
-      attempt: number;
-      error: string;
-      timestamp: string;
-    }> = [];
+    // Use functional retry utility with Either
+    return retryWithBackoff(
+      async () => {
+        // Attempt the request wrapped in Either
+        return safeAsync(async () => {
+          const response: Response = await fetch(url, requestOptions);
 
-    for (let attempt = 1; attempt <= this.#apiRetries; attempt++) {
-      try {
-        const response = await fetch(url, requestOptions);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data as RawCycleData;
-      } catch (error) {
-        const errorInfo = {
-          attempt,
-          error: error instanceof Error ? error.message : String(error),
-          timestamp: new Date().toISOString(),
-        };
-        // Create new array instead of mutating
-        errors.push(errorInfo);
-        logger.service.warnSafe(
-          `API request attempt ${attempt} failed`,
-          error,
-          { attempt },
-        );
-
-        if (attempt < this.#apiRetries) {
-          // Exponential backoff
-          const delay = Math.pow(2, attempt) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      }
-    }
-
-    // Show all errors that occurred during retry attempts
-    const errorSummary = errors
-      .map((e) => `Attempt ${e.attempt}: ${e.error}`)
-      .join("; ");
-    const finalErrorMessage = `API request failed after ${this.#apiRetries} attempts. Errors: ${errorSummary}`;
-    throw new Error(finalErrorMessage);
+          const data = await response.json();
+          return data as RawCycleData;
+        });
+      },
+      {
+        maxRetries: this.#apiRetries,
+        minTimeout: 1000,
+        factor: 2,
+        onRetry: (error, attempt) => {
+          // Log the attempt failure
+          logger.service.warnSafe(
+            `API request attempt ${attempt} failed`,
+            error,
+            { attempt },
+          );
+        },
+      },
+    );
   }
 
   /**
    * Get all initiatives from the unified data
-   * @returns {Promise<Initiative[]>} Array of initiatives with id and name properties
+   * @returns {Promise<Either<Error, readonly Initiative[]>>} Array of initiatives with id and name properties wrapped in Either
    */
-  async getAllInitiatives(): Promise<readonly Initiative[]> {
+  async getAllInitiatives(): Promise<Either<Error, readonly Initiative[]>> {
     const data = await this.#getCachedCycleData();
-    return data.initiatives;
+    return data.map((data) => data.initiatives);
   }
 
   /**
@@ -241,49 +231,52 @@ class CycleDataService {
   }
 
   /**
-   * Get all areas from appropriate data source union with areas from the configuration.   *
-   * @returns {Promise<Area[]>} Array of areas with id and name properties
+   * Get all areas from appropriate data source union with areas from the configuration.
+   * @returns {Promise<Either<Error, Area[]>>} Array of areas with id and name properties wrapped in Either
    */
-  async getAllAreas(_cycleId: CycleId | null = null): Promise<Area[]> {
-    const areasFromCycles = (await this.#getCachedCycleData()).areas;
-    const areasFromConfig = this.#getConfigAreas();
-    const allAreas = new Set([...areasFromCycles, ...areasFromConfig]);
-    return Array.from(allAreas);
+  async getAllAreas(): Promise<Either<Error, Area[]>> {
+    const data = await this.#getCachedCycleData();
+    return data.map((data) => {
+      const areasFromCycles = data.areas;
+      const areasFromConfig = this.#getConfigAreas();
+      const allAreas = new Set([...areasFromCycles, ...areasFromConfig]);
+      return Array.from(allAreas);
+    });
   }
 
   /**
    * Get all cycles from the unified data
-   * @returns {Promise<Cycle[]>} Array of cycles
+   * @returns {Promise<Either<Error, readonly Cycle[]>>} Array of cycles wrapped in Either
    */
-  async getAllCycles(): Promise<readonly Cycle[]> {
+  async getAllCycles(): Promise<Either<Error, readonly Cycle[]>> {
     const data = await this.#getCachedCycleData();
-    return data.cycles;
+    return data.map((data) => data.cycles);
   }
 
   /**
    * Get all stages from the unified data
-   * @returns {Promise<Stage[]>} Array of stages
+   * @returns {Promise<Either<Error, readonly Stage[]>>} Array of stages wrapped in Either
    */
-  async getAllStages(): Promise<readonly Stage[]> {
+  async getAllStages(): Promise<Either<Error, readonly Stage[]>> {
     const data = await this.#getCachedCycleData();
-    return data.stages;
+    return data.map((data) => data.stages);
   }
 
   /**
    * Get all assignees from the organisation
-   * @returns {Promise<Person[]>} Array of assignees
+   * @returns {Promise<Either<Error, readonly Person[]>>} Array of assignees wrapped in Either
    */
-  async getAllAssignees(): Promise<readonly Person[]> {
+  async getAllAssignees(): Promise<Either<Error, readonly Person[]>> {
     const data = await this.#getCachedCycleData();
-    return data.assignees;
+    return data.map((data) => data.assignees);
   }
 
   /**
    * Get cycle data with automatic loading
    * This is the main method for getting data - it handles loading automatically
-   * @returns {Promise<CycleData>} Processed cycle data structure
+   * @returns {Promise<Either<Error, CycleData>>} Processed cycle data structure wrapped in Either
    */
-  async getCycleData(): Promise<CycleData> {
+  async getCycleData(): Promise<Either<Error, CycleData>> {
     // Get cached data (already transformed)
     return await this.#getCachedCycleData();
   }

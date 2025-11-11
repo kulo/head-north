@@ -8,6 +8,7 @@
  * This belongs in /services because it manages state and has side effects.
  */
 
+import { Either } from "purify-ts";
 import { dataTransformer } from "../lib/transformers/data-transformer";
 import type { ViewFilterManager } from "../types/filter-types";
 import type { CycleData } from "@omega/types";
@@ -29,27 +30,12 @@ export class CycleDataViewCoordinator {
    * Process raw cycle data into nested structure
    * Business operation - coordinates pure transformation
    */
-  processCycleData(rawData: CycleData): NestedCycleData {
-    if (!rawData) {
-      throw new Error("Raw data is required");
-    }
-
-    console.log("Processing data with DataTransformer");
-    const processedData = dataTransformer.processCycleData(
-      this.config,
-      rawData,
-      {},
+  processCycleData(
+    rawData: Either<Error, CycleData>,
+  ): Either<Error, NestedCycleData> {
+    return rawData.map((cycleData) =>
+      dataTransformer.processCycleData(this.config, cycleData, {}),
     );
-
-    if (!processedData) {
-      throw new Error("Data processing failed");
-    }
-
-    console.log("Data processed successfully", {
-      initiatives: processedData.initiatives?.length || 0,
-    });
-
-    return processedData;
   }
 
   /**
@@ -130,7 +116,6 @@ export class CycleDataViewCoordinator {
    */
   initializeFilters(currentFilters: ViewFilterCriteria): void {
     this.viewFilterManager.setAllViewFilters(currentFilters);
-    console.log("Filters initialized with ViewFilterManager");
   }
 }
 

@@ -22,6 +22,7 @@ import {
   safe,
   safeAsync,
   tap,
+  retryWithBackoff,
 } from "../src/purify-utils.js";
 
 describe("pipe", () => {
@@ -374,5 +375,237 @@ describe("tap", () => {
 
     expect(result).toBe(12);
     expect(tappedValue).toBe(6);
+  });
+});
+
+describe("retryWithBackoff", () => {
+  it("should succeed on first attempt and return Right", async () => {
+    let attempts = 0;
+    const fn = async (): Promise<Either<Error, number>> => {
+      attempts++;
+      return Right(42);
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 3,
+      minTimeout: 10,
+      factor: 2,
+    });
+
+    expect(result.isRight()).toBe(true);
+    expect(result.extract()).toBe(42);
+    expect(attempts).toBe(1);
+  });
+
+  it("should retry on failure and succeed on subsequent attempt", async () => {
+    let attempts = 0;
+    const fn = async (): Promise<Either<Error, number>> => {
+      attempts++;
+      if (attempts < 3) {
+        return Left(new Error(`Attempt ${attempts} failed`));
+      }
+      return Right(42);
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 3,
+      minTimeout: 10,
+      factor: 2,
+    });
+
+    expect(result.isRight()).toBe(true);
+    expect(result.extract()).toBe(42);
+    expect(attempts).toBe(3);
+  });
+
+  it("should return Left when all retries are exhausted", async () => {
+    const fn = async (): Promise<Either<Error, number>> => {
+      return Left(new Error("Network error"));
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 2,
+      minTimeout: 10,
+      factor: 2,
+    });
+
+    expect(result.isLeft()).toBe(true);
+    const error = result.extract() as Error;
+    expect(error.message).toContain("API request failed after 2 attempts");
+    expect(error.message).toContain("Attempt 0: Network error");
+    expect(error.message).toContain("Attempt 1: Network error");
+  });
+
+  it("should accumulate errors from all retry attempts", async () => {
+    let attempts = 0;
+    const fn = async (): Promise<Either<Error, number>> => {
+      attempts++;
+      return Left(new Error(`Error on attempt ${attempts}`));
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 3,
+      minTimeout: 10,
+      factor: 2,
+    });
+
+    expect(result.isLeft()).toBe(true);
+    const error = result.extract() as Error;
+    expect(error.message).toContain("API request failed after 3 attempts");
+    expect(error.message).toContain("Attempt 0: Error on attempt 1");
+    expect(error.message).toContain("Attempt 1: Error on attempt 2");
+    expect(error.message).toContain("Attempt 2: Error on attempt 3");
+  });
+
+  it("should call onRetry callback for each retry attempt", async () => {
+    const retryErrors: Error[] = [];
+    const retryAttempts: number[] = [];
+
+    const fn = async (): Promise<Either<Error, number>> => {
+      return Left(new Error("Transient error"));
+    };
+
+    await retryWithBackoff(fn, {
+      maxRetries: 2,
+      minTimeout: 10,
+      factor: 2,
+      onRetry: (error, attempt) => {
+        retryErrors.push(error);
+        retryAttempts.push(attempt);
+      },
+    });
+
+    expect(retryErrors).toHaveLength(3); // 3 retries (attempts 0, 1, 2)
+    expect(retryAttempts).toEqual([0, 1, 2]);
+    retryErrors.forEach((error) => {
+      expect(error.message).toBe("Transient error");
+    });
+  });
+
+  it("should not call onRetry when function succeeds immediately", async () => {
+    let onRetryCalled = false;
+
+    const fn = async (): Promise<Either<Error, number>> => {
+      return Right(42);
+    };
+
+    await retryWithBackoff(fn, {
+      maxRetries: 3,
+      minTimeout: 10,
+      factor: 2,
+      onRetry: () => {
+        onRetryCalled = true;
+      },
+    });
+
+    expect(onRetryCalled).toBe(false);
+  });
+
+  it("should use custom minTimeout and factor for exponential backoff", async () => {
+    const startTime = Date.now();
+    let attempts = 0;
+
+    const fn = async (): Promise<Either<Error, number>> => {
+      attempts++;
+      if (attempts < 2) {
+        return Left(new Error("Retry needed"));
+      }
+      return Right(42);
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 2,
+      minTimeout: 50, // Custom timeout
+      factor: 2, // Exponential factor
+    });
+
+    const elapsed = Date.now() - startTime;
+
+    expect(result.isRight()).toBe(true);
+    // Should have waited at least minTimeout (50ms) before retry
+    // With some tolerance for test execution time
+    expect(elapsed).toBeGreaterThanOrEqual(40);
+  });
+
+  it("should handle different error messages across attempts", async () => {
+    let attempts = 0;
+    const fn = async (): Promise<Either<Error, number>> => {
+      attempts++;
+      return Left(
+        new Error(
+          attempts === 1
+            ? "Connection timeout"
+            : attempts === 2
+              ? "Network unreachable"
+              : "Server error",
+        ),
+      );
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 3,
+      minTimeout: 10,
+      factor: 2,
+    });
+
+    expect(result.isLeft()).toBe(true);
+    const error = result.extract() as Error;
+    expect(error.message).toContain("Connection timeout");
+    expect(error.message).toContain("Network unreachable");
+    expect(error.message).toContain("Server error");
+  });
+
+  it("should handle zero maxRetries (no retries)", async () => {
+    let attempts = 0;
+    const fn = async (): Promise<Either<Error, number>> => {
+      attempts++;
+      return Left(new Error("Error"));
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 0,
+      minTimeout: 10,
+      factor: 2,
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(attempts).toBe(1); // Only initial attempt, no retries
+  });
+
+  it("should work with default minTimeout and factor", async () => {
+    const fn = async (): Promise<Either<Error, string>> => {
+      return Right("success");
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 2,
+      // minTimeout and factor use defaults (1000ms and 2)
+    });
+
+    expect(result.isRight()).toBe(true);
+    expect(result.extract()).toBe("success");
+  });
+
+  it("should preserve error type information", async () => {
+    class CustomError extends Error {
+      constructor(message: string) {
+        super(message);
+        this.name = "CustomError";
+      }
+    }
+
+    const fn = async (): Promise<Either<Error, number>> => {
+      return Left(new CustomError("Custom error occurred"));
+    };
+
+    const result = await retryWithBackoff(fn, {
+      maxRetries: 1,
+      minTimeout: 10,
+      factor: 2,
+    });
+
+    expect(result.isLeft()).toBe(true);
+    const error = result.extract() as Error;
+    expect(error.message).toContain("Custom error occurred");
   });
 });

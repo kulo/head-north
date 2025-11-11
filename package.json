@@ -134,6 +134,7 @@
   "author": "Michael Wagner-Kulovits",
   "license": "MIT",
   "dependencies": {
+    "p-retry": "^7.1.0",
     "purify-ts": "^2.1.2",
     "ts-pattern": "^5.9.0",
     "vue": "^3.5.21",

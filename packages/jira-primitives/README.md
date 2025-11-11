@@ -42,17 +42,22 @@ import {
 const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
 // Returns: ['platform', 'resilience']
 
-// Extract custom field value
-const effort = extractCustomField<number>(issue, "customfield_10002");
-// Returns: 5 or undefined
+// Extract custom field value (returns Maybe<T>)
+const effort = extractCustomField<number>(issue, "customfield_10002").orDefault(
+  0,
+);
+// Returns: 5 or 0 (default)
 
-// Extract parent issue key
-const parentKey = extractParent(issue);
-// Returns: 'PROJ-1' or undefined
+// Extract parent issue key (returns Maybe<string>)
+const parentKey = extractParent(issue).orDefault("");
+// Returns: 'PROJ-1' or '' (default)
 
-// Extract assignee information
-const assignee = extractAssignee(issue);
-// Returns: { id: 'user123', name: 'John Doe' } or null
+// Extract assignee information (returns Maybe<Person>)
+const assignee = extractAssignee(issue).orDefault({
+  id: "",
+  name: "",
+});
+// Returns: { id: 'user123', name: 'John Doe' } or default empty object
 ```
 
 ### Transformers
@@ -132,13 +137,10 @@ const issue = await client.getIssue("TEST-1");
 ### Extractors
 
 - `extractLabelsWithPrefix(labels, prefix)` - Extract labels with specific prefix
-- `extractCustomField<T>(issue, fieldName)` - Extract custom field value
-- `extractParent(issue)` - Extract parent issue key
-- `extractComponents(issue)` - Extract components (placeholder)
-- `extractAssignee(issue)` - Extract assignee information
+- `extractCustomField<T>(issue, fieldName)` - Extract custom field value (returns Maybe<T>)
+- `extractParent(issue)` - Extract parent issue key (returns Maybe<string>)
+- `extractAssignee(issue)` - Extract assignee information (returns Maybe<Person>)
 - `extractAllAssignees(issues)` - Extract unique assignees from issue list
-- `extractStageFromName(name)` - Extract stage from issue name
-- `extractProjectName(summary)` - Extract project name from summary
 
 ### Transformers
 

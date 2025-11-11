@@ -7,6 +7,9 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { vi } from "vitest";
+import { Right } from "purify-ts";
+import type { Either } from "purify-ts";
+import type { CycleData } from "@omega/types";
 import {
   CycleDataService,
   CycleDataViewCoordinator,
@@ -17,7 +20,7 @@ import type { Router } from "vue-router";
 
 // Mock services
 const mockCycleDataService = {
-  getCycleData: vi.fn(() => Promise.resolve({})),
+  getCycleData: vi.fn(() => Promise.resolve(Right({} as CycleData))),
 } as unknown as CycleDataService;
 
 const mockViewFilterManager = {
@@ -39,9 +42,11 @@ const mockViewFilterManager = {
 } as unknown as ViewFilterManager;
 
 const mockCycleDataViewCoordinator = {
-  processCycleData: vi.fn(() => ({
-    initiatives: [],
-  })),
+  processCycleData: vi.fn((_rawData: Either<Error, CycleData>) =>
+    Right({
+      initiatives: [],
+    }),
+  ),
   generateRoadmapData: vi.fn(() => ({
     orderedCycles: [],
     roadmapItems: [],

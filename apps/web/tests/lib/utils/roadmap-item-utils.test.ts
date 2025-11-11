@@ -58,7 +58,7 @@ describe("roadmap-item-utils", () => {
             id: "RI-2",
             cycle: { id: 2, name: "Cycle 2" },
           },
-        ] as ReleaseItem[],
+        ] as unknown as ReleaseItem[],
       };
 
       const result = getReleaseItemsForCycle(roadmapItem, 1);

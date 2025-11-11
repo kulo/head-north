@@ -10,15 +10,9 @@ export { JiraClient } from "./client";
 export {
   extractLabelsWithPrefix,
   extractCustomField,
-  extractCustomFieldMaybe,
   extractParent,
-  extractParentMaybe,
   extractAssignee,
-  extractAssigneeMaybe,
   extractAllAssignees,
-  extractStageFromName,
-  extractStageFromNameMaybe,
-  extractProjectName,
 } from "./extractors";
 
 // Transformers

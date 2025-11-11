@@ -200,53 +200,52 @@ export const useDataStore = defineStore("data", () => {
   }
 
   async function fetchAndProcessData() {
-    try {
-      const appStore = useAppStore();
-      appStore.setLoading(true);
-      appStore.clearError();
+    const appStore = useAppStore();
+    appStore.setLoading(true);
+    appStore.clearError();
 
-      console.log("Fetching cycle data from API");
-      const cycleData = await dataService.getCycleData();
+    console.log("Fetching cycle data from API");
+    const cycleDataResult = await dataService.getCycleData();
 
-      if (!cycleData) {
-        throw new Error("No cycle data received from API");
-      }
-
-      console.log("Raw data received", {
-        roadmapItems: cycleData.roadmapItems?.length || 0,
-        releaseItems: cycleData.releaseItems?.length || 0,
-        cycles: cycleData.cycles?.length || 0,
+    // Chain operations: extract for side effects → process
+    // Extract cycleData for side effects, then pass original Either to processing
+    const finalResult = cycleDataResult
+      .map((cycleData) => {
+        // Extract and perform side effects (logging, storing)
+        console.log("Raw data received", {
+          roadmapItems: cycleData.roadmapItems?.length || 0,
+          releaseItems: cycleData.releaseItems?.length || 0,
+          cycles: cycleData.cycles?.length || 0,
+        });
+        setRawData(cycleData);
+        return cycleData; // map preserves Either structure
+      })
+      .chain(() => {
+        // Chain to processing - pass the original Either directly
+        console.log("Processing data with DataProcessor");
+        return coordinator.processCycleData(cycleDataResult);
       });
 
-      // Store raw data
-      setRawData(cycleData);
+    // Handle final result (combines fetch + processing errors)
+    finalResult.caseOf({
+      Left: (error) => {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        console.error("Failed to fetch and process data", error);
+        appStore.setError(errorMessage);
+      },
+      Right: (processed) => {
+        console.log("Data processed successfully", {
+          initiatives: processed.initiatives?.length || 0,
+        });
 
-      // Process data using coordinator
-      console.log("Processing data with DataProcessor");
-      const processed = coordinator.processCycleData(cycleData);
+        // Store processed data
+        setProcessedData(processed);
+        console.log("Data fetch and processing completed successfully");
+      },
+    });
 
-      if (!processed) {
-        throw new Error("Data processing failed");
-      }
-
-      console.log("Data processed successfully", {
-        initiatives: processed.initiatives?.length || 0,
-      });
-
-      // Store processed data
-      setProcessedData(processed);
-
-      console.log("Data fetch and processing completed successfully");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Failed to fetch and process data", error);
-      const appStore = useAppStore();
-      appStore.setError(errorMessage);
-    } finally {
-      const appStore = useAppStore();
-      appStore.setLoading(false);
-    }
+    appStore.setLoading(false);
   }
 
   function clearData() {
