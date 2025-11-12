@@ -6,6 +6,7 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
+import { Right } from "purify-ts";
 import { useAppStore } from "../../src/stores/app-store";
 import { setupTestApp } from "../setup-stores";
 import type { OmegaConfig } from "@omega/config";
@@ -30,7 +31,7 @@ const mockCycleDataService = {
 
 const mockViewFilterManager = {
   getActiveFilters: () => ({}),
-  updateFilter: () => {},
+  updateFilter: () => Right({}),
   getAllViewFilters: () => ({ common: {}, cycleOverview: {}, roadmap: {} }),
   switchView: () => ({}),
   setAllViewFilters: () => {},

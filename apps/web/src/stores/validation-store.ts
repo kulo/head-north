@@ -6,6 +6,7 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
+import { logger } from "@omega/utils";
 import type { OmegaConfig } from "@omega/config";
 import type { ViewFilterManager } from "../types/filter-types";
 
@@ -55,14 +56,20 @@ export const useValidationStore = defineStore("validation", () => {
     validationEnabled.value = !validationEnabled.value;
 
     // Update the filter to show/hide validation errors
-    try {
-      filterManager.updateFilter(
-        "showValidationErrors",
-        validationEnabled.value,
-      );
-    } catch (error) {
-      console.error("Failed to update validation filter:", error);
-    }
+    const result = filterManager.updateFilter(
+      "showValidationErrors",
+      validationEnabled.value,
+    );
+    result.caseOf({
+      Left: (error) => {
+        logger.service.errorSafe("Failed to update validation filter", error, {
+          enabled: validationEnabled.value,
+        });
+      },
+      Right: () => {
+        // Success - filter updated
+      },
+    });
   }
 
   // Initialize validation from config

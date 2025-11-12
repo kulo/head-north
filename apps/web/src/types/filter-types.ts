@@ -5,6 +5,7 @@
  * ensuring compile-time safety and consistency with OmegaConfig.
  */
 
+import type { Either } from "purify-ts";
 import type { ViewFilterCriteria } from "./ui-types";
 import type {
   AreaId,
@@ -137,9 +138,12 @@ export interface ViewFilterManager {
    * Update a filter for the current view
    * @param filterKey - The filter key (strongly typed)
    * @param value - The filter value
-   * @returns Updated active filters
+   * @returns Either<Error, TypedFilterCriteria> - Left if filter is invalid for view, Right with updated filters
    */
-  updateFilter(filterKey: FilterKey, value: unknown): TypedFilterCriteria;
+  updateFilter(
+    filterKey: FilterKey,
+    value: unknown,
+  ): Either<Error, TypedFilterCriteria>;
 
   /**
    * Get active filters for the current view

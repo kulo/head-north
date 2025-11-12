@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { setActivePinia, createPinia } from "pinia";
+import { Right } from "purify-ts";
 import { useAppStore } from "../../src/stores/app-store";
 import { useFilterStore } from "../../src/stores/filters-store";
 import { setupTestApp, getMockServices } from "../setup-stores";
@@ -34,7 +35,7 @@ const mockCycleDataService = {
 
 const mockViewFilterManager = {
   getActiveFilters: () => ({}),
-  updateFilter: () => {},
+  updateFilter: () => Right({}),
   getAllViewFilters: () => ({ common: {}, cycleOverview: {}, roadmap: {} }),
   switchView: () => ({}),
   setAllViewFilters: () => {},

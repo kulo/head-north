@@ -6,6 +6,7 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
+import { Right } from "purify-ts";
 import { useValidationStore } from "../../src/stores/validation-store";
 import { setupTestApp } from "../setup-stores";
 
@@ -16,7 +17,7 @@ const mockCycleDataService = {
 
 const mockViewFilterManager = {
   getActiveFilters: () => ({}),
-  updateFilter: () => {},
+  updateFilter: () => Right({}),
   getAllViewFilters: () => ({ common: {}, cycleOverview: {}, roadmap: {} }),
   switchView: () => ({}),
   setAllViewFilters: () => {},

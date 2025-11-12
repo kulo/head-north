@@ -13,6 +13,7 @@
 
 <script>
 import { computed, watch, ref } from "vue";
+import { logger } from "@omega/utils";
 import { useDataStore, useFilterStore } from "../../stores";
 
 export default {
@@ -45,22 +46,25 @@ export default {
       () => cycles.value,
       async (newCycles) => {
         if (newCycles && newCycles.length > 0) {
-          try {
-            await filterStore.initializeDefaultFilters(newCycles);
-          } catch (error) {
-            console.error("Failed to initialize default cycle filter:", error);
-          }
+          // initializeDefaultFilters handles errors internally
+          await filterStore.initializeDefaultFilters(newCycles);
         }
       },
       { immediate: true },
     );
 
     const handleCycleChange = async (cycleId) => {
-      try {
-        await filterStore.updateFilter("cycle", cycleId);
-      } catch (error) {
-        console.error("Failed to update cycle filter:", error);
-      }
+      const result = await filterStore.updateFilter("cycle", cycleId);
+      result.caseOf({
+        Left: (error) => {
+          logger.service.errorSafe("Failed to update cycle filter", error, {
+            cycleId,
+          });
+        },
+        Right: () => {
+          // Success - filter updated
+        },
+      });
     };
 
     return {

@@ -29,7 +29,7 @@ const mockCycleDataService = {
 
 const mockViewFilterManager = {
   getActiveFilters: () => ({}),
-  updateFilter: () => {},
+  updateFilter: () => Right({}),
   getAllViewFilters: () => ({ common: {}, cycleOverview: {}, roadmap: {} }),
   switchView: () => ({}),
   setAllViewFilters: () => {},

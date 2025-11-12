@@ -7,6 +7,7 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
+import { Either, logger } from "@omega/utils";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
 import type { ViewFilterCriteria } from "../types/ui-types";
@@ -48,75 +49,59 @@ export const useFilterStore = defineStore("filters", () => {
   }
 
   async function updateFilters(newFilters: ViewFilterCriteria) {
-    try {
-      setFilters(newFilters);
-      console.log("Filters updated", newFilters);
-    } catch (error) {
-      console.error("Failed to update filters", error);
-      throw new Error("Failed to update filters");
-    }
+    setFilters(newFilters);
+    logger.service.info("Filters updated", newFilters);
   }
 
-  async function updateFilter(key: FilterKey, value: unknown) {
-    try {
-      // Use ViewFilterManager to handle filter updates
-      const activeFilters = filterManager.updateFilter(key, value);
+  async function updateFilter(
+    key: FilterKey,
+    value: unknown,
+  ): Promise<Either<Error, void>> {
+    // Use ViewFilterManager to handle filter updates
+    const result = filterManager.updateFilter(key, value);
+    return result.map((activeFilters) => {
       const allViewFilters = filterManager.getAllViewFilters();
-
       setFilters(allViewFilters);
-      console.log("Filter updated", {
+      logger.service.info("Filter updated", {
         key,
         value,
         activeFilters,
         allViewFilters,
       });
-    } catch (error) {
-      console.error("Failed to update filter", error);
-      throw new Error("Failed to update filter");
-    }
+    });
   }
 
   async function switchView(page: string) {
-    try {
-      const appStore = useAppStore();
-      appStore.setCurrentPage(page);
-      console.log("Switched to page", page);
+    const appStore = useAppStore();
+    appStore.setCurrentPage(page);
+    logger.service.info("Switched to page", page);
 
-      // Use ViewFilterManager to handle view switching and filter management
-      const activeFilters = filterManager.switchView(
-        page as "cycle-overview" | "roadmap",
-      );
-      const allViewFilters = filterManager.getAllViewFilters();
+    // Use ViewFilterManager to handle view switching and filter management
+    const activeFilters = filterManager.switchView(
+      page as "cycle-overview" | "roadmap",
+    );
+    const allViewFilters = filterManager.getAllViewFilters();
 
-      // Update store with the structured filters from ViewFilterManager
-      setFilters(allViewFilters);
+    // Update store with the structured filters from ViewFilterManager
+    setFilters(allViewFilters);
 
-      console.log("View switched with filters:", {
-        page,
-        activeFilters,
-        allViewFilters,
-      });
+    logger.service.info("View switched with filters:", {
+      page,
+      activeFilters,
+      allViewFilters,
+    });
 
-      // Find the page in the config and navigate to its path
-      const pageConfig = appStore.allPages.find((p) => p.id === page);
-      if (pageConfig) {
-        routerInstance.push(pageConfig.path);
-      }
-    } catch (error) {
-      console.error("Failed to switch view", error);
-      throw new Error("Failed to switch view");
+    // Find the page in the config and navigate to its path
+    const pageConfig = appStore.allPages.find((p) => p.id === page);
+    if (pageConfig) {
+      routerInstance.push(pageConfig.path);
     }
   }
 
   function initializeFilters() {
-    try {
-      // Initialize ViewFilterManager with current state
-      filterManager.setAllViewFilters(filters.value);
-      console.log("Filters initialized with ViewFilterManager");
-    } catch (error) {
-      console.error("Failed to initialize filters", error);
-      throw new Error("Failed to initialize filters");
-    }
+    // Initialize ViewFilterManager with current state
+    filterManager.setAllViewFilters(filters.value);
+    logger.service.info("Filters initialized with ViewFilterManager");
   }
 
   function clearFilters() {
@@ -128,25 +113,33 @@ export const useFilterStore = defineStore("filters", () => {
   }
 
   async function initializeDefaultFilters(cycles: Cycle[]) {
-    try {
-      // Only initialize cycle filter if we're in cycle-overview view
-      // Cycle filter is not valid for other views (root, roadmap)
-      const currentView = filterManager.getCurrentView();
-      if (currentView !== "cycle-overview") {
-        return;
-      }
+    // Only initialize cycle filter if we're in cycle-overview view
+    // Cycle filter is not valid for other views (root, roadmap)
+    const currentView = filterManager.getCurrentView();
+    if (currentView !== "cycle-overview") {
+      return;
+    }
 
-      // Only set default cycle if no cycle filter is currently active
-      if (!activeFilters.value.cycle && cycles && cycles.length > 0) {
-        const defaultCycle = selectDefaultCycle(cycles);
-        if (defaultCycle) {
-          await updateFilter("cycle", defaultCycle.id);
-          console.log("Default cycle filter initialized:", defaultCycle.id);
-        }
+    // Only set default cycle if no cycle filter is currently active
+    if (!activeFilters.value.cycle && cycles && cycles.length > 0) {
+      const defaultCycle = selectDefaultCycle(cycles);
+      if (defaultCycle) {
+        const result = await updateFilter("cycle", defaultCycle.id);
+        result.caseOf({
+          Left: (error) => {
+            logger.service.errorSafe(
+              "Failed to initialize default cycle filter",
+              error,
+              { cycleId: defaultCycle.id },
+            );
+          },
+          Right: () => {
+            logger.service.info("Default cycle filter initialized:", {
+              cycleId: defaultCycle.id,
+            });
+          },
+        });
       }
-    } catch (error) {
-      console.error("Failed to initialize default filters:", error);
-      throw new Error("Failed to initialize default filters");
     }
   }
 
@@ -154,35 +147,24 @@ export const useFilterStore = defineStore("filters", () => {
     filterKey: FilterKey,
     values: unknown[],
     allValue: string = "all",
-  ) {
-    try {
-      // If "all" is selected or no values, clear the filter
-      if (!values || values.length === 0 || values.includes(allValue)) {
-        await updateFilter(filterKey, []);
-        return;
-      }
-
-      // Update store with new values
-      await updateFilter(filterKey, values);
-    } catch (error) {
-      console.error(`Failed to update ${filterKey} filter:`, error);
-      throw new Error(`Failed to update ${filterKey} filter`);
+  ): Promise<Either<Error, void>> {
+    // If "all" is selected or no values, clear the filter
+    if (!values || values.length === 0 || values.includes(allValue)) {
+      return updateFilter(filterKey, []);
     }
+
+    // Update store with new values
+    return updateFilter(filterKey, values);
   }
 
   async function updateSingleFilter(
     filterKey: FilterKey,
     value: unknown,
     allValue: string = "all",
-  ) {
-    try {
-      // If "all" is selected, clear the filter (set to undefined)
-      const filterValue = value === allValue ? undefined : value;
-      await updateFilter(filterKey, filterValue);
-    } catch (error) {
-      console.error(`Failed to update ${filterKey} filter:`, error);
-      throw new Error(`Failed to update ${filterKey} filter`);
-    }
+  ): Promise<Either<Error, void>> {
+    // If "all" is selected, clear the filter (set to undefined)
+    const filterValue = value === allValue ? undefined : value;
+    return updateFilter(filterKey, filterValue);
   }
 
   return {

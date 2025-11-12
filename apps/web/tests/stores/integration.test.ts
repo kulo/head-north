@@ -16,7 +16,7 @@ import { setupTestApp, getMockServices } from "../setup-stores";
 // Mock services
 const mockViewFilterManager = {
   getActiveFilters: vi.fn(() => ({})),
-  updateFilter: vi.fn(),
+  updateFilter: vi.fn(() => Right({})),
   getAllViewFilters: vi.fn(() => ({
     common: {},
     cycleOverview: {},

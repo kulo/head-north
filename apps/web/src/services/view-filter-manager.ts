@@ -11,6 +11,7 @@
  * Implemented as a factory function for functional programming patterns.
  */
 
+import { Either, Left, Right } from "purify-ts";
 import type { OmegaConfig } from "@omega/config";
 import type { InitiativeId, PersonId, StageId } from "@omega/types";
 import { match } from "ts-pattern";
@@ -102,11 +103,13 @@ export function createViewFilterManager(
   const updateFilter = (
     filterKey: FilterKey,
     value: unknown,
-  ): TypedFilterCriteria => {
+  ): Either<Error, TypedFilterCriteria> => {
     // Validate that this filter is valid for the current view
     if (!filterConfig.isValidFilterForView(filterKey, currentView)) {
-      throw new Error(
-        `Filter '${filterKey}' is not valid for view '${currentView}'`,
+      return Left(
+        new Error(
+          `Filter '${filterKey}' is not valid for view '${currentView}'`,
+        ),
       );
     }
 
@@ -148,7 +151,7 @@ export function createViewFilterManager(
         .exhaustive(); // Ensures all PageId cases are handled
     }
 
-    return getActiveFilters();
+    return Right(getActiveFilters());
   };
 
   /**

@@ -5,6 +5,7 @@
  * This service defines which filters are available for which views and their types.
  */
 
+import { Either, Left, Right } from "purify-ts";
 import type { OmegaConfig } from "@omega/config";
 import type {
   FilterConfiguration,
@@ -102,11 +103,12 @@ function buildViewFilterConfig(
 /**
  * Validate that all configured pages exist in OmegaConfig
  * Pure function - validates page configuration
+ * Returns Either<Error, void> - Left if validation fails, Right if valid
  */
 function validatePageConfiguration(
   filterCategories: readonly FilterCategory[],
   config: OmegaConfig,
-): void {
+): Either<Error, void> {
   // Collect all pages referenced in filter categories (immutable)
   const configuredPages = new Set<PageId>(
     filterCategories.flatMap((category) => category.views),
@@ -122,10 +124,14 @@ function validatePageConfiguration(
   );
 
   if (invalidPages.length > 0) {
-    throw new Error(
-      `Filter configuration references page(s) '${invalidPages.join(", ")}' which do not exist in OmegaConfig. Available pages: ${pageIds.join(", ")}`,
+    return Left(
+      new Error(
+        `Filter configuration references page(s) '${invalidPages.join(", ")}' which do not exist in OmegaConfig. Available pages: ${pageIds.join(", ")}`,
+      ),
     );
   }
+
+  return Right(undefined);
 }
 
 /**
@@ -142,7 +148,17 @@ export function createFilterConfigurationService(
   const viewFilterConfig = buildViewFilterConfig(filterCategories);
 
   // Validate that all configured pages exist in OmegaConfig
-  validatePageConfiguration(filterCategories, config);
+  // Fail-fast on configuration errors (this is called at service creation time
+  const validationResult = validatePageConfiguration(filterCategories, config);
+  validationResult.caseOf({
+    Left: (error) => {
+      // Configuration errors should fail-fast - this is a startup validation
+      throw error;
+    },
+    Right: () => {
+      // Validation passed, continue
+    },
+  });
 
   /**
    * Get filters available for a specific page/view

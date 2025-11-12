@@ -96,9 +96,13 @@ export class CycleDataViewCoordinator {
    * Update filters using ViewFilterManager
    * Business operation - has side effects (updates filter manager state)
    */
-  updateFilter(filterKey: FilterKey, value: unknown): ViewFilterCriteria {
-    this.viewFilterManager.updateFilter(filterKey, value);
-    return this.viewFilterManager.getAllViewFilters();
+  updateFilter(
+    filterKey: FilterKey,
+    value: unknown,
+  ): Either<Error, ViewFilterCriteria> {
+    return this.viewFilterManager
+      .updateFilter(filterKey, value)
+      .map(() => this.viewFilterManager.getAllViewFilters());
   }
 
   /**
