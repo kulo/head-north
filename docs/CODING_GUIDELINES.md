@@ -463,7 +463,9 @@ const area = Maybe.fromNullable(areaLabels[0])
 
 ### Optional Values with Maybe
 
-Replace `null`/`undefined` checks with `Maybe`.
+**Note**: See [TypeScript Optional Properties (`?`) vs `Maybe`](#typescript-optional-properties--vs-maybe---when-to-use-each) above for guidance on when to use TypeScript `?` vs `Maybe`.
+
+Replace `null`/`undefined` checks with `Maybe` during data extraction and transformation. Use TypeScript `?` for interface definitions.
 
 ```typescript
 import { Maybe } from "purify-ts";

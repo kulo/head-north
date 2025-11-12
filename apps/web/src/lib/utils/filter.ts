@@ -156,9 +156,14 @@ function filterRoadmapItem(
       if (!showErrors) return true;
 
       const hasRoadmapValidationErrors =
-        (roadmapItem.validations?.length || 0) > 0;
+        Maybe.fromNullable(roadmapItem.validations)
+          .map((vals) => vals.length)
+          .orDefault(0) > 0;
       const hasReleaseItemValidationErrors = filteredReleaseItems.some(
-        (item) => (item.validations?.length || 0) > 0,
+        (item) =>
+          Maybe.fromNullable(item.validations)
+            .map((vals) => vals.length)
+            .orDefault(0) > 0,
       );
 
       return hasRoadmapValidationErrors || hasReleaseItemValidationErrors;
@@ -286,7 +291,11 @@ function matchesAllCriteria(
   const validationMatch = Maybe.fromNullable(criteria.showValidationErrors)
     .map((showErrors) => {
       if (!showErrors) return true;
-      return (releaseItem.validations?.length || 0) > 0;
+      return (
+        Maybe.fromNullable(releaseItem.validations)
+          .map((vals) => vals.length)
+          .orDefault(0) > 0
+      );
     })
     .orDefault(true);
 

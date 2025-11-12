@@ -138,7 +138,9 @@ export function transformToNestedStructure(
     if (!acc[initiativeId]) {
       acc[initiativeId] = {
         id: initiativeId,
-        name: initiativesLookup[initiativeId] || DEFAULT_INITIATIVE.NAME,
+        name: Maybe.fromNullable(initiativesLookup[initiativeId]).orDefault(
+          DEFAULT_INITIATIVE.NAME,
+        ),
         roadmapItems: [],
         // Initialize progress metrics
         weeks: 0,
@@ -170,14 +172,28 @@ export function transformToNestedStructure(
     // Transform roadmap item with progress metrics
     const roadmapItemMetrics = calculateReleaseItemProgress(itemReleaseItems);
 
+    // Extract values using Maybe for safe transformation
+    const name = Maybe.fromNullable(item.summary)
+      .alt(Maybe.fromNullable(item.name))
+      .orDefault(`Roadmap Item ${item.id}`);
+    const labels = Maybe.fromNullable(item.labels).orDefault([]);
+    const area =
+      typeof item.area === "string"
+        ? item.area
+        : Maybe.fromNullable(item.area?.name).orDefault("");
+    const theme = typeof item.theme === "string" ? item.theme : "";
+    const url = Maybe.fromNullable(item.url).orDefault(
+      `https://example.com/browse/${item.id}`,
+    );
+
     const roadmapItem: RoadmapItemWithProgress = {
       id: item.id,
-      name: item.summary || item.name || `Roadmap Item ${item.id}`,
-      summary: item.summary || item.name || `Roadmap Item ${item.id}`,
-      labels: item.labels || [],
-      area: typeof item.area === "string" ? item.area : item.area?.name || "",
-      theme: typeof item.theme === "string" ? item.theme : "",
-      url: item.url || `https://example.com/browse/${item.id}`,
+      name,
+      summary: name,
+      labels,
+      area,
+      theme,
+      url,
       validations: Maybe.fromNullable(item.validations)
         .filter(Array.isArray)
         .map((vals) => hydrateValidations(config, vals))
@@ -190,14 +206,14 @@ export function transformToNestedStructure(
           .filter(Array.isArray)
           .map((vals) => hydrateValidations(config, vals))
           .orDefault([]),
-        cycle:
-          releaseItem.cycle ||
-          Maybe.fromNullable(releaseItem.cycleId)
-            .map((cycleId) => ({
+        cycle: Maybe.fromNullable(releaseItem.cycle)
+          .alt(
+            Maybe.fromNullable(releaseItem.cycleId).map((cycleId) => ({
               id: cycleId,
               name: getCycleName(cycles, cycleId),
-            }))
-            .orDefault({ id: "", name: "" }),
+            })),
+          )
+          .orDefault({ id: "", name: "" }),
       })),
       // Add calculated metrics
       ...roadmapItemMetrics,
@@ -348,10 +364,14 @@ export function generateRoadmapData(
   }
 
   return {
-    orderedCycles: rawData?.cycles ? [...rawData.cycles] : [],
+    orderedCycles: Maybe.fromNullable(rawData?.cycles)
+      .map((cycles) => [...cycles])
+      .orDefault([]),
     roadmapItems: [],
-    activeCycle: selectDefaultCycle(rawData?.cycles || []),
-    initiatives: processedData.initiatives || [],
+    activeCycle: selectDefaultCycle(
+      Maybe.fromNullable(rawData?.cycles).orDefault([]),
+    ),
+    initiatives: Maybe.fromNullable(processedData.initiatives).orDefault([]),
   };
 }
 
@@ -363,7 +383,13 @@ export function generateCycleOverviewData(
   rawData: CycleData | null,
   processedData: NestedCycleData | null,
 ): CycleOverviewData | null {
-  if (!processedData || !rawData?.cycles?.length) {
+  // Use Maybe for safe null checking
+  const hasValidData = Maybe.fromNullable(processedData)
+    .chain(() => Maybe.fromNullable(rawData?.cycles))
+    .filter((cycles) => cycles.length > 0)
+    .isJust();
+
+  if (!hasValidData) {
     return null;
   }
 
@@ -374,7 +400,7 @@ export function generateCycleOverviewData(
 
   return {
     cycle: selectedCycle,
-    initiatives: processedData.initiatives || [],
+    initiatives: Maybe.fromNullable(processedData.initiatives).orDefault([]),
   };
 }
 
@@ -400,10 +426,16 @@ export function generateFilteredRoadmapData(
   const filteredData = filter.apply(processedData, activeFilters);
 
   return {
-    orderedCycles: rawData?.cycles ? [...rawData.cycles] : [],
+    orderedCycles: Maybe.fromNullable(rawData?.cycles)
+      .map((cycles) => [...cycles])
+      .orDefault([]),
     roadmapItems: [],
-    activeCycle: selectDefaultCycle(rawData?.cycles || []),
-    initiatives: filteredData.data.initiatives || [],
+    activeCycle: selectDefaultCycle(
+      Maybe.fromNullable(rawData?.cycles).orDefault([]),
+    ),
+    initiatives: Maybe.fromNullable(filteredData.data.initiatives).orDefault(
+      [],
+    ),
   };
 }
 
@@ -417,8 +449,13 @@ export function generateFilteredCycleOverviewData(
   processedData: NestedCycleData | null,
   activeFilters: FilterCriteria,
 ): CycleOverviewData | null {
-  // Early return for null/empty data
-  if (!processedData || !rawData?.cycles?.length) {
+  // Early return for null/empty data using Maybe
+  const hasValidData = Maybe.fromNullable(processedData)
+    .chain(() => Maybe.fromNullable(rawData?.cycles))
+    .filter((cycles) => cycles.length > 0)
+    .isJust();
+
+  if (!hasValidData) {
     return null;
   }
 
@@ -430,7 +467,9 @@ export function generateFilteredCycleOverviewData(
     .map((cycle) => {
       // Apply filters using unified filter system
       const filteredData = filter.apply(processedData, activeFilters);
-      const filteredInitiatives = filteredData.data.initiatives || [];
+      const filteredInitiatives = Maybe.fromNullable(
+        filteredData.data.initiatives,
+      ).orDefault([]);
 
       // Calculate cycle progress data
       const cycleWithProgress = calculateCycleProgress(
@@ -461,9 +500,9 @@ function getCycleName(cycles: readonly unknown[], cycleId: string): string {
       return cycleObj.id === cycleId;
     }),
   )
-    .map((cycle) => {
+    .chain((cycle) => {
       const cycleWithName = cycle as { name?: string };
-      return cycleWithName.name || `Cycle ${String(cycleId)}`;
+      return Maybe.fromNullable(cycleWithName.name);
     })
     .orDefault(`Cycle ${String(cycleId)}`);
 }
