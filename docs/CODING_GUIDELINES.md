@@ -8,9 +8,20 @@ This document provides comprehensive coding guidelines for the Omega codebase. I
 2. [Quick Reference](#quick-reference) - API cheat sheet
 3. [TypeScript Best Practices](#typescript-best-practices)
 4. [Functional Programming Patterns](#functional-programming-patterns)
+   - [Pure Functions](#pure-functions)
+   - [Error Handling with Either](#error-handling-with-either)
+   - [TypeScript Optional Properties (`?`) vs `Maybe`](#typescript-optional-properties--vs-maybe---when-to-use-each)
+   - [Optional Values with Maybe](#optional-values-with-maybe)
+   - [Pattern Matching with ts-pattern](#pattern-matching-with-ts-pattern)
+   - [Functional Composition](#functional-composition)
+   - [Data Validation with Zod](#data-validation-with-zod)
 5. [Code Organization](#code-organization)
 6. [Testing Guidelines](#testing-guidelines)
 7. [Error Handling](#error-handling)
+   - [Framework Layers](#framework-layers)
+   - [Critical Failures](#critical-failures)
+   - [Pinia Store Error Handling](#pinia-store-error-handling)
+   - [Async Error Handling with EitherAsync](#async-error-handling-with-eitherasync)
 8. [Immutability & Side Effects](#immutability--side-effects)
 9. [Common Patterns](#common-patterns)
 10. [Anti-patterns to Avoid](#anti-patterns-to-avoid)
@@ -194,33 +205,39 @@ result.caseOf({
 
 ### Decision Tree
 
+Quick reference for choosing the right tool. For detailed guidance, see the sections below.
+
 **Need to handle optional value?**
 
-- → Use `Maybe`
+- → Use `Maybe` (see [Optional Values with Maybe](#optional-values-with-maybe))
+- → For interface definitions, use TypeScript `?` (see [TypeScript Optional Properties (`?`) vs `Maybe`](#typescript-optional-properties--vs-maybe---when-to-use-each))
 
 **Operation can fail?**
 
-- → Use `Either<Error, T>`
+- → Use `Either<Error, T>` (see [Error Handling with Either](#error-handling-with-either))
+- → For complex async operations, use `EitherAsync` (see [Async Error Handling with EitherAsync](#async-error-handling-with-eitherasync))
 
 **Multiple status/type branches?**
 
-- → Use `match()` from ts-pattern
+- → Use `match()` from ts-pattern (see [Pattern Matching with ts-pattern](#pattern-matching-with-ts-pattern))
 
 **Validate external data?**
 
-- → Use `Zod` + `Either`
+- → Use `Zod` + `Either` (see [Data Validation with Zod](#data-validation-with-zod))
 
 **Transform data through steps?**
 
-- → Use `pipe()`
+- → Use `pipe()` (see [Functional Composition](#functional-composition))
 
 **Safe wrapper for try-catch?**
 
-- → Use `safe()` or `safeAsync()`
+- → Use `safe()` or `safeAsync()` (see [Safe Wrappers](#safe-wrappers))
 
 ---
 
 ## TypeScript Best Practices
+
+This section covers TypeScript-specific best practices. For guidance on using TypeScript optional properties (`?`) versus `Maybe` ADT, see [TypeScript Optional Properties (`?`) vs `Maybe` - When to Use Each](#typescript-optional-properties--vs-maybe---when-to-use-each) in the Functional Programming Patterns section.
 
 ### Type Safety
 
@@ -463,9 +480,9 @@ const area = Maybe.fromNullable(areaLabels[0])
 
 ### Optional Values with Maybe
 
-**Note**: See [TypeScript Optional Properties (`?`) vs `Maybe`](#typescript-optional-properties--vs-maybe---when-to-use-each) above for guidance on when to use TypeScript `?` vs `Maybe`.
+**Note**: For comprehensive guidance on when to use TypeScript `?` vs `Maybe`, see [TypeScript Optional Properties (`?`) vs `Maybe` - When to Use Each](#typescript-optional-properties--vs-maybe---when-to-use-each) above.
 
-Replace `null`/`undefined` checks with `Maybe` during data extraction and transformation. Use TypeScript `?` for interface definitions.
+This section provides quick examples of using `Maybe` to replace `null`/`undefined` checks during data extraction and transformation. Remember: use TypeScript `?` for interface definitions, `Maybe` for extraction/transformation.
 
 ```typescript
 import { Maybe } from "purify-ts";
@@ -737,7 +754,7 @@ it("should return Left on invalid input", () => {
 
 ## Error Handling
 
-For business logic, use `Either<Error, T>` as described in [Error Handling with Either](#error-handling-with-either).
+This section covers error handling patterns across different layers of the application. For the core `Either` pattern, see [Error Handling with Either](#error-handling-with-either) in the Functional Programming Patterns section.
 
 ### Framework Layers
 
