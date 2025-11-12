@@ -8,6 +8,7 @@
 
 import {
   Either,
+  EitherAsync,
   logger,
   Maybe,
   retryWithBackoff,
@@ -154,6 +155,34 @@ class CycleDataService {
   }
 
   /**
+   * Fetch and parse HTTP response using functional error handling
+   * Handles fetch errors, HTTP error responses, and JSON parsing errors with Either
+   * @param {string} url - The full URL to fetch
+   * @param {RequestInit} requestOptions - Fetch request options
+   * @returns {Promise<Either<Error, RawCycleData>>} The parsed response data wrapped in Either
+   */
+  async #fetchAndParseResponse(
+    url: string,
+    requestOptions: RequestInit,
+  ): Promise<Either<Error, RawCycleData>> {
+    return EitherAsync<Error, RawCycleData>(async ({ fromPromise, throwE }) => {
+      const response = await fromPromise(
+        safeAsync(() => fetch(url, requestOptions)),
+      );
+
+      if (!response.ok) {
+        throwE(new Error(`HTTP ${response.status}: ${response.statusText}`));
+      }
+
+      const data = await fromPromise(
+        safeAsync(() => response.json() as Promise<RawCycleData>),
+      );
+
+      return data;
+    }).run();
+  }
+
+  /**
    * Make an HTTP request with error handling and retry logic
    * Uses functional retry pattern with Either for error handling
    * @param {string} endpoint - The API endpoint
@@ -179,19 +208,7 @@ class CycleDataService {
 
     // Use functional retry utility with Either
     return retryWithBackoff(
-      async () => {
-        // Attempt the request wrapped in Either
-        return safeAsync(async () => {
-          const response: Response = await fetch(url, requestOptions);
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          const data = await response.json();
-          return data as RawCycleData;
-        });
-      },
+      () => this.#fetchAndParseResponse(url, requestOptions),
       {
         maxRetries: this.#apiRetries,
         minTimeout: 1000,

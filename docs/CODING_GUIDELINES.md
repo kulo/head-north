@@ -36,7 +36,7 @@ A quick API reference for common FP patterns. For detailed explanations and exam
 ### Import Statements
 
 ```typescript
-import { Maybe, Either, Left, Right } from "purify-ts";
+import { Maybe, Either, Left, Right, EitherAsync } from "purify-ts";
 import { match } from "ts-pattern";
 import { z } from "zod";
 import { pipe, safe, safeAsync } from "@omega/utils";
@@ -635,6 +635,206 @@ adapterResult.caseOf({
   Right: (adapter) => adapter,
 });
 ```
+
+### Pinia Store Error Handling
+
+Store actions should return `Either<Error, T>` to maintain functional error handling throughout the stack. Components handle errors functionally using `.caseOf()`.
+
+```typescript
+// ✅ GOOD - Store action returns Either
+async function updateFilter(
+  key: FilterKey,
+  value: unknown,
+): Promise<Either<Error, void>> {
+  const result = filterManager.updateFilter(key, value);
+  return result.map((activeFilters) => {
+    const allViewFilters = filterManager.getAllViewFilters();
+    setFilters(allViewFilters);
+    logger.service.info("Filter updated", { key, value });
+  });
+}
+
+// ✅ GOOD - Component handles Either
+const handleCycleChange = async (cycleId: string) => {
+  const result = await filterStore.updateFilter("cycle", cycleId);
+  result.caseOf({
+    Left: (error) => {
+      logger.service.errorSafe("Failed to update cycle filter", error, {
+        cycleId,
+      });
+      // Optionally show user notification
+    },
+    Right: () => {
+      // Success - filter updated
+    },
+  });
+};
+```
+
+**Pattern**: Store actions return `Either`, components handle errors functionally. This maintains functional error handling from services → stores → components.
+
+### Async Error Handling with EitherAsync
+
+For complex async operations that return `Either<Error, T>`, use `EitherAsync` instead of `Promise<Either>` for cleaner, more readable code.
+
+#### When to Use EitherAsync
+
+**✅ Use `EitherAsync` when:**
+
+- Multiple async operations that need chaining
+- Complex error handling at different stages
+- Async operations with validation
+- Operations that would otherwise require nested `caseOf` or `Promise.resolve` patterns
+
+**❌ Keep `Promise<Either>` when:**
+
+- Simple `await + map` operations
+- Synchronous Either operations
+- Simple pass-through functions
+
+#### Basic Usage
+
+```typescript
+import { EitherAsync, safeAsync } from "@omega/utils";
+
+// ✅ GOOD - Complex async chain with EitherAsync
+async function fetchAndProcessData(
+  url: string,
+): Promise<Either<Error, ProcessedData>> {
+  return EitherAsync(async ({ fromPromise, throwE }) => {
+    // Fetch with automatic error handling
+    const response = await fromPromise(safeAsync(() => fetch(url)));
+
+    // Validate HTTP response
+    if (!response.ok) {
+      throwE(new Error(`HTTP ${response.status}: ${response.statusText}`));
+    }
+
+    // Parse JSON with automatic error handling
+    const data = await fromPromise(
+      safeAsync(() => response.json() as Promise<RawData>),
+    );
+
+    // Validate data
+    if (!data.valid) {
+      throwE(new Error("Invalid data structure"));
+    }
+
+    return processData(data);
+  }).run();
+}
+```
+
+#### Comparison: EitherAsync vs Promise<Either>
+
+**Before (complex with Promise<Either):**
+
+```typescript
+// ❌ COMPLEX - Nested caseOf and Promise.resolve
+async function fetchData(url: string): Promise<Either<Error, Data>> {
+  const fetchResult = await safeAsync(() => fetch(url));
+
+  const validated = fetchResult.chain((response) => {
+    if (!response.ok) {
+      return Left(new Error(`HTTP ${response.status}`));
+    }
+    return Right(response);
+  });
+
+  return await validated.caseOf({
+    Left: (error) => Promise.resolve(Left(error)),
+    Right: async (response) => {
+      const jsonResult = await safeAsync(() => response.json());
+      return jsonResult;
+    },
+  });
+}
+```
+
+**After (clean with EitherAsync):**
+
+```typescript
+// ✅ CLEAN - Async/await-like syntax
+async function fetchData(url: string): Promise<Either<Error, Data>> {
+  return EitherAsync(async ({ fromPromise, throwE }) => {
+    const response = await fromPromise(safeAsync(() => fetch(url)));
+    if (!response.ok) {
+      throwE(new Error(`HTTP ${response.status}`));
+    }
+    const data = await fromPromise(safeAsync(() => response.json()));
+    return data;
+  }).run();
+}
+```
+
+#### Simple Cases: Keep Promise<Either>
+
+For simple operations, `Promise<Either>` is perfectly fine:
+
+```typescript
+// ✅ GOOD - Simple await + map, no need for EitherAsync
+async function getAllCycles(): Promise<Either<Error, Cycle[]>> {
+  const data = await this.#getCachedCycleData();
+  return data.map((d) => d.cycles);
+}
+
+// ✅ GOOD - Simple pass-through
+async function getData(): Promise<Either<Error, Data>> {
+  return await this.#getCachedCycleData();
+}
+```
+
+#### EitherAsync Helpers
+
+`EitherAsync` provides helpers in its callback:
+
+- `fromPromise(promise)` - Unwraps `Promise<Either<L, R>>` or `Promise<T>` (auto-wraps in Right)
+- `throwE(error)` - Throws an error that becomes `Left(error)`
+- `liftEither(either)` - Lifts a synchronous `Either` into the async context
+
+```typescript
+return EitherAsync(async ({ fromPromise, throwE, liftEither }) => {
+  // Unwrap Promise<Either>
+  const data = await fromPromise(fetchData());
+
+  // Unwrap Promise<T> (auto-wrapped in Right)
+  const config = await fromPromise(fetchConfig());
+
+  // Use synchronous Either
+  const validated = liftEither(validateData(data));
+
+  // Throw error (becomes Left)
+  if (!validated.valid) {
+    throwE(new Error("Validation failed"));
+  }
+
+  return validated;
+}).run();
+```
+
+#### Integration with Existing Utilities
+
+`EitherAsync` works seamlessly with existing utilities:
+
+```typescript
+import { EitherAsync, safeAsync, retryWithBackoff } from "@omega/utils";
+
+async function fetchWithRetry(url: string): Promise<Either<Error, Data>> {
+  return retryWithBackoff(
+    () =>
+      EitherAsync(async ({ fromPromise }) => {
+        const response = await fromPromise(safeAsync(() => fetch(url)));
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return await fromPromise(safeAsync(() => response.json()));
+      }).run(),
+    { maxRetries: 3 },
+  );
+}
+```
+
+**Note**: `EitherAsync.run()` returns `Promise<Either<L, R>>`, so it's compatible with utilities expecting that signature.
 
 ---
 
