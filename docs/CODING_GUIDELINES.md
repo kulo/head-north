@@ -329,6 +329,138 @@ result.caseOf({
 
 **Real example**: `apps/api/src/services/collect-cycle-data.ts`
 
+### TypeScript Optional Properties (`?`) vs `Maybe` - When to Use Each
+
+Understanding when to use TypeScript's optional property syntax (`?`) versus the `Maybe` ADT is crucial for maintaining clean, type-safe code.
+
+#### Decision Tree
+
+**Use TypeScript `?` when:**
+
+- Defining interfaces/types for domain objects
+- Defining API response types
+- Properties that may or may not exist in the data structure
+- Type definitions that represent the shape of data
+
+**Use `Maybe` when:**
+
+- Extracting data from external sources (APIs, user input, etc.)
+- Transforming data during processing
+- Handling optional values in business logic
+- Chaining operations on potentially missing values
+
+**Convert to concrete values when:**
+
+- Creating domain objects from extracted data
+- Final assignment to properties
+- Returning from functions that need concrete types
+
+#### Examples
+
+**✅ GOOD - Interface with TypeScript `?`:**
+
+```typescript
+// Domain type definition - use TypeScript optional properties
+interface RoadmapItem {
+  id: string;
+  name: string;
+  summary?: string; // Optional property
+  area?: Area; // Optional property
+  theme?: Theme; // Optional property
+  startDate?: string;
+  endDate?: string;
+}
+```
+
+**✅ GOOD - Extraction with `Maybe`:**
+
+```typescript
+// External data extraction - use Maybe
+function extractArea(issue: JiraIssue): Maybe<string> {
+  const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
+  return Maybe.fromNullable(areaLabels[0]);
+}
+
+function extractCustomField<T>(issue: JiraIssue, fieldName: string): Maybe<T> {
+  const value = (issue.fields as Record<string, unknown>)[fieldName];
+  return Maybe.fromNullable(value as T | null | undefined);
+}
+```
+
+**✅ GOOD - Transformation with `Maybe`, convert to concrete:**
+
+```typescript
+// During transformation - use Maybe, then convert to concrete
+function transformRoadmapItem(issue: JiraIssue): RoadmapItem {
+  // Extract with Maybe
+  const areaLabel = Maybe.fromNullable(
+    extractLabelsWithPrefix(issue.fields.labels, "area:")[0],
+  );
+
+  // Chain operations with Maybe
+  const area = areaLabel
+    .chain((label) => Maybe.fromNullable(translations.areas[label]))
+    .orDefault(areaLabel.extract() || "unknown"); // Convert to concrete
+
+  // Create domain object with concrete values
+  return {
+    id: issue.key,
+    name: issue.fields.summary,
+    area: area, // Concrete value, not Maybe
+    // ...
+  };
+}
+```
+
+**❌ BAD - Using `||` fallbacks in extraction:**
+
+```typescript
+// ❌ BAD - Direct || fallback loses type safety
+const area =
+  (areaLabels[0] ? translations.areas[areaLabels[0]] : undefined) ||
+  areaLabels[0] ||
+  "unknown";
+```
+
+**✅ GOOD - Using `Maybe` for extraction:**
+
+```typescript
+// ✅ GOOD - Type-safe extraction with Maybe
+const area = Maybe.fromNullable(areaLabels[0])
+  .chain((label) => Maybe.fromNullable(translations.areas[label]))
+  .orDefault(areaLabels[0] || "unknown");
+```
+
+#### Pattern Summary
+
+1. **Define types with `?`**: `interface Item { name?: string; }`
+2. **Extract with `Maybe`**: `Maybe.fromNullable(value)`
+3. **Transform with `Maybe`**: Chain operations, filter, map
+4. **Convert to concrete**: Use `.orDefault()` or `.extract()` when creating domain objects
+
+#### Real Example from Codebase
+
+**Before (using `||` fallbacks):**
+
+```typescript
+const area =
+  (areaLabels[0]
+    ? this.config.getLabelTranslations().areas[areaLabels[0]]
+    : undefined) ||
+  areaLabels[0] ||
+  "unknown";
+```
+
+**After (using `Maybe`):**
+
+```typescript
+const area = Maybe.fromNullable(areaLabels[0])
+  .chain((label) =>
+    Maybe.fromNullable(this.config.getLabelTranslations().areas[label]),
+  )
+  .orDefault(areaLabels[0] || "unknown");
+```
+
 ### Optional Values with Maybe
 
 Replace `null`/`undefined` checks with `Maybe`.

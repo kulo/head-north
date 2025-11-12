@@ -92,6 +92,23 @@ export class DefaultJiraAdapter implements JiraAdapter {
     });
   }
 
+  /**
+   * Get translated label with fallback using Maybe for safe extraction
+   * @param label - The label to translate (may be undefined)
+   * @param translations - Translation dictionary
+   * @param fallback - Fallback value if translation not found
+   * @returns Translated label or fallback
+   */
+  private getTranslatedLabel(
+    label: string | undefined,
+    translations: Record<string, string>,
+    fallback: string = "unknown",
+  ): string {
+    return Maybe.fromNullable(label)
+      .chain((l) => Maybe.fromNullable(translations[l]))
+      .orDefault(label || fallback);
+  }
+
   private transformRoadmapItem(
     issue: JiraIssue,
     releaseIssues: JiraIssue[],
@@ -107,25 +124,28 @@ export class DefaultJiraAdapter implements JiraAdapter {
       "initiative:",
     )[0];
 
-    // Translate labels using config
-    const area =
-      (areaLabels[0]
-        ? this.config.getLabelTranslations().areas[areaLabels[0]]
-        : undefined) ||
-      areaLabels[0] ||
-      "unknown";
-    const theme =
-      (themeLabel
-        ? this.config.getLabelTranslations().themes[themeLabel]
-        : undefined) ||
-      themeLabel ||
-      "unknown";
-    const initiative =
-      (initiativeLabel
-        ? this.config.getLabelTranslations().initiatives[initiativeLabel]
-        : undefined) ||
-      initiativeLabel ||
-      "unknown";
+    // Translate labels using Maybe for safe extraction
+    const areaTranslations = this.config.getLabelTranslations().areas;
+    const area = this.getTranslatedLabel(
+      areaLabels[0],
+      areaTranslations,
+      areaLabels[0] || "unknown",
+    );
+
+    const themeTranslations = this.config.getLabelTranslations().themes;
+    const theme = this.getTranslatedLabel(
+      themeLabel,
+      themeTranslations,
+      themeLabel || "unknown",
+    );
+
+    const initiativeTranslations =
+      this.config.getLabelTranslations().initiatives;
+    const initiative = this.getTranslatedLabel(
+      initiativeLabel,
+      initiativeTranslations,
+      initiativeLabel || "unknown",
+    );
 
     // Generate validations
     const validations: ValidationItem[] = [
@@ -143,28 +163,43 @@ export class DefaultJiraAdapter implements JiraAdapter {
         .orDefault(false),
     );
 
-    // Determine owning team from release items
+    // Determine owning team from release items using Maybe
     const teamLabels = relatedReleaseItems.flatMap((ri) =>
       extractLabelsWithPrefix(ri.fields.labels, "team:"),
     );
-    const owningTeamId = teamLabels[0] || "unknown";
+    const owningTeamId = Maybe.fromNullable(teamLabels[0]).orDefault("unknown");
+
+    // Get team translation using Maybe
+    const teamTranslations = this.config.getLabelTranslations().teams;
+    const owningTeamName = this.getTranslatedLabel(
+      owningTeamId,
+      teamTranslations,
+      owningTeamId,
+    );
+
+    // Extract area ID using Maybe
+    const areaId = Maybe.fromNullable(areaLabels[0]).orDefault("unknown");
+    const themeId = Maybe.fromNullable(themeLabel).orDefault("unknown");
+
+    // Extract host URL using Maybe
+    const host = Maybe.fromNullable(this.jiraConfig.connection.host).orDefault(
+      "",
+    );
 
     return {
       id: issue.key,
       name,
       summary: issue.fields.summary,
-      area: { id: areaLabels[0] || "unknown", name: area, teams: [] },
-      theme: { id: themeLabel || "unknown", name: theme },
+      area: { id: areaId, name: area, teams: [] },
+      theme: { id: themeId, name: theme },
       initiativeId: initiativeLabel || null,
       labels: issue.fields.labels,
       validations,
       owningTeam: {
         id: owningTeamId,
-        name:
-          this.config.getLabelTranslations().teams[owningTeamId] ||
-          owningTeamId,
+        name: owningTeamName,
       },
-      url: createJiraUrl(issue.key, this.jiraConfig.connection.host || ""),
+      url: createJiraUrl(issue.key, host),
       isExternal: false, // Will be determined by business logic
     };
   }
@@ -199,8 +234,10 @@ export class DefaultJiraAdapter implements JiraAdapter {
     // Extract parent (roadmapItemId)
     const roadmapItemId = extractParent(issue).orDefault("");
 
-    // Extract cycleId from sprint
-    const cycleId = issue.fields.sprint?.id?.toString() || "";
+    // Extract cycleId from sprint using Maybe
+    const cycleId = Maybe.fromNullable(issue.fields.sprint?.id)
+      .map((id) => id.toString())
+      .orDefault("");
 
     // Find cycle using Maybe for safe lookup and transform to required shape
     const cycle = Maybe.fromNullable(cycles.find((c) => c.id === cycleId))
@@ -222,16 +259,23 @@ export class DefaultJiraAdapter implements JiraAdapter {
       areaIds: areaLabels,
       teams: teamLabels,
       status,
-      url: createJiraUrl(issue.key, this.jiraConfig.connection.host || ""),
+      url: createJiraUrl(
+        issue.key,
+        Maybe.fromNullable(this.jiraConfig.connection.host).orDefault(""),
+      ),
       isExternal: false, // Will be determined by business logic
       stage,
       assignee,
       validations,
-      roadmapItemId: roadmapItemId || "",
+      roadmapItemId,
       cycleId,
       cycle,
-      created: issue.fields.created || new Date().toISOString(),
-      updated: issue.fields.updated || new Date().toISOString(),
+      created: Maybe.fromNullable(issue.fields.created).orDefault(
+        new Date().toISOString() as `${number}-${number}-${number}`,
+      ),
+      updated: Maybe.fromNullable(issue.fields.updated).orDefault(
+        new Date().toISOString() as `${number}-${number}-${number}`,
+      ),
     };
   }
 

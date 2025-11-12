@@ -5,7 +5,7 @@
  * Handles validation and adapter selection at application startup.
  */
 
-import { logger } from "@omega/utils";
+import { logger, Maybe } from "@omega/utils";
 import type { Either } from "@omega/utils";
 import { Right } from "@omega/utils";
 import type { OmegaConfig, JiraConfigData } from "@omega/config";
@@ -35,9 +35,10 @@ function transformJiraConfigData(config: JiraConfigData): JiraConfig {
     },
     connection: {
       // After validation, these fields are guaranteed to be non-null strings
-      host: config.connection.host || "",
-      user: config.connection.user || "",
-      token: config.connection.token || "",
+      // Using Maybe for consistency with ADT normalization pattern
+      host: Maybe.fromNullable(config.connection.host).orDefault(""),
+      user: Maybe.fromNullable(config.connection.user).orDefault(""),
+      token: Maybe.fromNullable(config.connection.token).orDefault(""),
       boardId: config.connection.boardId,
     },
   };
