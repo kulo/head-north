@@ -1,13 +1,12 @@
 /**
  * Tests for OmegaConfig
- * DISABLED - Complex process environment mocking causes issues
+ * Complex tests with process environment mocking
  */
 
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
 import OmegaConfig from "../dist/omega-config.js";
 
-// Skip this test suite due to process environment issues
-describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
+describe("OmegaConfig - Complex Tests", () => {
   let config: OmegaConfig;
 
   beforeEach(() => {
@@ -21,13 +20,13 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
   describe("Constructor", () => {
     it("should create instance with default environment", () => {
       config = new OmegaConfig();
-      expect(config.environment).toBe("development");
+      expect(config.getConfig().environment).toBe("development");
       expect(config.getHost()).toBeDefined();
     });
 
     it("should create instance with specified environment", () => {
       config = new OmegaConfig({ overrides: { environment: "production" } });
-      expect(config.environment).toBe("production");
+      expect(config.getConfig().environment).toBe("production");
     });
 
     it("should apply overrides", () => {

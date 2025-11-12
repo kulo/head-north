@@ -45,10 +45,10 @@ import type {
 } from "./types";
 
 export default class OmegaConfig {
-  private readonly processEnv: Readonly<ProcessEnv>;
-  private readonly overrides: Readonly<ConfigOverrides>;
-  private readonly environment: string;
-  private readonly config: Readonly<OmegaConfigData>;
+  readonly processEnv: Readonly<ProcessEnv>;
+  readonly overrides: Readonly<ConfigOverrides>;
+  readonly environment: string;
+  readonly config: Readonly<OmegaConfigData>;
 
   constructor({
     processEnv = {},
