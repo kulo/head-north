@@ -225,6 +225,12 @@ This document tracks important cleanup tasks, architectural decisions, and techn
 - Test infrastructure exists but lacks enforcement thresholds
 - Documentation is good but missing ADRs
 
+### 📦 **Unused Code Analysis:**
+
+- See `UNUSED_CODE_ANALYSIS.md` for comprehensive analysis and tool recommendations
+- Recommended tools: `ts-prune`, `depcheck`, `knip` for finding unused code
+- No automated unused code detection currently configured
+
 ---
 
 _Last updated: November 2025 (Analysis completed)_

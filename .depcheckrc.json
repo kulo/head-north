@@ -1,0 +1,39 @@
+{
+  "ignoreMatches": [
+    "@types/*",
+    "eslint-*",
+    "@typescript-eslint/*",
+    "vue-eslint-parser",
+    "webpack-*",
+    "@babel/*",
+    "@vitest/*",
+    "ts-loader",
+    "vue-loader",
+    "html-webpack-plugin",
+    "copy-webpack-plugin",
+    "css-loader",
+    "style-loader",
+    "postcss-loader",
+    "babel-loader",
+    "@vitejs/*",
+    "autoprefixer",
+    "postcss",
+    "jsdom",
+    "@vue/test-utils",
+    "husky",
+    "lint-staged",
+    "prettier",
+    "concurrently",
+    "nodemon",
+    "dotenv",
+    "esbuild"
+  ],
+  "ignoreDirs": [
+    "dist",
+    "node_modules",
+    "coverage",
+    "**/dist",
+    "**/node_modules"
+  ],
+  "ignorePatterns": ["*.test.ts", "*.test.js", "*.spec.ts", "*.spec.js"]
+}

@@ -84,7 +84,10 @@
     "reset": "npm run clean && npm run install:all",
     "fresh": "npm run reset && npm run build && npm run dev",
     "validate:env": "node scripts/validate-env.js",
-    "dev:with-check": "npm run validate:env && npm run dev"
+    "dev:with-check": "npm run validate:env && npm run dev",
+    "analyze:unused": "ts-prune --ignore 'tests|test|spec|dist|coverage|node_modules'",
+    "analyze:deps": "depcheck",
+    "analyze:all": "npm run analyze:unused && npm run analyze:deps"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -96,11 +99,13 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "concurrently": "^7.6.0",
+    "depcheck": "^1.4.7",
     "eslint": "^9.0.0",
     "eslint-plugin-vue": "^9.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.0",
     "prettier": "^3.0.0",
+    "ts-prune": "^0.10.3",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
     "vue-eslint-parser": "^9.0.0"
