@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { getReleaseItemsForCycle } from "../../../src/lib/utils/roadmap-item-utils";
-import type { ReleaseItem } from "@omega/types";
+import type { ReleaseItem } from "@headnorth/types";
 
 describe("roadmap-item-utils", () => {
   describe("getReleaseItemsForCycle", () => {

@@ -1,14 +1,14 @@
 // Jira-specific Types
-// These types represent the Jira domain and should be shielded from the Omega domain
+// These types represent the Jira domain and should be shielded from the Head North domain
 
-import type { ISODateString, AreaId, Person } from "@omega/types";
+import type { ISODateString, AreaId, Person } from "@headnorth/types";
 import type {
   JiraStatusMappings,
   JiraStatusCategories,
   JiraLimits,
   JiraFields,
   JiraConnection,
-} from "@omega/config";
+} from "@headnorth/config";
 
 export interface JiraSprintsData {
   sprints: JiraSprint[];

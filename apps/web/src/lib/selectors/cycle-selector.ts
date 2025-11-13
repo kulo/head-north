@@ -6,7 +6,7 @@
  */
 
 import { isActiveState, isClosedState } from "../utils/cycle-state-utils";
-import type { Cycle } from "@omega/types";
+import type { Cycle } from "@headnorth/types";
 
 /**
  * Determines the best cycle to select based on availability and priority

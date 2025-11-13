@@ -1,5 +1,5 @@
 import { Context, Next } from "koa";
-import { logger } from "@omega/utils";
+import { logger } from "@headnorth/utils";
 
 export default async (context: Context, next: Next): Promise<void> => {
   try {

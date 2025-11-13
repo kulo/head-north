@@ -1,7 +1,7 @@
 {
-  "name": "@omega/test-config",
+  "name": "@headnorth/test-config",
   "version": "1.0.0",
-  "description": "Shared test configuration for Omega packages",
+  "description": "Shared test configuration for Head North packages",
   "type": "module",
   "main": "vitest.config.js",
   "private": true,
@@ -25,7 +25,7 @@
   "keywords": [
     "test",
     "vitest",
-    "omega",
+    "headnorth",
     "shared",
     "typescript"
   ],

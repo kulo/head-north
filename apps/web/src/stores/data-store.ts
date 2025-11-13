@@ -10,7 +10,7 @@ import { ref, computed, inject } from "vue";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
 import { useFilterStore } from "./filters-store";
-import type { CycleData } from "@omega/types";
+import type { CycleData } from "@headnorth/types";
 import type {
   NestedCycleData,
   RoadmapData,

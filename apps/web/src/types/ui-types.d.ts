@@ -73,5 +73,5 @@ import type {
   Assignee,
   Area,
   Stage,
-} from "@omega/types";
+} from "@headnorth/types";
 //# sourceMappingURL=ui-types.d.ts.map

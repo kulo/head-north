@@ -7,11 +7,11 @@
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
 import type { Page } from "../types/ui-types";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 
 export const useAppStore = defineStore("app", () => {
   // Inject services
-  const config = inject<OmegaConfig>("config")!;
+  const config = inject<HeadNorthConfig>("config")!;
 
   // State
   const loading = ref(false);

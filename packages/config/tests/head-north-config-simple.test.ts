@@ -1,30 +1,30 @@
 /**
- * Simplified OmegaConfig Tests
+ * Simplified HeadNorthConfig Tests
  * Basic tests without complex process environment mocking
  */
 
 import { describe, it, expect } from "vitest";
-import OmegaConfig from "../dist/omega-config.js";
+import HeadNorthConfig from "../dist/head-north-config.js";
 
-describe("OmegaConfig - Simplified", () => {
-  let config: OmegaConfig;
+describe("HeadNorthConfig - Simplified", () => {
+  let config: HeadNorthConfig;
 
   describe("Basic Functionality", () => {
     it("should create instance with default environment", () => {
-      config = new OmegaConfig();
+      config = new HeadNorthConfig();
       expect(config.environment).toBe("development");
       expect(config.getHost()).toBeDefined();
     });
 
     it("should create instance with specified environment", () => {
-      config = new OmegaConfig(undefined, { environment: "production" });
+      config = new HeadNorthConfig(undefined, { environment: "production" });
       // Note: Environment override might not work as expected in test environment
       expect(config.environment).toBeDefined();
       expect(typeof config.environment).toBe("string");
     });
 
     it("should create instance with custom overrides", () => {
-      config = new OmegaConfig(undefined, {
+      config = new HeadNorthConfig(undefined, {
         environment: "staging",
         api: { host: "https://staging-api.com" },
       });
@@ -37,7 +37,7 @@ describe("OmegaConfig - Simplified", () => {
 
   describe("API Configuration", () => {
     beforeEach(() => {
-      config = new OmegaConfig();
+      config = new HeadNorthConfig();
     });
 
     it("should get host configuration", () => {
@@ -63,7 +63,7 @@ describe("OmegaConfig - Simplified", () => {
 
   describe("Cache Configuration", () => {
     beforeEach(() => {
-      config = new OmegaConfig();
+      config = new HeadNorthConfig();
     });
 
     it("should get cache configuration", () => {
@@ -82,7 +82,7 @@ describe("OmegaConfig - Simplified", () => {
 
   describe("Label Translations", () => {
     beforeEach(() => {
-      config = new OmegaConfig();
+      config = new HeadNorthConfig();
     });
 
     it("should get label translations", () => {
@@ -94,7 +94,7 @@ describe("OmegaConfig - Simplified", () => {
 
   describe("Configuration Structure", () => {
     beforeEach(() => {
-      config = new OmegaConfig();
+      config = new HeadNorthConfig();
     });
 
     it("should have valid configuration structure", () => {

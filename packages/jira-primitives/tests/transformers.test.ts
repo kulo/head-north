@@ -8,7 +8,7 @@ import type { JiraSprint, JiraStatus } from "../src/types";
 
 describe("transformers", () => {
   describe("jiraSprintToCycle", () => {
-    it("should transform JIRA sprint to Omega cycle", () => {
+    it("should transform JIRA sprint to Head North cycle", () => {
       const sprint: JiraSprint = {
         id: "123",
         name: "Sprint 1",

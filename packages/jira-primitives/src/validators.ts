@@ -1,5 +1,5 @@
 // Validation utilities for JIRA data transformation
-import type { ValidationItem } from "@omega/types";
+import type { ValidationItem } from "@headnorth/types";
 
 /**
  * Create a validation item with a specific code

@@ -15,9 +15,9 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
-      "@omega/types": ["../../packages/types/src"],
-      "@omega/utils": ["../../packages/utils/src"],
-      "@omega/config": ["../../packages/config/src"]
+      "@headnorth/types": ["../../packages/types/src"],
+      "@headnorth/utils": ["../../packages/utils/src"],
+      "@headnorth/config": ["../../packages/config/src"]
     }
   },
   "include": ["src/**/*"],

@@ -1,24 +1,24 @@
 /**
- * OmegaConfig - Unified Configuration System
+ * HeadNorthConfig - Unified Configuration System
  *
- * This class provides a centralized configuration system for the Omega application.
+ * This class provides a centralized configuration system for the Head North application.
  * It handles environment detection, API endpoints, caching settings, and frontend-specific
  * configuration like page definitions and route constants.
  *
  * Usage:
- *   import { OmegaConfig } from '@omega/config'
+ *   import { HeadNorthConfig } from '@headnorth/config'
  *
  *   // Frontend usage (no process environment needed)
- *   const config = new OmegaConfig()
+ *   const config = new HeadNorthConfig()
  *
  *   // Backend usage (with process environment)
- *   const config = new OmegaConfig(process.env)
+ *   const config = new HeadNorthConfig(process.env)
  *
  *   // Custom environment via overrides
- *   const config = new OmegaConfig(process.env, { environment: 'staging' })
+ *   const config = new HeadNorthConfig(process.env, { environment: 'staging' })
  *
  *   // Override specific configuration values
- *   const config = new OmegaConfig(process.env, {
+ *   const config = new HeadNorthConfig(process.env, {
  *     environment: 'production',
  *     api: { host: 'https://custom-api.com' }
  *   })
@@ -36,7 +36,7 @@ import { getEnvVarWithFallback } from "./utils";
 import type {
   ProcessEnv,
   ConfigOverrides,
-  OmegaConfigData,
+  HeadNorthConfigData,
   CommonConfig,
   FrontendConfig,
   BackendConfig,
@@ -44,11 +44,11 @@ import type {
   ValidationRules,
 } from "./types";
 
-export default class OmegaConfig {
-  readonly processEnv: Readonly<ProcessEnv>;
-  readonly overrides: Readonly<ConfigOverrides>;
-  readonly environment: string;
-  readonly config: Readonly<OmegaConfigData>;
+export default class HeadNorthConfig {
+  private readonly processEnv: Readonly<ProcessEnv>;
+  private readonly overrides: Readonly<ConfigOverrides>;
+  private readonly environment: string;
+  private readonly config: Readonly<HeadNorthConfigData>;
 
   constructor({
     processEnv = {},
@@ -70,15 +70,15 @@ export default class OmegaConfig {
 
     // Store as readonly - immutability enforced by TypeScript types
     // Note: Not using Object.freeze() as config contains methods that can't be frozen
-    this.config = finalConfig as Readonly<OmegaConfigData>;
+    this.config = finalConfig as Readonly<HeadNorthConfigData>;
   }
 
   /**
    * Initialize configuration based on environment
    * @private
    */
-  private _initializeConfig(): OmegaConfigData {
-    const config: OmegaConfigData = {
+  private _initializeConfig(): HeadNorthConfigData {
+    const config: HeadNorthConfigData = {
       // Environment
       environment: this.environment,
 
@@ -108,7 +108,7 @@ export default class OmegaConfig {
           },
 
           // Pre-release Configuration
-          noPrereleaseAllowedLabel: "omega:no-pre-release-allowed",
+          noPrereleaseAllowedLabel: "headnorth:no-pre-release-allowed",
         },
 
         // Development Configuration (shared between frontend and backend)
@@ -119,7 +119,7 @@ export default class OmegaConfig {
 
         // Item Status Configuration (shared between frontend and backend)
         itemStatuses: {
-          // Omega status values
+          // Head North status values
           values: {
             TODO: "todo",
             IN_PROGRESS: "inprogress",
@@ -203,7 +203,7 @@ export default class OmegaConfig {
       // Frontend-specific Configuration
       frontend: {
         pages: {
-          ROOT: { id: "root", path: "/", name: "Omega Home" },
+          ROOT: { id: "root", path: "/", name: "Head North Home" },
           CYCLE_OVERVIEW: {
             id: "cycle-overview",
             path: "/cycles/overview",
@@ -261,9 +261,9 @@ export default class OmegaConfig {
    * @private
    */
   private _applyOverrides(
-    config: OmegaConfigData,
+    config: HeadNorthConfigData,
     overrides: ConfigOverrides,
-  ): OmegaConfigData {
+  ): HeadNorthConfigData {
     if (overrides && Object.keys(overrides).length > 0) {
       return this._deepMerge(config, overrides);
     }
@@ -350,7 +350,7 @@ export default class OmegaConfig {
    * Get full configuration object
    * @returns Full configuration (readonly)
    */
-  getConfig(): Readonly<OmegaConfigData> {
+  getConfig(): Readonly<HeadNorthConfigData> {
     return this.config;
   }
 

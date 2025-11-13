@@ -5,11 +5,11 @@ import {
 } from "vue-router";
 import CycleOverview from "@/components/cycles/CycleOverview.vue";
 import Roadmap from "@/components/roadmap/Roadmap.vue";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 
-// Router factory function that accepts OmegaConfig
-export default function createAppRouter(omegaConfig: OmegaConfig) {
-  const pages = omegaConfig.getFrontendConfig().pages;
+// Router factory function that accepts HeadNorthConfig
+export default function createAppRouter(headNorthConfig: HeadNorthConfig) {
+  const pages = headNorthConfig.getFrontendConfig().pages;
 
   const routes: RouteRecordRaw[] = [
     {

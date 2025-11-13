@@ -5,12 +5,12 @@
  * Handles validation and adapter selection at application startup.
  */
 
-import { logger, Maybe } from "@omega/utils";
-import type { Either } from "@omega/utils";
-import { Right } from "@omega/utils";
-import type { OmegaConfig, JiraConfigData } from "@omega/config";
-import { JiraClient } from "@omega/jira-primitives";
-import type { JiraConfig } from "@omega/jira-primitives";
+import { logger, Maybe } from "@headnorth/utils";
+import type { Either } from "@headnorth/utils";
+import { Right } from "@headnorth/utils";
+import type { HeadNorthConfig, JiraConfigData } from "@headnorth/config";
+import { JiraClient } from "@headnorth/jira-primitives";
+import type { JiraConfig } from "@headnorth/jira-primitives";
 import type { JiraAdapter } from "./jira-adapter.interface";
 import { DefaultJiraAdapter } from "./default-jira-adapter";
 import { FakeDataAdapter } from "./fake-data-adapter";
@@ -50,19 +50,19 @@ function transformJiraConfigData(config: JiraConfigData): JiraConfig {
  * - If using real JIRA: validates config and returns DefaultJiraAdapter
  * - Returns Either<Error, JiraAdapter> - client code should fail fast on Left
  *
- * @param omegaConfig - Omega configuration instance
+ * @param headNorthConfig - Head North configuration instance
  * @returns Either<Error, JiraAdapter> - Right contains adapter, Left contains validation error
  */
 export function createJiraAdapter(
-  omegaConfig: OmegaConfig,
+  headNorthConfig: HeadNorthConfig,
 ): Either<Error, JiraAdapter> {
-  if (omegaConfig.isUsingFakeCycleData()) {
+  if (headNorthConfig.isUsingFakeCycleData()) {
     logger.default.info("Using FakeDataAdapter for cycle data");
-    return Right(new FakeDataAdapter(omegaConfig));
+    return Right(new FakeDataAdapter(headNorthConfig));
   }
 
   // Validate JIRA config - return Left if invalid (no fallback for production)
-  const jiraConfigResult = omegaConfig.getJiraConfig();
+  const jiraConfigResult = headNorthConfig.getJiraConfig();
   return jiraConfigResult.map((jiraConfig) => {
     logger.default.info("JIRA configuration validated successfully");
 
@@ -70,6 +70,6 @@ export function createJiraAdapter(
     const clientConfig = transformJiraConfigData(jiraConfig);
     const jiraClient = new JiraClient(clientConfig);
 
-    return new DefaultJiraAdapter(jiraClient, omegaConfig, jiraConfig);
+    return new DefaultJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
   });
 }

@@ -30,9 +30,9 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./apps/frontend/src/*"],
-      "@omega/types": ["./packages/types"],
-      "@omega/utils": ["./packages/utils"],
-      "@omega/config": ["./packages/config"]
+      "@headnorth/types": ["./packages/types"],
+      "@headnorth/utils": ["./packages/utils"],
+      "@headnorth/config": ["./packages/config"]
     }
   },
   "include": ["apps/**/*", "packages/**/*", "tools/**/*"],

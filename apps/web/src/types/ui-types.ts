@@ -9,7 +9,7 @@ import type {
   PersonId,
   RoadmapItem,
   StageId,
-} from "@omega/types";
+} from "@headnorth/types";
 
 /**
  * UI Component Types

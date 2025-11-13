@@ -2,7 +2,7 @@ import esbuild from "esbuild";
 import { readdirSync } from "fs";
 
 /**
- * Shared esbuild configuration for Omega packages
+ * Shared esbuild configuration for Head North packages
  * Provides consistent build settings across all packages
  */
 
@@ -58,10 +58,9 @@ export function createAppConfig(entryPoint, customOptions = {}) {
       "pino",
       "retry",
       // Keep shared packages as external
-      "@omega/config",
-      "@omega/types",
-      "@omega/utils",
-      "@omega/ui",
+      "@headnorth/config",
+      "@headnorth/types",
+      "@headnorth/utils",
     ],
     ...customOptions,
   });

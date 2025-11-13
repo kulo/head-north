@@ -1,10 +1,10 @@
 // Fake Data Adapter for fast development without JIRA dependency
-// Generates realistic Omega domain data directly based on config
+// Generates realistic Head North domain data directly based on config
 // Uses Either for functional error handling
 
-import type { Either } from "@omega/utils";
-import { safeAsync } from "@omega/utils";
-import type { OmegaConfig } from "@omega/config";
+import type { Either } from "@headnorth/utils";
+import { safeAsync } from "@headnorth/utils";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type {
   RawCycleData,
   Cycle,
@@ -15,7 +15,7 @@ import type {
   Team,
   Initiative,
   ISODateString,
-} from "@omega/types";
+} from "@headnorth/types";
 import type { JiraAdapter } from "./jira-adapter.interface";
 
 export class FakeDataAdapter implements JiraAdapter {
@@ -25,7 +25,7 @@ export class FakeDataAdapter implements JiraAdapter {
   private roadmapItems: Record<string, RoadmapItem>;
   private sprints: Cycle[];
 
-  constructor(private config: OmegaConfig) {
+  constructor(private config: HeadNorthConfig) {
     // Initialize assignees (same as old generator)
     this.assignees = [
       { id: "all", name: "All Assignees" },
@@ -170,7 +170,7 @@ export class FakeDataAdapter implements JiraAdapter {
   private generateRoadmapItems(): Record<string, RoadmapItem> {
     const roadmapItems: Record<string, RoadmapItem> = {};
 
-    // Get teams and themes from omega config
+    // Get teams and themes from Head North config
     const teams = this.config.getTeams();
     const themes = this.config.getThemes();
     const teamKeys = Object.keys(teams);

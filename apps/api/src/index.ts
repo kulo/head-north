@@ -1,21 +1,21 @@
 import Koa from "koa";
 import createRouter from "./routes/router";
 import cors from "@koa/cors";
-import { OmegaConfig } from "@omega/config";
-import { logger } from "@omega/utils";
+import { HeadNorthConfig } from "@headnorth/config";
+import { logger } from "@headnorth/utils";
 import errorHandler from "./middleware/error-handler";
 import { createJiraAdapter } from "./adapters/adapter-factory";
 
 try {
-  // Create OmegaConfig instance for backend
-  const omegaConfig = new OmegaConfig({
+  // Create HeadNorthConfig instance for backend
+  const headNorthConfig = new HeadNorthConfig({
     processEnv: process.env,
     overrides: { environment: process.env.NODE_ENV || "development" },
   });
 
   // Validate JIRA config and create adapter at app startup
   // This ensures configuration errors are caught early (fail-fast)
-  const adapterResult = createJiraAdapter(omegaConfig);
+  const adapterResult = createJiraAdapter(headNorthConfig);
   const jiraAdapter = adapterResult.caseOf({
     Left: (error) => {
       const errorMessage = `JIRA configuration is invalid: ${error.message}. 
@@ -31,12 +31,12 @@ try {
   // Create the Koa app
   const app = new Koa();
 
-  // Make omegaConfig and pre-validated jiraAdapter available to the app context
-  app.context.omegaConfig = omegaConfig;
+  // Make headNorthConfig and pre-validated jiraAdapter available to the app context
+  app.context.headNorthConfig = headNorthConfig;
   app.context.jiraAdapter = jiraAdapter;
 
-  // Create router with omegaConfig injection
-  const router = createRouter(omegaConfig);
+  // Create router with headNorthConfig injection
+  const router = createRouter(headNorthConfig);
 
   app.use(cors());
   app.use(errorHandler);
@@ -44,7 +44,7 @@ try {
   app.use(router.allowedMethods());
 
   // Start server
-  const port = omegaConfig.get("backend.port");
+  const port = headNorthConfig.get("backend.port");
   app.listen(port);
   logger.default.info("started", { port });
 } catch (error) {

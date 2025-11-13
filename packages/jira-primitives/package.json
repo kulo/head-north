@@ -1,13 +1,13 @@
 {
-  "name": "@omega/jira-primitives",
+  "name": "@headnorth/jira-primitives",
   "version": "1.0.0",
-  "description": "JIRA data extraction and transformation utilities for Omega",
+  "description": "JIRA data extraction and transformation utilities for Head North",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:@omega/config --external:@omega/types --external:jira.js --external:lodash --external:purify-ts && npm run build:types",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:@headnorth/config --external:@headnorth/types --external:jira.js --external:lodash --external:purify-ts && npm run build:types",
     "build:types": "tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "test": "vitest run",
@@ -16,8 +16,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@omega/config": "file:../config",
-    "@omega/types": "file:../types",
+    "@headnorth/config": "file:../config",
+    "@headnorth/types": "file:../types",
     "jira.js": "^3.0.0",
     "lodash": "^4.17.21",
     "purify-ts": "^2.1.2"

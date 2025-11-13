@@ -6,10 +6,10 @@
  */
 
 import { z } from "zod";
-import type { Either } from "@omega/utils";
-import { Left, Right } from "@omega/utils";
+import type { Either } from "@headnorth/utils";
+import { Left, Right } from "@headnorth/utils";
 import type { Context } from "koa";
-import type { RawCycleData } from "@omega/types";
+import type { RawCycleData } from "@headnorth/types";
 
 // ============================================================================
 // Zod Schemas

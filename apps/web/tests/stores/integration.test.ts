@@ -50,7 +50,7 @@ const mockCycleDataViewCoordinator = {
   })),
 };
 
-const mockOmegaConfig = {
+const mockHeadNorthConfig = {
   getFrontendConfig: vi.fn(() => ({
     getAllPages: vi.fn(() => [
       { id: "roadmap", name: "Roadmap", path: "/roadmap" },

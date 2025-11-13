@@ -1,7 +1,7 @@
 // Data extraction utilities for JIRA data
 import { Maybe } from "purify-ts";
 import type { JiraIssue } from "./types";
-import type { Person } from "@omega/types";
+import type { Person } from "@headnorth/types";
 
 /**
  * Extract labels with a specific prefix

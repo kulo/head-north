@@ -28,7 +28,7 @@ const buildConfig = {
 async function build() {
   try {
     await esbuild.build(buildConfig);
-    console.log("✅ @omega/config built successfully");
+    console.log("✅ @headnorth/config built successfully");
   } catch (error) {
     console.error("❌ Build failed:", error);
     process.exit(1);

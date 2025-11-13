@@ -1,16 +1,16 @@
 # Shared Configuration Package
 
-This package provides a unified configuration system for the Omega application. It exports only the `OmegaConfig` class, which encapsulates all configuration logic, environment detection, and utility functions.
+This package provides a unified configuration system for the Head North application. It exports only the `HeadNorthConfig` class, which encapsulates all configuration logic, environment detection, and utility functions.
 
 ## Usage
 
 ### Basic Usage
 
 ```javascript
-import { OmegaConfig } from "@omega/config";
+import { HeadNorthConfig } from "@headnorth/config";
 
 // Create configuration instance
-const config = new OmegaConfig("development");
+const config = new HeadNorthConfig("development");
 
 // Access configuration
 const apiHost = config.getHost();
@@ -22,19 +22,19 @@ const cacheTTL = config.getCacheTTL();
 
 ```javascript
 // Development environment
-const devConfig = new OmegaConfig("development");
+const devConfig = new HeadNorthConfig("development");
 
 // Production environment
-const prodConfig = new OmegaConfig("production");
+const prodConfig = new HeadNorthConfig("production");
 
 // Test environment
-const testConfig = new OmegaConfig("test");
+const testConfig = new HeadNorthConfig("test");
 ```
 
 ### Configuration Overrides
 
 ```javascript
-const config = new OmegaConfig("development", {
+const config = new HeadNorthConfig("development", {
   // Override specific settings
   customSetting: "value",
   cache: {
@@ -47,7 +47,7 @@ const config = new OmegaConfig("development", {
 
 ### Constructor
 
-- `new OmegaConfig(environment?, overrides?)`
+- `new HeadNorthConfig(environment?, overrides?)`
   - `environment`: 'development' | 'production' | 'test' (default: 'development')
   - `overrides`: Object with configuration overrides
 
@@ -110,9 +110,9 @@ The configuration includes:
 ### Backend Usage
 
 ```javascript
-import { OmegaConfig } from "@omega/config";
+import { HeadNorthConfig } from "@headnorth/config";
 
-const config = new OmegaConfig(process.env.NODE_ENV || "development");
+const config = new HeadNorthConfig(process.env.NODE_ENV || "development");
 
 // Get server configuration
 const port = config.get("port");
@@ -125,10 +125,10 @@ const endpoints = config.getEndpoints();
 ### Frontend Usage
 
 ```javascript
-import { OmegaConfig } from "@omega/config";
+import { HeadNorthConfig } from "@headnorth/config";
 
 const environment = import.meta.env?.MODE || "development";
-const config = new OmegaConfig(environment, {
+const config = new HeadNorthConfig(environment, {
   devMode: environment === "development",
 });
 

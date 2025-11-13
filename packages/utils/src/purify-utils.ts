@@ -4,7 +4,7 @@
  * Generic functional composition utilities and helpers for working with purify-ts ADTs.
  * Provides pipeline composition, monadic helpers, safe wrappers, and utility functions.
  *
- * Side note: Could be moved into it's own package outside of omega-monorepo.
+ * Side note: Could be moved into it's own package outside of headnorth-monorepo.
  */
 
 import type { Either } from "purify-ts";

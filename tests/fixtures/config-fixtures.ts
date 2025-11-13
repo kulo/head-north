@@ -1,19 +1,19 @@
 /**
- * Test Fixtures - OmegaConfig Mock
+ * Test Fixtures - HeadNorthConfig Mock
  *
- * Provides mock OmegaConfig instances for testing without real configuration dependencies.
+ * Provides mock HeadNorthConfig instances for testing without real configuration dependencies.
  * These fixtures ensure consistent test data across all test suites.
  */
 
-import type { OmegaConfig } from "@omega/config";
-import { createURL } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
+import { createURL } from "@headnorth/config";
 
 /**
- * Create a mock OmegaConfig with default test values
+ * Create a mock HeadNorthConfig with default test values
  */
-export function createMockOmegaConfig(
-  overrides: Partial<OmegaConfig> = {},
-): OmegaConfig {
+export function createMockHeadNorthConfig(
+  overrides: Partial<HeadNorthConfig> = {},
+): HeadNorthConfig {
   const defaultConfig = {
     getJiraConfig: () => ({
       connection: {
@@ -183,14 +183,14 @@ export function createMockOmegaConfig(
     getHost: () => "https://api.test.com",
   };
 
-  return { ...defaultConfig, ...overrides } as OmegaConfig;
+  return { ...defaultConfig, ...overrides } as HeadNorthConfig;
 }
 
 /**
- * Create a mock OmegaConfig with minimal configuration for edge case testing
+ * Create a mock HeadNorthConfig with minimal configuration for edge case testing
  */
-export function createMinimalMockOmegaConfig(): OmegaConfig {
-  return createMockOmegaConfig({
+export function createMinimalMockHeadNorthConfig(): HeadNorthConfig {
+  return createMockHeadNorthConfig({
     getJiraConfig: () => null,
     getLabelTranslations: () => ({}),
     getItemStatusValues: () => ({
@@ -285,10 +285,12 @@ export function createMinimalMockOmegaConfig(): OmegaConfig {
 }
 
 /**
- * Create a mock OmegaConfig with custom stage configuration
+ * Create a mock HeadNorthConfig with custom stage configuration
  */
-export function createMockOmegaConfigWithStages(stages: string[]): OmegaConfig {
-  return createMockOmegaConfig({
+export function createMockHeadNorthConfigWithStages(
+  stages: string[],
+): HeadNorthConfig {
+  return createMockHeadNorthConfig({
     getStages: () => stages.map((id) => ({ id, name: id })),
     isExternalStage: (stage: string) => stages.includes(stage),
     isReleasableStage: (stage: string) =>

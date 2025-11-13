@@ -2,7 +2,7 @@
 
 # Default target
 help:
-	@echo "Omega One Monorepo - Available Commands:"
+	@echo "Head North Monorepo - Available Commands:"
 	@echo ""
 	@echo "  install     - Install all dependencies"
 	@echo "  dev         - Start both frontend and backend in development mode"

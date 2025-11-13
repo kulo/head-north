@@ -1,7 +1,7 @@
 {
-  "name": "omega-one",
+  "name": "head-north",
   "version": "1.0.0",
-  "description": "Omega One - Unified Frontend and Backend Monorepo",
+  "description": "Head North - Unified Frontend and Backend Monorepo",
   "type": "module",
   "private": true,
   "workspaces": [
@@ -44,6 +44,9 @@
     "start": "concurrently \"npm run start:api\" \"npm run start:web\"",
     "test:web": "cd apps/web && npm run test",
     "test:api": "cd apps/api && npm test",
+    "test:e2e": "cd apps/web && npm run test:e2e",
+    "test:e2e:ui": "cd apps/web && npm run test:e2e:ui",
+    "test:e2e:headed": "cd apps/web && npm run test:e2e:headed",
     "test": "npm run test:packages && npm run test:apps",
     "test:all": "npm run test",
     "test:packages": "npm run test:types && npm run test:utils && npm run test:config && npm run test:jira-primitives",
@@ -125,10 +128,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kulo/omega-one.git"
+    "url": "git+https://github.com/kulo/head-north.git"
   },
   "keywords": [
-    "omega",
+    "head-north",
     "monorepo",
     "frontend",
     "backend",

@@ -1,6 +1,6 @@
 // Type definitions for config package
 
-import type { Stage } from "@omega/types";
+import type { Stage } from "@headnorth/types";
 
 export interface ProcessEnv {
   [key: string]: string | undefined;
@@ -106,7 +106,7 @@ export interface BackendConfig {
   jira?: any; // Jira configuration - using any for flexibility with complex nested types
 }
 
-export interface OmegaConfigData {
+export interface HeadNorthConfigData {
   environment: string;
   common: CommonConfig;
   frontend: FrontendConfig;

@@ -11,7 +11,7 @@ import type { Either } from "purify-ts";
 import { useDataStore } from "../../src/stores/data-store";
 import { useAppStore } from "../../src/stores/app-store";
 import { setupTestApp, getMockServices } from "../setup-stores";
-import type { CycleData } from "@omega/types";
+import type { CycleData } from "@headnorth/types";
 
 // Mock DataTransformer
 vi.mock("../../lib/transformers/data-transformer", () => ({
@@ -53,7 +53,7 @@ const mockRouter = {
   push: () => {},
 } as any;
 
-const mockOmegaConfig = {
+const mockHeadNorthConfig = {
   getFrontendConfig: () => ({
     getAllPages: () => [],
     pages: { ROOT: { id: "roadmap" } },

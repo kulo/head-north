@@ -1,20 +1,20 @@
 # JIRA Adapters
 
-Adapters for transforming JIRA data into Omega domain objects. Choose the default adapter if your JIRA setup matches the expected structure, or create a custom adapter for specialized requirements.
+Adapters for transforming JIRA data into Head North domain objects. Choose the default adapter if your JIRA setup matches the expected structure, or create a custom adapter for specialized requirements.
 
 ## Overview
 
-The adapter pattern allows organizations to customize how their JIRA data is transformed into Omega's domain model. The default adapter works with standard JIRA setups, while custom adapters can handle specialized configurations.
+The adapter pattern allows organizations to customize how their JIRA data is transformed into Head North's domain model. The default adapter works with standard JIRA setups, while custom adapters can handle specialized configurations.
 
 ## Architecture
 
 ```
-JIRA Data → Adapter → Omega Domain Objects
+JIRA Data → Adapter → Head North Domain Objects
 ```
 
 - **JIRA Data**: Raw data from JIRA API (sprints, issues, etc.)
 - **Adapter**: Organization-specific transformation logic
-- **Omega Domain**: Standardized business objects (cycles, roadmap items, etc.)
+- **Head North Domain**: Standardized business objects (cycles, roadmap items, etc.)
 
 ## Interface
 
@@ -55,7 +55,7 @@ The default adapter works with JIRA projects that follow this structure:
 
 ```typescript
 import { DefaultJiraAdapter } from "./default-jira-adapter";
-import { JiraClient } from "@omega/jira-primitives";
+import { JiraClient } from "@headnorth/jira-primitives";
 
 const jiraClient = new JiraClient(config.getJiraConfig());
 const adapter = new DefaultJiraAdapter(jiraClient, config);
@@ -109,12 +109,12 @@ If your JIRA setup doesn't match the default adapter's expectations, you can cre
 
 ```typescript
 import type { JiraAdapter } from "./jira-adapter.interface";
-import type { RawCycleData } from "@omega/types";
+import type { RawCycleData } from "@headnorth/types";
 
 export class MyCompanyJiraAdapter implements JiraAdapter {
   constructor(
     private jiraClient: JiraClient,
-    private config: OmegaConfig,
+    private config: HeadNorthConfig,
   ) {}
 
   async fetchCycleData(): Promise<RawCycleData> {
@@ -125,7 +125,7 @@ export class MyCompanyJiraAdapter implements JiraAdapter {
 
 ### 2. Use JIRA Primitives
 
-Leverage the utilities from `@omega/jira-primitives`:
+Leverage the utilities from `@headnorth/jira-primitives`:
 
 ```typescript
 import {
@@ -135,7 +135,7 @@ import {
   mapJiraStatus,
   createValidation,
   validateRequired,
-} from "@omega/jira-primitives";
+} from "@headnorth/jira-primitives";
 
 // Extract data using primitives
 const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
@@ -192,20 +192,20 @@ export class MyCompanyJiraAdapter implements JiraAdapter {
 Update the factory in `collect-cycle-data.ts`:
 
 ```typescript
-function createAdapter(omegaConfig: OmegaConfig): JiraAdapter {
-  if (omegaConfig.isUsingFakeCycleData()) {
-    return new FakeDataAdapter(omegaConfig);
+function createAdapter(headNorthConfig: HeadNorthConfig): JiraAdapter {
+  if (headNorthConfig.isUsingFakeCycleData()) {
+    return new FakeDataAdapter(headNorthConfig);
   }
 
-  const jiraClient = new JiraClient(omegaConfig.getJiraConfig()!);
+  const jiraClient = new JiraClient(headNorthConfig.getJiraConfig()!);
 
   // Add organization detection logic
-  const organization = omegaConfig.get("organization");
+  const organization = headNorthConfig.get("organization");
   switch (organization) {
     case "mycompany":
-      return new MyCompanyJiraAdapter(jiraClient, omegaConfig);
+      return new MyCompanyJiraAdapter(jiraClient, headNorthConfig);
     default:
-      return new DefaultJiraAdapter(jiraClient, omegaConfig);
+      return new DefaultJiraAdapter(jiraClient, headNorthConfig);
   }
 }
 ```
@@ -213,7 +213,7 @@ function createAdapter(omegaConfig: OmegaConfig): JiraAdapter {
 ## Data Flow
 
 1. **Fetch Raw Data**: Use `JiraClient` to fetch sprints, issues, etc.
-2. **Transform Entities**: Convert JIRA objects to Omega objects
+2. **Transform Entities**: Convert JIRA objects to Head North objects
 3. **Extract Metadata**: Build areas, teams, initiatives from data
 4. **Apply Validations**: Check data quality and create validation items
 5. **Return Complete Data**: Return `RawCycleData` with all entities
@@ -313,7 +313,7 @@ describe("MyCompanyJiraAdapter", () => {
 When migrating from the old parser-based approach:
 
 1. **Identify Data Sources**: What JIRA data does your organization use?
-2. **Map Transformations**: How do JIRA concepts map to Omega concepts?
+2. **Map Transformations**: How do JIRA concepts map to Head North concepts?
 3. **Extract Logic**: Move transformation logic from parsers to adapter
 4. **Use Primitives**: Replace custom utilities with primitives
 5. **Test Thoroughly**: Ensure data structure matches expectations

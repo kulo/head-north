@@ -1,14 +1,14 @@
-# Omega One - Development Cycle Dashboard
+# Head North - Development Cycle Dashboard
 
-_Omega_ is a visualisation tool or dashboard for product development organisations that work in a common cadence via high-level iterations called "development cycles" or just "cycles".
+_Head North_ is a visualisation tool or dashboard for product development organisations that work in a common cadence via high-level iterations called "development cycles" or just "cycles".
 
-_Omega_ provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making.
+_Head North_ provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making.
 
-_Omega One_ is inspired by and a complete rewrite of a similar tool that was originally envisioned and developed within [Emarsys](https://github.com/emartech/).
+_Head North_ is inspired by and a complete rewrite of a similar tool that was originally envisioned and developed within [Emarsys](https://github.com/emartech/).
 
 ## 🎯 Core Concepts
 
-_Omega_ organizes product development around several key concepts that work together to provide comprehensive visibility into your development process:
+_Head North_ organizes product development around several key concepts that work together to provide comprehensive visibility into your development process:
 
 ### Development Cycles
 
@@ -44,7 +44,7 @@ The current state of roadmap items in the development process (e.g., "Discovery"
 
 ## 📊 Views & Dashboards
 
-_Omega_ provides two main views:
+_Head North_ provides two main views:
 
 - **Cycle Overview**: Shows the current progress and status of completed, active, and planned cycles, containing all work packages that teams have planned into their cycles.
 
@@ -52,17 +52,17 @@ _Omega_ provides two main views:
 
 ## 🏗️ Architecture & Repository Structure
 
-_Omega_ is built as a modern web application with a clear separation between data collection, processing, and visualization. The system consists of:
+_Head North_ is built as a modern web application with a clear separation between data collection, processing, and visualization. The system consists of:
 
 1. **Web Application**: A Vue.js frontend that provides interactive dashboards for cycle visualization and roadmap planning
 2. **API Service**: A Node.js/Koa backend that collects, transforms, and serves cycle data through RESTful endpoints
-3. **Data Adapters**: Flexible integration layer that connects to external data sources (primarily JIRA) and transforms raw data into Omega's standardized domain model
+3. **Data Adapters**: Flexible integration layer that connects to external data sources (primarily JIRA) and transforms raw data into Head North's standardized domain model
 4. **Shared Packages**: Common TypeScript types, utilities, and configuration shared across the entire application
 
 The architecture follows a **monorepo structure** with the following organization:
 
 ```
-omega-one/
+head-north/
 ├── apps/
 │   ├── web/           # Vue.js web application (port 8080)
 │   └── api/           # Node.js/Koa API service (port 3000)
@@ -85,22 +85,22 @@ omega-one/
 
 ## 🔌 Data Source Adapter Architecture
 
-Omega's default data source is **JIRA** with a specific model that maps Omega's internal domain model 1:1 to JIRA concepts:
+Head North's default data source is **JIRA** with a specific model that maps Head North's internal domain model 1:1 to JIRA concepts:
 
 - **Roadmap Items** → JIRA issue type "Roadmap Item"
 - **Release Items** → JIRA issue type "Release Item"
 - **Cycles** → JIRA Sprints
 - **Metadata** (areas, teams, release stages, etc.) → Fields within these issue types
 
-This direct mapping allows for straightforward data transformation and ensures consistency between your JIRA setup and Omega's visualization.
+This direct mapping allows for straightforward data transformation and ensures consistency between your JIRA setup and Head North's visualization.
 
 ### Customization Options
 
 You have two main approaches:
 
-1. **Use the Default Adapter**: Model your JIRA setup to fit Omega's expected structure (separate issue types, label-based metadata, etc.)
+1. **Use the Default Adapter**: Model your JIRA setup to fit Head North's expected structure (separate issue types, label-based metadata, etc.)
 
-2. **Create a Custom Adapter**: If you already have a different JIRA setup or prefer a different structure, you can create your own data adapter. The `@omega/jira-primitives` package provides reusable utilities for JIRA data transformation, validation, and API interaction to simplify this process.
+2. **Create a Custom Adapter**: If you already have a different JIRA setup or prefer a different structure, you can create your own data adapter. The `@headnorth/jira-primitives` package provides reusable utilities for JIRA data transformation, validation, and API interaction to simplify this process.
 
 For detailed information about creating custom adapters, see the [JIRA Adapters documentation](apps/api/src/adapters/README.md).
 
@@ -184,17 +184,17 @@ npm run start
 
 ## 📦 Shared Packages
 
-The monorepo includes several shared packages for code reuse and consistency. All packages use modern scoped naming (`@omega/*`) and follow current Node.js monorepo best practices:
+The monorepo includes several shared packages for code reuse and consistency. All packages use modern scoped naming (`@headnorth/*`) and follow current Node.js monorepo best practices:
 
-### Types (`@omega/types`)
+### Types (`@headnorth/types`)
 
 Common TypeScript types and interfaces used across web app and API service. Provides type safety and consistency across the entire monorepo.
 
-### Utils (`@omega/utils`)
+### Utils (`@headnorth/utils`)
 
 Shared utility functions used by both web app and API service applications. Currently includes logging functionality for consistent log formatting across the monorepo.
 
-### Config (`@omega/config`)
+### Config (`@headnorth/config`)
 
 **Single Source of Truth** for all API endpoints and configuration settings. Ensures web app and API service always use the same API paths and configuration values. Includes:
 
@@ -206,12 +206,12 @@ Shared utility functions used by both web app and API service applications. Curr
 - **Page definitions and routing** - Centralized page configuration for the frontend
 - **Filter system configuration** - Type-safe filter definitions and validation rules
 
-### JIRA Primitives (`@omega/jira-primitives`)
+### JIRA Primitives (`@headnorth/jira-primitives`)
 
 Specialized utilities for JIRA data transformation and validation. Provides reusable building blocks for creating custom JIRA adapters:
 
 - **Data Extractors**: Extract metadata from JIRA issues (labels, custom fields, etc.)
-- **Transformers**: Convert JIRA objects to Omega domain objects
+- **Transformers**: Convert JIRA objects to Head North domain objects
 - **Validators**: Validate data quality and create validation reports
 - **JIRA Client**: Standardized JIRA API client with authentication
 - **Type Definitions**: JIRA-specific TypeScript types and interfaces
@@ -220,20 +220,20 @@ Specialized utilities for JIRA data transformation and validation. Provides reus
 
 ```typescript
 // Import shared types
-import type { Cycle, RoadmapItem } from "@omega/types";
+import type { Cycle, RoadmapItem } from "@headnorth/types";
 
 // Import utilities
-import { logger } from "@omega/utils";
+import { logger } from "@headnorth/utils";
 
 // Import configuration
-import { OmegaConfig } from "@omega/config";
+import { HeadNorthConfig } from "@headnorth/config";
 
 // Import JIRA primitives for adapter development
 import {
   extractLabelsWithPrefix,
   jiraSprintToCycle,
   JiraClient,
-} from "@omega/jira-primitives";
+} from "@headnorth/jira-primitives";
 ```
 
 ### Tools

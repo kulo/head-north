@@ -13,7 +13,7 @@ import { useAppStore } from "./app-store";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type { ViewFilterManager } from "../types/filter-types";
 import type { Router } from "vue-router";
-import type { Cycle } from "@omega/types";
+import type { Cycle } from "@headnorth/types";
 import type { FilterKey } from "../types/filter-types";
 
 export const useFilterStore = defineStore("filters", () => {

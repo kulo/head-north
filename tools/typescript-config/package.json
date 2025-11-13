@@ -1,7 +1,7 @@
 {
-  "name": "@omega/typescript-config",
+  "name": "@headnorth/typescript-config",
   "version": "1.0.0",
-  "description": "Shared TypeScript configuration for Omega applications",
+  "description": "Shared TypeScript configuration for Head North applications",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -18,7 +18,7 @@
   "keywords": [
     "typescript",
     "config",
-    "omega",
+    "headnorth",
     "shared"
   ],
   "author": "Michael Wagner-Kulovits",

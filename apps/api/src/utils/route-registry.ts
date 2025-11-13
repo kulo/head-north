@@ -4,7 +4,7 @@
  */
 
 import { Context } from "koa";
-import { logger } from "@omega/utils";
+import { logger } from "@headnorth/utils";
 import type { RouteDefinition, RouteHandlers, RouteOptions } from "../types";
 import type { Router, RouterLayer } from "../types/api-response-types";
 
@@ -63,7 +63,7 @@ function defaultHealthCheck(context: Context): void {
   context.body = {
     success: true,
     timestamp: new Date().toISOString(),
-    service: "omega-backend",
+    service: "headnorth-backend",
   };
 }
 

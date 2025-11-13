@@ -1,6 +1,6 @@
-# Contributing to Omega
+# Contributing to Head North
 
-Thank you for your interest in contributing to Omega! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Head North! This document provides guidelines and instructions for contributing to the project.
 
 ## Quick Start
 
@@ -102,4 +102,4 @@ See [README.md](README.md) for all available commands. Most common:
 
 ---
 
-Thank you for contributing to Omega! 🎉
+Thank you for contributing to Head North! 🎉
