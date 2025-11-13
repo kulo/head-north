@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Playwright E2E Test Configuration
  *
  * These tests serve as regression tests to ensure UI functionality
- * remains intact during the Omega to Head North renaming process.
+ * remains intact across refactorings and updates.
  */
 export default defineConfig({
   testDir: "./e2e",
