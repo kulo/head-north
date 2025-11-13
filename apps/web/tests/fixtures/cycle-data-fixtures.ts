@@ -15,7 +15,7 @@ import type {
   Person,
   Stage,
   Team,
-} from "@omega/types";
+} from "@headnorth/types";
 import type {
   NestedCycleData,
   InitiativeWithProgress,

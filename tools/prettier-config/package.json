@@ -1,13 +1,13 @@
 {
-  "name": "@omega/prettier-config",
+  "name": "@headnorth/prettier-config",
   "version": "1.0.0",
-  "description": "Shared Prettier configuration for Omega applications",
+  "description": "Shared Prettier configuration for Head North applications",
   "main": "index.js",
   "private": true,
   "keywords": [
     "prettier",
     "config",
-    "omega",
+    "headnorth",
     "shared"
   ],
   "author": "Michael Wagner-Kulovits",

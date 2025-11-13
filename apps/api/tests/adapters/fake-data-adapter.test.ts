@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { FakeDataAdapter } from "../../src/adapters/fake-data-adapter";
-import { OmegaConfig } from "@omega/config";
-import { RawCycleData } from "@omega/types";
-import { Either } from "@omega/utils";
+import { HeadNorthConfig } from "@headnorth/config";
+import { RawCycleData } from "@headnorth/types";
+import { Either } from "@headnorth/utils";
 
 describe("FakeDataAdapter", () => {
-  let config: OmegaConfig;
+  let config: HeadNorthConfig;
   let adapter: FakeDataAdapter;
 
   beforeEach(() => {
-    config = new OmegaConfig();
+    config = new HeadNorthConfig();
     adapter = new FakeDataAdapter(config);
   });
 

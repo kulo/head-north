@@ -1,7 +1,7 @@
 {
-  "name": "@omega/eslint-config",
+  "name": "@headnorth/eslint-config",
   "version": "1.0.0",
-  "description": "Shared ESLint configuration for Omega applications",
+  "description": "Shared ESLint configuration for Head North applications",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -23,7 +23,7 @@
   "keywords": [
     "eslint",
     "config",
-    "omega",
+    "headnorth",
     "shared"
   ],
   "author": "Michael Wagner-Kulovits",

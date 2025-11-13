@@ -1,11 +1,11 @@
 /**
  * Filter Configuration Service
  *
- * Provides type-safe configuration for the filter system based on OmegaConfig.
+ * Provides type-safe configuration for the filter system based on HeadNorthConfig.
  * This service defines which filters are available for which views and their types.
  */
 
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type {
   FilterConfiguration,
   FilterCategory,
@@ -68,11 +68,11 @@ export class FilterConfigurationService implements FilterConfiguration {
   private filterCategories: FilterCategory[];
   private viewFilterConfig: ViewFilterConfig;
 
-  constructor(config: OmegaConfig) {
+  constructor(config: HeadNorthConfig) {
     this.filterCategories = DEFAULT_FILTER_CATEGORIES;
     this.viewFilterConfig = this.buildViewFilterConfig();
 
-    // Validate that all configured pages exist in OmegaConfig
+    // Validate that all configured pages exist in HeadNorthConfig
     this.validatePageConfiguration(config);
   }
 
@@ -163,10 +163,10 @@ export class FilterConfigurationService implements FilterConfiguration {
   }
 
   /**
-   * Validate that all configured pages exist in OmegaConfig
+   * Validate that all configured pages exist in HeadNorthConfig
    * @private
    */
-  private validatePageConfiguration(config: OmegaConfig): void {
+  private validatePageConfiguration(config: HeadNorthConfig): void {
     const configuredPages = new Set<PageId>();
 
     // Collect all pages referenced in filter categories
@@ -176,7 +176,7 @@ export class FilterConfigurationService implements FilterConfiguration {
       }
     }
 
-    // Check that all referenced page IDs exist in OmegaConfig
+    // Check that all referenced page IDs exist in HeadNorthConfig
     // We need to check against the actual page.id values, not the page keys
     const allPages = config.getFrontendConfig().getAllPages();
     const pageIds = allPages.map((page) => page.id);
@@ -184,7 +184,7 @@ export class FilterConfigurationService implements FilterConfiguration {
     for (const pageId of configuredPages) {
       if (!pageIds.includes(pageId)) {
         throw new Error(
-          `Filter configuration references page '${pageId}' which does not exist in OmegaConfig. Available pages: ${pageIds.join(", ")}`,
+          `Filter configuration references page '${pageId}' which does not exist in HeadNorthConfig. Available pages: ${pageIds.join(", ")}`,
         );
       }
     }

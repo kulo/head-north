@@ -1,20 +1,20 @@
 import Router from "@koa/router";
 import { registerApiRoutes } from "../utils/route-registry";
 import { getCycleData } from "../controllers/actions/get-cycle-data";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type { Router as ApiRouter } from "../types/api-response-types";
 
 /**
- * Create router with OmegaConfig dependency injection
- * @param omegaConfig - OmegaConfig instance
+ * Create router with HeadNorthConfig dependency injection
+ * @param headNorthConfig - HeadNorthConfig instance
  * @returns Koa router instance
  */
-function createRouter(_omegaConfig: OmegaConfig): Router {
+function createRouter(_headNorthConfig: HeadNorthConfig): Router {
   const router = new Router();
 
   // Root endpoint
   router.get("/", async (context) => {
-    context.body = "Welcome to the Omega Cycle Data Service Backend";
+    context.body = "Welcome to the Head North Cycle Data Service Backend";
   });
 
   // Define API routes

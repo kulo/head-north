@@ -1,7 +1,7 @@
 {
-  "name": "@omega/types",
+  "name": "@headnorth/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for Omega applications",
+  "description": "Shared TypeScript types for Head North applications",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,7 @@
   },
   "keywords": [
     "types",
-    "omega",
+    "headnorth",
     "shared",
     "typescript"
   ],

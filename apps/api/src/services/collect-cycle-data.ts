@@ -1,7 +1,7 @@
-import type { Either } from "@omega/utils";
-import { Right, Left } from "@omega/utils";
-import type { OmegaConfig } from "@omega/config";
-import type { RawCycleData } from "@omega/types";
+import type { Either } from "@headnorth/utils";
+import { Right, Left } from "@headnorth/utils";
+import type { HeadNorthConfig } from "@headnorth/config";
+import type { RawCycleData } from "@headnorth/types";
 import type { JiraAdapter } from "../adapters/jira-adapter.interface";
 import {
   validateRawCycleData,
@@ -15,7 +15,7 @@ import {
  */
 export default async function collectCycleData(
   adapter: JiraAdapter,
-  omegaConfig: OmegaConfig,
+  headNorthConfig: HeadNorthConfig,
   _extraFields: string[] = [],
 ): Promise<Either<Error, RawCycleData>> {
   const result: Either<Error, RawCycleData> = await adapter.fetchCycleData();
@@ -23,7 +23,7 @@ export default async function collectCycleData(
 }
 
 /**
- * Apply Omega-specific business logic to raw data
+ * Apply Head North-specific business logic to raw data
  * Domain logic: calculates cycle progress from release items
  */
 function applyBusinessLogic(rawData: RawCycleData): RawCycleData {

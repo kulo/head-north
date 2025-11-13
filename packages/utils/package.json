@@ -1,7 +1,7 @@
 {
-  "name": "@omega/utils",
+  "name": "@headnorth/utils",
   "version": "1.0.0",
-  "description": "Shared utilities for Omega One",
+  "description": "Shared utilities for Head North",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

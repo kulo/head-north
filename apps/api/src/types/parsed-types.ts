@@ -12,7 +12,7 @@ import type {
   ProjectId,
   StageId,
   InitiativeId,
-} from "@omega/types";
+} from "@headnorth/types";
 
 // ============================================================================
 // Parsed Roadmap Item DTO

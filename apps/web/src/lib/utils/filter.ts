@@ -13,7 +13,7 @@ import type {
   FilterResult,
   InitiativeWithProgress,
 } from "../../types/ui-types";
-import type { ReleaseItem } from "@omega/types";
+import type { ReleaseItem } from "@headnorth/types";
 import type {
   AreaId,
   InitiativeId,
@@ -21,7 +21,7 @@ import type {
   PersonId,
   CycleId,
   RoadmapItem,
-} from "@omega/types";
+} from "@headnorth/types";
 
 /**
  * Pure filtering functions for NestedCycleData

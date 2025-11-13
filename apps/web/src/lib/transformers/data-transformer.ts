@@ -8,7 +8,7 @@
  */
 
 import { Maybe } from "purify-ts";
-import type { CycleData, InitiativeId, ValidationItem } from "@omega/types";
+import type { CycleData, InitiativeId, ValidationItem } from "@headnorth/types";
 import type {
   FilterCriteria,
   InitiativeWithProgress,
@@ -26,15 +26,15 @@ import {
   DEFAULT_INITIATIVE,
   getDefaultInitiativeId,
 } from "../constants/default-values";
-import { pipe } from "@omega/utils";
-import OmegaConfig from "@omega/config";
+import { pipe } from "@headnorth/utils";
+import HeadNorthConfig from "@headnorth/config";
 
 /**
  * Hydrate ValidationItems with dictionary data
  * Uses Maybe for safe dictionary lookup
  */
 function hydrateValidations(
-  config: OmegaConfig,
+  config: HeadNorthConfig,
   validations: readonly ValidationItem[],
 ): readonly ValidationItem[] {
   const dictionary = config.getValidationDictionary();
@@ -86,7 +86,7 @@ function parseValidationCode(code: string): [string, string] {
  * Pure function - no side effects
  */
 export function transformToNestedStructure(
-  config: OmegaConfig,
+  config: HeadNorthConfig,
   rawData: CycleData,
 ): NestedCycleData {
   const { cycles, roadmapItems, releaseItems, initiatives } = rawData;
@@ -316,7 +316,7 @@ export function applyInitiativeFilter(
  * Uses functional pipeline composition for clear data flow
  */
 export function processCycleData(
-  config: OmegaConfig,
+  config: HeadNorthConfig,
   rawData: CycleData,
   filters: FilterCriteria = {},
 ): NestedCycleData {

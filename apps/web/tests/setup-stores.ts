@@ -12,7 +12,7 @@ import {
   CycleDataViewCoordinator,
   ViewFilterManager,
 } from "@/services";
-import OmegaConfig from "@omega/config";
+import HeadNorthConfig from "@headnorth/config";
 import type { Router } from "vue-router";
 
 // Mock services
@@ -75,7 +75,7 @@ const mockRouter = {
   push: vi.fn(),
 } as unknown as Router;
 
-const mockOmegaConfig = {
+const mockHeadNorthConfig = {
   getFrontendConfig: vi.fn(() => ({
     getAllPages: vi.fn(() => [
       { id: "roadmap", name: "Roadmap", path: "/roadmap" },
@@ -86,7 +86,7 @@ const mockOmegaConfig = {
     },
   })),
   getValidationEnabled: vi.fn(() => false),
-} as unknown as OmegaConfig;
+} as unknown as HeadNorthConfig;
 
 /**
  * Sets up a test app with all required dependencies provided
@@ -98,7 +98,7 @@ export function setupTestApp() {
   app.use(pinia);
 
   // Provide all required dependencies
-  app.provide("config", mockOmegaConfig);
+  app.provide("config", mockHeadNorthConfig);
   app.provide("dataService", mockCycleDataService);
   app.provide("filterManager", mockViewFilterManager);
   app.provide("coordinator", mockCycleDataViewCoordinator);
@@ -116,6 +116,6 @@ export function getMockServices() {
     viewFilterManager: mockViewFilterManager,
     cycleDataViewCoordinator: mockCycleDataViewCoordinator,
     router: mockRouter,
-    config: mockOmegaConfig,
+    config: mockHeadNorthConfig,
   };
 }

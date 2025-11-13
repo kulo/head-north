@@ -9,7 +9,7 @@ import {
   calculateReleaseItemProgress,
   calculateCycleMetadata,
 } from "./calculations/cycle-calculations";
-import type { Cycle } from "@omega/types";
+import type { Cycle } from "@headnorth/types";
 import type {
   CycleWithProgress,
   InitiativeWithProgress,

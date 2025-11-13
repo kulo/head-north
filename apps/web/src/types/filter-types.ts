@@ -2,7 +2,7 @@
  * Strongly-Typed Filter System Types
  *
  * This module provides type-safe interfaces for the filter system,
- * ensuring compile-time safety and consistency with OmegaConfig.
+ * ensuring compile-time safety and consistency with HeadNorthConfig.
  */
 
 import type { ViewFilterCriteria } from "./ui-types";
@@ -12,14 +12,14 @@ import type {
   StageId,
   PersonId,
   CycleId,
-} from "@omega/types";
+} from "@headnorth/types";
 
 // ============================================================================
 // Core Type Definitions
 // ============================================================================
 
 /**
- * Page IDs from OmegaConfig - strongly typed to prevent typos
+ * Page IDs from HeadNorthConfig - strongly typed to prevent typos
  * These are the actual page.id values used in the UI, not the page keys
  */
 export type PageId = "root" | "cycle-overview" | "roadmap";

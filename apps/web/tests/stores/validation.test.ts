@@ -35,7 +35,7 @@ const mockRouter = {
   push: () => {},
 } as any;
 
-const mockOmegaConfig = {
+const mockHeadNorthConfig = {
   getFrontendConfig: () => ({
     getAllPages: () => [],
     pages: { ROOT: { id: "roadmap" } },

@@ -63,9 +63,9 @@ export default (env, argv) => {
       alias: {
         '@': path.resolve(__dirname, 'src'),
         'vue': 'vue/dist/vue.esm-bundler.js',
-        '@omega/types': path.resolve(__dirname, '../../packages/types/dist'),
-        '@omega/utils': path.resolve(__dirname, '../../packages/utils/dist'),
-        '@omega/config': path.resolve(__dirname, '../../packages/config/dist')
+        '@headnorth/types': path.resolve(__dirname, '../../packages/types/dist'),
+        '@headnorth/utils': path.resolve(__dirname, '../../packages/utils/dist'),
+        '@headnorth/config': path.resolve(__dirname, '../../packages/config/dist')
       },
       extensions: ['.ts', '.js', '.vue', '.json'],
       // Ensure proper module resolution for ant-design-vue
@@ -80,7 +80,7 @@ export default (env, argv) => {
       new VueLoaderPlugin(),
       new HtmlWebpackPlugin({
         template: './index.html',
-        title: 'Omega One'
+        title: 'Head North'
       }),
       new CopyWebpackPlugin({
         patterns: [

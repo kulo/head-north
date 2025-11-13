@@ -5,7 +5,7 @@
  * Extracted from stores and components for better testability and reusability.
  */
 
-import type { ReleaseItem } from "@omega/types";
+import type { ReleaseItem } from "@headnorth/types";
 
 /**
  * Get release items for a specific cycle from a roadmap item

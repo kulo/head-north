@@ -1,7 +1,7 @@
 {
-  "name": "@omega/config",
+  "name": "@headnorth/config",
   "version": "1.0.0",
-  "description": "Shared configuration files for Omega applications",
+  "description": "Shared configuration files for Head North applications",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,7 @@
   },
   "keywords": [
     "config",
-    "omega",
+    "headnorth",
     "shared",
     "typescript"
   ],

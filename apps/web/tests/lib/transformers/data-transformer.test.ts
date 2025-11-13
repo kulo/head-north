@@ -16,8 +16,8 @@ import type {
   FilterCriteria,
   RoadmapItemWithProgress,
 } from "../../../src/types/ui-types";
-import { CycleData } from "@omega/types";
-import type { default as OmegaConfig } from "@omega/config";
+import { CycleData } from "@headnorth/types";
+import type { default as HeadNorthConfig } from "@headnorth/config";
 
 // Mock the filter module
 vi.mock("../../../src/lib/utils/filter", () => ({
@@ -33,7 +33,7 @@ vi.mock("../../../src/lib/utils/filter", () => ({
 }));
 
 // Mock config
-const mockConfig: OmegaConfig = {
+const mockConfig: HeadNorthConfig = {
   getValidationDictionary: vi.fn(() => ({
     releaseItem: {
       missingAssignee: { label: "Missing assignee", reference: "ref1" },
@@ -43,7 +43,7 @@ const mockConfig: OmegaConfig = {
       missingThemeLabel: { label: "Missing theme label", reference: "ref3" },
     },
   })),
-} as unknown as OmegaConfig;
+} as unknown as HeadNorthConfig;
 
 // Mock the cycle selector
 vi.mock("../../../src/lib/selectors/cycle-selector", () => ({

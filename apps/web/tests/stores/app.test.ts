@@ -8,10 +8,10 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
 import { useAppStore } from "../../src/stores/app-store";
 import { setupTestApp } from "../setup-stores";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 
 // Mock services
-const mockOmegaConfig = {
+const mockHeadNorthConfig = {
   getFrontendConfig: () => ({
     getAllPages: () => [
       { id: "roadmap", name: "Roadmap", path: "/roadmap" },
@@ -22,7 +22,7 @@ const mockOmegaConfig = {
     },
   }),
   getValidationEnabled: () => false,
-} as unknown as OmegaConfig;
+} as unknown as HeadNorthConfig;
 
 const mockCycleDataService = {
   getCycleData: () => Promise.resolve({}),

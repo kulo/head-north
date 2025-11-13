@@ -1,7 +1,7 @@
-// Pure JIRA Types - No Omega concepts mixed in
-// These types represent the JIRA domain and should be shielded from the Omega domain
+// Pure JIRA Types - No Head North concepts mixed in
+// These types represent the JIRA domain and should be shielded from the Head North domain
 
-import type { ISODateString } from "@omega/types";
+import type { ISODateString } from "@headnorth/types";
 
 export interface JiraSprintsData {
   sprints: JiraSprint[];

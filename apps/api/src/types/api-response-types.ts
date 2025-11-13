@@ -1,7 +1,7 @@
 // API Response Types
 // Comprehensive types for all API responses and data structures
 
-// import type { ISODateString, Stage, Team } from "@omega/types";
+// import type { ISODateString, Stage, Team } from "@headnorth/types";
 import type { ApiError, ValidationError, ProcessingError } from "./error-types";
 
 // ============================================================================
@@ -110,10 +110,10 @@ export interface RouteContext {
 // Stage and Team Types
 // ============================================================================
 
-// Stage interface is now imported from @omega/types
+// Stage interface is now imported from @headnorth/types
 
-// Re-export Team and Stage from @omega/types for backward compatibility
-export type { Team, Stage } from "@omega/types";
+// Re-export Team and Stage from @headnorth/types for backward compatibility
+export type { Team, Stage } from "@headnorth/types";
 
 // ============================================================================
 // Collection and Processing Types

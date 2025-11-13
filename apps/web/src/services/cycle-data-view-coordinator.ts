@@ -10,7 +10,7 @@
 
 import { dataTransformer } from "../lib/transformers/data-transformer";
 import type { ViewFilterManager } from "../types/filter-types";
-import type { CycleData } from "@omega/types";
+import type { CycleData } from "@headnorth/types";
 import type {
   NestedCycleData,
   RoadmapData,
@@ -18,12 +18,12 @@ import type {
   ViewFilterCriteria,
 } from "../types/ui-types";
 import type { FilterKey, PageId } from "../types/filter-types";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 
 export class CycleDataViewCoordinator {
   constructor(
     private viewFilterManager: ViewFilterManager,
-    private config: OmegaConfig,
+    private config: HeadNorthConfig,
   ) {}
   /**
    * Process raw cycle data into nested structure
@@ -140,7 +140,7 @@ export class CycleDataViewCoordinator {
  */
 export function createCycleDataViewCoordinator(
   viewFilterManager: ViewFilterManager,
-  config: OmegaConfig,
+  config: HeadNorthConfig,
 ): CycleDataViewCoordinator {
   return new CycleDataViewCoordinator(viewFilterManager, config);
 }

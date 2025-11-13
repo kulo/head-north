@@ -1,4 +1,4 @@
-// Core Domain Types for Omega Applications
+// Core Domain Types for Head North Applications
 
 // ============================================================================
 // Organisation Related Types

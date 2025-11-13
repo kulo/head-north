@@ -7,8 +7,8 @@
  */
 
 import { Maybe } from "purify-ts";
-import { logger } from "@omega/utils";
-import type { OmegaConfig } from "@omega/config";
+import { logger } from "@headnorth/utils";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type {
   Cycle,
   CycleId,
@@ -18,7 +18,7 @@ import type {
   Stage,
   RawCycleData,
   CycleData,
-} from "@omega/types";
+} from "@headnorth/types";
 
 /**
  * Cycle Data Service
@@ -50,20 +50,20 @@ type CacheState = {
 };
 
 class CycleDataService {
-  readonly #config: OmegaConfig;
+  readonly #config: HeadNorthConfig;
   readonly #cacheTTL: number;
   readonly #apiTimeout: number;
   readonly #apiRetries: number;
   // Use Maybe for optional immutable cache
   #cacheState: Maybe<CacheState>;
 
-  constructor(omegaConfig: OmegaConfig) {
-    if (!omegaConfig) {
+  constructor(headNorthConfig: HeadNorthConfig) {
+    if (!headNorthConfig) {
       throw new Error(
-        "CycleDataService requires an OmegaConfig instance to be injected",
+        "CycleDataService requires an HeadNorthConfig instance to be injected",
       );
     }
-    this.#config = omegaConfig;
+    this.#config = headNorthConfig;
 
     // Initialize with empty cache (Maybe.Nothing)
     this.#cacheState = Maybe.empty();

@@ -1,23 +1,23 @@
-# @omega/jira-primitives
+# @headnorth/jira-primitives
 
-Reusable utilities for JIRA data extraction and transformation in the Omega project.
+Reusable utilities for JIRA data extraction and transformation in the Head North project.
 
 ## Overview
 
-This package provides pure, focused utilities for working with JIRA data in the Omega ecosystem. It maintains a clear separation between JIRA domain concepts and Omega domain concepts.
+This package provides pure, focused utilities for working with JIRA data in the Head North ecosystem. It maintains a clear separation between JIRA domain concepts and Head North domain concepts.
 
 ## Features
 
 - **Pure JIRA Types**: Clean type definitions for JIRA data structures
 - **Extraction Utilities**: Functions to extract specific data from JIRA issues
-- **Transformation Utilities**: Functions to transform JIRA data to Omega formats
+- **Transformation Utilities**: Functions to transform JIRA data to Head North formats
 - **Validation Utilities**: Functions to create validation items for data quality
 - **JIRA Client**: Low-level wrapper for JIRA API calls
 
 ## Installation
 
 ```bash
-npm install @omega/jira-primitives
+npm install @headnorth/jira-primitives
 ```
 
 ## Usage
@@ -25,7 +25,11 @@ npm install @omega/jira-primitives
 ### Types
 
 ```typescript
-import type { JiraIssue, JiraSprint, JiraStatus } from "@omega/jira-primitives";
+import type {
+  JiraIssue,
+  JiraSprint,
+  JiraStatus,
+} from "@headnorth/jira-primitives";
 ```
 
 ### Extractors
@@ -36,7 +40,7 @@ import {
   extractCustomField,
   extractParent,
   extractAssignee,
-} from "@omega/jira-primitives";
+} from "@headnorth/jira-primitives";
 
 // Extract labels with specific prefix
 const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
@@ -62,13 +66,13 @@ import {
   jiraSprintToCycle,
   mapJiraStatus,
   createJiraUrl,
-} from "@omega/jira-primitives";
+} from "@headnorth/jira-primitives";
 
-// Transform JIRA sprint to Omega cycle
+// Transform JIRA sprint to Head North cycle
 const cycle = jiraSprintToCycle(jiraSprint);
 // Returns: { id: '123', name: 'Sprint 1', start: '2024-01-01', ... }
 
-// Map JIRA status to Omega status
+// Map JIRA status to Head North status
 const status = mapJiraStatus(jiraStatus, statusMappings, "todo");
 // Returns: 'inprogress' or 'todo' (default)
 
@@ -84,7 +88,7 @@ import {
   createValidation,
   validateRequired,
   validateOneOf,
-} from "@omega/jira-primitives";
+} from "@headnorth/jira-primitives";
 
 // Create validation item
 const validation = createValidation("TEST-1", "missingArea");
@@ -102,7 +106,7 @@ const validations = validateOneOf(stage, ["s0", "s1", "s2"], "TEST-1", "stage");
 ### JIRA Client
 
 ```typescript
-import { JiraClient } from "@omega/jira-primitives";
+import { JiraClient } from "@headnorth/jira-primitives";
 
 const client = new JiraClient(jiraConfig);
 
@@ -142,8 +146,8 @@ const issue = await client.getIssue("TEST-1");
 
 ### Transformers
 
-- `jiraSprintToCycle(sprint)` - Transform JIRA sprint to Omega cycle
-- `mapJiraStatus(status, mappings, default?)` - Map JIRA status to Omega status
+- `jiraSprintToCycle(sprint)` - Transform JIRA sprint to Head North cycle
+- `mapJiraStatus(status, mappings, default?)` - Map JIRA status to Head North status
 - `createJiraUrl(key, host)` - Create JIRA URL for issue
 - `transformToISODateString(dateString)` - Transform date to ISO format
 
@@ -166,7 +170,7 @@ const issue = await client.getIssue("TEST-1");
 
 1. **Pure Functions**: All utilities are pure functions with no side effects
 2. **Type Safety**: Full TypeScript support with strict typing
-3. **Domain Separation**: Clear separation between JIRA and Omega domains
+3. **Domain Separation**: Clear separation between JIRA and Head North domains
 4. **Composability**: Utilities can be combined to build complex transformations
 5. **Testability**: All functions are easily testable in isolation
 

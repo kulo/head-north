@@ -1,14 +1,14 @@
 /**
- * Tests for OmegaConfig
+ * Tests for HeadNorthConfig
  * DISABLED - Complex process environment mocking causes issues
  */
 
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
-import OmegaConfig from "../dist/omega-config.js";
+import HeadNorthConfig from "../dist/head-north-config.js";
 
 // Skip this test suite due to process environment issues
-describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
-  let config: OmegaConfig;
+describe.skip("HeadNorthConfig - Complex Tests (Disabled)", () => {
+  let config: HeadNorthConfig;
 
   beforeEach(() => {
     // Simple test setup without complex process mocking
@@ -20,26 +20,28 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
 
   describe("Constructor", () => {
     it("should create instance with default environment", () => {
-      config = new OmegaConfig();
+      config = new HeadNorthConfig();
       expect(config.environment).toBe("development");
       expect(config.getHost()).toBeDefined();
     });
 
     it("should create instance with specified environment", () => {
-      config = new OmegaConfig({ overrides: { environment: "production" } });
+      config = new HeadNorthConfig({
+        overrides: { environment: "production" },
+      });
       expect(config.environment).toBe("production");
     });
 
     it("should apply overrides", () => {
       const overrides = { customSetting: "test-value" };
-      config = new OmegaConfig({ overrides });
+      config = new HeadNorthConfig({ overrides });
       expect(config.get("customSetting")).toBe("test-value");
     });
   });
 
   describe("Configuration Access", () => {
     beforeEach(() => {
-      config = new OmegaConfig({ overrides: { environment: "test" } });
+      config = new HeadNorthConfig({ overrides: { environment: "test" } });
     });
 
     it("should get API host", () => {
@@ -84,7 +86,7 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
 
   describe("Environment-specific Configuration", () => {
     it("should include Node.js specific config when process.env is available", () => {
-      config = new OmegaConfig({
+      config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
           PORT: "3001",
@@ -103,7 +105,7 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
     });
 
     it("should read environment variables", () => {
-      config = new OmegaConfig({
+      config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
           PORT: "3001",
@@ -116,7 +118,7 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
     });
 
     it("should get Jira configuration", () => {
-      config = new OmegaConfig({
+      config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
           JIRA_USER: "test-user",
@@ -144,7 +146,7 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
     });
 
     it("should get stages configuration", () => {
-      config = new OmegaConfig({ overrides: { environment: "test" } });
+      config = new HeadNorthConfig({ overrides: { environment: "test" } });
       const stages = config.getStages();
 
       expect(Array.isArray(stages)).toBe(true);
@@ -156,7 +158,7 @@ describe.skip("OmegaConfig - Complex Tests (Disabled)", () => {
 
   describe("Configuration Management", () => {
     beforeEach(() => {
-      config = new OmegaConfig({ overrides: { environment: "test" } });
+      config = new HeadNorthConfig({ overrides: { environment: "test" } });
     });
 
     it("should return undefined for non-existent keys", () => {

@@ -1,9 +1,9 @@
-// JIRA to Omega transformation utilities
+// JIRA to Head North transformation utilities
 import type { JiraSprint, JiraStatus } from "./types";
-import type { Cycle } from "@omega/types";
+import type { Cycle } from "@headnorth/types";
 
 /**
- * Transform JIRA sprint to Omega cycle
+ * Transform JIRA sprint to Head North cycle
  */
 export function jiraSprintToCycle(sprint: JiraSprint): Cycle {
   return {
@@ -17,7 +17,7 @@ export function jiraSprintToCycle(sprint: JiraSprint): Cycle {
 }
 
 /**
- * Map JIRA status to Omega status using mappings
+ * Map JIRA status to Head North status using mappings
  */
 export function mapJiraStatus(
   jiraStatus: JiraStatus,

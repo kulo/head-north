@@ -108,7 +108,7 @@ export default class HeadNorthConfig {
           },
 
           // Pre-release Configuration
-          noPrereleaseAllowedLabel: "omega:no-pre-release-allowed",
+          noPrereleaseAllowedLabel: "headnorth:no-pre-release-allowed",
         },
 
         // Development Configuration (shared between frontend and backend)
@@ -119,7 +119,7 @@ export default class HeadNorthConfig {
 
         // Item Status Configuration (shared between frontend and backend)
         itemStatuses: {
-          // Omega status values
+          // Head North status values
           values: {
             TODO: "todo",
             IN_PROGRESS: "inprogress",
@@ -203,7 +203,7 @@ export default class HeadNorthConfig {
       // Frontend-specific Configuration
       frontend: {
         pages: {
-          ROOT: { id: "root", path: "/", name: "Omega Home" },
+          ROOT: { id: "root", path: "/", name: "Head North Home" },
           CYCLE_OVERVIEW: {
             id: "cycle-overview",
             path: "/cycles/overview",

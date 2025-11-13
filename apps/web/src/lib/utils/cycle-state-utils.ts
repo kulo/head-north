@@ -6,7 +6,7 @@
  */
 
 import { match } from "ts-pattern";
-import type { CycleState } from "@omega/types";
+import type { CycleState } from "@headnorth/types";
 
 /**
  * Check if cycle state is considered closed/completed using pattern matching

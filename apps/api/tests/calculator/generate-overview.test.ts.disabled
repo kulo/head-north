@@ -11,7 +11,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import generateOverview from "../../src/calculator/generate-overview";
 import { resolveStage } from "../../src/calculator/resolve-stage";
-import { createMockOmegaConfig } from "../../../../tests/fixtures/config-fixtures";
+import { createMockHeadNorthConfig } from "../../../../tests/fixtures/config-fixtures";
 import { 
   createMockJiraIssue,
   createMockSprintCollection,
@@ -24,7 +24,7 @@ describe("generate-overview", () => {
   let mockSprints: any;
 
   beforeEach(() => {
-    mockConfig = createMockOmegaConfig();
+    mockConfig = createMockHeadNorthConfig();
     mockRoadmapItems = createMockRoadmapItemsData();
     mockSprints = createMockSprintCollection();
   });
@@ -278,7 +278,7 @@ describe("generate-overview", () => {
       ];
       
       // Mock config to return false for isExternalStage
-      const mockConfigWithInternalStages = createMockOmegaConfig({
+      const mockConfigWithInternalStages = createMockHeadNorthConfig({
         isExternalStage: () => false,
       });
       

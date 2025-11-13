@@ -6,13 +6,13 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type { ViewFilterManager } from "../types/filter-types";
 
 export const useValidationStore = defineStore("validation", () => {
   // Inject services
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _config = inject<OmegaConfig>("config")!;
+  const _config = inject<HeadNorthConfig>("config")!;
   const filterManager = inject<ViewFilterManager>("filterManager")!;
 
   // State

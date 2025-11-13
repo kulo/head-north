@@ -5,35 +5,35 @@
 
 import { vi } from "vitest";
 import CycleDataService from "../../src/services/cycle-data-service";
-import { OmegaConfig } from "@omega/config";
+import { HeadNorthConfig } from "@headnorth/config";
 
 // Mock fetch globally
 global.fetch = vi.fn();
 
 describe("Cycle Data Service", () => {
   let cycleDataService;
-  let omegaConfig;
+  let headNorthConfig;
 
   beforeEach(() => {
     vi.mocked(fetch).mockClear();
-    omegaConfig = new OmegaConfig();
+    headNorthConfig = new HeadNorthConfig();
     // Mock the config to disable retries for testing
-    vi.spyOn(omegaConfig, "getEnvironmentConfig").mockReturnValue({
+    vi.spyOn(headNorthConfig, "getEnvironmentConfig").mockReturnValue({
       backendHost: null,
       timeout: 1000,
       retries: 1,
       retryDelay: 100,
     });
-    cycleDataService = new CycleDataService(omegaConfig);
+    cycleDataService = new CycleDataService(headNorthConfig);
   });
 
   describe("Configuration", () => {
     test("should have correct default host", () => {
-      expect(omegaConfig.getHost()).toBe("http://localhost:3000");
+      expect(headNorthConfig.getHost()).toBe("http://localhost:3000");
     });
 
     test("should get host from configuration", () => {
-      const host = omegaConfig.getHost();
+      const host = headNorthConfig.getHost();
       expect(host).toBeDefined();
       expect(typeof host).toBe("string");
     });
@@ -41,7 +41,7 @@ describe("Cycle Data Service", () => {
 
   describe("API Endpoints", () => {
     test("should have all required endpoints defined", () => {
-      const endpoints = omegaConfig.getEndpoints();
+      const endpoints = headNorthConfig.getEndpoints();
       expect(endpoints.HEALTH_CHECK).toBe("/healthcheck");
       expect(endpoints.CYCLE_DATA).toBe("/cycle-data");
     });

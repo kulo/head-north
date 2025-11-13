@@ -10,7 +10,7 @@ import {
   isCompletedStatus,
   isInProgressStatus,
 } from "../constants/status-constants";
-import type { ReleaseItem, Cycle } from "@omega/types";
+import type { ReleaseItem, Cycle } from "@headnorth/types";
 import type { CycleMetadata, ProgressMetrics } from "../../types/ui-types";
 
 /**

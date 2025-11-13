@@ -11,8 +11,8 @@
  * Implemented as a factory function for functional programming patterns.
  */
 
-import type { OmegaConfig } from "@omega/config";
-import type { InitiativeId, PersonId, StageId } from "@omega/types";
+import type { HeadNorthConfig } from "@headnorth/config";
+import type { InitiativeId, PersonId, StageId } from "@headnorth/types";
 import { match } from "ts-pattern";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type {
@@ -51,11 +51,11 @@ const createMutableFilters = (
 /**
  * Factory function to create ViewFilterManager with immutable state management
  *
- * @param config - OmegaConfig instance for filter configuration
+ * @param config - HeadNorthConfig instance for filter configuration
  * @returns ViewFilterManager instance with functional state management
  */
 export function createViewFilterManager(
-  config: OmegaConfig,
+  config: HeadNorthConfig,
 ): ViewFilterManager {
   // Immutable state held in closure
   let currentView: PageId = "cycle-overview";
@@ -274,7 +274,7 @@ export function createViewFilterManager(
 export class ViewFilterManagerClass implements ViewFilterManager {
   private manager: ViewFilterManager;
 
-  constructor(config: OmegaConfig) {
+  constructor(config: HeadNorthConfig) {
     this.manager = createViewFilterManager(config);
   }
 

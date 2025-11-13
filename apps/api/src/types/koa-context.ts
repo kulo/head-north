@@ -5,25 +5,27 @@
  */
 
 import type { Context } from "koa";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type { JiraAdapter } from "../adapters/jira-adapter.interface";
 
 /**
- * Extended Koa context with Omega-specific properties
+ * Extended Koa context with Head North-specific properties
  */
-export interface OmegaContext extends Context {
-  omegaConfig: OmegaConfig;
+export interface HeadNorthContext extends Context {
+  headNorthConfig: HeadNorthConfig;
   jiraAdapter: JiraAdapter;
 }
 
 /**
- * Type guard to check if context has Omega properties
+ * Type guard to check if context has Head North properties
  */
-export function isOmegaContext(context: Context): context is OmegaContext {
+export function isHeadNorthContext(
+  context: Context,
+): context is HeadNorthContext {
   return (
-    "omegaConfig" in context &&
+    "headNorthConfig" in context &&
     "jiraAdapter" in context &&
-    typeof (context as OmegaContext).omegaConfig !== "undefined" &&
-    typeof (context as OmegaContext).jiraAdapter !== "undefined"
+    typeof (context as HeadNorthContext).headNorthConfig !== "undefined" &&
+    typeof (context as HeadNorthContext).jiraAdapter !== "undefined"
   );
 }

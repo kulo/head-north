@@ -1,6 +1,6 @@
 # Coding Guidelines
 
-This document provides comprehensive coding guidelines for the Omega codebase. It covers functional programming patterns, TypeScript best practices, code organization, testing, and more.
+This document provides comprehensive coding guidelines for the Head North codebase. It covers functional programming patterns, TypeScript best practices, code organization, testing, and more.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ This document provides comprehensive coding guidelines for the Omega codebase. I
 
 ## Philosophy & Principles
 
-Omega follows these core principles:
+Head North follows these core principles:
 
 1. **Functional Programming First**: Prefer pure functions, immutability, and explicit error handling
 2. **Type Safety**: Leverage TypeScript's type system fully - avoid `any`, use strict mode
@@ -39,7 +39,7 @@ A quick API reference for common FP patterns. For detailed explanations and exam
 import { Maybe, Either, Left, Right } from "purify-ts";
 import { match } from "ts-pattern";
 import { z } from "zod";
-import { pipe, safe, safeAsync } from "@omega/utils";
+import { pipe, safe, safeAsync } from "@headnorth/utils";
 ```
 
 ### Maybe (Optional Values)
@@ -271,7 +271,7 @@ function calculateProgress(items: readonly ReleaseItem[]): number {
 
 ### Strict Mode
 
-Omega uses TypeScript strict mode. This means:
+Head North uses TypeScript strict mode. This means:
 
 - `noImplicitAny`: All types must be explicit
 - `strictNullChecks`: Null/undefined must be handled explicitly
@@ -309,7 +309,7 @@ Use `Either<Error, Success>` for operations that can fail.
 
 ```typescript
 import { Either, Left, Right } from "purify-ts";
-import { safeAsync } from "@omega/utils";
+import { safeAsync } from "@headnorth/utils";
 
 // ✅ GOOD - Explicit error handling
 async function fetchData(id: string): Promise<Either<Error, Data>> {
@@ -386,7 +386,7 @@ function normalizeStatus(status: string): string {
 Use `pipe()` for left-to-right composition.
 
 ```typescript
-import { pipe } from "@omega/utils";
+import { pipe } from "@headnorth/utils";
 
 // ✅ GOOD - Functional pipeline
 const result = pipe(
@@ -431,7 +431,7 @@ function validateJiraConfig(config: unknown): Either<Error, JiraConfigData> {
 ### File Structure
 
 ```
-omega-one/
+head-north/
 ├── apps/
 │   ├── web/              # Frontend application
 │   │   ├── src/
@@ -484,9 +484,9 @@ import { match } from "ts-pattern";
 import { z } from "zod";
 
 // 2. Internal packages (scoped)
-import type { Cycle, ReleaseItem } from "@omega/types";
-import { logger } from "@omega/utils";
-import { OmegaConfig } from "@omega/config";
+import type { Cycle, ReleaseItem } from "@headnorth/types";
+import { logger } from "@headnorth/utils";
+import { HeadNorthConfig } from "@headnorth/config";
 
 // 3. Relative imports
 import { calculateProgress } from "../calculations/cycle-calculations";
@@ -770,7 +770,7 @@ class ViewFilterManager {
 }
 
 // ✅ GOOD - Factory function with closure
-function createViewFilterManager(config: OmegaConfig): ViewFilterManager {
+function createViewFilterManager(config: HeadNorthConfig): ViewFilterManager {
   // State in closure (immutable updates)
   let currentView: PageId = "cycle-overview";
   let filters: ViewFilterCriteria = {};

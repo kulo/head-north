@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 /**
- * Shared Vitest configuration for Omega packages
+ * Shared Vitest configuration for Head North packages
  * Provides consistent test settings across all packages
  */
 

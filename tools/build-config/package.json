@@ -1,7 +1,7 @@
 {
-  "name": "@omega/build-config",
+  "name": "@headnorth/build-config",
   "version": "1.0.0",
-  "description": "Shared build configuration for Omega packages",
+  "description": "Shared build configuration for Head North packages",
   "type": "module",
   "main": "esbuild.base.js",
   "private": true,
@@ -24,7 +24,7 @@
   "keywords": [
     "build",
     "esbuild",
-    "omega",
+    "headnorth",
     "shared",
     "typescript"
   ],
