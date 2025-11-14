@@ -13,7 +13,7 @@
 
 <script>
 import { computed, watch, ref } from "vue";
-import { logger } from "@omega/utils";
+import { logger } from "@headnorth/utils";
 import { useDataStore, useFilterStore } from "../../stores";
 
 export default {

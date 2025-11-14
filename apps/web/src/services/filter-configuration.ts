@@ -1,12 +1,12 @@
 /**
  * Filter Configuration Service
  *
- * Provides type-safe configuration for the filter system based on OmegaConfig.
+ * Provides type-safe configuration for the filter system based on HeadNorthConfig.
  * This service defines which filters are available for which views and their types.
  */
 
 import { Either, Left, Right } from "purify-ts";
-import type { OmegaConfig } from "@omega/config";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type {
   FilterConfiguration,
   FilterCategory,
@@ -101,13 +101,13 @@ function buildViewFilterConfig(
 }
 
 /**
- * Validate that all configured pages exist in OmegaConfig
+ * Validate that all configured pages exist in HeadNorthConfig
  * Pure function - validates page configuration
  * Returns Either<Error, void> - Left if validation fails, Right if valid
  */
 function validatePageConfiguration(
   filterCategories: readonly FilterCategory[],
-  config: OmegaConfig,
+  config: HeadNorthConfig,
 ): Either<Error, void> {
   // Collect all pages referenced in filter categories (immutable)
   const configuredPages = new Set<PageId>(
@@ -126,7 +126,7 @@ function validatePageConfiguration(
   if (invalidPages.length > 0) {
     return Left(
       new Error(
-        `Filter configuration references page(s) '${invalidPages.join(", ")}' which do not exist in OmegaConfig. Available pages: ${pageIds.join(", ")}`,
+        `Filter configuration references page(s) '${invalidPages.join(", ")}' which do not exist in HeadNorthConfig. Available pages: ${pageIds.join(", ")}`,
       ),
     );
   }
@@ -141,13 +141,13 @@ function validatePageConfiguration(
  * Returns an immutable configuration object with pure functional methods.
  */
 export function createFilterConfigurationService(
-  config: OmegaConfig,
+  config: HeadNorthConfig,
 ): FilterConfiguration {
   // Immutable configuration data
   const filterCategories = [...DEFAULT_FILTER_CATEGORIES] as const;
   const viewFilterConfig = buildViewFilterConfig(filterCategories);
 
-  // Validate that all configured pages exist in OmegaConfig
+  // Validate that all configured pages exist in HeadNorthConfig
   // Fail-fast on configuration errors (this is called at service creation time
   const validationResult = validatePageConfiguration(filterCategories, config);
   validationResult.caseOf({

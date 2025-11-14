@@ -9,7 +9,7 @@ import { createPinia } from "pinia";
 import { vi } from "vitest";
 import { Right } from "purify-ts";
 import type { Either } from "purify-ts";
-import type { CycleData } from "@omega/types";
+import type { CycleData } from "@headnorth/types";
 import {
   CycleDataService,
   CycleDataViewCoordinator,

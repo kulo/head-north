@@ -846,7 +846,7 @@ For complex async operations that return `Either<Error, T>`, use `EitherAsync` i
 #### Basic Usage
 
 ```typescript
-import { EitherAsync, safeAsync } from "@omega/utils";
+import { EitherAsync, safeAsync } from "@headnorth/utils";
 
 // ✅ GOOD - Complex async chain with EitherAsync
 async function fetchAndProcessData(
@@ -968,7 +968,7 @@ return EitherAsync(async ({ fromPromise, throwE, liftEither }) => {
 `EitherAsync` works seamlessly with existing utilities:
 
 ```typescript
-import { EitherAsync, safeAsync, retryWithBackoff } from "@omega/utils";
+import { EitherAsync, safeAsync, retryWithBackoff } from "@headnorth/utils";
 
 async function fetchWithRetry(url: string): Promise<Either<Error, Data>> {
   return retryWithBackoff(

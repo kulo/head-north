@@ -4,17 +4,17 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { OmegaConfig } from "@omega/config";
+import { HeadNorthConfig } from "@headnorth/config";
 import { createFilterConfigurationService } from "../../src/services/filter-configuration";
 import type { FilterKey, PageId } from "../../src/types/filter-types";
 
 describe("Filter Configuration Service", () => {
   let filterConfig: ReturnType<typeof createFilterConfigurationService>;
-  let omegaConfig: OmegaConfig;
+  let headNorthConfig: HeadNorthConfig;
 
   beforeEach(() => {
-    omegaConfig = new OmegaConfig();
-    filterConfig = createFilterConfigurationService(omegaConfig);
+    headNorthConfig = new HeadNorthConfig();
+    filterConfig = createFilterConfigurationService(headNorthConfig);
   });
 
   describe("Factory Function", () => {
@@ -25,12 +25,12 @@ describe("Filter Configuration Service", () => {
       expect(typeof filterConfig.isValidFilterForView).toBe("function");
     });
 
-    it("should validate page configuration matches OmegaConfig", () => {
-      // The service validates that all pages in filter categories exist in OmegaConfig
-      // Since DEFAULT_FILTER_CATEGORIES references pages that exist in default OmegaConfig,
+    it("should validate page configuration matches HeadNorthConfig", () => {
+      // The service validates that all pages in filter categories exist in HeadNorthConfig
+      // Since DEFAULT_FILTER_CATEGORIES references pages that exist in default HeadNorthConfig,
       // this should succeed without throwing
       expect(() => {
-        createFilterConfigurationService(omegaConfig);
+        createFilterConfigurationService(headNorthConfig);
       }).not.toThrow();
     });
   });

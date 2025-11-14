@@ -14,8 +14,8 @@ import {
   retryWithBackoff,
   Right,
   safeAsync,
-} from "@omega/utils";
-import type { OmegaConfig } from "@omega/config";
+} from "@headnorth/utils";
+import type { HeadNorthConfig } from "@headnorth/config";
 import type {
   Cycle,
   Initiative,
@@ -24,7 +24,7 @@ import type {
   Stage,
   RawCycleData,
   CycleData,
-} from "@omega/types";
+} from "@headnorth/types";
 
 /**
  * Cycle Data Service
@@ -56,15 +56,15 @@ type CycleDataCache = {
 };
 
 class CycleDataService {
-  readonly #config: OmegaConfig;
+  readonly #config: HeadNorthConfig;
   readonly #cacheTTL: number;
   readonly #apiTimeout: number;
   readonly #apiRetries: number;
   // Use Maybe for optional immutable cache
   #cache: Maybe<CycleDataCache>;
 
-  constructor(omegaConfig: OmegaConfig) {
-    this.#config = omegaConfig;
+  constructor(headNorthConfig: HeadNorthConfig) {
+    this.#config = headNorthConfig;
 
     // Initialize with empty cache (Maybe.Nothing)
     this.#cache = Maybe.empty();

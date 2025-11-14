@@ -2,8 +2,8 @@
 // Handles standard JIRA setup: separate Roadmap Item and Release Item issue types
 // Uses Either for functional error handling
 
-import { Either, Maybe, safeAsync } from "@omega/utils";
-import type { OmegaConfig, JiraConfigData } from "@omega/config";
+import { Either, Maybe, safeAsync } from "@headnorth/utils";
+import type { HeadNorthConfig, JiraConfigData } from "@headnorth/config";
 import type {
   RawCycleData,
   Cycle,
@@ -14,7 +14,7 @@ import type {
   Initiative,
   ValidationItem,
   Person,
-} from "@omega/types";
+} from "@headnorth/types";
 import type { JiraAdapter } from "./jira-adapter.interface";
 import {
   JiraClient,
@@ -27,16 +27,16 @@ import {
   mapJiraStatus,
   createJiraUrl,
   validateRequired,
-} from "@omega/jira-primitives";
-import type { JiraIssue } from "@omega/jira-primitives";
+} from "@headnorth/jira-primitives";
+import type { JiraIssue } from "@headnorth/jira-primitives";
 
 export class DefaultJiraAdapter implements JiraAdapter {
   private readonly jiraConfig: JiraConfigData;
-  private readonly config: OmegaConfig;
+  private readonly config: HeadNorthConfig;
 
   constructor(
     private jiraClient: JiraClient,
-    config: OmegaConfig,
+    config: HeadNorthConfig,
     jiraConfig: JiraConfigData,
   ) {
     this.jiraConfig = jiraConfig;

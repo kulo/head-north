@@ -7,7 +7,7 @@
 
 import { defineStore } from "pinia";
 import { ref, computed, inject } from "vue";
-import { Either, logger } from "@omega/utils";
+import { Either, logger } from "@headnorth/utils";
 import { selectDefaultCycle } from "../lib/selectors/cycle-selector";
 import { useAppStore } from "./app-store";
 import type { ViewFilterCriteria } from "../types/ui-types";

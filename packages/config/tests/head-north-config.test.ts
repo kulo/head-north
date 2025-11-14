@@ -1,13 +1,13 @@
 /**
- * Tests for OmegaConfig
+ * Tests for HeadNorthConfig
  * Complex tests with process environment mocking
  */
 
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
-import OmegaConfig from "../dist/omega-config.js";
+import HeadNorthConfig from "../dist/head-north-config.js";
 
-describe("OmegaConfig - Complex Tests", () => {
-  let config: OmegaConfig;
+describe("HeadNorthConfig - Complex Tests", () => {
+  let config: HeadNorthConfig;
 
   beforeEach(() => {
     // Simple test setup without complex process mocking
@@ -19,7 +19,7 @@ describe("OmegaConfig - Complex Tests", () => {
 
   describe("Constructor", () => {
     it("should create instance with default environment", () => {
-      config = new OmegaConfig();
+      config = new HeadNorthConfig();
       expect(config.getConfig().environment).toBe("development");
       expect(config.getHost()).toBeDefined();
     });
