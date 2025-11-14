@@ -4,7 +4,7 @@ _Head North_ is a visualisation tool or dashboard for product development organi
 
 _Head North_ provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making.
 
-_Head North_ is inspired by and a complete rewrite of a similar tool that was originally envisioned and developed within [Emarsys](https://github.com/emartech/).
+_Head North_ is inspired by a similar tool, called _Omega_, that was originally envisioned and developed as internal tool at [Emarsys](https://github.com/emartech/).
 
 ## 🎯 Core Concepts
 
