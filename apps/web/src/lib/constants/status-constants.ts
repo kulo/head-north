@@ -1,7 +1,7 @@
 import { match } from "ts-pattern";
 
 /**
- * Status constants for release items and roadmap items
+ * Status constants for cycle items and roadmap items
  * Extracted from the original AreaData class for reuse across the application
  */
 export const STATUS = {

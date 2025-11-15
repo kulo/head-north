@@ -1,5 +1,5 @@
 <template>
-  <div class="release-item-container-column__roadmap-item">
+  <div class="cycle-item-container-column__roadmap-item">
     <!-- Backdrop overlay for blur effect -->
     <div
       v-if="popoverVisible"
@@ -43,40 +43,38 @@
         </div>
 
         <div
-          v-if="roadmapItem.releaseItems && roadmapItem.releaseItems.length > 0"
-          class="roadmap-popover__release-items"
+          v-if="roadmapItem.cycleItems && roadmapItem.cycleItems.length > 0"
+          class="roadmap-popover__cycle-items"
         >
           <div
-            v-for="releaseItem in roadmapItem.releaseItems"
-            :key="releaseItem.name"
-            class="roadmap-popover__release-item"
+            v-for="cycleItem in roadmapItem.cycleItems"
+            :key="cycleItem.name"
+            class="roadmap-popover__cycle-item"
           >
-            <div class="roadmap-popover__release-item__name">
-              {{ releaseItem.name }}
+            <div class="roadmap-popover__cycle-item__name">
+              {{ cycleItem.name }}
             </div>
-            <div class="roadmap-popover__release-item__effort">
-              {{ releaseItem.effort || 0 }}w
-            </div>
-            <div
-              class="roadmap-popover__release-item__stage"
-              :class="getStageClass(releaseItem.stage)"
-            >
-              {{ releaseItem.stage || DEFAULT_UNKNOWN.NAME }}
+            <div class="roadmap-popover__cycle-item__effort">
+              {{ cycleItem.effort || 0 }}w
             </div>
             <div
-              class="roadmap-popover__release-item__status"
-              :class="getStatusClass(releaseItem.status)"
+              class="roadmap-popover__cycle-item__stage"
+              :class="getStageClass(cycleItem.stage)"
             >
-              {{ releaseItem.status || DEFAULT_UNKNOWN.NAME }}
+              {{ cycleItem.stage || DEFAULT_UNKNOWN.NAME }}
             </div>
             <div
-              v-if="
-                releaseItem.validations && releaseItem.validations.length > 0
-              "
-              class="roadmap-popover__release-item__validation"
+              class="roadmap-popover__cycle-item__status"
+              :class="getStatusClass(cycleItem.status)"
             >
-              {{ releaseItem.validations.length }} validation{{
-                releaseItem.validations.length > 1 ? "s" : ""
+              {{ cycleItem.status || DEFAULT_UNKNOWN.NAME }}
+            </div>
+            <div
+              v-if="cycleItem.validations && cycleItem.validations.length > 0"
+              class="roadmap-popover__cycle-item__validation"
+            >
+              {{ cycleItem.validations.length }} validation{{
+                cycleItem.validations.length > 1 ? "s" : ""
               }}
             </div>
           </div>

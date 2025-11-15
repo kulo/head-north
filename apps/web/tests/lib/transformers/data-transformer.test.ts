@@ -25,9 +25,9 @@ vi.mock("../../../src/lib/utils/filter", () => ({
     apply: vi.fn((data, criteria) => ({
       data,
       appliedFilters: criteria,
-      totalInitiatives: data.initiatives?.length || 0,
+      totalObjectives: data.objectives?.length || 0,
       totalRoadmapItems: 0,
-      totalReleaseItems: 0,
+      totalCycleItems: 0,
     })),
   },
 }));
@@ -35,7 +35,7 @@ vi.mock("../../../src/lib/utils/filter", () => ({
 // Mock config
 const mockConfig: HeadNorthConfig = {
   getValidationDictionary: vi.fn(() => ({
-    releaseItem: {
+    cycleItem: {
       missingAssignee: { label: "Missing assignee", reference: "ref1" },
       missingAreaLabel: { label: "Missing area label", reference: "ref2" },
     },
@@ -52,7 +52,7 @@ vi.mock("../../../src/lib/selectors/cycle-selector", () => ({
 
 // Mock the cycle progress calculator
 vi.mock("../../../src/lib/cycle-progress-calculator", () => ({
-  calculateCycleProgress: vi.fn((cycle, initiatives) => ({
+  calculateCycleProgress: vi.fn((cycle, objectives) => ({
     ...cycle,
     weeks: 10,
     weeksDone: 5,
@@ -61,11 +61,11 @@ vi.mock("../../../src/lib/cycle-progress-calculator", () => ({
     weeksNotToDo: 0,
     weeksCancelled: 0,
     weeksPostponed: 0,
-    releaseItemsCount: 5,
-    releaseItemsDoneCount: 3,
+    cycleItemsCount: 5,
+    cycleItemsDoneCount: 3,
     progress: 50,
     progressWithInProgress: 80,
-    progressByReleaseItems: 60,
+    progressByCycleItems: 60,
     percentageNotToDo: 0,
     startMonth: "Jan",
     endMonth: "Mar",
@@ -85,11 +85,11 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives).toHaveLength(2);
-      expect(result.initiatives[0].id).toBe("init-1");
-      expect(result.initiatives[0].name).toBe("Platform Initiative");
-      expect(result.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(result.initiatives[0].roadmapItems[0].id).toBe("ROADMAP-001");
+      expect(result.objectives).toHaveLength(2);
+      expect(result.objectives[0].id).toBe("obj-1");
+      expect(result.objectives[0].name).toBe("Platform Objective");
+      expect(result.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.objectives[0].roadmapItems[0].id).toBe("ROADMAP-001");
     });
 
     it("should handle empty cycle data", () => {
@@ -100,13 +100,13 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives).toHaveLength(0);
+      expect(result.objectives).toHaveLength(0);
     });
 
-    it("should handle cycle data with missing initiatives", () => {
+    it("should handle cycle data with missing objectives", () => {
       const rawData = {
         ...createMockCycleData(),
-        initiatives: null,
+        objectives: null,
       };
 
       const result = dataTransformer.transformToNestedStructure(
@@ -114,14 +114,14 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives).toHaveLength(2);
-      expect(result.initiatives[0].name).toBe("Unassigned Initiative");
+      expect(result.objectives).toHaveLength(2);
+      expect(result.objectives[0].name).toBe("Unassigned Objective");
     });
 
-    it("should handle cycle data with non-array initiatives", () => {
+    it("should handle cycle data with non-array objectives", () => {
       const rawData = {
         ...createMockCycleData(),
-        initiatives: "not-an-array" as any,
+        objectives: "not-an-array" as any,
       };
 
       const result = dataTransformer.transformToNestedStructure(
@@ -129,11 +129,11 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives).toHaveLength(2);
-      expect(result.initiatives[0].name).toBe("Unassigned Initiative");
+      expect(result.objectives).toHaveLength(2);
+      expect(result.objectives[0].name).toBe("Unassigned Objective");
     });
 
-    it("should group roadmap items by initiative", () => {
+    it("should group roadmap items by objective", () => {
       const rawData = createMockCycleData();
 
       const result = dataTransformer.transformToNestedStructure(
@@ -141,18 +141,18 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives).toHaveLength(2);
-      expect(result.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(result.initiatives[1].roadmapItems).toHaveLength(1);
+      expect(result.objectives).toHaveLength(2);
+      expect(result.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.objectives[1].roadmapItems).toHaveLength(1);
     });
 
-    it("should handle roadmap items with missing initiativeId", () => {
+    it("should handle roadmap items with missing objectiveId", () => {
       const rawData = {
         ...createMockCycleData(),
         roadmapItems: [
           {
             ...createMockCycleData().roadmapItems[0],
-            initiativeId: null,
+            objectiveId: null,
           },
         ],
       };
@@ -162,18 +162,18 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("unassigned");
-      expect(result.initiatives[0].name).toBe("Unassigned Initiative");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("unassigned");
+      expect(result.objectives[0].name).toBe("Unassigned Objective");
     });
 
-    it("should handle roadmap items with undefined initiativeId", () => {
+    it("should handle roadmap items with undefined objectiveId", () => {
       const rawData = {
         ...createMockCycleData(),
         roadmapItems: [
           {
             ...createMockCycleData().roadmapItems[0],
-            initiativeId: undefined,
+            objectiveId: undefined,
           },
         ],
       };
@@ -183,9 +183,9 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("unassigned");
-      expect(result.initiatives[0].name).toBe("Unassigned Initiative");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("unassigned");
+      expect(result.objectives[0].name).toBe("Unassigned Objective");
     });
 
     it("should calculate progress metrics for roadmap items", () => {
@@ -197,20 +197,19 @@ describe("DataTransformer", () => {
       );
 
       expect(
-        (result.initiatives[0].roadmapItems[0] as RoadmapItemWithProgress)
-          .weeks,
+        (result.objectives[0].roadmapItems[0] as RoadmapItemWithProgress).weeks,
       ).toBeGreaterThan(0);
       expect(
-        (result.initiatives[0].roadmapItems[0] as RoadmapItemWithProgress)
+        (result.objectives[0].roadmapItems[0] as RoadmapItemWithProgress)
           .progress,
       ).toBeGreaterThanOrEqual(0);
       expect(
-        (result.initiatives[0].roadmapItems[0] as RoadmapItemWithProgress)
+        (result.objectives[0].roadmapItems[0] as RoadmapItemWithProgress)
           .progress,
       ).toBeLessThanOrEqual(100);
     });
 
-    it("should aggregate progress metrics to initiative level", () => {
+    it("should aggregate progress metrics to objective level", () => {
       const rawData = createMockCycleDataWithMixedStatuses();
 
       const result = dataTransformer.transformToNestedStructure(
@@ -218,12 +217,12 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].weeks).toBeGreaterThan(0);
-      expect(result.initiatives[0].progress).toBeGreaterThanOrEqual(0);
-      expect(result.initiatives[0].progress).toBeLessThanOrEqual(100);
+      expect(result.objectives[0].weeks).toBeGreaterThan(0);
+      expect(result.objectives[0].progress).toBeGreaterThanOrEqual(0);
+      expect(result.objectives[0].progress).toBeLessThanOrEqual(100);
     });
 
-    it("should sort initiatives by weeks (largest first)", () => {
+    it("should sort objectives by weeks (largest first)", () => {
       const rawData = createMockCycleDataWithMixedStatuses();
 
       const result = dataTransformer.transformToNestedStructure(
@@ -231,9 +230,9 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      if (result.initiatives.length > 1) {
-        expect(result.initiatives[0].weeks).toBeGreaterThanOrEqual(
-          result.initiatives[1].weeks,
+      if (result.objectives.length > 1) {
+        expect(result.objectives[0].weeks).toBeGreaterThanOrEqual(
+          result.objectives[1].weeks,
         );
       }
     });
@@ -254,7 +253,7 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].roadmapItems[0].area).toBe("frontend");
+      expect(result.objectives[0].roadmapItems[0].area).toBe("frontend");
     });
 
     it("should handle roadmap items with area object", () => {
@@ -273,7 +272,7 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].roadmapItems[0].area).toBe("Frontend");
+      expect(result.objectives[0].roadmapItems[0].area).toBe("Frontend");
     });
 
     it("should handle roadmap items with missing area", () => {
@@ -292,7 +291,7 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].roadmapItems[0].area).toBe("");
+      expect(result.objectives[0].roadmapItems[0].area).toBe("");
     });
 
     it("should handle roadmap items with string theme", () => {
@@ -311,7 +310,7 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].roadmapItems[0].theme).toBe("platform");
+      expect(result.objectives[0].roadmapItems[0].theme).toBe("platform");
     });
 
     it("should handle roadmap items with missing theme", () => {
@@ -330,7 +329,7 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].roadmapItems[0].theme).toBe("");
+      expect(result.objectives[0].roadmapItems[0].theme).toBe("");
     });
 
     it("should handle roadmap items with array validations", () => {
@@ -357,7 +356,7 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].roadmapItems[0].validations).toEqual([
+      expect(result.objectives[0].roadmapItems[0].validations).toEqual([
         {
           id: "val-1",
           code: "testValidation",
@@ -384,24 +383,24 @@ describe("DataTransformer", () => {
         rawData,
       );
 
-      expect(result.initiatives[0].roadmapItems[0].validations).toEqual([]);
+      expect(result.objectives[0].roadmapItems[0].validations).toEqual([]);
     });
   });
 
-  describe("applyInitiativeFilter", () => {
-    it("should return original data when no initiatives specified", () => {
+  describe("applyObjectiveFilter", () => {
+    it("should return original data when no objectives specified", () => {
       const data = createMockNestedCycleData();
 
-      const result = dataTransformer.applyInitiativeFilter(data, []);
+      const result = dataTransformer.applyObjectiveFilter(data, []);
 
       expect(result).toEqual(data);
     });
 
-    it("should return original data when initiatives is null/undefined", () => {
+    it("should return original data when objectives is null/undefined", () => {
       const data = createMockNestedCycleData();
 
-      const result1 = dataTransformer.applyInitiativeFilter(data, null as any);
-      const result2 = dataTransformer.applyInitiativeFilter(
+      const result1 = dataTransformer.applyObjectiveFilter(data, null as any);
+      const result2 = dataTransformer.applyObjectiveFilter(
         data,
         undefined as any,
       );
@@ -410,35 +409,35 @@ describe("DataTransformer", () => {
       expect(result2).toEqual(data);
     });
 
-    it("should filter by specific initiatives", () => {
+    it("should filter by specific objectives", () => {
       const data = createMockNestedCycleData();
 
-      const result = dataTransformer.applyInitiativeFilter(data, ["init-1"]);
+      const result = dataTransformer.applyObjectiveFilter(data, ["obj-1"]);
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("init-1");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("obj-1");
     });
 
-    it("should filter by multiple initiatives", () => {
+    it("should filter by multiple objectives", () => {
       const data = createMockNestedCycleData();
 
-      const result = dataTransformer.applyInitiativeFilter(data, [
-        "init-1",
-        "init-2",
+      const result = dataTransformer.applyObjectiveFilter(data, [
+        "obj-1",
+        "obj-2",
       ]);
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("init-1");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("obj-1");
     });
 
-    it("should return empty initiatives when none match", () => {
+    it("should return empty objectives when none match", () => {
       const data = createMockNestedCycleData();
 
-      const result = dataTransformer.applyInitiativeFilter(data, [
+      const result = dataTransformer.applyObjectiveFilter(data, [
         "nonexistent",
       ]);
 
-      expect(result.initiatives).toHaveLength(0);
+      expect(result.objectives).toHaveLength(0);
     });
   });
 
@@ -448,12 +447,12 @@ describe("DataTransformer", () => {
 
       const result = dataTransformer.processCycleData(mockConfig, rawData);
 
-      expect(result.initiatives).toHaveLength(2);
+      expect(result.objectives).toHaveLength(2);
     });
 
-    it("should process cycle data with initiative filter", () => {
+    it("should process cycle data with objective filter", () => {
       const rawData = createMockCycleData();
-      const filters: FilterCriteria = { initiatives: ["init-1"] };
+      const filters: FilterCriteria = { objectives: ["obj-1"] };
 
       const result = dataTransformer.processCycleData(
         mockConfig,
@@ -461,14 +460,14 @@ describe("DataTransformer", () => {
         filters,
       );
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("init-1");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("obj-1");
     });
 
     it("should process cycle data with multiple filters", () => {
       const rawData = createMockCycleData();
       const filters: FilterCriteria = {
-        initiatives: ["init-1"],
+        objectives: ["obj-1"],
         area: "frontend",
         stages: ["s2"],
       };
@@ -479,8 +478,8 @@ describe("DataTransformer", () => {
         filters,
       );
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("init-1");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("obj-1");
     });
 
     it("should handle empty raw data", () => {
@@ -488,7 +487,7 @@ describe("DataTransformer", () => {
 
       const result = dataTransformer.processCycleData(mockConfig, rawData);
 
-      expect(result.initiatives).toHaveLength(0);
+      expect(result.objectives).toHaveLength(0);
     });
   });
 
@@ -505,7 +504,7 @@ describe("DataTransformer", () => {
       expect(result.orderedCycles).toEqual(rawData.cycles);
       expect(result.roadmapItems).toEqual([]);
       expect(result.activeCycle).toEqual(rawData.cycles[0]);
-      expect(result.initiatives).toEqual(processedData.initiatives);
+      expect(result.objectives).toEqual(processedData.objectives);
     });
 
     it("should handle null processed data", () => {
@@ -516,7 +515,7 @@ describe("DataTransformer", () => {
       expect(result.orderedCycles).toEqual([]);
       expect(result.roadmapItems).toEqual([]);
       expect(result.activeCycle).toBeNull();
-      expect(result.initiatives).toEqual([]);
+      expect(result.objectives).toEqual([]);
     });
 
     it("should handle null raw data", () => {
@@ -527,7 +526,7 @@ describe("DataTransformer", () => {
       expect(result.orderedCycles).toEqual([]);
       expect(result.roadmapItems).toEqual([]);
       expect(result.activeCycle).toBeNull();
-      expect(result.initiatives).toEqual(processedData.initiatives);
+      expect(result.objectives).toEqual(processedData.objectives);
     });
 
     it("should handle both null data", () => {
@@ -536,7 +535,7 @@ describe("DataTransformer", () => {
       expect(result.orderedCycles).toEqual([]);
       expect(result.roadmapItems).toEqual([]);
       expect(result.activeCycle).toBeNull();
-      expect(result.initiatives).toEqual([]);
+      expect(result.objectives).toEqual([]);
     });
   });
 
@@ -552,7 +551,7 @@ describe("DataTransformer", () => {
 
       expect(result).not.toBeNull();
       expect(result!.cycle).toEqual(rawData.cycles[0]);
-      expect(result!.initiatives).toEqual(processedData.initiatives);
+      expect(result!.objectives).toEqual(processedData.objectives);
     });
 
     it("should return null for null processed data", () => {
@@ -614,7 +613,7 @@ describe("DataTransformer", () => {
       expect(result.orderedCycles).toEqual(rawData.cycles);
       expect(result.roadmapItems).toEqual([]);
       expect(result.activeCycle).toEqual(rawData.cycles[0]);
-      expect(result.initiatives).toEqual(processedData.initiatives);
+      expect(result.objectives).toEqual(processedData.objectives);
     });
 
     it("should handle null processed data", () => {
@@ -630,7 +629,7 @@ describe("DataTransformer", () => {
       expect(result.orderedCycles).toEqual([]);
       expect(result.roadmapItems).toEqual([]);
       expect(result.activeCycle).toBeNull();
-      expect(result.initiatives).toEqual([]);
+      expect(result.objectives).toEqual([]);
     });
   });
 
@@ -660,7 +659,7 @@ describe("DataTransformer", () => {
       expect(result!.cycle).toHaveProperty("daysInCycle");
       expect(result!.cycle).toHaveProperty("startMonth");
       expect(result!.cycle).toHaveProperty("endMonth");
-      expect(result!.initiatives).toEqual(processedData.initiatives);
+      expect(result!.objectives).toEqual(processedData.objectives);
     });
 
     it("should return null for null processed data", () => {

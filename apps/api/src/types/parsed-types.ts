@@ -2,16 +2,16 @@
 // These are temporary data structures used only during parsing from Jira to Domain objects
 
 import type {
-  ReleaseItem,
+  CycleItem,
   ValidationItem,
   AreaId,
   TeamId,
   RoadmapItemId,
-  ReleaseItemId,
+  CycleItemId,
   TicketId,
   ProjectId,
   StageId,
-  InitiativeId,
+  ObjectiveId,
 } from "@headnorth/types";
 
 // ============================================================================
@@ -20,23 +20,23 @@ import type {
 
 export interface ParsedRoadmapItem {
   id: RoadmapItemId;
-  initiativeId: InitiativeId | null;
+  objectiveId: ObjectiveId | null;
   name: string;
   theme: Record<string, unknown>;
   area: Record<string, unknown>;
   isExternal: boolean;
-  releaseItems: ReleaseItem[];
+  cycleItems: CycleItem[];
   owningTeam: TeamId;
   url: string;
   validations: ValidationItem[];
 }
 
 // ============================================================================
-// Parsed Release Item DTO
+// Parsed Cycle Item DTO
 // ============================================================================
 
-export interface ParsedReleaseItem {
-  id: ReleaseItemId;
+export interface ParsedCycleItem {
+  id: CycleItemId;
   ticketId: TicketId;
   effort: number;
   projectId: ProjectId | null;

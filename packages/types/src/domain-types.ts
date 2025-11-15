@@ -37,10 +37,10 @@ export interface Person {
 
 export type CycleId = string;
 export type TicketId = string;
-export type InitiativeId = string;
+export type ObjectiveId = string;
 export type StageId = string;
 export type RoadmapItemId = string;
-export type ReleaseItemId = string;
+export type CycleItemId = string;
 export type ValidationItemId = string;
 export type CycleState = "active" | "closed" | "future" | "completed";
 
@@ -57,8 +57,8 @@ export interface Cycle {
   readonly state: CycleState;
 }
 
-export interface Initiative {
-  readonly id: InitiativeId;
+export interface Objective {
+  readonly id: ObjectiveId;
   readonly name: string;
   readonly roadmapItems?: readonly RoadmapItem[];
 }
@@ -69,20 +69,20 @@ export interface RoadmapItem {
   readonly summary: string;
   readonly area?: string | Area;
   readonly theme?: string | Readonly<Record<string, unknown>>;
-  readonly initiative?: Readonly<Record<string, unknown>>;
-  readonly initiativeId?: InitiativeId | null;
+  readonly objective?: Readonly<Record<string, unknown>>;
+  readonly objectiveId?: ObjectiveId | null;
   readonly isExternal?: boolean;
   readonly owningTeam?: Team;
   readonly url?: string;
   readonly validations?: readonly ValidationItem[];
-  readonly releaseItems?: readonly ReleaseItem[];
+  readonly cycleItems?: readonly CycleItem[];
   readonly labels: readonly string[];
   readonly startDate?: ISODateString;
   readonly endDate?: ISODateString;
 }
 
-export interface ReleaseItem {
-  readonly id: ReleaseItemId;
+export interface CycleItem {
+  readonly id: CycleItemId;
   readonly ticketId: TicketId;
   readonly effort: number;
   readonly name: string;
@@ -135,10 +135,10 @@ export interface ValidationItem {
 export interface RawCycleData {
   readonly cycles: readonly Cycle[];
   readonly roadmapItems: readonly RoadmapItem[];
-  readonly releaseItems: readonly ReleaseItem[];
+  readonly cycleItems: readonly CycleItem[];
   readonly assignees: readonly Person[];
   readonly areas: Readonly<Record<string, Area>>;
-  readonly initiatives: readonly Initiative[];
+  readonly objectives: readonly Objective[];
   readonly stages: readonly Stage[];
   readonly teams?: readonly Team[];
 }
@@ -151,9 +151,9 @@ export interface RawCycleData {
 export interface CycleData {
   readonly cycles: readonly Cycle[];
   readonly roadmapItems: readonly RoadmapItem[];
-  readonly releaseItems: readonly ReleaseItem[];
+  readonly cycleItems: readonly CycleItem[];
   readonly areas: readonly Area[];
-  readonly initiatives: readonly Initiative[];
+  readonly objectives: readonly Objective[];
   readonly assignees: readonly Person[];
   readonly stages: readonly Stage[];
 }

@@ -1,5 +1,5 @@
 // Default JIRA Adapter
-// Handles standard JIRA setup: separate Roadmap Item and Release Item issue types
+// Handles standard JIRA setup: separate Roadmap Item and Cycle Item issue types
 // Uses Either for functional error handling
 
 import { Either, Maybe, safeAsync } from "@headnorth/utils";
@@ -8,10 +8,10 @@ import type {
   RawCycleData,
   Cycle,
   RoadmapItem,
-  ReleaseItem,
+  CycleItem,
   Area,
   Team,
-  Initiative,
+  Objective,
   ValidationItem,
   Person,
 } from "@headnorth/types";
@@ -49,40 +49,40 @@ export class DefaultJiraAdapter implements JiraAdapter {
       // 1. Fetch all JIRA data in parallel
       const boardId = this.jiraConfig.connection.boardId;
 
-      const [sprints, roadmapIssues, releaseIssues] = await Promise.all([
+      const [sprints, roadmapIssues, cycleIssues] = await Promise.all([
         this.jiraClient.getSprints(boardId),
         this.jiraClient.searchIssues('issuetype = "Roadmap Item"', [
           "summary",
           "labels",
         ]),
-        this.jiraClient.searchIssues('issuetype = "Release Item"', ["*"]),
+        this.jiraClient.searchIssues('issuetype = "Cycle Item"', ["*"]),
       ]);
 
       // 2. Transform sprints to cycles
       const cycles = sprints.map(jiraSprintToCycle);
 
-      // 3. Transform issues to roadmap/release items
+      // 3. Transform issues to roadmap/cycle items
       const roadmapItems = roadmapIssues.map((issue: JiraIssue) =>
-        this.transformRoadmapItem(issue, releaseIssues),
+        this.transformRoadmapItem(issue, cycleIssues),
       );
 
-      const releaseItems = releaseIssues.map((issue: JiraIssue) =>
-        this.transformReleaseItem(issue, cycles),
+      const cycleItems = cycleIssues.map((issue: JiraIssue) =>
+        this.transformCycleItem(issue, cycles),
       );
 
       // 4. Extract metadata from all issues
-      const allIssues = [...roadmapIssues, ...releaseIssues];
+      const allIssues = [...roadmapIssues, ...cycleIssues];
       const areas = this.extractAreas(allIssues);
-      const initiatives = this.extractInitiatives(allIssues);
+      const objectives = this.extractObjectives(allIssues);
       const teams = this.extractTeams(allIssues);
       const assignees = extractAllAssignees(allIssues);
 
       const rawData: RawCycleData = {
         cycles,
         roadmapItems,
-        releaseItems,
+        cycleItems,
         areas,
-        initiatives,
+        objectives,
         assignees,
         stages: this.config.getStages(),
         teams,
@@ -111,7 +111,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
 
   private transformRoadmapItem(
     issue: JiraIssue,
-    releaseIssues: JiraIssue[],
+    cycleIssues: JiraIssue[],
   ): RoadmapItem {
     // Extract labels using primitives
     const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
@@ -119,9 +119,9 @@ export class DefaultJiraAdapter implements JiraAdapter {
       issue.fields.labels,
       "theme:",
     )[0];
-    const initiativeLabel = extractLabelsWithPrefix(
+    const objectiveLabel = extractLabelsWithPrefix(
       issue.fields.labels,
-      "initiative:",
+      "objective:",
     )[0];
 
     // Translate labels using Maybe for safe extraction
@@ -139,33 +139,32 @@ export class DefaultJiraAdapter implements JiraAdapter {
       themeLabel || "unknown",
     );
 
-    const initiativeTranslations =
-      this.config.getLabelTranslations().initiatives;
-    const initiative = this.getTranslatedLabel(
-      initiativeLabel,
-      initiativeTranslations,
-      initiativeLabel || "unknown",
+    const objectiveTranslations = this.config.getLabelTranslations().objectives;
+    const objective = this.getTranslatedLabel(
+      objectiveLabel,
+      objectiveTranslations,
+      objectiveLabel || "unknown",
     );
 
     // Generate validations
     const validations: ValidationItem[] = [
       ...validateRequired(area, issue.key, "area"),
       ...validateRequired(theme, issue.key, "theme"),
-      ...validateRequired(initiative, issue.key, "initiative"),
+      ...validateRequired(objective, issue.key, "objective"),
     ];
 
     const name = this.extractRoadmapItemName(issue.fields.summary);
 
-    // Find related release items
-    const relatedReleaseItems = releaseIssues.filter((ri) =>
-      extractParent(ri)
+    // Find related cycle items
+    const relatedCycleItems = cycleIssues.filter((ci) =>
+      extractParent(ci)
         .map((parentKey: string) => parentKey === issue.key)
         .orDefault(false),
     );
 
-    // Determine owning team from release items using Maybe
-    const teamLabels = relatedReleaseItems.flatMap((ri) =>
-      extractLabelsWithPrefix(ri.fields.labels, "team:"),
+    // Determine owning team from cycle items using Maybe
+    const teamLabels = relatedCycleItems.flatMap((ci) =>
+      extractLabelsWithPrefix(ci.fields.labels, "team:"),
     );
     const owningTeamId = Maybe.fromNullable(teamLabels[0]).orDefault("unknown");
 
@@ -192,7 +191,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
       summary: issue.fields.summary,
       area: { id: areaId, name: area, teams: [] },
       theme: { id: themeId, name: theme },
-      initiativeId: initiativeLabel || null,
+      objectiveId: objectiveLabel || null,
       labels: issue.fields.labels,
       validations,
       owningTeam: {
@@ -204,7 +203,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
     };
   }
 
-  private transformReleaseItem(issue: JiraIssue, cycles: Cycle[]): ReleaseItem {
+  private transformCycleItem(issue: JiraIssue, cycles: Cycle[]): CycleItem {
     // Extract effort from custom field
     const effort = extractCustomField<number>(
       issue,
@@ -302,16 +301,16 @@ export class DefaultJiraAdapter implements JiraAdapter {
     );
   }
 
-  private extractInitiatives(allIssues: JiraIssue[]): Initiative[] {
-    const initiativeLabels = new Set(
+  private extractObjectives(allIssues: JiraIssue[]): Objective[] {
+    const objectiveLabels = new Set(
       allIssues.flatMap((issue) =>
-        extractLabelsWithPrefix(issue.fields.labels, "initiative:"),
+        extractLabelsWithPrefix(issue.fields.labels, "objective:"),
       ),
     );
 
-    return Array.from(initiativeLabels).map((label) => ({
+    return Array.from(objectiveLabels).map((label) => ({
       id: label,
-      name: this.config.getLabelTranslations().initiatives[label] || label,
+      name: this.config.getLabelTranslations().objectives[label] || label,
     }));
   }
 

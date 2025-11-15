@@ -4,8 +4,8 @@ import type {
   Cycle,
   CycleId,
   CycleData,
-  Initiative,
-  InitiativeId,
+  Objective,
+  ObjectiveId,
   PersonId,
   RoadmapItem,
   StageId,
@@ -32,7 +32,7 @@ export interface RoadmapData {
   readonly orderedCycles: readonly Cycle[];
   readonly roadmapItems: readonly RoadmapItem[];
   readonly activeCycle: Cycle | null;
-  readonly initiatives?: readonly InitiativeWithProgress[];
+  readonly objectives?: readonly ObjectiveWithProgress[];
 }
 
 // ============================================================================
@@ -42,13 +42,13 @@ export interface RoadmapData {
 /**
  * Complete progress data including cycle metadata.
  * Contains both progress metrics and cycle-specific metadata like dates and months.
- * Used by complete entities (CycleWithProgress, InitiativeWithProgress) that need
+ * Used by complete entities (CycleWithProgress, ObjectiveWithProgress) that need
  * both progress calculations and contextual cycle information.
  */
 export interface ProgressWithinCycle {
   readonly progress: number;
   readonly progressWithInProgress: number;
-  readonly progressByReleaseItems: number;
+  readonly progressByCycleItems: number;
   readonly weeks: number;
   readonly weeksDone: number;
   readonly weeksInProgress: number;
@@ -56,8 +56,8 @@ export interface ProgressWithinCycle {
   readonly weeksCancelled: number;
   readonly weeksPostponed: number;
   readonly weeksTodo: number;
-  readonly releaseItemsCount: number;
-  readonly releaseItemsDoneCount: number;
+  readonly cycleItemsCount: number;
+  readonly cycleItemsDoneCount: number;
   readonly percentageNotToDo: number;
   readonly startMonth: string;
   readonly endMonth: string;
@@ -69,10 +69,8 @@ export interface ProgressWithinCycle {
 // Cycle with calculated progress data - extends core cycle
 export interface CycleWithProgress extends Cycle, ProgressWithinCycle {}
 
-// Initiative with calculated progress data - extends base initiative
-export interface InitiativeWithProgress
-  extends Initiative,
-    ProgressWithinCycle {}
+// Objective with calculated progress data - extends base objective
+export interface ObjectiveWithProgress extends Objective, ProgressWithinCycle {}
 
 export interface RoadmapItemWithProgress
   extends RoadmapItem,
@@ -100,7 +98,7 @@ export interface CycleMetadata {
 export interface ProgressMetrics {
   readonly progress: number;
   readonly progressWithInProgress: number;
-  readonly progressByReleaseItems: number;
+  readonly progressByCycleItems: number;
   readonly weeks: number;
   readonly weeksDone: number;
   readonly weeksInProgress: number;
@@ -108,25 +106,25 @@ export interface ProgressMetrics {
   readonly weeksCancelled: number;
   readonly weeksPostponed: number;
   readonly weeksTodo: number;
-  readonly releaseItemsCount: number;
-  readonly releaseItemsDoneCount: number;
+  readonly cycleItemsCount: number;
+  readonly cycleItemsDoneCount: number;
   readonly percentageNotToDo: number;
 }
 
 /**
  * Nested cycle data structure that represents the hierarchical
- * relationship: Initiative -> RoadmapItem -> ReleaseItem
+ * relationship: Objective -> RoadmapItem -> CycleItem
  *
  * This is the core data structure that both roadmap and cycle overview
  * views work with, ensuring consistent filtering across the application.
  */
 export interface NestedCycleData {
-  readonly initiatives: readonly InitiativeWithProgress[];
+  readonly objectives: readonly ObjectiveWithProgress[];
 }
 
 /**
  * Cycle overview data for frontend display.
- * Contains a single cycle with its associated initiatives that have
+ * Contains a single cycle with its associated objectives that have
  * calculated progress metrics for the cycle overview view.
  */
 export interface CycleOverviewData extends NestedCycleData {
@@ -151,12 +149,12 @@ export interface StoreState {
 
 /**
  * Filter criteria that can be applied to NestedCycleData
- * All filters are applied at the ReleaseItem level and cascade up
+ * All filters are applied at the CycleItem level and cascade up
  * Uses strong domain types for better type safety
  */
 export interface FilterCriteria {
   readonly area?: AreaId;
-  readonly initiatives?: readonly InitiativeId[];
+  readonly objectives?: readonly ObjectiveId[];
   readonly stages?: readonly StageId[];
   readonly assignees?: readonly PersonId[];
   readonly cycle?: CycleId;
@@ -171,7 +169,7 @@ export interface ViewFilterCriteria {
   // Common filters (shared between all views)
   readonly common: {
     readonly area?: AreaId;
-    readonly initiatives?: readonly InitiativeId[];
+    readonly objectives?: readonly ObjectiveId[];
   };
   // Cycle overview specific filters
   readonly cycleOverview: {
@@ -189,7 +187,7 @@ export interface ViewFilterCriteria {
 export interface FilterResult {
   readonly data: NestedCycleData;
   readonly appliedFilters: FilterCriteria;
-  readonly totalInitiatives: number;
+  readonly totalObjectives: number;
   readonly totalRoadmapItems: number;
-  readonly totalReleaseItems: number;
+  readonly totalCycleItems: number;
 }

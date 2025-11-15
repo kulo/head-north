@@ -5,11 +5,11 @@
  */
 
 /**
- * Default values for initiatives
+ * Default values for objectives
  */
-export const DEFAULT_INITIATIVE = {
+export const DEFAULT_OBJECTIVE = {
   ID: "unassigned",
-  NAME: "Unassigned Initiative",
+  NAME: "Unassigned Objective",
 } as const;
 
 /**
@@ -55,14 +55,14 @@ export const DEFAULT_STATUS = {
 } as const;
 
 /**
- * Helper function to get default initiative ID
- * @param initiativeId - The initiative ID to check
- * @returns The initiative ID or default if null/undefined
+ * Helper function to get default objective ID
+ * @param objectiveId - The objective ID to check
+ * @returns The objective ID or default if null/undefined
  */
-export const getDefaultInitiativeId = (
-  initiativeId: string | null | undefined,
+export const getDefaultObjectiveId = (
+  objectiveId: string | null | undefined,
 ): string => {
-  return initiativeId || DEFAULT_INITIATIVE.ID;
+  return objectiveId || DEFAULT_OBJECTIVE.ID;
 };
 
 /**

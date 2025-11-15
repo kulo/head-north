@@ -47,11 +47,11 @@ describe("FakeDataAdapter", () => {
       id: expect.stringMatching(/^ROAD-\d+$/),
       name: expect.stringMatching(/^.+ - \d+$/),
       area: expect.any(String),
-      initiativeId: expect.any(String),
+      objectiveId: expect.any(String),
     });
   });
 
-  it("should generate release items", async () => {
+  it("should generate cycle items", async () => {
     const result = (await adapter.fetchCycleData()) as Either<
       Error,
       RawCycleData
@@ -59,9 +59,9 @@ describe("FakeDataAdapter", () => {
 
     expect(result.isRight()).toBe(true);
     const data = result.extract() as RawCycleData;
-    expect(data.releaseItems.length).toBeGreaterThan(0);
-    expect(data.releaseItems[0]).toMatchObject({
-      id: expect.stringMatching(/^ROAD-\d+-RELEASE-\d+$/),
+    expect(data.cycleItems.length).toBeGreaterThan(0);
+    expect(data.cycleItems[0]).toMatchObject({
+      id: expect.stringMatching(/^ROAD-\d+-CYCLE-\d+$/),
       effort: expect.any(Number),
       status: expect.any(String),
       stage: expect.any(String),
@@ -85,7 +85,7 @@ describe("FakeDataAdapter", () => {
     });
   });
 
-  it("should generate initiatives", async () => {
+  it("should generate objectives", async () => {
     const result = (await adapter.fetchCycleData()) as Either<
       Error,
       RawCycleData
@@ -93,8 +93,8 @@ describe("FakeDataAdapter", () => {
 
     expect(result.isRight()).toBe(true);
     const data = result.extract() as RawCycleData;
-    expect(data.initiatives.length).toBeGreaterThan(0);
-    expect(data.initiatives[0]).toMatchObject({
+    expect(data.objectives.length).toBeGreaterThan(0);
+    expect(data.objectives[0]).toMatchObject({
       id: expect.any(String),
       name: expect.any(String),
     });
@@ -155,20 +155,20 @@ describe("FakeDataAdapter", () => {
     expect(result.isRight()).toBe(true);
     const data = result.extract() as RawCycleData;
 
-    // Check that release items reference valid roadmap items
-    data.releaseItems.forEach((releaseItem) => {
-      if (releaseItem.roadmapItemId) {
+    // Check that cycle items reference valid roadmap items
+    data.cycleItems.forEach((cycleItem) => {
+      if (cycleItem.roadmapItemId) {
         const roadmapItem = data.roadmapItems.find(
-          (ri) => ri.id === releaseItem.roadmapItemId,
+          (ri) => ri.id === cycleItem.roadmapItemId,
         );
         expect(roadmapItem).toBeDefined();
       }
     });
 
-    // Check that release items reference valid cycles
-    data.releaseItems.forEach((releaseItem) => {
-      if (releaseItem.cycleId) {
-        const cycle = data.cycles.find((c) => c.id === releaseItem.cycleId);
+    // Check that cycle items reference valid cycles
+    data.cycleItems.forEach((cycleItem) => {
+      if (cycleItem.cycleId) {
+        const cycle = data.cycles.find((c) => c.id === cycleItem.cycleId);
         expect(cycle).toBeDefined();
       }
     });

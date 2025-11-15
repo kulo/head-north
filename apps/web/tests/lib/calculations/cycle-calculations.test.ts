@@ -6,17 +6,17 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  calculateReleaseItemProgress,
+  calculateCycleItemProgress,
   calculateCycleMetadata,
   aggregateProgressMetrics,
   normalize,
   roundToTwoDigit,
 } from "../../../src/lib/calculations/cycle-calculations";
 import {
-  createMockReleaseItem,
-  createMockReleaseItemWithStatus,
-  createMockReleaseItemWithEffort,
-  createTestReleaseItemCollection,
+  createMockCycleItem,
+  createMockCycleItemWithStatus,
+  createMockCycleItemWithEffort,
+  createTestCycleItemCollection,
   createMockCycle,
 } from "../../fixtures/cycle-data-fixtures";
 
@@ -58,9 +58,9 @@ describe("cycle-calculations", () => {
     });
   });
 
-  describe("calculateReleaseItemProgress", () => {
+  describe("calculateCycleItemProgress", () => {
     it("should return zero metrics for empty array", () => {
-      const result = calculateReleaseItemProgress([]);
+      const result = calculateCycleItemProgress([]);
 
       expect(result).toEqual({
         weeks: 0,
@@ -70,18 +70,18 @@ describe("cycle-calculations", () => {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
-        releaseItemsCount: 0,
-        releaseItemsDoneCount: 0,
+        cycleItemsCount: 0,
+        cycleItemsDoneCount: 0,
         progress: 0,
         progressWithInProgress: 0,
-        progressByReleaseItems: 0,
+        progressByCycleItems: 0,
         percentageNotToDo: 0,
       });
     });
 
     it("should return zero metrics for null/undefined input", () => {
-      const result1 = calculateReleaseItemProgress(null as any);
-      const result2 = calculateReleaseItemProgress(undefined as any);
+      const result1 = calculateCycleItemProgress(null as any);
+      const result2 = calculateCycleItemProgress(undefined as any);
 
       expect(result1).toEqual({
         weeks: 0,
@@ -91,20 +91,20 @@ describe("cycle-calculations", () => {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
-        releaseItemsCount: 0,
-        releaseItemsDoneCount: 0,
+        cycleItemsCount: 0,
+        cycleItemsDoneCount: 0,
         progress: 0,
         progressWithInProgress: 0,
-        progressByReleaseItems: 0,
+        progressByCycleItems: 0,
         percentageNotToDo: 0,
       });
       expect(result2).toEqual(result1);
     });
 
-    it("should calculate metrics for single release item", () => {
-      const releaseItems = [createMockReleaseItemWithStatus("done")];
+    it("should calculate metrics for single cycle item", () => {
+      const cycleItems = [createMockCycleItemWithStatus("done")];
 
-      const result = calculateReleaseItemProgress(releaseItems);
+      const result = calculateCycleItemProgress(cycleItems);
 
       expect(result.weeks).toBe(2);
       expect(result.weeksDone).toBe(2);
@@ -113,24 +113,24 @@ describe("cycle-calculations", () => {
       expect(result.weeksNotToDo).toBe(0);
       expect(result.weeksCancelled).toBe(0);
       expect(result.weeksPostponed).toBe(0);
-      expect(result.releaseItemsCount).toBe(1);
-      expect(result.releaseItemsDoneCount).toBe(1);
+      expect(result.cycleItemsCount).toBe(1);
+      expect(result.cycleItemsDoneCount).toBe(1);
       expect(result.progress).toBe(100);
       expect(result.progressWithInProgress).toBe(100);
-      expect(result.progressByReleaseItems).toBe(100);
+      expect(result.progressByCycleItems).toBe(100);
       expect(result.percentageNotToDo).toBe(0);
     });
 
-    it("should calculate metrics for mixed status release items", () => {
-      const releaseItems = [
-        createMockReleaseItemWithStatus("todo"),
-        createMockReleaseItemWithStatus("inprogress"),
-        createMockReleaseItemWithStatus("done"),
-        createMockReleaseItemWithStatus("cancelled"),
-        createMockReleaseItemWithStatus("postponed"),
+    it("should calculate metrics for mixed status cycle items", () => {
+      const cycleItems = [
+        createMockCycleItemWithStatus("todo"),
+        createMockCycleItemWithStatus("inprogress"),
+        createMockCycleItemWithStatus("done"),
+        createMockCycleItemWithStatus("cancelled"),
+        createMockCycleItemWithStatus("postponed"),
       ];
 
-      const result = calculateReleaseItemProgress(releaseItems);
+      const result = calculateCycleItemProgress(cycleItems);
 
       expect(result.weeks).toBe(10); // 5 items * 2 weeks each
       expect(result.weeksDone).toBe(2);
@@ -139,77 +139,77 @@ describe("cycle-calculations", () => {
       expect(result.weeksNotToDo).toBe(4); // cancelled + postponed
       expect(result.weeksCancelled).toBe(2);
       expect(result.weeksPostponed).toBe(2);
-      expect(result.releaseItemsCount).toBe(5);
-      expect(result.releaseItemsDoneCount).toBe(1);
+      expect(result.cycleItemsCount).toBe(5);
+      expect(result.cycleItemsDoneCount).toBe(1);
       expect(result.progress).toBe(20); // 2/10 * 100
       expect(result.progressWithInProgress).toBe(40); // (2+2)/10 * 100
-      expect(result.progressByReleaseItems).toBe(20); // 1/5 * 100
+      expect(result.progressByCycleItems).toBe(20); // 1/5 * 100
       expect(result.percentageNotToDo).toBe(40); // 4/10 * 100
     });
 
     it("should handle different effort values", () => {
-      const releaseItems = [
-        createMockReleaseItemWithEffort(0.5),
-        createMockReleaseItemWithEffort(1.0),
-        createMockReleaseItemWithEffort(2.5),
-        createMockReleaseItemWithEffort(5.0),
+      const cycleItems = [
+        createMockCycleItemWithEffort(0.5),
+        createMockCycleItemWithEffort(1.0),
+        createMockCycleItemWithEffort(2.5),
+        createMockCycleItemWithEffort(5.0),
       ].map((item) => ({ ...item, status: "done" })); // Set all to done status
 
-      const result = calculateReleaseItemProgress(releaseItems);
+      const result = calculateCycleItemProgress(cycleItems);
 
       expect(result.weeks).toBe(9); // 0.5 + 1.0 + 2.5 + 5.0
       expect(result.weeksDone).toBe(9); // All are done by default
-      expect(result.releaseItemsCount).toBe(4);
-      expect(result.releaseItemsDoneCount).toBe(4);
+      expect(result.cycleItemsCount).toBe(4);
+      expect(result.cycleItemsDoneCount).toBe(4);
     });
 
     it("should handle string effort values", () => {
-      const releaseItems = [
-        createMockReleaseItem({ effort: "1.5" as any, status: "done" }),
-        createMockReleaseItem({ effort: "2.0" as any, status: "done" }),
+      const cycleItems = [
+        createMockCycleItem({ effort: "1.5" as any, status: "done" }),
+        createMockCycleItem({ effort: "2.0" as any, status: "done" }),
       ];
 
-      const result = calculateReleaseItemProgress(releaseItems);
+      const result = calculateCycleItemProgress(cycleItems);
 
       expect(result.weeks).toBe(3.5);
       expect(result.weeksDone).toBe(3.5);
     });
 
     it("should handle invalid effort values", () => {
-      const releaseItems = [
-        createMockReleaseItem({ effort: "invalid" as any }),
-        createMockReleaseItem({ effort: null as any }),
-        createMockReleaseItem({ effort: undefined as any }),
+      const cycleItems = [
+        createMockCycleItem({ effort: "invalid" as any }),
+        createMockCycleItem({ effort: null as any }),
+        createMockCycleItem({ effort: undefined as any }),
       ];
 
-      const result = calculateReleaseItemProgress(releaseItems);
+      const result = calculateCycleItemProgress(cycleItems);
 
       expect(result.weeks).toBe(0);
       expect(result.weeksDone).toBe(0);
     });
 
     it("should exclude replanned items from weeks calculation", () => {
-      const releaseItems = [
-        createMockReleaseItemWithStatus("replanned"),
-        createMockReleaseItemWithStatus("done"),
+      const cycleItems = [
+        createMockCycleItemWithStatus("replanned"),
+        createMockCycleItemWithStatus("done"),
       ];
 
-      const result = calculateReleaseItemProgress(releaseItems);
+      const result = calculateCycleItemProgress(cycleItems);
 
       expect(result.weeks).toBe(2); // Only the done item
       expect(result.weeksDone).toBe(2);
-      expect(result.releaseItemsCount).toBe(1); // Only the done item
-      expect(result.releaseItemsDoneCount).toBe(1);
+      expect(result.cycleItemsCount).toBe(1); // Only the done item
+      expect(result.cycleItemsDoneCount).toBe(1);
     });
 
     it("should handle case insensitive status values", () => {
-      const releaseItems = [
-        createMockReleaseItem({ status: "DONE" }),
-        createMockReleaseItem({ status: "InProgress" }),
-        createMockReleaseItem({ status: "TODO" }),
+      const cycleItems = [
+        createMockCycleItem({ status: "DONE" }),
+        createMockCycleItem({ status: "InProgress" }),
+        createMockCycleItem({ status: "TODO" }),
       ];
 
-      const result = calculateReleaseItemProgress(releaseItems);
+      const result = calculateCycleItemProgress(cycleItems);
 
       expect(result.weeksDone).toBe(2);
       expect(result.weeksInProgress).toBe(2);
@@ -338,11 +338,11 @@ describe("cycle-calculations", () => {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
-        releaseItemsCount: 0,
-        releaseItemsDoneCount: 0,
+        cycleItemsCount: 0,
+        cycleItemsDoneCount: 0,
         progress: 0,
         progressWithInProgress: 0,
-        progressByReleaseItems: 0,
+        progressByCycleItems: 0,
         percentageNotToDo: 0,
       });
     });
@@ -359,11 +359,11 @@ describe("cycle-calculations", () => {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
-        releaseItemsCount: 0,
-        releaseItemsDoneCount: 0,
+        cycleItemsCount: 0,
+        cycleItemsDoneCount: 0,
         progress: 0,
         progressWithInProgress: 0,
-        progressByReleaseItems: 0,
+        progressByCycleItems: 0,
         percentageNotToDo: 0,
       });
       expect(result2).toEqual(result1);
@@ -379,11 +379,11 @@ describe("cycle-calculations", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 2,
-          releaseItemsDoneCount: 1,
+          cycleItemsCount: 2,
+          cycleItemsDoneCount: 1,
           progress: 50,
           progressWithInProgress: 75,
-          progressByReleaseItems: 50,
+          progressByCycleItems: 50,
           percentageNotToDo: 0,
         },
         {
@@ -394,11 +394,11 @@ describe("cycle-calculations", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 3,
-          releaseItemsDoneCount: 2,
+          cycleItemsCount: 3,
+          cycleItemsDoneCount: 2,
           progress: 50,
           progressWithInProgress: 83,
-          progressByReleaseItems: 67,
+          progressByCycleItems: 67,
           percentageNotToDo: 0,
         },
       ];
@@ -412,11 +412,11 @@ describe("cycle-calculations", () => {
       expect(result.weeksNotToDo).toBe(0);
       expect(result.weeksCancelled).toBe(0);
       expect(result.weeksPostponed).toBe(0);
-      expect(result.releaseItemsCount).toBe(5);
-      expect(result.releaseItemsDoneCount).toBe(3);
+      expect(result.cycleItemsCount).toBe(5);
+      expect(result.cycleItemsDoneCount).toBe(3);
       expect(result.progress).toBe(50); // 5/10 * 100
       expect(result.progressWithInProgress).toBe(80); // (5+3)/10 * 100
-      expect(result.progressByReleaseItems).toBe(60); // 3/5 * 100
+      expect(result.progressByCycleItems).toBe(60); // 3/5 * 100
       expect(result.percentageNotToDo).toBe(0);
     });
 
@@ -430,11 +430,11 @@ describe("cycle-calculations", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 2,
-          releaseItemsDoneCount: 1,
+          cycleItemsCount: 2,
+          cycleItemsDoneCount: 1,
           progress: 50,
           progressWithInProgress: 75,
-          progressByReleaseItems: 50,
+          progressByCycleItems: 50,
           percentageNotToDo: 0,
         },
       ];
@@ -454,11 +454,11 @@ describe("cycle-calculations", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 0,
-          releaseItemsDoneCount: 0,
+          cycleItemsCount: 0,
+          cycleItemsDoneCount: 0,
           progress: 0,
           progressWithInProgress: 0,
-          progressByReleaseItems: 0,
+          progressByCycleItems: 0,
           percentageNotToDo: 0,
         },
       ];
@@ -467,11 +467,11 @@ describe("cycle-calculations", () => {
 
       expect(result.progress).toBe(0);
       expect(result.progressWithInProgress).toBe(0);
-      expect(result.progressByReleaseItems).toBe(0);
+      expect(result.progressByCycleItems).toBe(0);
       expect(result.percentageNotToDo).toBe(0);
     });
 
-    it("should handle zero release items in percentage calculations", () => {
+    it("should handle zero cycle items in percentage calculations", () => {
       const metricsArray = [
         {
           weeks: 4,
@@ -481,18 +481,18 @@ describe("cycle-calculations", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 0,
-          releaseItemsDoneCount: 0,
+          cycleItemsCount: 0,
+          cycleItemsDoneCount: 0,
           progress: 50,
           progressWithInProgress: 75,
-          progressByReleaseItems: 0,
+          progressByCycleItems: 0,
           percentageNotToDo: 0,
         },
       ];
 
       const result = aggregateProgressMetrics(metricsArray);
 
-      expect(result.progressByReleaseItems).toBe(0);
+      expect(result.progressByCycleItems).toBe(0);
     });
   });
 });

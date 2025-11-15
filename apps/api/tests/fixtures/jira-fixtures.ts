@@ -55,7 +55,7 @@ export function createMockJiraIssue(
       labels: ["area:frontend", "team:team-a", "theme:platform"],
       issuetype: {
         id: "10001",
-        name: "Release Item",
+        name: "Cycle Item",
         subtask: false,
       },
       assignee: {
@@ -118,7 +118,7 @@ export function createMinimalJiraIssue(
       labels: [],
       issuetype: {
         id: "10001",
-        name: "Release Item",
+        name: "Cycle Item",
         subtask: false,
       },
       assignee: null,
@@ -254,7 +254,7 @@ export function createMockRoadmapItemsData(): JiraRoadmapItemsData {
       labels: [
         "area:frontend",
         "theme:platform",
-        "initiative:init-1",
+        "objective:obj-1",
         "no-pre-release-allowed",
       ],
     },
@@ -263,7 +263,7 @@ export function createMockRoadmapItemsData(): JiraRoadmapItemsData {
       labels: [
         "area:backend",
         "theme:performance",
-        "initiative:init-2",
+        "objective:obj-2",
         "no-pre-release-allowed",
       ],
     },

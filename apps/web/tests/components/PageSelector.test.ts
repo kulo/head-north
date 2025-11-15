@@ -46,7 +46,7 @@ const mockCycleDataViewCoordinator = {
     orderedCycles: [],
     roadmapItems: [],
     activeCycle: null,
-    initiatives: [],
+    objectives: [],
   }),
 } as any;
 

@@ -62,7 +62,7 @@ export const getCycleData = async (
     },
     Right: (preparedData) => {
       logger.default.info(
-        `Raw cycle data validated successfully: ${(preparedData.roadmapItems as unknown[])?.length || 0} roadmap items, ${(preparedData.releaseItems as unknown[])?.length || 0} release items, ${(preparedData.cycles as unknown[])?.length || 0} cycles`,
+        `Raw cycle data validated successfully: ${(preparedData.roadmapItems as unknown[])?.length || 0} roadmap items, ${(preparedData.cycleItems as unknown[])?.length || 0} cycle items, ${(preparedData.cycles as unknown[])?.length || 0} cycles`,
       );
 
       // Return prepared data - all transformations handled in frontend

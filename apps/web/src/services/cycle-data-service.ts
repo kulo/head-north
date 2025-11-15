@@ -18,7 +18,7 @@ import {
 import type { HeadNorthConfig } from "@headnorth/config";
 import type {
   Cycle,
-  Initiative,
+  Objective,
   Person,
   Area,
   Stage,
@@ -102,9 +102,9 @@ class CycleDataService {
     return {
       cycles: rawData.cycles, // Return raw cycles without progress calculations
       roadmapItems: rawData.roadmapItems,
-      releaseItems: rawData.releaseItems,
+      cycleItems: rawData.cycleItems,
       areas: Object.values(rawData.areas), // Convert Record<string, Area> to Area[]
-      initiatives: rawData.initiatives,
+      objectives: rawData.objectives,
       assignees: rawData.assignees,
       stages: rawData.stages, // Keep Stage[] as-is
     };
@@ -226,12 +226,12 @@ class CycleDataService {
   }
 
   /**
-   * Get all initiatives from the unified data
-   * @returns {Promise<Either<Error, readonly Initiative[]>>} Array of initiatives with id and name properties wrapped in Either
+   * Get all objectives from the unified data
+   * @returns {Promise<Either<Error, readonly Objective[]>>} Array of objectives with id and name properties wrapped in Either
    */
-  async getAllInitiatives(): Promise<Either<Error, readonly Initiative[]>> {
+  async getAllObjectives(): Promise<Either<Error, readonly Objective[]>> {
     const data = await this.#getCachedCycleData();
-    return data.map((data) => data.initiatives);
+    return data.map((data) => data.objectives);
   }
 
   /**

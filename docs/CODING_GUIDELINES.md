@@ -281,7 +281,7 @@ function processItems(items: readonly Item[]): readonly Item[] {
 const items = data.items; // Type inferred from data.items
 
 // ✅ GOOD - Explicit when it improves clarity
-function calculateProgress(items: readonly ReleaseItem[]): number {
+function calculateProgress(items: readonly CycleItem[]): number {
   // Explicit return type improves documentation
 }
 ```
@@ -305,15 +305,15 @@ Head North uses TypeScript strict mode. This means:
 
 ```typescript
 // ✅ GOOD - Pure function
-function calculateProgress(releaseItems: readonly ReleaseItem[]): number {
-  const completed = releaseItems.filter((item) => item.status === "done");
-  return (completed.length / releaseItems.length) * 100;
+function calculateProgress(cycleItems: readonly CycleItem[]): number {
+  const completed = cycleItems.filter((item) => item.status === "done");
+  return (completed.length / cycleItems.length) * 100;
 }
 
 // ❌ BAD - Side effect (mutates external state)
-function calculateProgress(releaseItems: ReleaseItem[]): number {
+function calculateProgress(cycleItems: CycleItem[]): number {
   let total = 0; // Mutation
-  releaseItems.forEach((item) => (total += item.effort)); // Side effect
+  cycleItems.forEach((item) => (total += item.effort)); // Side effect
   return total;
 }
 ```
@@ -488,16 +488,16 @@ This section provides quick examples of using `Maybe` to replace `null`/`undefin
 import { Maybe } from "purify-ts";
 
 // ❌ AVOID - Null checks
-function getArea(releaseItem: ReleaseItem): string | null {
-  if (releaseItem.area) {
-    return releaseItem.area.id;
+function getArea(cycleItem: CycleItem): string | null {
+  if (cycleItem.area) {
+    return cycleItem.area.id;
   }
   return null;
 }
 
 // ✅ PREFER - Maybe
-function getArea(releaseItem: ReleaseItem): Maybe<string> {
-  return Maybe.fromNullable(releaseItem.area).map((area) => area.id);
+function getArea(cycleItem: CycleItem): Maybe<string> {
+  return Maybe.fromNullable(cycleItem.area).map((area) => area.id);
 }
 
 // Usage with default
@@ -619,7 +619,7 @@ head-north/
 ```typescript
 // ✅ GOOD - Descriptive names
 function calculateCycleProgress(cycles: readonly Cycle[]): number {}
-function getReleaseItemsForCycle(roadmapItem: RoadmapItem, cycleId: string) {}
+function getCycleItemsForCycle(roadmapItem: RoadmapItem, cycleId: string) {}
 
 // ❌ BAD - Vague names
 function calc(c: Cycle[]): number {}
@@ -635,7 +635,7 @@ import { match } from "ts-pattern";
 import { z } from "zod";
 
 // 2. Internal packages (scoped)
-import type { Cycle, ReleaseItem } from "@headnorth/types";
+import type { Cycle, CycleItem } from "@headnorth/types";
 import { logger } from "@headnorth/utils";
 import { HeadNorthConfig } from "@headnorth/config";
 
@@ -1087,7 +1087,7 @@ Extract business logic from components into pure functions. See [Pure Functions]
 
 ```typescript
 // ❌ BAD - Logic in component
-// InitiativeChart.vue
+// ObjectiveChart.vue
 const calculateProgress = () => {
   let total = 0;
   items.value.forEach((item) => (total += item.effort));
@@ -1095,17 +1095,17 @@ const calculateProgress = () => {
 };
 
 // ✅ GOOD - Pure function extracted
-// lib/charts/initiative-chart-calculations.ts
-export function calculateProgress(items: readonly ReleaseItem[]): number {
+// lib/charts/objective-chart-calculations.ts
+export function calculateProgress(items: readonly CycleItem[]): number {
   return items.reduce((sum, item) => sum + (item.effort || 0), 0);
 }
 
-// InitiativeChart.vue - just uses the function
-import { calculateProgress } from "../lib/charts/initiative-chart-calculations";
+// ObjectiveChart.vue - just uses the function
+import { calculateProgress } from "../lib/charts/objective-chart-calculations";
 const progress = computed(() => calculateProgress(items.value));
 ```
 
-**Real example**: `apps/web/src/lib/charts/initiative-chart-calculations.ts`
+**Real example**: `apps/web/src/lib/charts/objective-chart-calculations.ts`
 
 ### Pattern: Converting Class to Factory Function
 
@@ -1274,4 +1274,4 @@ function process(data: unknown): Either<Error, ProcessedData> {
 - **Pattern matching**: `apps/web/src/lib/constants/status-constants.ts`
 - **Composition**: `packages/utils/src/purify-utils.ts`
 - **Validation**: `packages/config/src/jira-config-validation.ts`
-- **Component extraction**: `apps/web/src/lib/charts/initiative-chart-calculations.ts`
+- **Component extraction**: `apps/web/src/lib/charts/objective-chart-calculations.ts`

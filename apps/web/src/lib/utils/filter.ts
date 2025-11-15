@@ -2,7 +2,7 @@
  * Filter - Core filtering system for NestedCycleData
  *
  * Pure functional filtering system that replaces class-based approach.
- * All filters are applied at the ReleaseItem level and cascade up through
+ * All filters are applied at the CycleItem level and cascade up through
  * the hierarchy using functional composition.
  */
 
@@ -11,12 +11,12 @@ import type {
   FilterCriteria,
   NestedCycleData,
   FilterResult,
-  InitiativeWithProgress,
+  ObjectiveWithProgress,
 } from "../../types/ui-types";
-import type { ReleaseItem } from "@headnorth/types";
+import type { CycleItem } from "@headnorth/types";
 import type {
   AreaId,
-  InitiativeId,
+  ObjectiveId,
   StageId,
   PersonId,
   CycleId,
@@ -27,8 +27,8 @@ import type {
  * Pure filtering functions for NestedCycleData
  *
  * The filter works by:
- * 1. Applying filters at the ReleaseItem level (lowest level)
- * 2. Cascading results up through RoadmapItem -> Initiative
+ * 1. Applying filters at the CycleItem level (lowest level)
+ * 2. Cascading results up through RoadmapItem -> Objective
  * 3. Removing empty containers at each level
  */
 
@@ -43,23 +43,23 @@ function applyFilter(
   data: NestedCycleData,
   criteria: FilterCriteria,
 ): FilterResult {
-  if (!data?.initiatives) {
+  if (!data?.objectives) {
     return {
-      data: { initiatives: [] },
+      data: { objectives: [] },
       appliedFilters: criteria,
-      totalInitiatives: 0,
+      totalObjectives: 0,
       totalRoadmapItems: 0,
-      totalReleaseItems: 0,
+      totalCycleItems: 0,
     };
   }
 
-  // Filter initiatives, which will cascade down to roadmap items and release items
-  const filteredInitiatives = data.initiatives
-    .map((initiative) => filterInitiative(initiative, criteria))
-    .filter((initiative) => initiative.roadmapItems.length > 0);
+  // Filter objectives, which will cascade down to roadmap items and cycle items
+  const filteredObjectives = data.objectives
+    .map((objective) => filterObjective(objective, criteria))
+    .filter((objective) => objective.roadmapItems.length > 0);
 
   const filteredData: NestedCycleData = {
-    initiatives: filteredInitiatives,
+    objectives: filteredObjectives,
   };
 
   // Count filtered data for metadata
@@ -68,85 +68,85 @@ function applyFilter(
   return {
     data: filteredData,
     appliedFilters: criteria,
-    totalInitiatives: filteredCounts.initiatives,
+    totalObjectives: filteredCounts.objectives,
     totalRoadmapItems: filteredCounts.roadmapItems,
-    totalReleaseItems: filteredCounts.releaseItems,
+    totalCycleItems: filteredCounts.cycleItems,
   };
 }
 
 /**
- * Filter a single initiative and its nested data
+ * Filter a single objective and its nested data
  */
-function filterInitiative(
-  initiative: InitiativeWithProgress,
+function filterObjective(
+  objective: ObjectiveWithProgress,
   criteria: FilterCriteria,
-): InitiativeWithProgress {
-  // Check if this initiative matches the initiative filter using Maybe
+): ObjectiveWithProgress {
+  // Check if this objective matches the objective filter using Maybe
   // Empty array means "no filter" - treat same as undefined/null
-  const initiativeMatches = Maybe.fromNullable(criteria.initiatives)
-    .filter((initiatives) => initiatives.length > 0) // Only apply filter if array has items
-    .map((initiatives) => initiatives.includes(initiative.id))
+  const objectiveMatches = Maybe.fromNullable(criteria.objectives)
+    .filter((objectives) => objectives.length > 0) // Only apply filter if array has items
+    .map((objectives) => objectives.includes(objective.id))
     .orDefault(true); // If empty array or undefined, include all (no filter)
 
-  if (!initiativeMatches) {
-    // Return empty initiative if it doesn't match the filter
+  if (!objectiveMatches) {
+    // Return empty objective if it doesn't match the filter
     return {
-      ...initiative,
+      ...objective,
       roadmapItems: [],
     };
   }
 
-  // Filter roadmap items within this initiative
-  const filteredRoadmapItems = initiative.roadmapItems
+  // Filter roadmap items within this objective
+  const filteredRoadmapItems = objective.roadmapItems
     .map((roadmapItem) => filterRoadmapItem(roadmapItem, criteria))
     .filter((roadmapItem) => {
       // Keep roadmap items that either:
-      // 1. Have matching release items, OR
-      // 2. Match the area filter directly (even if no release items match)
-      const hasMatchingReleaseItems = roadmapItem.releaseItems.length > 0;
+      // 1. Have matching cycle items, OR
+      // 2. Match the area filter directly (even if no cycle items match)
+      const hasMatchingCycleItems = roadmapItem.cycleItems.length > 0;
       const matchesAreaDirectly = Maybe.fromNullable(criteria.area)
         .filter((area) => area !== "all")
         .map((area) => roadmapItemMatchesArea(roadmapItem, area))
         .orDefault(false);
 
-      return hasMatchingReleaseItems || matchesAreaDirectly;
+      return hasMatchingCycleItems || matchesAreaDirectly;
     });
 
-  // If area filter is applied and no roadmap items match, hide the entire initiative
-  const shouldHideInitiative = Maybe.fromNullable(criteria.area)
+  // If area filter is applied and no roadmap items match, hide the entire objective
+  const shouldHideObjective = Maybe.fromNullable(criteria.area)
     .filter((area) => area !== "all")
     .map(() => filteredRoadmapItems.length === 0)
     .orDefault(false);
 
-  if (shouldHideInitiative) {
+  if (shouldHideObjective) {
     return {
-      ...initiative,
+      ...objective,
       roadmapItems: [],
     };
   }
 
   return {
-    ...initiative,
+    ...objective,
     roadmapItems: filteredRoadmapItems,
   };
 }
 
 /**
- * Filter a single roadmap item and its nested release items
+ * Filter a single roadmap item and its nested cycle items
  */
 function filterRoadmapItem(
   roadmapItem: RoadmapItem,
   criteria: FilterCriteria,
 ): RoadmapItem {
-  // Filter release items within this roadmap item
-  const filteredReleaseItems = roadmapItem.releaseItems.filter((releaseItem) =>
-    matchesAllCriteria(releaseItem, criteria),
+  // Filter cycle items within this roadmap item
+  const filteredCycleItems = roadmapItem.cycleItems.filter((cycleItem) =>
+    matchesAllCriteria(cycleItem, criteria),
   );
 
   // Check if roadmap item should be included based on area filter
   const shouldIncludeRoadmapItem = shouldIncludeRoadmapItemCheck(
     roadmapItem,
-    filteredReleaseItems,
+    filteredCycleItems,
     criteria,
   );
 
@@ -159,35 +159,35 @@ function filterRoadmapItem(
         Maybe.fromNullable(roadmapItem.validations)
           .map((vals) => vals.length)
           .orDefault(0) > 0;
-      const hasReleaseItemValidationErrors = filteredReleaseItems.some(
+      const hasCycleItemValidationErrors = filteredCycleItems.some(
         (item) =>
           Maybe.fromNullable(item.validations)
             .map((vals) => vals.length)
             .orDefault(0) > 0,
       );
 
-      return hasRoadmapValidationErrors || hasReleaseItemValidationErrors;
+      return hasRoadmapValidationErrors || hasCycleItemValidationErrors;
     })
     .orDefault(true);
 
   if (!hasValidationErrors) {
     return {
       ...roadmapItem,
-      releaseItems: [],
+      cycleItems: [],
     };
   }
 
-  // If roadmap item should not be included, return it with empty release items
+  // If roadmap item should not be included, return it with empty cycle items
   if (!shouldIncludeRoadmapItem) {
     return {
       ...roadmapItem,
-      releaseItems: [],
+      cycleItems: [],
     };
   }
 
   return {
     ...roadmapItem,
-    releaseItems: filteredReleaseItems,
+    cycleItems: filteredCycleItems,
   };
 }
 
@@ -196,7 +196,7 @@ function filterRoadmapItem(
  */
 function shouldIncludeRoadmapItemCheck(
   roadmapItem: RoadmapItem,
-  filteredReleaseItems: readonly ReleaseItem[],
+  filteredCycleItems: readonly CycleItem[],
   criteria: FilterCriteria,
 ): boolean {
   // If no area filter is applied, include the roadmap item
@@ -204,8 +204,8 @@ function shouldIncludeRoadmapItemCheck(
   return Maybe.fromNullable(criteria.area)
     .filter((area) => area !== "all")
     .map((areaFilter) => {
-      // Rule 1: Include if there are matching release items
-      if (filteredReleaseItems.length > 0) {
+      // Rule 1: Include if there are matching cycle items
+      if (filteredCycleItems.length > 0) {
         return true;
       }
 
@@ -214,7 +214,7 @@ function shouldIncludeRoadmapItemCheck(
         return true;
       }
 
-      // Rule 3: Exclude if neither release items nor roadmap item match
+      // Rule 3: Exclude if neither cycle items nor roadmap item match
       return false;
     })
     .orDefault(true); // If no area filter, include by default
@@ -249,16 +249,16 @@ function roadmapItemMatchesArea(
 }
 
 /**
- * Check if a release item matches all filter criteria
+ * Check if a cycle item matches all filter criteria
  */
 function matchesAllCriteria(
-  releaseItem: ReleaseItem,
+  cycleItem: CycleItem,
   criteria: FilterCriteria,
 ): boolean {
   // Area filter - empty string or "all" means no filter
   const areaMatch = Maybe.fromNullable(criteria.area)
     .filter((area) => area !== "all" && area !== "")
-    .map((area) => matchesArea(releaseItem, area))
+    .map((area) => matchesArea(cycleItem, area))
     .orDefault(true);
 
   if (!areaMatch) return false;
@@ -266,7 +266,7 @@ function matchesAllCriteria(
   // Stage filter - empty array means no filter
   const stageMatch = Maybe.fromNullable(criteria.stages)
     .filter((stages) => stages.length > 0)
-    .map((stages) => matchesStages(releaseItem, stages))
+    .map((stages) => matchesStages(cycleItem, stages))
     .orDefault(true);
 
   if (!stageMatch) return false;
@@ -274,7 +274,7 @@ function matchesAllCriteria(
   // Assignee filter - empty array means no filter
   const assigneeMatch = Maybe.fromNullable(criteria.assignees)
     .filter((assignees) => assignees.length > 0)
-    .map((assignees) => matchesAssignees(releaseItem, assignees))
+    .map((assignees) => matchesAssignees(cycleItem, assignees))
     .orDefault(true);
 
   if (!assigneeMatch) return false;
@@ -282,7 +282,7 @@ function matchesAllCriteria(
   // Cycle filter
   const cycleMatch = Maybe.fromNullable(criteria.cycle)
     .filter((cycle) => cycle !== "all")
-    .map((cycle) => matchesCycle(releaseItem, cycle))
+    .map((cycle) => matchesCycle(cycleItem, cycle))
     .orDefault(true);
 
   if (!cycleMatch) return false;
@@ -292,7 +292,7 @@ function matchesAllCriteria(
     .map((showErrors) => {
       if (!showErrors) return true;
       return (
-        Maybe.fromNullable(releaseItem.validations)
+        Maybe.fromNullable(cycleItem.validations)
           .map((vals) => vals.length)
           .orDefault(0) > 0
       );
@@ -305,11 +305,11 @@ function matchesAllCriteria(
 }
 
 /**
- * Check if release item matches area filter
+ * Check if cycle item matches area filter
  */
-function matchesArea(releaseItem: ReleaseItem, area: AreaId): boolean {
-  // Check areaIds array (primary field for release items)
-  const areaIdsMatch = Maybe.fromNullable(releaseItem.areaIds)
+function matchesArea(cycleItem: CycleItem, area: AreaId): boolean {
+  // Check areaIds array (primary field for cycle items)
+  const areaIdsMatch = Maybe.fromNullable(cycleItem.areaIds)
     .filter(Array.isArray)
     .map((areaIds) => areaIds.includes(area))
     .orDefault(false);
@@ -317,7 +317,7 @@ function matchesArea(releaseItem: ReleaseItem, area: AreaId): boolean {
   if (areaIdsMatch) return true;
 
   // Fallback to area field if areaIds doesn't exist
-  return Maybe.fromNullable(releaseItem.area)
+  return Maybe.fromNullable(cycleItem.area)
     .map((areaValue) => {
       // Handle string area
       if (typeof areaValue === "string") {
@@ -335,25 +335,25 @@ function matchesArea(releaseItem: ReleaseItem, area: AreaId): boolean {
 }
 
 /**
- * Check if release item matches stage filter
+ * Check if cycle item matches stage filter
  */
 function matchesStages(
-  releaseItem: ReleaseItem,
+  cycleItem: CycleItem,
   stages: readonly StageId[],
 ): boolean {
-  return Maybe.fromNullable(releaseItem.stage)
+  return Maybe.fromNullable(cycleItem.stage)
     .map((stage) => stages.includes(stage as StageId))
     .orDefault(false);
 }
 
 /**
- * Check if release item matches assignee filter
+ * Check if cycle item matches assignee filter
  */
 function matchesAssignees(
-  releaseItem: ReleaseItem,
+  cycleItem: CycleItem,
   assignees: readonly PersonId[],
 ): boolean {
-  return Maybe.fromNullable(releaseItem.assignee)
+  return Maybe.fromNullable(cycleItem.assignee)
     .chain((assignee) => {
       // Handle Person object - check for both 'id' and 'accountId' fields
       if (typeof assignee === "object" && assignee !== null) {
@@ -389,61 +389,61 @@ function matchesAssignees(
 }
 
 /**
- * Check if release item matches cycle filter
+ * Check if cycle item matches cycle filter
  */
-function matchesCycle(releaseItem: ReleaseItem, cycle: CycleId): boolean {
-  return Maybe.fromNullable(releaseItem.cycleId)
+function matchesCycle(cycleItem: CycleItem, cycle: CycleId): boolean {
+  return Maybe.fromNullable(cycleItem.cycleId)
     .map((cycleId) => cycleId === cycle)
     .orDefault(false);
 }
 
 /**
- * Check if initiative matches initiative filter
+ * Check if objective matches objective filter
  */
-function matchesInitiatives(
-  initiative: InitiativeWithProgress,
-  initiatives: readonly InitiativeId[],
+function matchesObjectives(
+  objective: ObjectiveWithProgress,
+  objectives: readonly ObjectiveId[],
 ): boolean {
-  return initiatives.includes(initiative.id);
+  return objectives.includes(objective.id);
 }
 
 /**
  * Count data items for metadata
  */
 function countData(data: NestedCycleData): {
-  initiatives: number;
+  objectives: number;
   roadmapItems: number;
-  releaseItems: number;
+  cycleItems: number;
 } {
-  const roadmapItems = data.initiatives.flatMap((init) => init.roadmapItems);
-  const releaseItems = roadmapItems.flatMap((item) => item.releaseItems);
+  const roadmapItems = data.objectives.flatMap((obj) => obj.roadmapItems);
+  const cycleItems = roadmapItems.flatMap((item) => item.cycleItems);
 
   return {
-    initiatives: data.initiatives.length,
+    objectives: data.objectives.length,
     roadmapItems: roadmapItems.length,
-    releaseItems: releaseItems.length,
+    cycleItems: cycleItems.length,
   };
 }
 
 /**
- * Apply initiative filter at the initiative level
- * This is a special case since initiatives are at the top level
+ * Apply objective filter at the objective level
+ * This is a special case since objectives are at the top level
  */
-function applyInitiativeFilter(
+function applyObjectiveFilter(
   data: NestedCycleData,
-  initiatives: readonly InitiativeId[],
+  objectives: readonly ObjectiveId[],
 ): NestedCycleData {
-  if (!initiatives || initiatives.length === 0) {
+  if (!objectives || objectives.length === 0) {
     return data;
   }
 
-  const filteredInitiatives = data.initiatives.filter((initiative) =>
-    matchesInitiatives(initiative, initiatives),
+  const filteredObjectives = data.objectives.filter((objective) =>
+    matchesObjectives(objective, objectives),
   );
 
   return {
     ...data,
-    initiatives: filteredInitiatives,
+    objectives: filteredObjectives,
   };
 }
 
@@ -453,11 +453,11 @@ export class Filter {
     return applyFilter(data, criteria);
   }
 
-  applyInitiativeFilter(
+  applyObjectiveFilter(
     data: NestedCycleData,
-    initiatives: readonly InitiativeId[],
+    objectives: readonly ObjectiveId[],
   ): NestedCycleData {
-    return applyInitiativeFilter(data, initiatives);
+    return applyObjectiveFilter(data, objectives);
   }
 }
 
@@ -467,14 +467,14 @@ export const filter = new Filter();
 // Export pure functions for direct use
 export {
   applyFilter,
-  filterInitiative,
+  filterObjective,
   filterRoadmapItem,
   matchesAllCriteria,
   matchesArea,
   matchesStages,
   matchesAssignees,
   matchesCycle,
-  matchesInitiatives,
+  matchesObjectives,
   countData,
-  applyInitiativeFilter,
+  applyObjectiveFilter,
 };
