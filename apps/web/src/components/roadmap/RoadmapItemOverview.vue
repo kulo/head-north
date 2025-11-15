@@ -9,7 +9,7 @@
         </div>
         <div v-if="hasValidationError">
           <a-tooltip :title="validationErrorText" placement="bottom">
-            <span class="gtm-validation">Release not scheduled yet</span>
+            <span class="gtm-validation">Cycle not scheduled yet</span>
           </a-tooltip>
         </div>
       </a-col>
@@ -17,25 +17,25 @@
         v-for="cycle in orderedCycles"
         :key="cycle.id"
         :span="4"
-        class="cycle-release-items"
+        class="cycle-cycle-items"
       >
-        <template v-if="getReleaseItemsForCycle(cycle.id).length > 0">
+        <template v-if="getCycleItemsForCycle(cycle.id).length > 0">
           <div
-            v-for="releaseItem in getReleaseItemsForCycle(cycle.id)"
-            :key="releaseItem.id"
-            class="release-item"
+            v-for="cycleItem in getCycleItemsForCycle(cycle.id)"
+            :key="cycleItem.id"
+            class="cycle-item"
           >
-            <a :href="releaseItem.url" class="jira-link" target="_blank">
-              {{ releaseItem.name }}
+            <a :href="cycleItem.url" class="jira-link" target="_blank">
+              {{ cycleItem.name }}
             </a>
             <span
-              v-if="releaseItem.stage"
+              v-if="cycleItem.stage"
               :class="{
-                [releaseItem.stage]: true,
-                'project-popover__release-item__stage': true,
+                [cycleItem.stage]: true,
+                'project-popover__cycle-item__stage': true,
               }"
             >
-              {{ releaseItem.stage }}
+              {{ cycleItem.stage }}
             </span>
           </div>
         </template>
@@ -50,7 +50,7 @@ import {
   hasValidationError,
   getValidationErrorText,
 } from "../../lib/utils/roadmap-validation";
-import { getReleaseItemsForCycle } from "../../lib/utils/roadmap-item-utils";
+import { getCycleItemsForCycle } from "../../lib/utils/roadmap-item-utils";
 
 export default {
   name: "roadmap-item-overview",
@@ -66,15 +66,15 @@ export default {
     );
 
     // Use pure function instead of store method
-    const getReleaseItemsForCycleFn = (cycleId) => {
-      return getReleaseItemsForCycle(props.roadmapItem, cycleId);
+    const getCycleItemsForCycleFn = (cycleId) => {
+      return getCycleItemsForCycle(props.roadmapItem, cycleId);
     };
 
     return {
       validations,
       hasValidationError: hasValidationErrorComputed,
       validationErrorText: validationErrorTextComputed,
-      getReleaseItemsForCycle: getReleaseItemsForCycleFn,
+      getCycleItemsForCycle: getCycleItemsForCycleFn,
     };
   },
 };

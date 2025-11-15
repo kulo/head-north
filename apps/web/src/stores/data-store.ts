@@ -32,7 +32,7 @@ export const useDataStore = defineStore("data", () => {
   const hasRawData = computed(() => rawData.value !== null);
   const hasProcessedData = computed(() => processedData.value !== null);
 
-  const initiatives = computed(() => processedData.value?.initiatives || []);
+  const objectives = computed(() => processedData.value?.objectives || []);
   const areas = computed(() => rawData.value?.areas || []);
   const assignees = computed(() => rawData.value?.assignees || []);
   const stages = computed(() => rawData.value?.stages || []);
@@ -53,7 +53,7 @@ export const useDataStore = defineStore("data", () => {
     console.log("🔍 Computing roadmapData:", {
       hasProcessedData: !!processedData.value,
       hasRawData: !!rawData.value,
-      processedDataInitiatives: processedData.value?.initiatives?.length || 0,
+      processedDataObjectives: processedData.value?.objectives?.length || 0,
       rawDataCycles: rawData.value?.cycles?.length || 0,
     });
 
@@ -63,7 +63,7 @@ export const useDataStore = defineStore("data", () => {
         orderedCycles: [],
         roadmapItems: [],
         activeCycle: null,
-        initiatives: [],
+        objectives: [],
       };
     }
 
@@ -71,11 +71,11 @@ export const useDataStore = defineStore("data", () => {
       orderedCycles: rawData.value?.cycles || [],
       roadmapItems: [],
       activeCycle: selectDefaultCycle(rawData.value?.cycles || []),
-      initiatives: processedData.value.initiatives || [],
+      objectives: processedData.value.objectives || [],
     };
 
     console.log("✅ roadmapData computed:", {
-      initiativesCount: result.initiatives.length,
+      objectivesCount: result.objectives.length,
       cyclesCount: result.orderedCycles.length,
       hasActiveCycle: !!result.activeCycle,
     });
@@ -105,7 +105,7 @@ export const useDataStore = defineStore("data", () => {
         orderedCycles: [],
         roadmapItems: [],
         activeCycle: null,
-        initiatives: [],
+        objectives: [],
       };
     }
 
@@ -116,7 +116,7 @@ export const useDataStore = defineStore("data", () => {
       );
 
       console.log("✅ filteredRoadmapData computed:", {
-        initiativesCount: filtered.initiatives?.length || 0,
+        objectivesCount: filtered.objectives?.length || 0,
         cyclesCount: filtered.orderedCycles?.length || 0,
         hasActiveCycle: !!filtered.activeCycle,
       });
@@ -139,7 +139,7 @@ export const useDataStore = defineStore("data", () => {
     }
     return {
       cycle: selectedCycle,
-      initiatives: processedData.value.initiatives || [],
+      objectives: processedData.value.objectives || [],
     };
   });
 
@@ -172,7 +172,7 @@ export const useDataStore = defineStore("data", () => {
 
       console.log("✅ filteredCycleOverviewData computed:", {
         hasCycle: !!filtered?.cycle,
-        initiativesCount: filtered?.initiatives?.length || 0,
+        objectivesCount: filtered?.objectives?.length || 0,
       });
 
       return filtered;
@@ -214,7 +214,7 @@ export const useDataStore = defineStore("data", () => {
         // Extract and perform side effects (logging, storing)
         console.log("Raw data received", {
           roadmapItems: cycleData.roadmapItems?.length || 0,
-          releaseItems: cycleData.releaseItems?.length || 0,
+          cycleItems: cycleData.cycleItems?.length || 0,
           cycles: cycleData.cycles?.length || 0,
         });
         setRawData(cycleData);
@@ -236,7 +236,7 @@ export const useDataStore = defineStore("data", () => {
       },
       Right: (processed) => {
         console.log("Data processed successfully", {
-          initiatives: processed.initiatives?.length || 0,
+          objectives: processed.objectives?.length || 0,
         });
 
         // Store processed data
@@ -261,7 +261,7 @@ export const useDataStore = defineStore("data", () => {
     // Getters
     hasRawData,
     hasProcessedData,
-    initiatives,
+    objectives,
     areas,
     assignees,
     stages,

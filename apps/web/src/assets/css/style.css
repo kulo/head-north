@@ -334,19 +334,19 @@ body {
 /* Override specific colored elements to maintain their intended colors */
 .ant-popover.roadmap-popover .roadmap-popover__header__owner,
 .ant-popover.roadmap-popover .roadmap-popover__header__weeks,
-.ant-popover.roadmap-popover .roadmap-popover__release-item__effort {
+.ant-popover.roadmap-popover .roadmap-popover__cycle-item__effort {
   color: var(--color-info) !important;
 }
 
-.ant-popover.roadmap-popover .roadmap-popover__release-item__validation {
+.ant-popover.roadmap-popover .roadmap-popover__cycle-item__validation {
   color: var(--color-error) !important;
 }
 
-.ant-popover.roadmap-popover .roadmap-popover__release-item__warning {
+.ant-popover.roadmap-popover .roadmap-popover__cycle-item__warning {
   color: var(--color-warning) !important;
 }
 
-.ant-popover.roadmap-popover .roadmap-popover__release-item__release_narrative {
+.ant-popover.roadmap-popover .roadmap-popover__cycle-item__release_narrative {
   color: var(--color-gray-600) !important;
 }
 
@@ -437,14 +437,14 @@ body {
   background: var(--color-gray-900) !important;
 }
 
-.roadmap-popover__release-items {
+.roadmap-popover__cycle-items {
   background: var(--color-background);
   color: var(--color-text-primary);
   padding: 0;
   overflow: visible;
 }
 
-.roadmap-popover__release-item {
+.roadmap-popover__cycle-item {
   background: var(--color-background);
   color: var(--color-text-primary);
   min-height: 20px;
@@ -453,18 +453,18 @@ body {
   font-weight: bold;
 }
 
-.roadmap-popover__release-item:last-child {
+.roadmap-popover__cycle-item:last-child {
   margin-bottom: 0;
 }
 
-.roadmap-popover__release-item__name {
+.roadmap-popover__cycle-item__name {
   width: calc(100% - 160px);
   word-break: normal;
   text-align: left;
   color: var(--color-text-primary);
 }
 
-.roadmap-popover__release-item__effort {
+.roadmap-popover__cycle-item__effort {
   width: 70px;
   position: absolute;
   right: 80px;
@@ -472,7 +472,7 @@ body {
   color: var(--color-info);
 }
 
-.roadmap-popover__release-item__stage {
+.roadmap-popover__cycle-item__stage {
   background: var(--color-gray-600);
   border: 1px solid var(--color-gray-600);
   border-radius: 8px;
@@ -493,25 +493,25 @@ body {
   text-overflow: ellipsis;
 }
 
-.roadmap-popover__release-item__validation {
+.roadmap-popover__cycle-item__validation {
   color: var(--color-error);
   padding: 2px;
   margin-top: 4px;
 }
 
-.roadmap-popover__release-item__release_narrative {
+.roadmap-popover__cycle-item__release_narrative {
   color: var(--color-gray-600);
   /*padding: 2px;*/
   /*margin-top: 4px;*/
 }
 
-.roadmap-popover__release-item__warning {
+.roadmap-popover__cycle-item__warning {
   color: var(--color-warning);
   /*padding: 2px;*/
   /*margin-top: 4px;*/
 }
 
-.release-item-container-column__project__title .roadmap-popover__release-item__validation {
+.cycle-item-container-column__project__title .roadmap-popover__cycle-item__validation {
   margin-top: 0;
   padding: 0;
 }
@@ -531,7 +531,7 @@ body {
   color: var(--color-highlight);
 }
 
-.roadmap-popover__release-item__status {
+.roadmap-popover__cycle-item__status {
   width: 70px;
   position: absolute;
   right: 70px;
@@ -541,25 +541,25 @@ body {
   font-size: 11px;
 }
 
-.roadmap-popover__release-item.health-bad .roadmap-popover__release-item__status,
+.roadmap-popover__cycle-item.health-bad .roadmap-popover__cycle-item__status,
 .roadmap-popover.health-bad .roadmap-popover__header__progress {
   color: var(--color-error);
 }
 
-.roadmap-popover__release-item.health-normal .roadmap-popover__release-item__status {
+.roadmap-popover__cycle-item.health-normal .roadmap-popover__cycle-item__status {
   color: var(--color-text-primary);
 }
 
-.roadmap-popover__release-item.health-good .roadmap-popover__release-item__status {
+.roadmap-popover__cycle-item.health-good .roadmap-popover__cycle-item__status {
   color: var(--color-highlight);
 }
 
-.roadmap-popover__release-item.health-best .roadmap-popover__release-item__status,
+.roadmap-popover__cycle-item.health-best .roadmap-popover__cycle-item__status,
 .roadmap-popover.health-good .roadmap-popover__header__progress {
   color: var(--color-highlight);
 }
 
-.roadmap-popover__release-item.health-forget .roadmap-popover__release-item__status {
+.roadmap-popover__cycle-item.health-forget .roadmap-popover__cycle-item__status {
   color: var(--color-info);
 }
 
@@ -695,7 +695,7 @@ body {
   color: var(--color-text-primary) !important;
 }
 
-/* PageSelector Dropdown Styling - Match InitiativeSelector */
+/* PageSelector Dropdown Styling - Match ObjectiveSelector */
 .page-selector .ant-dropdown {
   background-color: var(--color-gray-900) !important;
   border-color: var(--color-gray-600) !important;
@@ -844,7 +844,7 @@ body {
   outline: 0;
 }
 
-.release-item-container {
+.cycle-item-container {
   height: auto;
   align-items: center;
   justify-content: center;
@@ -852,7 +852,7 @@ body {
   display: flex;
 }
 
-.release-item-container-column {
+.cycle-item-container-column {
   column-count: 3;
   column-gap: 50px;
   column-width: 300px;
@@ -861,8 +861,8 @@ body {
   padding-right: 30px;
 }
 
-.release-item-container-column__initiative,
-.release-item-container-column__project {
+.cycle-item-container-column__objective,
+.cycle-item-container-column__project {
   color: var(--color-yellow-950);
   align-items: center;
   display: flex;
@@ -875,25 +875,25 @@ body {
   border-radius: 6px;
 }
 
-.overview-page .release-item-container-column__initiative,
-.overview-page .release-item-container-column__project {
+.overview-page .cycle-item-container-column__objective,
+.overview-page .cycle-item-container-column__project {
   height: 65px;
 }
 
-.release-item-container-column__project {
+.cycle-item-container-column__project {
   cursor: pointer;
 }
 
-.release-item-container-column__project,
-.release-item-container-column__project * {
+.cycle-item-container-column__project,
+.cycle-item-container-column__project * {
   outline: none !important;
 }
 
-.release-item-container-column__project__internal {
+.cycle-item-container-column__project__internal {
   padding: 0;
 }
 
-.release-item-container-column__initiative {
+.cycle-item-container-column__objective {
   background: var(--color-gray-900);
   font-size: 18px;
   height: 47px;
@@ -905,18 +905,18 @@ body {
   text-shadow: 1px 1px rgba(0, 0, 0, 1);
 }
 
-.overview-page .release-item-container-column__initiative {
+.overview-page .cycle-item-container-column__objective {
   height: 52px;
   margin-bottom: 10px;
 }
 
-.release-item-container-column__initiative__name {
+.cycle-item-container-column__objective__name {
   width: calc(100% - 50px);
   float: left;
   font-weight: bold;
 }
 
-.release-item-container-column__initiative__percentage {
+.cycle-item-container-column__objective__percentage {
   float: right;
   width: 50px;
   text-align: right;
@@ -928,7 +928,7 @@ body {
   margin: 6px;
 }
 
-#roadmaps .roadmap-initiative-header-row {
+#roadmaps .roadmap-objective-header-row {
   margin: 6px;
   border-radius: 6px;
   height: 60px;
@@ -938,7 +938,7 @@ body {
   width: calc(100% - 12px);
 }
 
-#roadmaps .roadmap-initiative-header-cycle {
+#roadmaps .roadmap-objective-header-cycle {
   text-align: center;
   color: var(--color-yellow-950);
   height: 100%;
@@ -947,13 +947,13 @@ body {
   justify-content: center;
 }
 
-#roadmaps .roadmap-initiative-header-name {
+#roadmaps .roadmap-objective-header-name {
   color: var(--color-yellow-950);
   font-weight: bold;
   padding: 0 12px;
 }
 
-.release-item-container-column__project__title {
+.cycle-item-container-column__project__title {
   height: 15px;
   white-space: nowrap;
   overflow: hidden;
@@ -962,14 +962,14 @@ body {
   display: inline-block;
 }
 
-.release-item-container-column__project__area {
+.cycle-item-container-column__project__area {
  font-size: 11px;
  color: var(--color-info);
  opacity: .6;
  padding-bottom: 1px;
 }
 
-.release-item-container-column__project__release-item-counts {
+.cycle-item-container-column__project__cycle-item-counts {
   width: 100px;
   height: 15px;
   display: inline-block;
@@ -1062,7 +1062,7 @@ body {
   margin-right: 3px;
 }
 
-.global-initiatives {
+.global-objectives {
     background: transparent;
     margin: 0;
     border-bottom: none;
@@ -1072,7 +1072,7 @@ body {
     align-items: stretch;
 }
 
-.global-initiatives__container, .global-initiatives__progress {
+.global-objectives__container, .global-objectives__progress {
     height: auto;
     min-height: 300px;
     position: relative;
@@ -1083,7 +1083,7 @@ body {
     padding: 20px;
 }
 
-.global-initiatives__container {
+.global-objectives__container {
     margin-right: 10px;
     flex: 1;
     display: flex;
@@ -1091,14 +1091,14 @@ body {
     align-items: flex-start;
 }
 
-.global-initiatives__progress {
+.global-objectives__progress {
     margin-left: 10px;
     flex: 1;
     padding: 20px;
     box-sizing: border-box;
 }
 
-.global-initiatives__chart-container {
+.global-objectives__chart-container {
     width: 300px;
     height: 300px;
     position: relative;
@@ -1106,7 +1106,7 @@ body {
     flex-shrink: 0;
 }
 
-.global-initiatives__details {
+.global-objectives__details {
     position: relative;
     left: 0;
     top: 0;
@@ -1115,57 +1115,57 @@ body {
     flex: 1;
 }
 
-.global-initiatives__details.global-initiatives__details-1 {
+.global-objectives__details.global-objectives__details-1 {
     top: 118px;
 }
 
-.global-initiatives__details.global-initiatives__details-2 {
+.global-objectives__details.global-objectives__details-2 {
     top: 80px;
 }
 
-.global-initiatives__details.global-initiatives__details-3 {
+.global-objectives__details.global-objectives__details-3 {
     top: 45px;
 }
 
-.global-initiatives__details.global-initiatives__details-4 {
+.global-objectives__details.global-objectives__details-4 {
     top: 21px;
 }
 
-.global-initiatives__details.global-initiatives__details-gt4 {
+.global-objectives__details.global-objectives__details-gt4 {
     top: 21px;
     width: calc(100% - 300px);
 }
 
-.global-initiatives__details__title {
+.global-objectives__details__title {
     font-size: 24px;
     font-weight: bold;
 }
 
-.global-initiatives__detail {
+.global-objectives__detail {
     padding: 12px 0;
 }
 
-.global-initiatives__details-1 .global-initiatives__detail {
+.global-objectives__details-1 .global-objectives__detail {
     padding: 12px 0;
 }
 
-.global-initiatives__details-2 .global-initiatives__detail {
+.global-objectives__details-2 .global-objectives__detail {
     padding: 12px 0;
 }
 
-.global-initiatives__details-3 .global-initiatives__detail {
+.global-objectives__details-3 .global-objectives__detail {
     padding: 12px 0;
 }
 
-.global-initiatives__details-4 .global-initiatives__detail {
+.global-objectives__details-4 .global-objectives__detail {
     padding: 8px 0;
 }
 
-.global-initiatives__details-gt4 .global-initiatives__detail {
+.global-objectives__details-gt4 .global-objectives__detail {
     padding: 8px 0;
 }
 
-.global-initiatives__detail .global-initiatives__detail__progress:before {
+.global-objectives__detail .global-objectives__detail__progress:before {
     content: '';
     display: inline-block;
     width: 20px;
@@ -1176,122 +1176,122 @@ body {
     top: 1px;
 }
 
-.global-initiatives__details-gt4 .global-initiatives__detail .global-initiatives__detail__progress:before {
+.global-objectives__details-gt4 .global-objectives__detail .global-objectives__detail__progress:before {
   top: 3px;
 }
 
-.global-initiatives__details-gt4 > div {
+.global-objectives__details-gt4 > div {
   column-count: 2;
   column-gap: 20px;
   column-fill: auto;
   height: 285px;
 }
 
-.global-initiatives__details-gt4 .global-initiatives__detail {
+.global-objectives__details-gt4 .global-objectives__detail {
   -webkit-column-break-inside: avoid-column;
   page-break-inside: avoid-column;
   break-inside: avoid-column;
 }
 
-.global-initiatives__detail:nth-child(1) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(1) .global-objectives__detail__progress:before {
     background: var(--color-highlight);
 }
 
-.global-initiatives__detail:nth-child(2) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(2) .global-objectives__detail__progress:before {
     background: var(--color-info);
 }
 
-.global-initiatives__detail:nth-child(3) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(3) .global-objectives__detail__progress:before {
     background: var(--color-gray-500);
 }
 
-.global-initiatives__detail:nth-child(4) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(4) .global-objectives__detail__progress:before {
   background: var(--color-gray-600);
 }
 
-.global-initiatives__detail:nth-child(5) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(5) .global-objectives__detail__progress:before {
   background: var(--color-gray-600);
 }
 
-.global-initiatives__detail:nth-child(6) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(6) .global-objectives__detail__progress:before {
   background: var(--color-gray-500);
 }
 
-.global-initiatives__detail:nth-child(7) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(7) .global-objectives__detail__progress:before {
   background: var(--color-warning);
 }
 
-.global-initiatives__detail:nth-child(8) .global-initiatives__detail__progress:before {
+.global-objectives__detail:nth-child(8) .global-objectives__detail__progress:before {
   background: var(--color-gray-300);
 }
 
-.global-initiatives__detail__name {
+.global-objectives__detail__name {
     font-size: 15px;
     color: var(--color-info);
     margin-top: 1px;
     margin-left: 33px;
 }
 
-.global-initiatives__details-gt4 .global-initiatives__detail__name {
+.global-objectives__details-gt4 .global-objectives__detail__name {
   font-size: 15px;
 }
 
-.global-initiatives__detail__progress {
+.global-objectives__detail__progress {
     display: inline-block;
     margin-left: 2px;
     font-size: 24px;
 }
 
-.global-initiatives__details-gt4 .global-initiatives__detail__progress {
+.global-objectives__details-gt4 .global-objectives__detail__progress {
   font-size: 20px;
 }
 
-.global-initiatives__detail__weeks {
+.global-objectives__detail__weeks {
     color: var(--color-info);
     display: inline-block;
     font-size: 12px;
     opacity: .6;
 }
 
-.global-initiatives__progress__row {
+.global-objectives__progress__row {
     position: relative;
 }
 
-.global-initiatives__progress__big-container {
+.global-objectives__progress__big-container {
     text-align: center;
 }
 
-.global-initiatives__progress__big {
+.global-objectives__progress__big {
     font-size: 50px;
     line-height: 50px;
     font-weight: bold;
     color: var(--color-highlight)
 }
 
-.global-initiatives__progress__big-title {
+.global-objectives__progress__big-title {
     font-size: 18px;
     color: var(--color-info);
 }
 
-.global-initiatives__progress-gt4 .global-initiatives__progress__big-title {
+.global-objectives__progress-gt4 .global-objectives__progress__big-title {
   font-size: 17px;
 }
 
-.global-initiatives__progress__value-container {
+.global-objectives__progress__value-container {
     text-align: center;
 }
 
-.global-initiatives__progress__bar {
+.global-objectives__progress__bar {
     width: 100%;
     height: 20px;
     margin-top: 27px;
     position: relative;
 }
 
-.global-initiatives__progress__bar .global-initiatives__progress__bar_inprogress,
-.global-initiatives__progress__bar .global-initiatives__progress__bar_done,
-.global-initiatives__progress__bar .global-initiatives__progress__bar_nottodo,
-.global-initiatives__progress__bar:before {
+.global-objectives__progress__bar .global-objectives__progress__bar_inprogress,
+.global-objectives__progress__bar .global-objectives__progress__bar_done,
+.global-objectives__progress__bar .global-objectives__progress__bar_nottodo,
+.global-objectives__progress__bar:before {
     content: " ";
     position: absolute;
     display: block;
@@ -1301,7 +1301,7 @@ body {
     width: 100%;
 }
 
-.global-initiatives__progress__bar .global-initiatives__progress__bar_inprogress {
+.global-objectives__progress__bar .global-objectives__progress__bar_inprogress {
   width: var(--percentage-with-in-progress);
   background: repeating-linear-gradient(
     45deg,
@@ -1314,25 +1314,25 @@ body {
   animation: stripe-move 2s linear infinite;
 }
 
-.global-initiatives__progress__bar .global-initiatives__progress__bar_done {
+.global-objectives__progress__bar .global-objectives__progress__bar_done {
   width: var(--percentage);
   background: var(--color-highlight);
 }
 
-.global-initiatives__progress__bar .global-initiatives__progress__bar_nottodo {
+.global-objectives__progress__bar .global-objectives__progress__bar_nottodo {
   width: var(--percentage-not-to-do);
   top: 0;
   right: 0;
   background: var(--color-error);
 }
 
-.global-initiatives__progress__bar:after {
+.global-objectives__progress__bar:after {
     width: var(--percentage);
     background: var(--color-success);
 }
 
 
-.global-initiatives__time__bar {
+.global-objectives__time__bar {
     width: 100%;
     box-sizing: border-box;
     height: 20px;
@@ -1345,7 +1345,7 @@ body {
     opacity: .6;
 }
 
-.global-initiatives__time__bar:before {
+.global-objectives__time__bar:before {
     content: " ";
     position: absolute;
     top: 0;
@@ -1355,23 +1355,23 @@ body {
     border-top: 2px dashed var(--color-info);
 }
 
-.global-initiatives__time__start, .global-initiatives__time__end {
+.global-objectives__time__start, .global-objectives__time__end {
     position: absolute;
     top: -6px;
     background: var(--color-gray-900);
 }
 
-.global-initiatives__time__start {
+.global-objectives__time__start {
     left: 0;
     padding-right: 8px;
 }
 
-.global-initiatives__time__end {
+.global-objectives__time__end {
     right: 0;
     padding-left: 8px;
 }
 
-.global-initiatives__time__current {
+.global-objectives__time__current {
     background: var(--color-gray-900);
     position: absolute;
     top: 10px;
@@ -1379,41 +1379,41 @@ body {
     font-weight: bold;
 }
 
-.global-initiatives__time__current.label-left {
+.global-objectives__time__current.label-left {
     text-align: right;
     width: var(--percentage);
 }
 
-.global-initiatives__time__current.label-right {
+.global-objectives__time__current.label-right {
     text-align: left;
     left: var(--percentage);
 }
 
-.global-initiatives__progress__title {
+.global-objectives__progress__title {
     font-size: 18px;
     color: var(--color-info);
 }
 
-.global-initiatives__progress-gt4 .global-initiatives__progress__title {
+.global-objectives__progress-gt4 .global-objectives__progress__title {
   font-size: 14px;
 }
 
-.global-initiatives__progress_value {
+.global-objectives__progress_value {
     font-size: 24px;
 }
 
-.global-initiatives__progress-gt4 .global-initiatives__progress_value {
+.global-objectives__progress-gt4 .global-objectives__progress_value {
   font-size: 14px;
 }
 
 
-.global-initiatives__chart-container svg, .global-initiatives__chart-container .apexcharts-canvas {
+.global-objectives__chart-container svg, .global-objectives__chart-container .apexcharts-canvas {
     height: 300px !important;
     min-height: 300px !important;
     width: 300px !important;
 }
 
-.global-initiatives__chart {
+.global-objectives__chart {
     position: absolute;
     top: 0;
     left: 0;
@@ -1438,20 +1438,20 @@ body {
         font-size: 16px;
     }
 
-    .global-initiatives__progress {
+    .global-objectives__progress {
         padding: 10px;
     }
 
-    .global-initiatives__progress {
+    .global-objectives__progress {
         margin-left: 20px;
         margin-right: 20px;
     }
 
-    .global-initiatives {
+    .global-objectives {
         flex-direction: column;
     }
     
-    .global-initiatives__container, .global-initiatives__progress {
+    .global-objectives__container, .global-objectives__progress {
         height: auto;
         min-height: 200px;
         background: transparent;
@@ -1459,11 +1459,11 @@ body {
         padding: 10px;
     }
 
-    .global-initiatives__progress_value {
+    .global-objectives__progress_value {
         font-size: 18px;
     }
 
-    .global-initiatives__progress__title {
+    .global-objectives__progress__title {
         font-size: 14px;
     }
 
@@ -1474,7 +1474,7 @@ body {
 
 
 @media only screen and (min-width: 1200px) {
-  .global-initiatives > .ant-col-lg-9 {
+  .global-objectives > .ant-col-lg-9 {
     width: 40%;
   }
 }
@@ -1488,7 +1488,7 @@ body {
   font-size: 12px;
 }
 
-.initiative {
+.objective {
   text-overflow: ellipsis;
   width: calc(100% - 42px);
   overflow: hidden;
@@ -1497,11 +1497,11 @@ body {
   margin: -5px 0;
 }
 
-.initiative.without-theme {
+.objective.without-theme {
   width: calc(100%);
 }
 
-.initiative:hover {
+.objective:hover {
   overflow: visible;
 }
 
@@ -1546,13 +1546,13 @@ body {
   font-weight: 500;
 }
 
-/* Cycle Release Items Styles - General (for cycle-overview page) */
-.cycle-release-items {
+/* Cycle Items Styles - General (for cycle-overview page) */
+.cycle-cycle-items {
   text-align: center;
   padding: 4px;
 }
 
-.release-item {
+.cycle-item {
   margin-bottom: 4px;
   background-color: var(--color-gray-600);
   border: 1px solid var(--color-gray-700);
@@ -1561,8 +1561,8 @@ body {
   margin: 2px 0;
 }
 
-/* Roadmap-specific cycle release items */
-#roadmaps .cycle-release-items {
+/* Roadmap-specific cycle items */
+#roadmaps .cycle-cycle-items {
   padding: 6px;
   flex: 1;
   display: flex;
@@ -1571,7 +1571,7 @@ body {
   min-height: 60px;
 }
 
-#roadmaps .release-item {
+#roadmaps .cycle-item {
   background-color: var(--color-gray-600);
   border-radius: 6px;
   padding: 6px;
@@ -1584,7 +1584,7 @@ body {
   border: none;
 }
 
-.project-popover__release-item__stage {
+.project-popover__cycle-item__stage {
   display: inline-block;
   padding: 2px 6px;
   border-radius: 3px;
@@ -1907,137 +1907,137 @@ ant-dropdown-menu-vertical
 }
 
 /* Status Colors for Roadmap Popover */
-.roadmap-popover__release-item__status.status-done,
-.roadmap-popover__release-item__status.status-completed,
-.roadmap-popover__release-item__status.status-finished {
+.roadmap-popover__cycle-item__status.status-done,
+.roadmap-popover__cycle-item__status.status-completed,
+.roadmap-popover__cycle-item__status.status-finished {
   color: var(--color-success) !important;
 }
 
-.roadmap-popover__release-item__status.status-in-progress,
-.roadmap-popover__release-item__status.status-active,
-.roadmap-popover__release-item__status.status-working {
+.roadmap-popover__cycle-item__status.status-in-progress,
+.roadmap-popover__cycle-item__status.status-active,
+.roadmap-popover__cycle-item__status.status-working {
   color: var(--color-highlight) !important;
 }
 
-.roadmap-popover__release-item__status.status-todo,
-.roadmap-popover__release-item__status.status-pending,
-.roadmap-popover__release-item__status.status-waiting {
+.roadmap-popover__cycle-item__status.status-todo,
+.roadmap-popover__cycle-item__status.status-pending,
+.roadmap-popover__cycle-item__status.status-waiting {
   color: var(--color-gray-500) !important;
 }
 
-.roadmap-popover__release-item__status.status-blocked,
-.roadmap-popover__release-item__status.status-failed,
-.roadmap-popover__release-item__status.status-error {
+.roadmap-popover__cycle-item__status.status-blocked,
+.roadmap-popover__cycle-item__status.status-failed,
+.roadmap-popover__cycle-item__status.status-error {
   color: var(--color-error) !important;
 }
 
-.roadmap-popover__release-item__status.status-review,
-.roadmap-popover__release-item__status.status-testing,
-.roadmap-popover__release-item__status.status-qa {
+.roadmap-popover__cycle-item__status.status-review,
+.roadmap-popover__cycle-item__status.status-testing,
+.roadmap-popover__cycle-item__status.status-qa {
   color: var(--color-info) !important;
 }
 
 /* Stage Colors for Roadmap Popover */
-.roadmap-popover__release-item__stage.stage-done,
-.roadmap-popover__release-item__stage.stage-completed,
-.roadmap-popover__release-item__stage.stage-finished {
+.roadmap-popover__cycle-item__stage.stage-done,
+.roadmap-popover__cycle-item__stage.stage-completed,
+.roadmap-popover__cycle-item__stage.stage-finished {
   background: var(--color-success) !important;
   border-color: var(--color-success) !important;
   color: var(--color-text-primary) !important;
 }
 
-.roadmap-popover__release-item__stage.stage-dev,
-.roadmap-popover__release-item__stage.stage-development,
-.roadmap-popover__release-item__stage.stage-coding {
+.roadmap-popover__cycle-item__stage.stage-dev,
+.roadmap-popover__cycle-item__stage.stage-development,
+.roadmap-popover__cycle-item__stage.stage-coding {
   background: var(--color-highlight) !important;
   border-color: var(--color-highlight) !important;
   color: var(--color-background) !important;
 }
 
-.roadmap-popover__release-item__stage.stage-qa,
-.roadmap-popover__release-item__stage.stage-testing,
-.roadmap-popover__release-item__stage.stage-review {
+.roadmap-popover__cycle-item__stage.stage-qa,
+.roadmap-popover__cycle-item__stage.stage-testing,
+.roadmap-popover__cycle-item__stage.stage-review {
   background: var(--color-info) !important;
   border-color: var(--color-info) !important;
   color: var(--color-text-primary) !important;
 }
 
-.roadmap-popover__release-item__stage.stage-todo,
-.roadmap-popover__release-item__stage.stage-pending,
-.roadmap-popover__release-item__stage.stage-waiting {
+.roadmap-popover__cycle-item__stage.stage-todo,
+.roadmap-popover__cycle-item__stage.stage-pending,
+.roadmap-popover__cycle-item__stage.stage-waiting {
   background: var(--color-gray-500) !important;
   border-color: var(--color-gray-500) !important;
   color: var(--color-text-primary) !important;
 }
 
-.roadmap-popover__release-item__stage.stage-blocked,
-.roadmap-popover__release-item__stage.stage-failed,
-.roadmap-popover__release-item__stage.stage-error {
+.roadmap-popover__cycle-item__stage.stage-blocked,
+.roadmap-popover__cycle-item__stage.stage-failed,
+.roadmap-popover__cycle-item__stage.stage-error {
   background: var(--color-error) !important;
   border-color: var(--color-error) !important;
   color: var(--color-text-primary) !important;
 }
 
 /* Generic status/stage coloring based on common values */
-.roadmap-popover__release-item__status[class*="done"],
-.roadmap-popover__release-item__status[class*="complete"],
-.roadmap-popover__release-item__status[class*="finish"] {
+.roadmap-popover__cycle-item__status[class*="done"],
+.roadmap-popover__cycle-item__status[class*="complete"],
+.roadmap-popover__cycle-item__status[class*="finish"] {
   color: var(--color-success) !important;
 }
 
-.roadmap-popover__release-item__status[class*="progress"],
-.roadmap-popover__release-item__status[class*="active"],
-.roadmap-popover__release-item__status[class*="working"] {
+.roadmap-popover__cycle-item__status[class*="progress"],
+.roadmap-popover__cycle-item__status[class*="active"],
+.roadmap-popover__cycle-item__status[class*="working"] {
   color: var(--color-highlight) !important;
 }
 
-.roadmap-popover__release-item__status[class*="todo"],
-.roadmap-popover__release-item__status[class*="pending"],
-.roadmap-popover__release-item__status[class*="waiting"] {
+.roadmap-popover__cycle-item__status[class*="todo"],
+.roadmap-popover__cycle-item__status[class*="pending"],
+.roadmap-popover__cycle-item__status[class*="waiting"] {
   color: var(--color-gray-500) !important;
 }
 
-.roadmap-popover__release-item__status[class*="blocked"],
-.roadmap-popover__release-item__status[class*="failed"],
-.roadmap-popover__release-item__status[class*="error"] {
+.roadmap-popover__cycle-item__status[class*="blocked"],
+.roadmap-popover__cycle-item__status[class*="failed"],
+.roadmap-popover__cycle-item__status[class*="error"] {
   color: var(--color-error) !important;
 }
 
-.roadmap-popover__release-item__stage[class*="done"],
-.roadmap-popover__release-item__stage[class*="complete"],
-.roadmap-popover__release-item__stage[class*="finish"] {
+.roadmap-popover__cycle-item__stage[class*="done"],
+.roadmap-popover__cycle-item__stage[class*="complete"],
+.roadmap-popover__cycle-item__stage[class*="finish"] {
   background: var(--color-success) !important;
   border-color: var(--color-success) !important;
   color: var(--color-text-primary) !important;
 }
 
-.roadmap-popover__release-item__stage[class*="dev"],
-.roadmap-popover__release-item__stage[class*="coding"],
-.roadmap-popover__release-item__stage[class*="progress"] {
+.roadmap-popover__cycle-item__stage[class*="dev"],
+.roadmap-popover__cycle-item__stage[class*="coding"],
+.roadmap-popover__cycle-item__stage[class*="progress"] {
   background: var(--color-highlight) !important;
   border-color: var(--color-highlight) !important;
   color: var(--color-background) !important;
 }
 
-.roadmap-popover__release-item__stage[class*="qa"],
-.roadmap-popover__release-item__stage[class*="test"],
-.roadmap-popover__release-item__stage[class*="review"] {
+.roadmap-popover__cycle-item__stage[class*="qa"],
+.roadmap-popover__cycle-item__stage[class*="test"],
+.roadmap-popover__cycle-item__stage[class*="review"] {
   background: var(--color-info) !important;
   border-color: var(--color-info) !important;
   color: var(--color-text-primary) !important;
 }
 
-.roadmap-popover__release-item__stage[class*="todo"],
-.roadmap-popover__release-item__stage[class*="pending"],
-.roadmap-popover__release-item__stage[class*="waiting"] {
+.roadmap-popover__cycle-item__stage[class*="todo"],
+.roadmap-popover__cycle-item__stage[class*="pending"],
+.roadmap-popover__cycle-item__stage[class*="waiting"] {
   background: var(--color-gray-500) !important;
   border-color: var(--color-gray-500) !important;
   color: var(--color-text-primary) !important;
 }
 
-.roadmap-popover__release-item__stage[class*="blocked"],
-.roadmap-popover__release-item__stage[class*="failed"],
-.roadmap-popover__release-item__stage[class*="error"] {
+.roadmap-popover__cycle-item__stage[class*="blocked"],
+.roadmap-popover__cycle-item__stage[class*="failed"],
+.roadmap-popover__cycle-item__stage[class*="error"] {
   background: var(--color-error) !important;
   border-color: var(--color-error) !important;
   color: var(--color-text-primary) !important;

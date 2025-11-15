@@ -43,7 +43,7 @@ describe("Filter Configuration Service", () => {
       expect(filters.length).toBeGreaterThan(0);
       // Should include common filters
       expect(filters).toContain("area");
-      expect(filters).toContain("initiatives");
+      expect(filters).toContain("objectives");
       expect(filters).toContain("showValidationErrors");
       // Should include view-specific filters
       expect(filters).toContain("stages");
@@ -57,7 +57,7 @@ describe("Filter Configuration Service", () => {
       expect(Array.isArray(filters)).toBe(true);
       // Should include common filters
       expect(filters).toContain("area");
-      expect(filters).toContain("initiatives");
+      expect(filters).toContain("objectives");
       expect(filters).toContain("showValidationErrors");
       // Should not include view-specific filters for cycle-overview
       expect(filters).not.toContain("stages");
@@ -71,7 +71,7 @@ describe("Filter Configuration Service", () => {
       expect(Array.isArray(filters)).toBe(true);
       // Root should only have common filters
       expect(filters).toContain("area");
-      expect(filters).toContain("initiatives");
+      expect(filters).toContain("objectives");
       expect(filters).toContain("showValidationErrors");
     });
 
@@ -99,7 +99,7 @@ describe("Filter Configuration Service", () => {
   describe("isCommonFilter", () => {
     it("should return true for common filters", () => {
       expect(filterConfig.isCommonFilter("area")).toBe(true);
-      expect(filterConfig.isCommonFilter("initiatives")).toBe(true);
+      expect(filterConfig.isCommonFilter("objectives")).toBe(true);
       expect(filterConfig.isCommonFilter("showValidationErrors")).toBe(true);
     });
 
@@ -132,7 +132,7 @@ describe("Filter Configuration Service", () => {
 
     it("should return true for valid filters in roadmap", () => {
       expect(filterConfig.isValidFilterForView("area", "roadmap")).toBe(true);
-      expect(filterConfig.isValidFilterForView("initiatives", "roadmap")).toBe(
+      expect(filterConfig.isValidFilterForView("objectives", "roadmap")).toBe(
         true,
       );
       expect(
@@ -164,7 +164,7 @@ describe("Filter Configuration Service", () => {
 
       views.forEach((view) => {
         expect(filterConfig.isValidFilterForView("area", view)).toBe(true);
-        expect(filterConfig.isValidFilterForView("initiatives", view)).toBe(
+        expect(filterConfig.isValidFilterForView("objectives", view)).toBe(
           true,
         );
         expect(
@@ -192,7 +192,7 @@ describe("Filter Configuration Service", () => {
       const views: PageId[] = ["root", "cycle-overview", "roadmap"];
       const allFilterKeys: FilterKey[] = [
         "area",
-        "initiatives",
+        "objectives",
         "stages",
         "assignees",
         "cycle",
@@ -216,7 +216,7 @@ describe("Filter Configuration Service", () => {
       // Test that isCommonFilter is consistent with filter availability
       const commonFilters: FilterKey[] = [
         "area",
-        "initiatives",
+        "objectives",
         "showValidationErrors",
       ];
       const viewSpecificFilters: FilterKey[] = ["stages", "assignees", "cycle"];

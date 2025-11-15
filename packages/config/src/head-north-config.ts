@@ -188,7 +188,7 @@ export default class HeadNorthConfig {
             "non-roadmap": "Non-Roadmap Projects",
             virtual: "Non-Roadmap Projects",
           },
-          initiatives: {
+          objectives: {
             compliance: "Efficient Compliance",
             "integrated-scorecard": "Seamlessly Integrated Scorecard",
             FTTR: "Faster Time to Response",
@@ -489,11 +489,11 @@ export default class HeadNorthConfig {
 
   /**
    * Get product strategy configuration
-   * @returns Product strategy configuration (themes, initiatives)
+   * @returns Product strategy configuration (themes, objectives)
    */
   getProductStrategyConfig(): {
     themes: Record<string, string>;
-    initiatives: Record<string, string>;
+    objectives: Record<string, string>;
   } {
     return this.config.common.productStrategy;
   }
@@ -507,11 +507,11 @@ export default class HeadNorthConfig {
   }
 
   /**
-   * Get initiatives configuration
-   * @returns Initiatives configuration
+   * Get objectives configuration
+   * @returns Objectives configuration
    */
-  getInitiatives(): Record<string, string> {
-    return this.config.common.productStrategy.initiatives;
+  getObjectives(): Record<string, string> {
+    return this.config.common.productStrategy.objectives;
   }
 
   /**
@@ -673,13 +673,13 @@ export default class HeadNorthConfig {
     areas: Record<string, string>;
     teams: Record<string, string>;
     themes: Record<string, string>;
-    initiatives: Record<string, string>;
+    objectives: Record<string, string>;
   } {
     return {
       areas: this.getAreas(),
       teams: this.getTeams(),
       themes: this.getThemes(),
-      initiatives: this.getInitiatives(),
+      objectives: this.getObjectives(),
     };
   }
 

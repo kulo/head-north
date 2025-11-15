@@ -65,13 +65,13 @@ const stageSchema = z.object({
 });
 
 /**
- * ReleaseItem schema
+ * CycleItem schema
  */
-const releaseItemSchema = z.object({
-  id: z.string().min(1, "ReleaseItem ID is required"),
+const cycleItemSchema = z.object({
+  id: z.string().min(1, "CycleItem ID is required"),
   ticketId: z.string().min(1, "Ticket ID is required"),
   effort: z.number().nonnegative().optional().default(0),
-  name: z.string().min(1, "ReleaseItem name is required"),
+  name: z.string().min(1, "CycleItem name is required"),
   areaIds: z.array(z.string()).optional().default([]),
   teams: z.array(z.string()).optional().default([]),
   status: z.string(),
@@ -100,24 +100,24 @@ const roadmapItemSchema = z.object({
   summary: z.string().optional(),
   area: z.union([z.string(), areaSchema]).optional(),
   theme: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
-  initiative: z.record(z.string(), z.unknown()).optional(),
-  initiativeId: z.string().nullable().optional(),
+  objective: z.record(z.string(), z.unknown()).optional(),
+  objectiveId: z.string().nullable().optional(),
   isExternal: z.boolean().optional().default(false),
   owningTeam: z.unknown().optional(),
   url: z.string().optional(),
   validations: z.array(z.unknown()).optional().default([]),
-  releaseItems: z.array(releaseItemSchema).optional().default([]),
+  cycleItems: z.array(cycleItemSchema).optional().default([]),
   labels: z.array(z.string()).optional().default([]),
   startDate: isoDateStringSchema.optional(),
   endDate: isoDateStringSchema.optional(),
 });
 
 /**
- * Initiative schema
+ * Objective schema
  */
-const initiativeSchema = z.object({
-  id: z.string().min(1, "Initiative ID is required"),
-  name: z.string().min(1, "Initiative name is required"),
+const objectiveSchema = z.object({
+  id: z.string().min(1, "Objective ID is required"),
+  name: z.string().min(1, "Objective name is required"),
   roadmapItems: z.array(roadmapItemSchema).optional(),
 });
 
@@ -127,13 +127,13 @@ const initiativeSchema = z.object({
 export const rawCycleDataSchema = z.object({
   cycles: z.array(cycleSchema),
   roadmapItems: z.array(roadmapItemSchema),
-  releaseItems: z.array(releaseItemSchema),
+  cycleItems: z.array(cycleItemSchema),
   assignees: z.array(personSchema),
   areas: z.union([z.record(z.string(), areaSchema), z.array(areaSchema)]),
   stages: z.array(stageSchema),
-  initiatives: z.union([
-    z.record(z.string(), initiativeSchema),
-    z.array(initiativeSchema),
+  objectives: z.union([
+    z.record(z.string(), objectiveSchema),
+    z.array(objectiveSchema),
   ]),
   teams: z.array(z.unknown()).optional(),
 });

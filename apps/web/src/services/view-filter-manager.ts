@@ -3,7 +3,7 @@
  *
  * Manages view-specific filtering logic with type safety and dependency injection.
  * Ensures that:
- * 1. Common filters (area, initiatives) are preserved when switching views
+ * 1. Common filters (area, objectives) are preserved when switching views
  * 2. View-specific filters are reset when switching to incompatible views
  * 3. Filter state is maintained appropriately for each view
  * 4. All operations are type-safe and validated
@@ -13,7 +13,7 @@
 
 import { Either, Left, Right } from "purify-ts";
 import type { HeadNorthConfig } from "@headnorth/config";
-import type { InitiativeId, PersonId, StageId } from "@headnorth/types";
+import type { ObjectiveId, PersonId, StageId } from "@headnorth/types";
 import { match } from "ts-pattern";
 import type { ViewFilterCriteria } from "../types/ui-types";
 import type {
@@ -39,7 +39,7 @@ const createMutableFilters = (
 ): ViewFilterCriteria => ({
   common: {
     ...filters.common,
-    initiatives: createMutableArray(filters.common.initiatives),
+    objectives: createMutableArray(filters.common.objectives),
   },
   cycleOverview: {
     ...filters.cycleOverview,
@@ -160,8 +160,8 @@ export function createViewFilterManager(
   const getActiveFilters = (): TypedFilterCriteria => {
     const activeFilters: TypedFilterCriteria = {
       area: viewFilters.common.area,
-      initiatives: viewFilters.common.initiatives
-        ? [...viewFilters.common.initiatives]
+      objectives: viewFilters.common.objectives
+        ? [...viewFilters.common.objectives]
         : undefined,
     };
 
@@ -200,8 +200,8 @@ export function createViewFilterManager(
     return {
       common: {
         ...viewFilters.common,
-        initiatives: viewFilters.common.initiatives
-          ? (viewFilters.common.initiatives as readonly InitiativeId[])
+        objectives: viewFilters.common.objectives
+          ? (viewFilters.common.objectives as readonly ObjectiveId[])
           : undefined,
       },
       cycleOverview: {

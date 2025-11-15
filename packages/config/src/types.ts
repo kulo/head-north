@@ -64,7 +64,7 @@ export interface Organisation {
 
 export interface ProductStrategy {
   themes: Record<string, string>;
-  initiatives: Record<string, string>;
+  objectives: Record<string, string>;
 }
 
 export interface CommonConfig {
@@ -122,7 +122,7 @@ export interface ValidationRule {
 }
 
 export interface ValidationRules {
-  releaseItem: {
+  cycleItem: {
     noProjectId: ValidationRule;
     missingAreaLabel: ValidationRule;
     missingTeamLabel: ValidationRule;
@@ -136,12 +136,12 @@ export interface ValidationRules {
   roadmapItem: {
     missingAreaLabel: ValidationRule;
     missingThemeLabel: ValidationRule;
-    missingInitiativeLabel: ValidationRule;
+    missingObjectiveLabel: ValidationRule;
     missingAreaTranslation: (area: string) => ValidationRule;
     missingThemeTranslation: (theme: string) => ValidationRule;
-    missingInitiativeTranslation: (initiative: string) => ValidationRule;
+    missingObjectiveTranslation: (objective: string) => ValidationRule;
     missingExternalRoadmap: ValidationRule;
-    iternalWithStagedReleaseItem: ValidationRule;
+    iternalWithStagedCycleItem: ValidationRule;
     missingExternalRoadmapDescription: ValidationRule;
   };
 }

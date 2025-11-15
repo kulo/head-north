@@ -25,20 +25,22 @@ describe("HeadNorthConfig - Complex Tests", () => {
     });
 
     it("should create instance with specified environment", () => {
-      config = new OmegaConfig({ overrides: { environment: "production" } });
+      config = new HeadNorthConfig({
+        overrides: { environment: "production" },
+      });
       expect(config.getConfig().environment).toBe("production");
     });
 
     it("should apply overrides", () => {
       const overrides = { customSetting: "test-value" };
-      config = new OmegaConfig({ overrides });
+      config = new HeadNorthConfig({ overrides });
       expect(config.get("customSetting")).toBe("test-value");
     });
   });
 
   describe("Configuration Access", () => {
     beforeEach(() => {
-      config = new OmegaConfig({ overrides: { environment: "test" } });
+      config = new HeadNorthConfig({ overrides: { environment: "test" } });
     });
 
     it("should get API host", () => {
@@ -83,7 +85,7 @@ describe("HeadNorthConfig - Complex Tests", () => {
 
   describe("Environment-specific Configuration", () => {
     it("should include Node.js specific config when process.env is available", () => {
-      config = new OmegaConfig({
+      config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
           PORT: "3001",
@@ -102,7 +104,7 @@ describe("HeadNorthConfig - Complex Tests", () => {
     });
 
     it("should read environment variables", () => {
-      config = new OmegaConfig({
+      config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
           PORT: "3001",
@@ -115,7 +117,7 @@ describe("HeadNorthConfig - Complex Tests", () => {
     });
 
     it("should get Jira configuration", () => {
-      config = new OmegaConfig({
+      config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
           JIRA_USER: "test-user",
@@ -143,7 +145,7 @@ describe("HeadNorthConfig - Complex Tests", () => {
     });
 
     it("should get stages configuration", () => {
-      config = new OmegaConfig({ overrides: { environment: "test" } });
+      config = new HeadNorthConfig({ overrides: { environment: "test" } });
       const stages = config.getStages();
 
       expect(Array.isArray(stages)).toBe(true);
@@ -155,7 +157,7 @@ describe("HeadNorthConfig - Complex Tests", () => {
 
   describe("Configuration Management", () => {
     beforeEach(() => {
-      config = new OmegaConfig({ overrides: { environment: "test" } });
+      config = new HeadNorthConfig({ overrides: { environment: "test" } });
     });
 
     it("should return undefined for non-existent keys", () => {

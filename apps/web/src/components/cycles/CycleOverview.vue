@@ -7,7 +7,7 @@
         <cycle-selector></cycle-selector>
       </div>
       <div class="cycle-overview-header__right">
-        <initiative-selector></initiative-selector>
+        <objective-selector></objective-selector>
         <area-selector></area-selector>
         <assignee-selector></assignee-selector>
         <stage-selector></stage-selector>
@@ -28,42 +28,40 @@
       v-else-if="
         cycleOverviewData &&
         cycleOverviewData.cycle &&
-        cycleOverviewData.initiatives
+        cycleOverviewData.objectives
       "
       class="cycle-overview-content"
     >
-      <!-- Global Initiative Progress -->
-      <div class="global-initiatives__container">
-        <initiative-chart
+      <!-- Global Objective Progress -->
+      <div class="global-objectives__container">
+        <objective-chart
           v-if="
-            cycleOverviewData.initiatives &&
-            cycleOverviewData.initiatives.length > 0
+            cycleOverviewData.objectives &&
+            cycleOverviewData.objectives.length > 0
           "
-          :initiatives="cycleOverviewData.initiatives"
+          :objectives="cycleOverviewData.objectives"
         >
-        </initiative-chart>
+        </objective-chart>
       </div>
-      <div class="global-initiatives__progress">
-        <global-initiative-progress
+      <div class="global-objectives__progress">
+        <global-objective-progress
           :cycle="cycleOverviewData.cycle"
-          :initiatives="cycleOverviewData.initiatives"
+          :objectives="cycleOverviewData.objectives"
         >
-        </global-initiative-progress>
+        </global-objective-progress>
       </div>
 
-      <!-- Initiative and Roadmap Items Listing -->
-      <div class="release-item-container">
-        <div class="release-item-container-column">
+      <!-- Objective and Roadmap Items Listing -->
+      <div class="cycle-item-container">
+        <div class="cycle-item-container-column">
           <template
-            v-for="initiative in cycleOverviewData.initiatives"
-            :key="initiative.name"
+            v-for="objective in cycleOverviewData.objectives"
+            :key="objective.name"
           >
-            <initiative-list-item
-              :initiative="initiative"
-            ></initiative-list-item>
+            <objective-list-item :objective="objective"></objective-list-item>
             <roadmap-item-list-item
-              v-for="roadmapItem in initiative.roadmapItems"
-              :key="initiative.name + roadmapItem.name"
+              v-for="roadmapItem in objective.roadmapItems"
+              :key="objective.name + roadmapItem.name"
               :roadmap-item="roadmapItem"
               :show-area="isOverviewPage"
               @show-validation="showValidation"
@@ -112,12 +110,12 @@ import PageSelector from "../ui/PageSelector.vue";
 import ValidationSelector from "../ui/ValidationSelector.vue";
 import CycleSelector from "../ui/CycleSelector.vue";
 import AreaSelector from "../ui/AreaSelector.vue";
-import InitiativeSelector from "../ui/InitiativeSelector.vue";
+import ObjectiveSelector from "../ui/ObjectiveSelector.vue";
 import StageSelector from "../ui/StageSelector.vue";
 import AssigneeSelector from "../ui/AssigneeSelector.vue";
-import GlobalInitiativeProgress from "./GlobalInitiativeProgress.vue";
-import InitiativeChart from "./InitiativeChart.vue";
-import InitiativeListItem from "./InitiativeListItem.vue";
+import GlobalObjectiveProgress from "./GlobalObjectiveProgress.vue";
+import ObjectiveChart from "./ObjectiveChart.vue";
+import ObjectiveListItem from "./ObjectiveListItem.vue";
 import RoadmapItemListItem from "./RoadmapItemListItem.vue";
 
 export default {
@@ -128,12 +126,12 @@ export default {
     ValidationSelector,
     CycleSelector,
     AreaSelector,
-    InitiativeSelector,
+    ObjectiveSelector,
     StageSelector,
     AssigneeSelector,
-    GlobalInitiativeProgress,
-    InitiativeChart,
-    InitiativeListItem,
+    GlobalObjectiveProgress,
+    ObjectiveChart,
+    ObjectiveListItem,
     RoadmapItemListItem,
   },
   setup() {

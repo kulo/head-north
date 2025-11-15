@@ -1,20 +1,20 @@
 <template>
-  <div class="release-item-container-column__initiative">
-    <div class="release-item-container-column__initiative__name">
-      {{ initiative.name }}
+  <div class="cycle-item-container-column__objective">
+    <div class="cycle-item-container-column__objective__name">
+      {{ objective.name }}
     </div>
-    <div class="release-item-container-column__initiative__percentage">
-      {{ initiative.progress || 0 }}%
+    <div class="cycle-item-container-column__objective__percentage">
+      {{ objective.progress || 0 }}%
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "InitiativeListItem",
+  name: "ObjectiveListItem",
 
   props: {
-    initiative: {
+    objective: {
       type: Object,
       required: true,
     },

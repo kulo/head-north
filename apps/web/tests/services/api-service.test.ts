@@ -53,9 +53,9 @@ describe("Cycle Data Service", () => {
       const mockData = {
         cycles: [],
         roadmapItems: [],
-        releaseItems: [],
+        cycleItems: [],
         areas: {},
-        initiatives: [],
+        objectives: [],
         assignees: [],
         stages: [],
       };
@@ -76,9 +76,9 @@ describe("Cycle Data Service", () => {
           expect(data).toEqual({
             cycles: [],
             roadmapItems: [],
-            releaseItems: [],
+            cycleItems: [],
             areas: [],
-            initiatives: [],
+            objectives: [],
             assignees: [],
             stages: [],
           });

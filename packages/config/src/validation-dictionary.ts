@@ -5,17 +5,17 @@ import type { ValidationRules } from "./types";
 import { createURL } from "./utils";
 
 const validationDictionary: ValidationRules = {
-  releaseItem: {
+  cycleItem: {
     noProjectId: {
-      label: "The `Roadmap Item` is missing from the Release Item",
-      reference: createURL("https://docs.example.com/release-item-conventions"),
+      label: "The `Roadmap Item` is missing from the Cycle Item",
+      reference: createURL("https://docs.example.com/cycle-item-conventions"),
     },
     missingAreaLabel: {
-      label: "At least one `area:` prefix label is needed on the Release Item",
+      label: "At least one `area:` prefix label is needed on the Cycle Item",
       reference: createURL("https://docs.example.com/labeling-conventions"),
     },
     missingTeamLabel: {
-      label: "At least one `team:` prefix label is needed on the Release Item",
+      label: "At least one `team:` prefix label is needed on the Cycle Item",
       reference: createURL("https://docs.example.com/labeling-conventions"),
     },
     missingTeamTranslation: (team: string) => ({
@@ -23,7 +23,7 @@ const validationDictionary: ValidationRules = {
       reference: createURL("https://docs.example.com/team-translations"),
     }),
     missingEstimate: {
-      label: "The `Story point estimate` is missing from the Release Item",
+      label: "The `Story point estimate` is missing from the Cycle Item",
       reference: createURL("https://docs.example.com/estimation-conventions"),
     },
     tooGranularEstimate: {
@@ -32,11 +32,11 @@ const validationDictionary: ValidationRules = {
       reference: createURL("https://docs.example.com/estimation-guidelines"),
     },
     missingStage: {
-      label: "The stage is missing from the Release Item",
+      label: "The stage is missing from the Cycle Item",
       reference: createURL("https://docs.example.com/stage-requirements"),
     },
     missingAssignee: {
-      label: "The assignee is missing from the Release Item",
+      label: "The assignee is missing from the Cycle Item",
       reference: createURL("https://docs.example.com/assignment-requirements"),
     },
     tooLowStageWithoutProperRoadmapItem: {
@@ -56,9 +56,9 @@ const validationDictionary: ValidationRules = {
       label: "At least one `theme:` prefix label is needed on the Roadmap Item",
       reference: createURL("https://docs.example.com/labeling-conventions"),
     },
-    missingInitiativeLabel: {
+    missingObjectiveLabel: {
       label:
-        "At least one `initiative:` prefix label is needed on the Roadmap Item",
+        "At least one `objective:` prefix label is needed on the Roadmap Item",
       reference: createURL("https://docs.example.com/labeling-conventions"),
     },
     missingAreaTranslation: (area: string) => ({
@@ -69,9 +69,9 @@ const validationDictionary: ValidationRules = {
       label: `The theme \`${theme}\` is not yet translated`,
       reference: createURL("https://docs.example.com/theme-translations"),
     }),
-    missingInitiativeTranslation: (initiative: string) => ({
-      label: `The initiative \`${initiative}\` is not yet translated`,
-      reference: createURL("https://docs.example.com/initiative-translations"),
+    missingObjectiveTranslation: (objective: string) => ({
+      label: `The objective \`${objective}\` is not yet translated`,
+      reference: createURL("https://docs.example.com/objective-translations"),
     }),
     missingExternalRoadmap: {
       label:
@@ -80,9 +80,9 @@ const validationDictionary: ValidationRules = {
         "https://docs.example.com/external-roadmap-requirements",
       ),
     },
-    iternalWithStagedReleaseItem: {
+    iternalWithStagedCycleItem: {
       label:
-        "This roadmap item should be either marked as external / public (because at least one of its release item has a stage), or either changed its release items' stages to internal",
+        "This roadmap item should be either marked as external / public (because at least one of its cycle item has a stage), or either changed its cycle items' stages to internal",
       reference: createURL(
         "https://docs.example.com/external-roadmap-requirements",
       ),

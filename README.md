@@ -2,7 +2,7 @@
 
 _Head North_ is a visualisation tool or dashboard for product development organisations that work in a common cadence via high-level iterations called "development cycles" or just "cycles".
 
-_Head North_ provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making.
+_Head North_ provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making towards your north star / objectives.
 
 _Head North_ is inspired by a similar tool, called _Omega_, that was originally envisioned and developed as internal tool at [Emarsys](https://github.com/emartech/).
 
@@ -16,11 +16,11 @@ High-level iterations that represent major development phases. Each cycle typica
 
 ### Roadmap Items
 
-Customer-facing features or capabilities that represent value delivered to end users. These are the high-level items that appear on product roadmaps and are typically planned across multiple cycles. Roadmap items serve as the primary organizing principle for customer-facing work and might or might not be mapped to dedicated JIRA issue types.
+Customer-facing features or capabilities that represent value delivered to end users. These are the high-level items that appear on product roadmaps and are typically planned across multiple cycles. Roadmap items serve as the primary organizing principle for customer-facing work and may or may not be mapped to dedicated JIRA issue types.
 
-### Release Items
+### Cycle Items
 
-Concrete work packages that implement roadmap items. These usually group togehter one or more epics from one or more teams that work on the same topicwithin a specific cycle. Release items are linked to their parent roadmap items and represent the granular work that moves roadmap items toward completion.
+Concrete work packages that implement roadmap items. These usually group together one or more epics from one or more teams that work on the same topic within a specific cycle. Cycle items are linked to their parent roadmap items and represent the granular work that moves roadmap items toward completion.
 
 ### Product Areas
 
@@ -28,15 +28,15 @@ Organizational units that group related functionality or business domains (e.g.,
 
 ### Teams
 
-Development teams responsible for delivering work. Teams are assigned to release items and provide accountability and resource planning visibility. Team assignments help track capacity and identify bottlenecks.
+Development teams responsible for delivering work. Teams are assigned to cycle items and provide accountability and resource planning visibility. Team assignments help track capacity and identify bottlenecks.
 
 ### Assignees
 
-Individual contributors assigned to specific release items. Assignee information provides granular visibility into individual workloads and helps with capacity planning and knowledge distribution.
+Individual contributors assigned to specific cycle items. Assignee information provides granular visibility into individual workloads and helps with capacity planning and knowledge distribution.
 
-### Initiatives
+### Objectives
 
-Strategic programs or themes that span multiple roadmap items and cycles. Initiatives represent larger business objectives and help align individual roadmap items with broader organizational goals.
+Strategic programs or themes that span multiple roadmap items and cycles. Objectives represent larger business goals and help align individual roadmap items with broader organizational strategy.
 
 ### Release Stages
 
@@ -88,9 +88,9 @@ head-north/
 Head North's default data source is **JIRA** with a specific model that maps Head North's internal domain model 1:1 to JIRA concepts:
 
 - **Roadmap Items** → JIRA issue type "Roadmap Item"
-- **Release Items** → JIRA issue type "Release Item"
+- **Cycle Items** → JIRA issue type "Cycle Item"
 - **Cycles** → JIRA Sprints
-- **Metadata** (areas, teams, release stages, etc.) → Fields within these issue types
+- **Metadata** (areas, teams, objectives, release stages, etc.) → Fields within these issue types
 
 This direct mapping allows for straightforward data transformation and ensures consistency between your JIRA setup and Head North's visualization.
 

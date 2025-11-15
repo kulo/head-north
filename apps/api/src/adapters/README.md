@@ -32,11 +32,11 @@ interface JiraAdapter {
 
 The default adapter works with JIRA projects that follow this structure:
 
-- **Issue Types**: Separate "Roadmap Item" and "Release Item" issue types
-- **Metadata Storage**: Areas, themes, initiatives stored as labels with prefixes (e.g., `area:frontend`, `theme:performance`)
+- **Issue Types**: Separate "Roadmap Item" and "Cycle Item" issue types
+- **Metadata Storage**: Areas, themes, objectives stored as labels with prefixes (e.g., `area:frontend`, `theme:performance`, `objective:obj-1`)
 - **Effort Field**: Effort stored in custom field `customfield_10002`
 - **Team Assignment**: Teams stored as labels with `team:` prefix
-- **Parent-Child Relationships**: Release items link to roadmap items via parent field
+- **Parent-Child Relationships**: Cycle items link to roadmap items via parent field
 
 **When to use the Default Adapter:**
 
@@ -93,7 +93,7 @@ If your JIRA setup doesn't match the default adapter's expectations, you can cre
 
 **Consider creating your own adapter if:**
 
-- You use different issue types (e.g., only "Story" instead of "Roadmap Item" + "Release Item")
+- You use different issue types (e.g., only "Story" instead of "Roadmap Item" + "Cycle Item")
 - Your metadata is stored differently (e.g., in components instead of labels)
 - You have custom fields with different names or structures
 - You need complex data relationships or transformations
@@ -157,7 +157,7 @@ Different organizations may have different setups:
 
 - Only "Story" issue type (no separate roadmap items)
 - Areas stored as JIRA components
-- Initiatives in custom field
+- Objectives in custom field
 - Effort in "story_points" field
 
 ```typescript
@@ -172,15 +172,15 @@ export class MyCompanyJiraAdapter implements JiraAdapter {
     // Extract areas from components
     const areas = this.extractAreasFromComponents(stories);
 
-    // Extract initiatives from custom field
-    const initiatives = this.extractInitiativesFromField(stories);
+    // Extract objectives from custom field
+    const objectives = this.extractObjectivesFromField(stories);
 
     return {
       cycles: sprints.map(jiraSprintToCycle),
       roadmapItems,
-      releaseItems: stories.map(this.transformStoryToReleaseItem),
+      cycleItems: stories.map(this.transformStoryToCycleItem),
       areas,
-      initiatives,
+      objectives,
       // ... other metadata
     };
   }
@@ -214,7 +214,7 @@ function createAdapter(headNorthConfig: HeadNorthConfig): JiraAdapter {
 
 1. **Fetch Raw Data**: Use `JiraClient` to fetch sprints, issues, etc.
 2. **Transform Entities**: Convert JIRA objects to Head North objects
-3. **Extract Metadata**: Build areas, teams, initiatives from data
+3. **Extract Metadata**: Build areas, teams, objectives from data
 4. **Apply Validations**: Check data quality and create validation items
 5. **Return Complete Data**: Return `RawCycleData` with all entities
 
@@ -251,11 +251,11 @@ const effort = extractCustomField<number>(issue, "customfield_10002"); // Could 
 
 ```typescript
 // ✅ Good - extract from all issues
-const allIssues = [...roadmapIssues, ...releaseIssues];
+const allIssues = [...roadmapIssues, ...cycleIssues];
 const areas = this.extractAreas(allIssues);
 
 // ❌ Bad - extract from subset
-const areas = this.extractAreas(roadmapIssues); // Might miss areas only in release items
+const areas = this.extractAreas(roadmapIssues); // Might miss areas only in cycle items
 ```
 
 ### 4. Create Meaningful Validations
@@ -275,7 +275,7 @@ const validations = []; // No validation
 
 ```typescript
 // ✅ Good
-const releaseItem = {
+const cycleItem = {
   id: issue.key,
   roadmapItemId: extractParent(issue).orDefault(""), // Links to roadmap item
   cycleId: issue.fields.sprint?.id?.toString(), // Links to cycle
@@ -283,7 +283,7 @@ const releaseItem = {
 };
 
 // ❌ Bad
-const releaseItem = {
+const cycleItem = {
   id: issue.key,
   // Missing relationships
 };
@@ -303,7 +303,7 @@ describe("MyCompanyJiraAdapter", () => {
 
     expect(data.cycles).toHaveLength(5);
     expect(data.roadmapItems.length).toBeGreaterThan(0);
-    expect(data.releaseItems.length).toBeGreaterThan(0);
+    expect(data.cycleItems.length).toBeGreaterThan(0);
   });
 });
 ```
@@ -322,7 +322,7 @@ When migrating from the old parser-based approach:
 
 See the `DefaultJiraAdapter` for a complete reference implementation that handles:
 
-- Separate issue types for roadmap and release items
+- Separate issue types for roadmap and cycle items
 - Label-based metadata extraction
 - Custom field handling
 - Validation generation

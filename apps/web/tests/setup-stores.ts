@@ -44,14 +44,14 @@ const mockViewFilterManager = {
 const mockCycleDataViewCoordinator = {
   processCycleData: vi.fn((_rawData: Either<Error, CycleData>) =>
     Right({
-      initiatives: [],
+      objectives: [],
     }),
   ),
   generateRoadmapData: vi.fn(() => ({
     orderedCycles: [],
     roadmapItems: [],
     activeCycle: null,
-    initiatives: [],
+    objectives: [],
   })),
   generateCycleOverviewData: vi.fn(() => ({
     cycle: {
@@ -62,17 +62,17 @@ const mockCycleDataViewCoordinator = {
       delivery: "2024-04-15",
       state: "active",
     },
-    initiatives: [],
+    objectives: [],
   })),
   generateFilteredRoadmapData: vi.fn(() => ({
     orderedCycles: [],
     roadmapItems: [],
     activeCycle: null,
-    initiatives: [],
+    objectives: [],
   })),
   generateFilteredCycleOverviewData: vi.fn(() => ({
     cycle: null,
-    initiatives: [],
+    objectives: [],
   })),
 } as unknown as CycleDataViewCoordinator;
 

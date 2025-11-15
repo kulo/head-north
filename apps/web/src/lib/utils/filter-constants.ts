@@ -13,12 +13,12 @@ export const ALL_ASSIGNEES_FILTER = {
 };
 
 /**
- * "All Initiatives" filter option
- * Used when no specific initiative filter is applied
+ * "All Objectives" filter option
+ * Used when no specific objective filter is applied
  */
-export const ALL_INITIATIVES_FILTER = {
+export const ALL_OBJECTIVES_FILTER = {
   id: "all",
-  name: "All Initiatives",
+  name: "All Objectives",
 };
 
 /**

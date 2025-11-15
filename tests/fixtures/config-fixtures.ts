@@ -52,10 +52,10 @@ export function createMockHeadNorthConfig(
         performance: "Performance",
         virtual: "Virtual",
       },
-      initiatives: {
-        "init-1": "Initiative One",
-        "init-2": "Initiative Two",
-        "init-3": "Initiative Three",
+      objectives: {
+        "obj-1": "Objective One",
+        "obj-2": "Objective Two",
+        "obj-3": "Objective Three",
       },
     }),
 
@@ -68,7 +68,7 @@ export function createMockHeadNorthConfig(
     }),
 
     getValidationDictionary: () => ({
-      releaseItem: {
+      cycleItem: {
         missingEstimate: {
           label: "Missing effort estimate",
           reference: createURL(
@@ -84,7 +84,7 @@ export function createMockHeadNorthConfig(
         noProjectId: {
           label: "No parent project ID",
           reference: createURL(
-            "https://docs.example.com/release-item-conventions",
+            "https://docs.example.com/cycle-item-conventions",
           ),
         },
         missingAreaLabel: {
@@ -129,14 +129,14 @@ export function createMockHeadNorthConfig(
           label: `Missing translation for theme: ${theme}`,
           reference: createURL("https://docs.example.com/theme-translations"),
         }),
-        missingInitiativeLabel: {
-          label: "Missing initiative label",
+        missingObjectiveLabel: {
+          label: "Missing objective label",
           reference: createURL("https://docs.example.com/labeling-conventions"),
         },
-        missingInitiativeTranslation: (initiative: string) => ({
-          label: `Missing translation for initiative: ${initiative}`,
+        missingObjectiveTranslation: (objective: string) => ({
+          label: `Missing translation for objective: ${objective}`,
           reference: createURL(
-            "https://docs.example.com/initiative-translations",
+            "https://docs.example.com/objective-translations",
           ),
         }),
       },
@@ -158,10 +158,10 @@ export function createMockHeadNorthConfig(
       data: "Data Platform",
     }),
 
-    getInitiatives: () => ({
-      "init-1": "Initiative One",
-      "init-2": "Initiative Two",
-      "init-3": "Initiative Three",
+    getObjectives: () => ({
+      "obj-1": "Objective One",
+      "obj-2": "Objective Two",
+      "obj-3": "Objective Three",
     }),
 
     isExternalStage: (stage: string) =>
@@ -201,7 +201,7 @@ export function createMinimalMockHeadNorthConfig(): HeadNorthConfig {
       POSTPONED: "postponed",
     }),
     getValidationDictionary: () => ({
-      releaseItem: {
+      cycleItem: {
         missingEstimate: {
           label: "Missing effort estimate",
           reference: createURL(
@@ -217,7 +217,7 @@ export function createMinimalMockHeadNorthConfig(): HeadNorthConfig {
         noProjectId: {
           label: "No parent project ID",
           reference: createURL(
-            "https://docs.example.com/release-item-conventions",
+            "https://docs.example.com/cycle-item-conventions",
           ),
         },
         missingAreaLabel: {
@@ -262,14 +262,14 @@ export function createMinimalMockHeadNorthConfig(): HeadNorthConfig {
           label: `Missing translation for theme: ${theme}`,
           reference: createURL("https://docs.example.com/theme-translations"),
         }),
-        missingInitiativeLabel: {
-          label: "Missing initiative label",
+        missingObjectiveLabel: {
+          label: "Missing objective label",
           reference: createURL("https://docs.example.com/labeling-conventions"),
         },
-        missingInitiativeTranslation: (initiative: string) => ({
-          label: `Missing translation for initiative: ${initiative}`,
+        missingObjectiveTranslation: (objective: string) => ({
+          label: `Missing translation for objective: ${objective}`,
           reference: createURL(
-            "https://docs.example.com/initiative-translations",
+            "https://docs.example.com/objective-translations",
           ),
         }),
       },

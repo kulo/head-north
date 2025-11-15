@@ -1,20 +1,20 @@
 <template>
   <a-select
-    v-model:value="selectedInitiatives"
-    class="external-selector initiative-selector"
+    v-model:value="selectedObjectives"
+    class="external-selector objective-selector"
     mode="multiple"
-    :placeholder="ALL_INITIATIVES_FILTER.name"
-    @change="handleInitiativeChange"
+    :placeholder="ALL_OBJECTIVES_FILTER.name"
+    @change="handleObjectiveChange"
   >
     <a-select-option key="all" value="all">
-      {{ ALL_INITIATIVES_FILTER.name }}
+      {{ ALL_OBJECTIVES_FILTER.name }}
     </a-select-option>
     <a-select-option
-      v-for="initiative in filteredInitiatives"
-      :key="initiative.id"
-      :value="initiative.id"
+      v-for="objective in filteredObjectives"
+      :key="objective.id"
+      :value="objective.id"
     >
-      {{ initiative.name }}
+      {{ objective.name }}
     </a-select-option>
   </a-select>
 </template>
@@ -22,59 +22,55 @@
 <script>
 import { ref, computed, watch } from "vue";
 import { useDataStore, useFilterStore } from "../../stores";
-import { ALL_INITIATIVES_FILTER } from "@/lib/utils/filter-constants";
+import { ALL_OBJECTIVES_FILTER } from "@/lib/utils/filter-constants";
 
 export default {
-  name: "InitiativeSelector",
+  name: "ObjectiveSelector",
   setup() {
     const dataStore = useDataStore();
     const filterStore = useFilterStore();
 
-    const selectedInitiatives = ref([]);
-    const initiatives = computed(() => {
-      const data = dataStore.initiatives;
+    const selectedObjectives = ref([]);
+    const objectives = computed(() => {
+      const data = dataStore.objectives;
       return Array.isArray(data) ? data : [];
     });
 
     const activeFilters = computed(() => filterStore.activeFilters);
 
-    // Filter out "All Initiatives" from the dropdown options
-    const filteredInitiatives = computed(() => {
-      return initiatives.value.filter((init) => init.id !== "all");
+    // Filter out "All Objectives" from the dropdown options
+    const filteredObjectives = computed(() => {
+      return objectives.value.filter((obj) => obj.id !== "all");
     });
 
     // Watch for changes in store and update local ref
     watch(
-      () => activeFilters.value.initiatives,
+      () => activeFilters.value.objectives,
       (newValue) => {
         if (newValue && newValue.length > 0) {
-          selectedInitiatives.value = newValue;
+          selectedObjectives.value = newValue;
         } else {
-          selectedInitiatives.value = [];
+          selectedObjectives.value = [];
         }
       },
       { immediate: true },
     );
 
-    const handleInitiativeChange = async (initiativeIds) => {
-      selectedInitiatives.value = initiativeIds;
+    const handleObjectiveChange = async (objectiveIds) => {
+      selectedObjectives.value = objectiveIds;
       try {
-        await filterStore.updateArrayFilter(
-          "initiatives",
-          initiativeIds,
-          "all",
-        );
+        await filterStore.updateArrayFilter("objectives", objectiveIds, "all");
       } catch (error) {
-        console.error("Failed to update initiatives filter:", error);
+        console.error("Failed to update objectives filter:", error);
       }
     };
 
     return {
-      selectedInitiatives,
-      initiatives,
-      filteredInitiatives,
-      handleInitiativeChange,
-      ALL_INITIATIVES_FILTER,
+      selectedObjectives,
+      objectives,
+      filteredObjectives,
+      handleObjectiveChange,
+      ALL_OBJECTIVES_FILTER,
     };
   },
 };

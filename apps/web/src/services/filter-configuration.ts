@@ -27,10 +27,10 @@ const DEFAULT_FILTER_CATEGORIES: FilterCategory[] = [
     description: "Filter by area/team",
   },
   {
-    key: "initiatives",
+    key: "objectives",
     type: "common",
     views: ["cycle-overview", "roadmap"],
-    description: "Filter by initiatives",
+    description: "Filter by objectives",
   },
   {
     key: "stages",

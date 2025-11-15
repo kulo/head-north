@@ -7,10 +7,10 @@
 
 import type {
   CycleData,
-  ReleaseItem,
+  CycleItem,
   RoadmapItem,
   Cycle,
-  Initiative,
+  Objective,
   Area,
   Person,
   Stage,
@@ -18,7 +18,7 @@ import type {
 } from "@headnorth/types";
 import type {
   NestedCycleData,
-  InitiativeWithProgress,
+  ObjectiveWithProgress,
   RoadmapItemWithProgress,
 } from "../../src/types/ui-types";
 
@@ -38,14 +38,14 @@ export function createMockCycle(overrides: Partial<Cycle> = {}): Cycle {
 }
 
 /**
- * Create a mock initiative
+ * Create a mock objective
  */
-export function createMockInitiative(
-  overrides: Partial<Initiative> = {},
-): Initiative {
+export function createMockObjective(
+  overrides: Partial<Objective> = {},
+): Objective {
   return {
-    id: "init-1",
-    name: "Platform Initiative",
+    id: "obj-1",
+    name: "Platform Objective",
     ...overrides,
   };
 }
@@ -99,20 +99,20 @@ export function createMockStage(overrides: Partial<Stage> = {}): Stage {
 }
 
 /**
- * Create a mock release item
+ * Create a mock cycle item
  */
-export function createMockReleaseItem(
-  overrides: Partial<ReleaseItem> = {},
-): ReleaseItem {
+export function createMockCycleItem(
+  overrides: Partial<CycleItem> = {},
+): CycleItem {
   return {
-    id: "RELEASE-001",
-    ticketId: "RELEASE-001",
+    id: "CYCLE-001",
+    ticketId: "CYCLE-001",
     effort: 2.0,
-    name: "Test Release Item",
+    name: "Test Cycle Item",
     areaIds: ["frontend"],
     teams: ["team-a"],
     status: "inprogress",
-    url: "https://test.atlassian.net/browse/RELEASE-001",
+    url: "https://test.atlassian.net/browse/CYCLE-001",
     isExternal: true,
     stage: "s2",
     assignee: {
@@ -127,23 +127,23 @@ export function createMockReleaseItem(
 }
 
 /**
- * Create a mock release item with different status
+ * Create a mock cycle item with different status
  */
-export function createMockReleaseItemWithStatus(status: string): ReleaseItem {
-  return createMockReleaseItem({
-    id: `RELEASE-${status.toUpperCase()}`,
-    ticketId: `RELEASE-${status.toUpperCase()}`,
+export function createMockCycleItemWithStatus(status: string): CycleItem {
+  return createMockCycleItem({
+    id: `CYCLE-${status.toUpperCase()}`,
+    ticketId: `CYCLE-${status.toUpperCase()}`,
     status,
   });
 }
 
 /**
- * Create a mock release item with different effort
+ * Create a mock cycle item with different effort
  */
-export function createMockReleaseItemWithEffort(effort: number): ReleaseItem {
-  return createMockReleaseItem({
-    id: `RELEASE-EFFORT-${effort}`,
-    ticketId: `RELEASE-EFFORT-${effort}`,
+export function createMockCycleItemWithEffort(effort: number): CycleItem {
+  return createMockCycleItem({
+    id: `CYCLE-EFFORT-${effort}`,
+    ticketId: `CYCLE-EFFORT-${effort}`,
     effort,
   });
 }
@@ -158,15 +158,15 @@ export function createMockRoadmapItem(
     id: "ROADMAP-001",
     summary: "Test Roadmap Item",
     name: "Test Roadmap Item",
-    labels: ["area:frontend", "theme:platform", "initiative:init-1"],
+    labels: ["area:frontend", "theme:platform", "objective:obj-1"],
     area: "frontend",
     theme: "platform",
     url: "https://test.atlassian.net/browse/ROADMAP-001",
     validations: [],
     startDate: "2024-01-01",
     endDate: "2024-03-31",
-    initiativeId: "init-1",
-    releaseItems: [],
+    objectiveId: "obj-1",
+    cycleItems: [],
     ...overrides,
   };
 }
@@ -196,9 +196,9 @@ export function createMockCycleData(
     createMockCycle({ id: "cycle-2", name: "Q2 2024", state: "closed" }),
   ];
 
-  const initiatives = [
-    createMockInitiative({ id: "init-1", name: "Platform Initiative" }),
-    createMockInitiative({ id: "init-2", name: "User Experience Initiative" }),
+  const objectives = [
+    createMockObjective({ id: "obj-1", name: "Platform Objective" }),
+    createMockObjective({ id: "obj-2", name: "User Experience Objective" }),
   ];
 
   const areas = [
@@ -219,24 +219,24 @@ export function createMockCycleData(
   ];
 
   const roadmapItems = [
-    createMockRoadmapItem({ id: "ROADMAP-001", initiativeId: "init-1" }),
-    createMockRoadmapItem({ id: "ROADMAP-002", initiativeId: "init-2" }),
+    createMockRoadmapItem({ id: "ROADMAP-001", objectiveId: "obj-1" }),
+    createMockRoadmapItem({ id: "ROADMAP-002", objectiveId: "obj-2" }),
   ];
 
-  const releaseItems = [
-    createMockReleaseItem({
-      id: "RELEASE-001",
+  const cycleItems = [
+    createMockCycleItem({
+      id: "CYCLE-001",
       roadmapItemId: "ROADMAP-001",
       cycleId: "cycle-1",
     }),
-    createMockReleaseItem({
-      id: "RELEASE-002",
+    createMockCycleItem({
+      id: "CYCLE-002",
       roadmapItemId: "ROADMAP-001",
       cycleId: "cycle-1",
       status: "done",
     }),
-    createMockReleaseItem({
-      id: "RELEASE-003",
+    createMockCycleItem({
+      id: "CYCLE-003",
       roadmapItemId: "ROADMAP-002",
       cycleId: "cycle-1",
       status: "todo",
@@ -245,12 +245,12 @@ export function createMockCycleData(
 
   return {
     cycles,
-    initiatives,
+    objectives,
     areas,
     assignees,
     stages,
     roadmapItems,
-    releaseItems,
+    cycleItems,
     ...overrides,
   };
 }
@@ -261,36 +261,36 @@ export function createMockCycleData(
 export function createEmptyCycleData(): CycleData {
   return {
     cycles: [],
-    initiatives: [],
+    objectives: [],
     areas: [],
     assignees: [],
     stages: [],
     roadmapItems: [],
-    releaseItems: [],
+    cycleItems: [],
   };
 }
 
 /**
- * Create a mock cycle data with mixed status release items
+ * Create a mock cycle data with mixed status cycle items
  */
 export function createMockCycleDataWithMixedStatuses(): CycleData {
   const baseData = createMockCycleData();
 
-  const mixedReleaseItems = [
-    createMockReleaseItemWithStatus("todo"),
-    createMockReleaseItemWithStatus("inprogress"),
-    createMockReleaseItemWithStatus("done"),
-    createMockReleaseItemWithStatus("cancelled"),
-    createMockReleaseItemWithStatus("postponed"),
-    createMockReleaseItemWithEffort(0.5),
-    createMockReleaseItemWithEffort(1.0),
-    createMockReleaseItemWithEffort(2.5),
-    createMockReleaseItemWithEffort(5.0),
+  const mixedCycleItems = [
+    createMockCycleItemWithStatus("todo"),
+    createMockCycleItemWithStatus("inprogress"),
+    createMockCycleItemWithStatus("done"),
+    createMockCycleItemWithStatus("cancelled"),
+    createMockCycleItemWithStatus("postponed"),
+    createMockCycleItemWithEffort(0.5),
+    createMockCycleItemWithEffort(1.0),
+    createMockCycleItemWithEffort(2.5),
+    createMockCycleItemWithEffort(5.0),
   ];
 
   return {
     ...baseData,
-    releaseItems: mixedReleaseItems,
+    cycleItems: mixedCycleItems,
   };
 }
 
@@ -298,9 +298,9 @@ export function createMockCycleDataWithMixedStatuses(): CycleData {
  * Create a mock nested cycle data
  */
 export function createMockNestedCycleData(): NestedCycleData {
-  const initiative1: InitiativeWithProgress = {
-    id: "init-1",
-    name: "Platform Initiative",
+  const objective1: ObjectiveWithProgress = {
+    id: "obj-1",
+    name: "Platform Objective",
     roadmapItems: [
       {
         id: "ROADMAP-001",
@@ -313,9 +313,9 @@ export function createMockNestedCycleData(): NestedCycleData {
         validations: [],
         startDate: "2024-01-01",
         endDate: "2024-03-31",
-        releaseItems: [
-          createMockReleaseItem({ id: "RELEASE-001", status: "inprogress" }),
-          createMockReleaseItem({ id: "RELEASE-002", status: "done" }),
+        cycleItems: [
+          createMockCycleItem({ id: "CYCLE-001", status: "inprogress" }),
+          createMockCycleItem({ id: "CYCLE-002", status: "done" }),
         ],
         weeks: 4.0,
         weeksDone: 2.0,
@@ -324,11 +324,11 @@ export function createMockNestedCycleData(): NestedCycleData {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
-        releaseItemsCount: 2,
-        releaseItemsDoneCount: 1,
+        cycleItemsCount: 2,
+        cycleItemsDoneCount: 1,
         progress: 50,
         progressWithInProgress: 100,
-        progressByReleaseItems: 50,
+        progressByCycleItems: 50,
         percentageNotToDo: 0,
         startMonth: "Jan",
         endMonth: "Mar",
@@ -344,11 +344,11 @@ export function createMockNestedCycleData(): NestedCycleData {
     weeksNotToDo: 0,
     weeksCancelled: 0,
     weeksPostponed: 0,
-    releaseItemsCount: 2,
-    releaseItemsDoneCount: 1,
+    cycleItemsCount: 2,
+    cycleItemsDoneCount: 1,
     progress: 50,
     progressWithInProgress: 100,
-    progressByReleaseItems: 50,
+    progressByCycleItems: 50,
     percentageNotToDo: 0,
     startMonth: "Jan",
     endMonth: "Mar",
@@ -358,7 +358,7 @@ export function createMockNestedCycleData(): NestedCycleData {
   };
 
   return {
-    initiatives: [initiative1],
+    objectives: [objective1],
   };
 }
 
@@ -377,9 +377,9 @@ export function createMockRoadmapItemWithProgress(): RoadmapItemWithProgress {
     validations: [],
     startDate: "2024-01-01",
     endDate: "2024-03-31",
-    releaseItems: [
-      createMockReleaseItem({ id: "RELEASE-001", status: "inprogress" }),
-      createMockReleaseItem({ id: "RELEASE-002", status: "done" }),
+    cycleItems: [
+      createMockCycleItem({ id: "CYCLE-001", status: "inprogress" }),
+      createMockCycleItem({ id: "CYCLE-002", status: "done" }),
     ],
     weeks: 4.0,
     weeksDone: 2.0,
@@ -388,11 +388,11 @@ export function createMockRoadmapItemWithProgress(): RoadmapItemWithProgress {
     weeksNotToDo: 0,
     weeksCancelled: 0,
     weeksPostponed: 0,
-    releaseItemsCount: 2,
-    releaseItemsDoneCount: 1,
+    cycleItemsCount: 2,
+    cycleItemsDoneCount: 1,
     progress: 50,
     progressWithInProgress: 100,
-    progressByReleaseItems: 50,
+    progressByCycleItems: 50,
     percentageNotToDo: 0,
     startMonth: "Jan",
     endMonth: "Mar",
@@ -403,29 +403,29 @@ export function createMockRoadmapItemWithProgress(): RoadmapItemWithProgress {
 }
 
 /**
- * Create a collection of test release items for different scenarios
+ * Create a collection of test cycle items for different scenarios
  */
-export function createTestReleaseItemCollection(): ReleaseItem[] {
+export function createTestCycleItemCollection(): CycleItem[] {
   return [
-    createMockReleaseItemWithStatus("todo"),
-    createMockReleaseItemWithStatus("inprogress"),
-    createMockReleaseItemWithStatus("done"),
-    createMockReleaseItemWithStatus("cancelled"),
-    createMockReleaseItemWithStatus("postponed"),
-    createMockReleaseItemWithEffort(0.5),
-    createMockReleaseItemWithEffort(1.0),
-    createMockReleaseItemWithEffort(2.5),
-    createMockReleaseItemWithEffort(5.0),
-    createMockReleaseItem({
-      id: "RELEASE-AREA-OBJECT",
+    createMockCycleItemWithStatus("todo"),
+    createMockCycleItemWithStatus("inprogress"),
+    createMockCycleItemWithStatus("done"),
+    createMockCycleItemWithStatus("cancelled"),
+    createMockCycleItemWithStatus("postponed"),
+    createMockCycleItemWithEffort(0.5),
+    createMockCycleItemWithEffort(1.0),
+    createMockCycleItemWithEffort(2.5),
+    createMockCycleItemWithEffort(5.0),
+    createMockCycleItem({
+      id: "CYCLE-AREA-OBJECT",
       area: { id: "backend", name: "Backend", teams: [] },
     }),
-    createMockReleaseItem({
-      id: "RELEASE-AREA-STRING",
+    createMockCycleItem({
+      id: "CYCLE-AREA-STRING",
       area: "frontend",
     }),
-    createMockReleaseItem({
-      id: "RELEASE-AREA-IDS",
+    createMockCycleItem({
+      id: "CYCLE-AREA-IDS",
       areaIds: ["frontend", "backend"],
     }),
   ];

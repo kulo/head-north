@@ -9,7 +9,7 @@ import { Filter } from "../../../src/lib/utils/filter";
 import {
   createMockNestedCycleData,
   createMockRoadmapItemWithProgress,
-  createTestReleaseItemCollection,
+  createTestCycleItemCollection,
 } from "../../fixtures/cycle-data-fixtures";
 import type {
   FilterCriteria,
@@ -30,10 +30,10 @@ describe("Filter", () => {
       const result1 = filter.apply(null as any, {});
       const result2 = filter.apply(undefined as any, {});
 
-      expect(result1.data.initiatives).toEqual([]);
-      expect(result1.totalInitiatives).toBe(0);
+      expect(result1.data.objectives).toEqual([]);
+      expect(result1.totalObjectives).toBe(0);
       expect(result1.totalRoadmapItems).toBe(0);
-      expect(result1.totalReleaseItems).toBe(0);
+      expect(result1.totalCycleItems).toBe(0);
       expect(result2).toEqual(result1);
     });
 
@@ -42,9 +42,9 @@ describe("Filter", () => {
 
       expect(result.data).toEqual(mockData);
       expect(result.appliedFilters).toEqual({});
-      expect(result.totalInitiatives).toBe(1);
+      expect(result.totalObjectives).toBe(1);
       expect(result.totalRoadmapItems).toBe(1);
-      expect(result.totalReleaseItems).toBe(2);
+      expect(result.totalCycleItems).toBe(2);
     });
 
     it("should filter by area", () => {
@@ -52,11 +52,11 @@ describe("Filter", () => {
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(2);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        2,
+      );
     });
 
     it("should filter by area 'all' (no filtering)", () => {
@@ -72,11 +72,11 @@ describe("Filter", () => {
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(2);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        2,
+      );
     });
 
     it("should filter by multiple stages", () => {
@@ -84,11 +84,11 @@ describe("Filter", () => {
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(2);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        2,
+      );
     });
 
     it("should filter by assignees", () => {
@@ -96,11 +96,11 @@ describe("Filter", () => {
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(2);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        2,
+      );
     });
 
     it("should filter by multiple assignees", () => {
@@ -108,11 +108,11 @@ describe("Filter", () => {
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(2);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        2,
+      );
     });
 
     it("should filter by cycle", () => {
@@ -120,11 +120,11 @@ describe("Filter", () => {
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(2);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        2,
+      );
     });
 
     it("should filter by cycle 'all' (no filtering)", () => {
@@ -135,32 +135,32 @@ describe("Filter", () => {
       expect(result.data).toEqual(mockData);
     });
 
-    it("should filter by initiatives", () => {
-      const criteria: FilterCriteria = { initiatives: ["init-1"] };
+    it("should filter by objectives", () => {
+      const criteria: FilterCriteria = { objectives: ["obj-1"] };
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].id).toBe("init-1");
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].id).toBe("obj-1");
     });
 
-    it("should filter by multiple initiatives", () => {
-      const criteria: FilterCriteria = { initiatives: ["init-1", "init-2"] };
+    it("should filter by multiple objectives", () => {
+      const criteria: FilterCriteria = { objectives: ["obj-1", "obj-2"] };
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].id).toBe("init-1");
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].id).toBe("obj-1");
     });
 
-    it("should return all initiatives when initiatives filter is empty array (no filter)", () => {
+    it("should return all objectives when objectives filter is empty array (no filter)", () => {
       // Empty array should mean "no filter" - same as undefined
-      const criteria: FilterCriteria = { initiatives: [] };
+      const criteria: FilterCriteria = { objectives: [] };
 
       const result = filter.apply(mockData, criteria);
 
-      // Should return all initiatives, not filter them out
-      expect(result.data.initiatives).toHaveLength(mockData.initiatives.length);
+      // Should return all objectives, not filter them out
+      expect(result.data.objectives).toHaveLength(mockData.objectives.length);
       expect(result.data).toEqual(mockData);
     });
 
@@ -183,16 +183,16 @@ describe("Filter", () => {
         stages: ["s2"],
         assignees: ["user-1"],
         cycle: "cycle-1",
-        initiatives: ["init-1"],
+        objectives: ["obj-1"],
       };
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(2);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        2,
+      );
     });
 
     it("should return empty results when no items match filters", () => {
@@ -200,32 +200,32 @@ describe("Filter", () => {
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(0);
-      expect(result.totalInitiatives).toBe(0);
+      expect(result.data.objectives).toHaveLength(0);
+      expect(result.totalObjectives).toBe(0);
       expect(result.totalRoadmapItems).toBe(0);
-      expect(result.totalReleaseItems).toBe(0);
+      expect(result.totalCycleItems).toBe(0);
     });
 
-    it("should cascade filters from release items up to initiatives", () => {
+    it("should cascade filters from cycle items up to objectives", () => {
       const criteria: FilterCriteria = { stages: ["nonexistent"] };
 
       const result = filter.apply(mockData, criteria);
 
-      expect(result.data.initiatives).toHaveLength(0);
+      expect(result.data.objectives).toHaveLength(0);
     });
 
-    it("should include roadmap items that match area filter even without matching release items", () => {
+    it("should include roadmap items that match area filter even without matching cycle items", () => {
       const dataWithAreaMatch: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
+                ...mockData.objectives[0].roadmapItems[0],
                 area: "frontend",
-                releaseItems: [
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     stage: "s1", // Different stage
                   },
                 ],
@@ -239,66 +239,63 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithAreaMatch, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
-      expect(
-        result.data.initiatives[0].roadmapItems[0].releaseItems,
-      ).toHaveLength(0);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems[0].cycleItems).toHaveLength(
+        0,
+      );
     });
   });
 
-  describe("applyInitiativeFilter", () => {
-    it("should return original data when no initiatives specified", () => {
-      const result = filter.applyInitiativeFilter(mockData, []);
+  describe("applyObjectiveFilter", () => {
+    it("should return original data when no objectives specified", () => {
+      const result = filter.applyObjectiveFilter(mockData, []);
 
       expect(result).toEqual(mockData);
     });
 
-    it("should return original data when initiatives is null/undefined", () => {
-      const result1 = filter.applyInitiativeFilter(mockData, null as any);
-      const result2 = filter.applyInitiativeFilter(mockData, undefined as any);
+    it("should return original data when objectives is null/undefined", () => {
+      const result1 = filter.applyObjectiveFilter(mockData, null as any);
+      const result2 = filter.applyObjectiveFilter(mockData, undefined as any);
 
       expect(result1).toEqual(mockData);
       expect(result2).toEqual(mockData);
     });
 
-    it("should filter by specific initiatives", () => {
-      const result = filter.applyInitiativeFilter(mockData, ["init-1"]);
+    it("should filter by specific objectives", () => {
+      const result = filter.applyObjectiveFilter(mockData, ["obj-1"]);
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("init-1");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("obj-1");
     });
 
-    it("should filter by multiple initiatives", () => {
-      const result = filter.applyInitiativeFilter(mockData, [
-        "init-1",
-        "init-2",
-      ]);
+    it("should filter by multiple objectives", () => {
+      const result = filter.applyObjectiveFilter(mockData, ["obj-1", "obj-2"]);
 
-      expect(result.initiatives).toHaveLength(1);
-      expect(result.initiatives[0].id).toBe("init-1");
+      expect(result.objectives).toHaveLength(1);
+      expect(result.objectives[0].id).toBe("obj-1");
     });
 
-    it("should return empty initiatives when none match", () => {
-      const result = filter.applyInitiativeFilter(mockData, ["nonexistent"]);
+    it("should return empty objectives when none match", () => {
+      const result = filter.applyObjectiveFilter(mockData, ["nonexistent"]);
 
-      expect(result.initiatives).toHaveLength(0);
+      expect(result.objectives).toHaveLength(0);
     });
   });
 
   describe("private methods (tested through public interface)", () => {
     it("should handle area filtering with string area", () => {
       const dataWithStringArea: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
+                ...mockData.objectives[0].roadmapItems[0],
                 area: "frontend",
-                releaseItems: [
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     area: "frontend",
                   },
                 ],
@@ -312,22 +309,22 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithStringArea, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
     it("should handle area filtering with area object", () => {
       const dataWithAreaObject: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
+                ...mockData.objectives[0].roadmapItems[0],
                 area: { id: "frontend", name: "Frontend", teams: [] },
-                releaseItems: [
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     area: { id: "frontend", name: "Frontend", teams: [] },
                   },
                 ],
@@ -341,21 +338,21 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithAreaObject, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
     it("should handle area filtering with areaIds array", () => {
       const dataWithAreaIds: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
-                releaseItems: [
+                ...mockData.objectives[0].roadmapItems[0],
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     areaIds: ["frontend", "backend"],
                   },
                 ],
@@ -369,21 +366,21 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithAreaIds, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
     it("should handle assignee filtering with id field", () => {
       const dataWithAssigneeId: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
-                releaseItems: [
+                ...mockData.objectives[0].roadmapItems[0],
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     assignee: { id: "user-1", name: "John Doe" },
                   },
                 ],
@@ -397,21 +394,21 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithAssigneeId, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
     it("should handle assignee filtering with accountId field", () => {
       const dataWithAssigneeAccountId: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
-                releaseItems: [
+                ...mockData.objectives[0].roadmapItems[0],
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     assignee: { accountId: "user-1", displayName: "John Doe" },
                   },
                 ],
@@ -425,21 +422,21 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithAssigneeAccountId, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
     it("should handle assignee filtering with no assignee", () => {
       const dataWithNoAssignee: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
-                releaseItems: [
+                ...mockData.objectives[0].roadmapItems[0],
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     assignee: null,
                   },
                 ],
@@ -453,20 +450,20 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithNoAssignee, criteria);
 
-      expect(result.data.initiatives).toHaveLength(0);
+      expect(result.data.objectives).toHaveLength(0);
     });
 
     it("should handle cycle filtering", () => {
       const dataWithCycle: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
-                releaseItems: [
+                ...mockData.objectives[0].roadmapItems[0],
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     cycleId: "cycle-1",
                   },
                 ],
@@ -480,21 +477,21 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithCycle, criteria);
 
-      expect(result.data.initiatives).toHaveLength(1);
-      expect(result.data.initiatives[0].roadmapItems).toHaveLength(1);
+      expect(result.data.objectives).toHaveLength(1);
+      expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
     it("should handle cycle filtering with no cycleId", () => {
       const dataWithNoCycle: NestedCycleData = {
-        initiatives: [
+        objectives: [
           {
-            ...mockData.initiatives[0],
+            ...mockData.objectives[0],
             roadmapItems: [
               {
-                ...mockData.initiatives[0].roadmapItems[0],
-                releaseItems: [
+                ...mockData.objectives[0].roadmapItems[0],
+                cycleItems: [
                   {
-                    ...mockData.initiatives[0].roadmapItems[0].releaseItems[0],
+                    ...mockData.objectives[0].roadmapItems[0].cycleItems[0],
                     cycleId: null,
                   },
                 ],
@@ -508,7 +505,7 @@ describe("Filter", () => {
 
       const result = filter.apply(dataWithNoCycle, criteria);
 
-      expect(result.data.initiatives).toHaveLength(0);
+      expect(result.data.objectives).toHaveLength(0);
     });
   });
 });

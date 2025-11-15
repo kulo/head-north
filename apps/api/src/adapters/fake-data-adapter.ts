@@ -9,11 +9,11 @@ import type {
   RawCycleData,
   Cycle,
   RoadmapItem,
-  ReleaseItem,
+  CycleItem,
   Person,
   Area,
   Team,
-  Initiative,
+  Objective,
   ISODateString,
 } from "@headnorth/types";
 import type { JiraAdapter } from "./jira-adapter.interface";
@@ -21,7 +21,7 @@ import type { JiraAdapter } from "./jira-adapter.interface";
 export class FakeDataAdapter implements JiraAdapter {
   private assignees: Person[];
   private areas: Area[];
-  private initiatives: Initiative[];
+  private objectives: Objective[];
   private roadmapItems: Record<string, RoadmapItem>;
   private sprints: Cycle[];
 
@@ -46,14 +46,14 @@ export class FakeDataAdapter implements JiraAdapter {
       teams: this.generateTeamsForArea(id, name),
     }));
 
-    // Initialize initiatives from config
-    const initiativesConfig = this.config.getInitiatives();
-    this.initiatives = Object.entries(initiativesConfig).map(([id, name]) => ({
+    // Initialize objectives from config
+    const objectivesConfig = this.config.getObjectives();
+    this.objectives = Object.entries(objectivesConfig).map(([id, name]) => ({
       id,
       name,
     }));
 
-    // Generate roadmap items dynamically based on areas and initiatives from config
+    // Generate roadmap items dynamically based on areas and objectives from config
     this.roadmapItems = this.generateRoadmapItems();
 
     // Generate sprints following Shape-up methodology (2-month cycles)
@@ -62,10 +62,10 @@ export class FakeDataAdapter implements JiraAdapter {
 
   async fetchCycleData(): Promise<Either<Error, RawCycleData>> {
     return safeAsync(async () => {
-      // Generate release items based on roadmap items and sprints
-      const releaseItems = this.generateReleaseItems();
+      // Generate cycle items based on roadmap items and sprints
+      const cycleItems = this.generateCycleItems();
       const areas = this.generateAreas();
-      const initiatives = this.generateInitiatives();
+      const objectives = this.generateObjectives();
       const teams = this.generateTeams();
       const assignees = this.generateAssignees();
       const stages = this.config.getStages();
@@ -73,9 +73,9 @@ export class FakeDataAdapter implements JiraAdapter {
       return {
         cycles: this.sprints,
         roadmapItems: Object.values(this.roadmapItems),
-        releaseItems,
+        cycleItems,
         areas,
-        initiatives,
+        objectives,
         assignees,
         stages,
         teams,
@@ -165,7 +165,7 @@ export class FakeDataAdapter implements JiraAdapter {
   }
 
   /**
-   * Generate roadmap items dynamically based on areas and initiatives from config
+   * Generate roadmap items dynamically based on areas and objectives from config
    */
   private generateRoadmapItems(): Record<string, RoadmapItem> {
     const roadmapItems: Record<string, RoadmapItem> = {};
@@ -178,14 +178,14 @@ export class FakeDataAdapter implements JiraAdapter {
 
     let roadmapItemCounter = 1;
 
-    // Generate roadmap items for each initiative (1-5 items per initiative)
-    this.initiatives.forEach((initiative, _initiativeIndex) => {
-      // Generate between 1 and 5 roadmap items per initiative
+    // Generate roadmap items for each objective (1-5 items per objective)
+    this.objectives.forEach((objective, _objectiveIndex) => {
+      // Generate between 1 and 5 roadmap items per objective
       const numRoadmapItems = Math.floor(Math.random() * 5) + 1; // 1-5 items
 
       for (let i = 0; i < numRoadmapItems; i++) {
         const roadmapItemKey = `ROAD-${roadmapItemCounter}`;
-        const summary = `${initiative.name} - ${roadmapItemCounter}`;
+        const summary = `${objective.name} - ${roadmapItemCounter}`;
 
         // Pick a random area for this roadmap item
         const area = this.areas[Math.floor(Math.random() * this.areas.length)];
@@ -201,7 +201,7 @@ export class FakeDataAdapter implements JiraAdapter {
             ? areaTeams[Math.floor(Math.random() * areaTeams.length)]
             : teamKeys[0];
 
-        // Pick a theme that matches the initiative
+        // Pick a theme that matches the objective
         const selectedTheme =
           themeKeys[Math.floor(Math.random() * themeKeys.length)];
 
@@ -211,13 +211,13 @@ export class FakeDataAdapter implements JiraAdapter {
           summary,
           labels: [
             area.id,
-            `initiative:${initiative.id}`,
+            `objective:${objective.id}`,
             `area:${area.id}`,
             `team:${selectedTeam}`,
             `theme:${selectedTheme}`,
           ],
           area: area.id,
-          initiativeId: initiative.id,
+          objectiveId: objective.id,
           isExternal: true,
           url: `https://example.com/browse/${roadmapItemKey}`,
           validations: [],
@@ -227,7 +227,7 @@ export class FakeDataAdapter implements JiraAdapter {
       }
     });
 
-    // Add some roadmap items without initiatives to test UI behavior
+    // Add some roadmap items without objectives to test UI behavior
     for (let i = 0; i < 3; i++) {
       const roadmapItemKey = `ROAD-${roadmapItemCounter}`;
       const area = this.areas[Math.floor(Math.random() * this.areas.length)];
@@ -259,7 +259,7 @@ export class FakeDataAdapter implements JiraAdapter {
           `theme:${selectedTheme}`,
         ],
         area: area.id,
-        initiativeId: null, // No initiative assigned
+        objectiveId: null, // No objective assigned
         isExternal: true,
         url: `https://example.com/browse/${roadmapItemKey}`,
         validations: [],
@@ -272,23 +272,23 @@ export class FakeDataAdapter implements JiraAdapter {
   }
 
   /**
-   * Generate release items based on roadmap items and sprints
+   * Generate cycle items based on roadmap items and sprints
    */
-  private generateReleaseItems(): ReleaseItem[] {
-    const allReleaseItems: ReleaseItem[] = [];
+  private generateCycleItems(): CycleItem[] {
+    const allCycleItems: CycleItem[] = [];
 
-    // Create 1-3 release items for each roadmap item, distributed across different cycles
+    // Create 1-3 cycle items for each roadmap item, distributed across different cycles
     Object.keys(this.roadmapItems).forEach((roadmapItemKey) => {
-      const releaseItems = this.getReleaseItemsForRoadmapItem(roadmapItemKey);
+      const cycleItems = this.getCycleItemsForRoadmapItem(roadmapItemKey);
 
-      // Assign each release item to a random sprint (cycle)
-      releaseItems.forEach((item) => {
+      // Assign each cycle item to a random sprint (cycle)
+      cycleItems.forEach((item) => {
         const sprint =
           this.sprints.length > 0
             ? this.sprints[Math.floor(Math.random() * this.sprints.length)]
             : null;
 
-        allReleaseItems.push({
+        allCycleItems.push({
           ...item,
           roadmapItemId: roadmapItemKey,
           cycleId: sprint?.id || null,
@@ -297,20 +297,20 @@ export class FakeDataAdapter implements JiraAdapter {
       });
     });
 
-    return allReleaseItems;
+    return allCycleItems;
   }
 
   /**
-   * Get release items for a specific roadmap item
+   * Get cycle items for a specific roadmap item
    */
-  private getReleaseItemsForRoadmapItem(roadmapItemKey: string): ReleaseItem[] {
+  private getCycleItemsForRoadmapItem(roadmapItemKey: string): CycleItem[] {
     const stages = ["s0", "s1", "s2", "s3", "s3+"]; // Stage progression order
     const roadmapItem = this.roadmapItems[roadmapItemKey];
-    const releaseItems: ReleaseItem[] = [];
+    const cycleItems: CycleItem[] = [];
 
-    if (!roadmapItem) return releaseItems;
+    if (!roadmapItem) return cycleItems;
 
-    // Generate 1-3 release items per roadmap item
+    // Generate 1-3 cycle items per roadmap item
     const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items
 
     // Select random stages in progression order (s0 → s1 → s2 → s3 → s3+)
@@ -324,15 +324,15 @@ export class FakeDataAdapter implements JiraAdapter {
       const statuses = ["To Do", "In Progress", "Done", "Review"];
       const status =
         statuses[Math.floor(Math.random() * statuses.length)] || "To Do";
-      const releaseStage = selectedStages[i] || "s0";
+      const cycleStage = selectedStages[i] || "s0";
 
       if (!assignee) continue; // Skip if no assignee
 
-      releaseItems.push({
-        id: `${roadmapItemKey}-RELEASE-${i + 1}`,
-        ticketId: `${roadmapItemKey}-RELEASE-${i + 1}`,
+      cycleItems.push({
+        id: `${roadmapItemKey}-CYCLE-${i + 1}`,
+        ticketId: `${roadmapItemKey}-CYCLE-${i + 1}`,
         effort: Math.floor(Math.random() * 8) + 1,
-        name: `${roadmapItem.summary} - Release Item ${i + 1} - (${releaseStage})`,
+        name: `${roadmapItem.summary} - Cycle Item ${i + 1} - (${cycleStage})`,
         areaIds: [
           typeof roadmapItem.area === "string"
             ? roadmapItem.area
@@ -340,9 +340,9 @@ export class FakeDataAdapter implements JiraAdapter {
         ],
         teams: [assignee.id],
         status: status,
-        url: `https://example.com/browse/${roadmapItemKey}-RELEASE-${i + 1}`,
+        url: `https://example.com/browse/${roadmapItemKey}-CYCLE-${i + 1}`,
         isExternal: true,
-        stage: releaseStage,
+        stage: cycleStage,
         assignee: assignee,
         validations: [],
         roadmapItemId: roadmapItemKey,
@@ -351,7 +351,7 @@ export class FakeDataAdapter implements JiraAdapter {
       });
     }
 
-    return releaseItems;
+    return cycleItems;
   }
 
   private generateAreas(): Record<string, Area> {
@@ -375,10 +375,10 @@ export class FakeDataAdapter implements JiraAdapter {
     return result;
   }
 
-  private generateInitiatives(): Initiative[] {
-    const initiatives = this.config.getInitiatives();
+  private generateObjectives(): Objective[] {
+    const objectives = this.config.getObjectives();
 
-    return Object.entries(initiatives).map(([id, name]) => ({
+    return Object.entries(objectives).map(([id, name]) => ({
       id,
       name,
     }));

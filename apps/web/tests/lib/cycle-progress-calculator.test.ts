@@ -1,7 +1,7 @@
 /**
  * Tests for cycle-progress-calculator.ts
  *
- * Tests the cycle progress calculation logic that aggregates progress from initiatives.
+ * Tests the cycle progress calculation logic that aggregates progress from objectives.
  */
 
 import { describe, it, expect } from "vitest";
@@ -10,13 +10,13 @@ import {
   createMockCycle,
   createMockNestedCycleData,
   createMockRoadmapItemWithProgress,
-  createMockReleaseItem,
+  createMockCycleItem,
 } from "../fixtures/cycle-data-fixtures";
-import type { InitiativeWithProgress } from "../../src/types/ui-types";
+import type { ObjectiveWithProgress } from "../../src/types/ui-types";
 
 describe("cycle-progress-calculator", () => {
   describe("calculateCycleProgress", () => {
-    it("should calculate cycle progress with initiatives", () => {
+    it("should calculate cycle progress with objectives", () => {
       // Mock current date to be in the middle of the cycle
       const originalDate = Date;
       const mockDate = new Date("2024-02-15T12:00:00.000Z");
@@ -41,10 +41,10 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [
+      const objectives: ObjectiveWithProgress[] = [
         {
-          id: "init-1",
-          name: "Platform Initiative",
+          id: "obj-1",
+          name: "Platform Objective",
           roadmapItems: [createMockRoadmapItemWithProgress()],
           weeks: 4.0,
           weeksDone: 2.0,
@@ -53,11 +53,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 2,
-          releaseItemsDoneCount: 1,
+          cycleItemsCount: 2,
+          cycleItemsDoneCount: 1,
           progress: 50,
           progressWithInProgress: 100,
-          progressByReleaseItems: 50,
+          progressByCycleItems: 50,
           percentageNotToDo: 0,
           startMonth: "Jan",
           endMonth: "Mar",
@@ -67,7 +67,7 @@ describe("cycle-progress-calculator", () => {
         },
       ];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result).toEqual({
         id: "cycle-1",
@@ -83,11 +83,11 @@ describe("cycle-progress-calculator", () => {
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
-        releaseItemsCount: 2,
-        releaseItemsDoneCount: 1,
+        cycleItemsCount: 2,
+        cycleItemsDoneCount: 1,
         progress: 50,
         progressWithInProgress: 100,
-        progressByReleaseItems: 50,
+        progressByCycleItems: 50,
         percentageNotToDo: 0,
         startMonth: "Jan",
         endMonth: "Mar",
@@ -100,7 +100,7 @@ describe("cycle-progress-calculator", () => {
       global.Date = originalDate;
     });
 
-    it("should calculate cycle progress with multiple initiatives", () => {
+    it("should calculate cycle progress with multiple objectives", () => {
       const cycle = createMockCycle({
         id: "cycle-1",
         name: "Q1 2024",
@@ -108,10 +108,10 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [
+      const objectives: ObjectiveWithProgress[] = [
         {
-          id: "init-1",
-          name: "Platform Initiative",
+          id: "obj-1",
+          name: "Platform Objective",
           roadmapItems: [createMockRoadmapItemWithProgress()],
           weeks: 4.0,
           weeksDone: 2.0,
@@ -120,11 +120,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 2,
-          releaseItemsDoneCount: 1,
+          cycleItemsCount: 2,
+          cycleItemsDoneCount: 1,
           progress: 50,
           progressWithInProgress: 100,
-          progressByReleaseItems: 50,
+          progressByCycleItems: 50,
           percentageNotToDo: 0,
           startMonth: "Jan",
           endMonth: "Mar",
@@ -133,8 +133,8 @@ describe("cycle-progress-calculator", () => {
           currentDayPercentage: 17,
         },
         {
-          id: "init-2",
-          name: "User Experience Initiative",
+          id: "obj-2",
+          name: "User Experience Objective",
           roadmapItems: [
             {
               ...createMockRoadmapItemWithProgress(),
@@ -143,16 +143,16 @@ describe("cycle-progress-calculator", () => {
               weeksDone: 3.0,
               weeksInProgress: 2.0,
               weeksTodo: 1.0,
-              releaseItemsCount: 3,
-              releaseItemsDoneCount: 2,
-              releaseItems: [
-                createMockReleaseItem({
-                  id: "RELEASE-003",
+              cycleItemsCount: 3,
+              cycleItemsDoneCount: 2,
+              cycleItems: [
+                createMockCycleItem({
+                  id: "CYCLE-003",
                   effort: 3.0,
                   status: "done",
                 }),
-                createMockReleaseItem({
-                  id: "RELEASE-004",
+                createMockCycleItem({
+                  id: "CYCLE-004",
                   effort: 3.0,
                   status: "inprogress",
                 }),
@@ -166,11 +166,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 3,
-          releaseItemsDoneCount: 2,
+          cycleItemsCount: 3,
+          cycleItemsDoneCount: 2,
           progress: 50,
           progressWithInProgress: 83,
-          progressByReleaseItems: 67,
+          progressByCycleItems: 67,
           percentageNotToDo: 0,
           startMonth: "Jan",
           endMonth: "Mar",
@@ -180,20 +180,20 @@ describe("cycle-progress-calculator", () => {
         },
       ];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.weeks).toBe(10.0); // 4.0 + 6.0
       expect(result.weeksDone).toBe(5.0); // 2.0 + 3.0
       expect(result.weeksInProgress).toBe(5.0); // 2.0 + 3.0
       expect(result.weeksTodo).toBe(0); // 0 + 0
-      expect(result.releaseItemsCount).toBe(4); // 2 + 2
-      expect(result.releaseItemsDoneCount).toBe(2); // 1 + 1
+      expect(result.cycleItemsCount).toBe(4); // 2 + 2
+      expect(result.cycleItemsDoneCount).toBe(2); // 1 + 1
       expect(result.progress).toBe(50); // 5/10 * 100
       expect(result.progressWithInProgress).toBe(100); // (5+5)/10 * 100
-      expect(result.progressByReleaseItems).toBe(50); // 2/4 * 100
+      expect(result.progressByCycleItems).toBe(50); // 2/4 * 100
     });
 
-    it("should calculate cycle progress with empty initiatives", () => {
+    it("should calculate cycle progress with empty objectives", () => {
       const cycle = createMockCycle({
         id: "cycle-1",
         name: "Q1 2024",
@@ -201,9 +201,9 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [];
+      const objectives: ObjectiveWithProgress[] = [];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.weeks).toBe(0);
       expect(result.weeksDone).toBe(0);
@@ -212,15 +212,15 @@ describe("cycle-progress-calculator", () => {
       expect(result.weeksNotToDo).toBe(0);
       expect(result.weeksCancelled).toBe(0);
       expect(result.weeksPostponed).toBe(0);
-      expect(result.releaseItemsCount).toBe(0);
-      expect(result.releaseItemsDoneCount).toBe(0);
+      expect(result.cycleItemsCount).toBe(0);
+      expect(result.cycleItemsDoneCount).toBe(0);
       expect(result.progress).toBe(0);
       expect(result.progressWithInProgress).toBe(0);
-      expect(result.progressByReleaseItems).toBe(0);
+      expect(result.progressByCycleItems).toBe(0);
       expect(result.percentageNotToDo).toBe(0);
     });
 
-    it("should calculate cycle progress with initiatives having no roadmap items", () => {
+    it("should calculate cycle progress with objectives having no roadmap items", () => {
       const cycle = createMockCycle({
         id: "cycle-1",
         name: "Q1 2024",
@@ -228,10 +228,10 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [
+      const objectives: ObjectiveWithProgress[] = [
         {
-          id: "init-1",
-          name: "Empty Initiative",
+          id: "obj-1",
+          name: "Empty Objective",
           roadmapItems: [],
           weeks: 0,
           weeksDone: 0,
@@ -240,11 +240,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 0,
-          releaseItemsDoneCount: 0,
+          cycleItemsCount: 0,
+          cycleItemsDoneCount: 0,
           progress: 0,
           progressWithInProgress: 0,
-          progressByReleaseItems: 0,
+          progressByCycleItems: 0,
           percentageNotToDo: 0,
           startMonth: "",
           endMonth: "",
@@ -254,7 +254,7 @@ describe("cycle-progress-calculator", () => {
         },
       ];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.weeks).toBe(0);
       expect(result.weeksDone).toBe(0);
@@ -263,15 +263,15 @@ describe("cycle-progress-calculator", () => {
       expect(result.weeksNotToDo).toBe(0);
       expect(result.weeksCancelled).toBe(0);
       expect(result.weeksPostponed).toBe(0);
-      expect(result.releaseItemsCount).toBe(0);
-      expect(result.releaseItemsDoneCount).toBe(0);
+      expect(result.cycleItemsCount).toBe(0);
+      expect(result.cycleItemsDoneCount).toBe(0);
       expect(result.progress).toBe(0);
       expect(result.progressWithInProgress).toBe(0);
-      expect(result.progressByReleaseItems).toBe(0);
+      expect(result.progressByCycleItems).toBe(0);
       expect(result.percentageNotToDo).toBe(0);
     });
 
-    it("should calculate cycle progress with initiatives having null roadmap items", () => {
+    it("should calculate cycle progress with objectives having null roadmap items", () => {
       const cycle = createMockCycle({
         id: "cycle-1",
         name: "Q1 2024",
@@ -279,10 +279,10 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [
+      const objectives: ObjectiveWithProgress[] = [
         {
-          id: "init-1",
-          name: "Initiative with Null Roadmap Items",
+          id: "obj-1",
+          name: "Objective with Null Roadmap Items",
           roadmapItems: null as any,
           weeks: 0,
           weeksDone: 0,
@@ -291,11 +291,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 0,
-          releaseItemsDoneCount: 0,
+          cycleItemsCount: 0,
+          cycleItemsDoneCount: 0,
           progress: 0,
           progressWithInProgress: 0,
-          progressByReleaseItems: 0,
+          progressByCycleItems: 0,
           percentageNotToDo: 0,
           startMonth: "",
           endMonth: "",
@@ -305,7 +305,7 @@ describe("cycle-progress-calculator", () => {
         },
       ];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.weeks).toBe(0);
       expect(result.weeksDone).toBe(0);
@@ -314,15 +314,15 @@ describe("cycle-progress-calculator", () => {
       expect(result.weeksNotToDo).toBe(0);
       expect(result.weeksCancelled).toBe(0);
       expect(result.weeksPostponed).toBe(0);
-      expect(result.releaseItemsCount).toBe(0);
-      expect(result.releaseItemsDoneCount).toBe(0);
+      expect(result.cycleItemsCount).toBe(0);
+      expect(result.cycleItemsDoneCount).toBe(0);
       expect(result.progress).toBe(0);
       expect(result.progressWithInProgress).toBe(0);
-      expect(result.progressByReleaseItems).toBe(0);
+      expect(result.progressByCycleItems).toBe(0);
       expect(result.percentageNotToDo).toBe(0);
     });
 
-    it("should calculate cycle progress with initiatives having undefined roadmap items", () => {
+    it("should calculate cycle progress with objectives having undefined roadmap items", () => {
       const cycle = createMockCycle({
         id: "cycle-1",
         name: "Q1 2024",
@@ -330,10 +330,10 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [
+      const objectives: ObjectiveWithProgress[] = [
         {
-          id: "init-1",
-          name: "Initiative with Undefined Roadmap Items",
+          id: "obj-1",
+          name: "Objective with Undefined Roadmap Items",
           roadmapItems: undefined as any,
           weeks: 0,
           weeksDone: 0,
@@ -342,11 +342,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 0,
-          releaseItemsDoneCount: 0,
+          cycleItemsCount: 0,
+          cycleItemsDoneCount: 0,
           progress: 0,
           progressWithInProgress: 0,
-          progressByReleaseItems: 0,
+          progressByCycleItems: 0,
           percentageNotToDo: 0,
           startMonth: "",
           endMonth: "",
@@ -356,7 +356,7 @@ describe("cycle-progress-calculator", () => {
         },
       ];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.weeks).toBe(0);
       expect(result.weeksDone).toBe(0);
@@ -365,15 +365,15 @@ describe("cycle-progress-calculator", () => {
       expect(result.weeksNotToDo).toBe(0);
       expect(result.weeksCancelled).toBe(0);
       expect(result.weeksPostponed).toBe(0);
-      expect(result.releaseItemsCount).toBe(0);
-      expect(result.releaseItemsDoneCount).toBe(0);
+      expect(result.cycleItemsCount).toBe(0);
+      expect(result.cycleItemsDoneCount).toBe(0);
       expect(result.progress).toBe(0);
       expect(result.progressWithInProgress).toBe(0);
-      expect(result.progressByReleaseItems).toBe(0);
+      expect(result.progressByCycleItems).toBe(0);
       expect(result.percentageNotToDo).toBe(0);
     });
 
-    it("should calculate cycle progress with initiatives having roadmap items with null release items", () => {
+    it("should calculate cycle progress with objectives having roadmap items with null cycle items", () => {
       const cycle = createMockCycle({
         id: "cycle-1",
         name: "Q1 2024",
@@ -381,14 +381,14 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [
+      const objectives: ObjectiveWithProgress[] = [
         {
-          id: "init-1",
-          name: "Initiative with Null Release Items",
+          id: "obj-1",
+          name: "Objective with Null Cycle Items",
           roadmapItems: [
             {
               ...createMockRoadmapItemWithProgress(),
-              releaseItems: null as any,
+              cycleItems: null as any,
             },
           ],
           weeks: 0,
@@ -398,11 +398,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 0,
-          releaseItemsDoneCount: 0,
+          cycleItemsCount: 0,
+          cycleItemsDoneCount: 0,
           progress: 0,
           progressWithInProgress: 0,
-          progressByReleaseItems: 0,
+          progressByCycleItems: 0,
           percentageNotToDo: 0,
           startMonth: "",
           endMonth: "",
@@ -412,7 +412,7 @@ describe("cycle-progress-calculator", () => {
         },
       ];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.weeks).toBe(0);
       expect(result.weeksDone).toBe(0);
@@ -421,11 +421,11 @@ describe("cycle-progress-calculator", () => {
       expect(result.weeksNotToDo).toBe(0);
       expect(result.weeksCancelled).toBe(0);
       expect(result.weeksPostponed).toBe(0);
-      expect(result.releaseItemsCount).toBe(0);
-      expect(result.releaseItemsDoneCount).toBe(0);
+      expect(result.cycleItemsCount).toBe(0);
+      expect(result.cycleItemsDoneCount).toBe(0);
       expect(result.progress).toBe(0);
       expect(result.progressWithInProgress).toBe(0);
-      expect(result.progressByReleaseItems).toBe(0);
+      expect(result.progressByCycleItems).toBe(0);
       expect(result.percentageNotToDo).toBe(0);
     });
 
@@ -439,9 +439,9 @@ describe("cycle-progress-calculator", () => {
         end: "2024-03-31",
       });
 
-      const initiatives: InitiativeWithProgress[] = [];
+      const objectives: ObjectiveWithProgress[] = [];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.id).toBe("cycle-1");
       expect(result.name).toBe("Q1 2024");
@@ -459,10 +459,10 @@ describe("cycle-progress-calculator", () => {
         end: null,
       });
 
-      const initiatives: InitiativeWithProgress[] = [
+      const objectives: ObjectiveWithProgress[] = [
         {
-          id: "init-1",
-          name: "Platform Initiative",
+          id: "obj-1",
+          name: "Platform Objective",
           roadmapItems: [createMockRoadmapItemWithProgress()],
           weeks: 4.0,
           weeksDone: 2.0,
@@ -471,11 +471,11 @@ describe("cycle-progress-calculator", () => {
           weeksNotToDo: 0,
           weeksCancelled: 0,
           weeksPostponed: 0,
-          releaseItemsCount: 2,
-          releaseItemsDoneCount: 1,
+          cycleItemsCount: 2,
+          cycleItemsDoneCount: 1,
           progress: 50,
           progressWithInProgress: 100,
-          progressByReleaseItems: 50,
+          progressByCycleItems: 50,
           percentageNotToDo: 0,
           startMonth: "",
           endMonth: "",
@@ -485,7 +485,7 @@ describe("cycle-progress-calculator", () => {
         },
       ];
 
-      const result = calculateCycleProgress(cycle, initiatives);
+      const result = calculateCycleProgress(cycle, objectives);
 
       expect(result.startMonth).toBe("");
       expect(result.endMonth).toBe("");

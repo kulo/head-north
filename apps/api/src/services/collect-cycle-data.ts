@@ -24,26 +24,26 @@ export default async function collectCycleData(
 
 /**
  * Apply Head North-specific business logic to raw data
- * Domain logic: calculates cycle progress from release items
+ * Domain logic: calculates cycle progress from cycle items
  */
 function applyBusinessLogic(rawData: RawCycleData): RawCycleData {
-  // Calculate progress for each cycle based on release item completion
+  // Calculate progress for each cycle based on cycle item completion
   const cyclesWithProgress = rawData.cycles.map((cycle) => {
-    const cycleReleaseItems = rawData.releaseItems.filter(
+    const cycleItems = rawData.cycleItems.filter(
       (ri) => ri.cycleId === cycle.id,
     );
 
-    if (cycleReleaseItems.length === 0) {
+    if (cycleItems.length === 0) {
       return { ...cycle, progress: 0 };
     }
 
-    const completedItems = cycleReleaseItems.filter((ri) => {
+    const completedItems = cycleItems.filter((ri) => {
       const status = ri.status?.toLowerCase();
       return status === "done" || status === "completed" || status === "closed";
     });
 
     const progress = Math.round(
-      (completedItems.length / cycleReleaseItems.length) * 100,
+      (completedItems.length / cycleItems.length) * 100,
     );
     return { ...cycle, progress };
   });
@@ -86,20 +86,20 @@ export const prepareCycleDataResponse = (
 ): {
   readonly cycles: RawCycleData["cycles"];
   readonly roadmapItems: RawCycleData["roadmapItems"];
-  readonly releaseItems: RawCycleData["releaseItems"];
+  readonly cycleItems: RawCycleData["cycleItems"];
   readonly assignees: RawCycleData["assignees"];
   readonly areas: Array<{ readonly id: string; readonly name: string }>;
-  readonly initiatives: RawCycleData["initiatives"];
+  readonly objectives: RawCycleData["objectives"];
   readonly stages: RawCycleData["stages"];
   readonly teams?: RawCycleData["teams"];
 } => {
   const {
     cycles,
     roadmapItems,
-    releaseItems,
+    cycleItems,
     assignees,
     areas,
-    initiatives: configInitiatives,
+    objectives: configObjectives,
     stages,
     teams,
   } = rawData;
@@ -107,10 +107,10 @@ export const prepareCycleDataResponse = (
   return {
     cycles,
     roadmapItems,
-    releaseItems,
+    cycleItems,
     assignees,
     areas: formatAreasForResponse(areas),
-    initiatives: configInitiatives,
+    objectives: configObjectives,
     stages,
     teams,
   };

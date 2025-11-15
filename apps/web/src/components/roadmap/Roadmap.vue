@@ -6,7 +6,7 @@
         <page-selector></page-selector>
       </div>
       <div class="cycle-overview-header__right">
-        <initiative-selector></initiative-selector>
+        <objective-selector></objective-selector>
         <area-selector></area-selector>
       </div>
     </div>
@@ -16,8 +16,8 @@
       <div
         v-else-if="
           !roadmapData ||
-          !roadmapData.initiatives ||
-          roadmapData.initiatives.length === 0
+          !roadmapData.objectives ||
+          roadmapData.objectives.length === 0
         "
         class="no-data"
       >
@@ -26,25 +26,25 @@
       <div v-else>
         <div class="roadmap-table">
           <template
-            v-for="(row, index) in roadmapData.initiatives"
+            v-for="(row, index) in roadmapData.objectives"
             :key="row?.id || index"
           >
             <template v-if="row && row.id">
-              <!-- Initiative header row -->
-              <a-row class="roadmap-initiative-header-row">
+              <!-- Objective header row -->
+              <a-row class="roadmap-objective-header-row">
                 <a-col :span="6">
-                  <div class="roadmap-initiative-header-name">
-                    {{ row.name || `Initiative: ${row.id}` }}
+                  <div class="roadmap-objective-header-name">
+                    {{ row.name || `Objective: ${row.id}` }}
                   </div>
                 </a-col>
                 <a-col v-for="cycle in orderedCycles" :key="cycle.id" :span="4">
-                  <div class="roadmap-initiative-header-cycle">
+                  <div class="roadmap-objective-header-cycle">
                     {{ cycle.name }}
                   </div>
                 </a-col>
               </a-row>
 
-              <!-- Roadmap items for this initiative -->
+              <!-- Roadmap items for this objective -->
               <roadmap-item-overview
                 v-for="(roadmapItem, itemIndex) in row.roadmapItems || []"
                 :key="roadmapItem.id"
@@ -67,7 +67,7 @@ import RoadmapItemOverview from "./RoadmapItemOverview.vue";
 import Logo from "../ui/Logo.vue";
 import PageSelector from "../ui/PageSelector.vue";
 import AreaSelector from "../ui/AreaSelector.vue";
-import InitiativeSelector from "../ui/InitiativeSelector.vue";
+import ObjectiveSelector from "../ui/ObjectiveSelector.vue";
 
 export default {
   name: "Roadmap",
@@ -76,7 +76,7 @@ export default {
     Logo,
     PageSelector,
     AreaSelector,
-    InitiativeSelector,
+    ObjectiveSelector,
   },
   setup() {
     const appStore = useAppStore();

@@ -17,7 +17,7 @@ import type { CycleData } from "@headnorth/types";
 vi.mock("../../lib/transformers/data-transformer", () => ({
   DataTransformer: {
     processCycleData: vi.fn((data) => ({
-      initiatives: data.initiatives || [],
+      objectives: data.objectives || [],
     })),
   },
 }));
@@ -38,14 +38,14 @@ const mockViewFilterManager = {
 const mockCycleDataViewCoordinator = {
   processCycleData: vi.fn((_rawData: Either<Error, CycleData>) =>
     Right({
-      initiatives: [],
+      objectives: [],
     }),
   ),
   generateFilteredRoadmapData: () => ({
     orderedCycles: [],
     roadmapItems: [],
     activeCycle: null,
-    initiatives: [],
+    objectives: [],
   }),
 } as any;
 
@@ -72,12 +72,12 @@ const mockCycleData: CycleData = {
       end: "2024-03-31",
     },
   ],
-  initiatives: [{ id: "init1", name: "Initiative 1" }],
+  objectives: [{ id: "obj1", name: "Objective 1" }],
   areas: [{ id: "area1", name: "Area 1", teams: [] }],
   assignees: [{ id: "user1", name: "User 1" }],
   stages: [{ id: "stage1", name: "Stage 1" }],
   roadmapItems: [],
-  releaseItems: [],
+  cycleItems: [],
 };
 
 describe("Data Store", () => {
@@ -92,7 +92,7 @@ describe("Data Store", () => {
 
     expect(store.hasRawData).toBe(false);
     expect(store.hasProcessedData).toBe(false);
-    expect(store.initiatives).toEqual([]);
+    expect(store.objectives).toEqual([]);
     expect(store.areas).toEqual([]);
     expect(store.assignees).toEqual([]);
     expect(store.stages).toEqual([]);
@@ -113,12 +113,12 @@ describe("Data Store", () => {
 
   it("should set processed data", () => {
     const store = useDataStore();
-    const processedData = { initiatives: [] }; // Empty array for now
+    const processedData = { objectives: [] }; // Empty array for now
 
     store.setProcessedData(processedData);
     expect(store.hasProcessedData).toBe(true);
     expect(store.processedData).toEqual(processedData);
-    expect(store.initiatives).toEqual([]);
+    expect(store.objectives).toEqual([]);
   });
 
   it("should fetch and process data successfully", async () => {
@@ -158,7 +158,7 @@ describe("Data Store", () => {
     const store = useDataStore();
 
     store.setRawData(mockCycleData);
-    store.setProcessedData({ initiatives: [] });
+    store.setProcessedData({ objectives: [] });
 
     store.clearData();
 

@@ -1,32 +1,32 @@
 /**
- * Tests for Initiative Chart Calculations
+ * Tests for Objective Chart Calculations
  *
- * Tests for pure functions extracted from InitiativeChart.vue
+ * Tests for pure functions extracted from ObjectiveChart.vue
  */
 
 import { describe, it, expect } from "vitest";
 import {
-  sortInitiatives,
-  summarizeInitiatives,
-  calculateInitiativeRelativeValues,
-  extractInitiativeTracks,
-  extractInitiativeProgresses,
-  extractInitiativeInProgress,
+  sortObjectives,
+  summarizeObjectives,
+  calculateObjectiveRelativeValues,
+  extractObjectiveTracks,
+  extractObjectiveProgresses,
+  extractObjectiveInProgress,
   validateChartOptions,
-  getInitiativeLengthClass,
-} from "../../../src/lib/charts/initiative-chart-calculations";
-import type { InitiativeWithProgress } from "../../../src/types/ui-types";
+  getObjectiveLengthClass,
+} from "../../../src/lib/charts/objective-chart-calculations";
+import type { ObjectiveWithProgress } from "../../../src/types/ui-types";
 
 /**
- * Helper to create a test initiative
+ * Helper to create a test objective
  */
-const createInitiative = (
+const createObjective = (
   id: string,
   name: string,
   weeks: number,
   weeksDone: number,
   weeksInProgress: number = 0,
-): InitiativeWithProgress => ({
+): ObjectiveWithProgress => ({
   id,
   name,
   roadmapItems: [],
@@ -37,12 +37,12 @@ const createInitiative = (
   weeksNotToDo: 0,
   weeksCancelled: 0,
   weeksPostponed: 0,
-  releaseItemsCount: 0,
-  releaseItemsDoneCount: 0,
+  cycleItemsCount: 0,
+  cycleItemsDoneCount: 0,
   progress: weeks > 0 ? Math.round((weeksDone / weeks) * 100) : 0,
   progressWithInProgress:
     weeks > 0 ? Math.round(((weeksDone + weeksInProgress) / weeks) * 100) : 0,
-  progressByReleaseItems: 0,
+  progressByCycleItems: 0,
   percentageNotToDo: 0,
   startMonth: "",
   endMonth: "",
@@ -51,15 +51,15 @@ const createInitiative = (
   currentDayPercentage: 0,
 });
 
-describe("sortInitiatives", () => {
-  it("should sort initiatives by weeks in descending order", () => {
-    const initiatives = [
-      createInitiative("1", "Small", 10, 5),
-      createInitiative("2", "Large", 50, 25),
-      createInitiative("3", "Medium", 30, 15),
+describe("sortObjectives", () => {
+  it("should sort objectives by weeks in descending order", () => {
+    const objectives = [
+      createObjective("1", "Small", 10, 5),
+      createObjective("2", "Large", 50, 25),
+      createObjective("3", "Medium", 30, 15),
     ];
 
-    const sorted = sortInitiatives(initiatives);
+    const sorted = sortObjectives(objectives);
 
     expect(sorted[0].id).toBe("2"); // Largest first
     expect(sorted[1].id).toBe("3");
@@ -67,35 +67,35 @@ describe("sortInitiatives", () => {
   });
 
   it("should not mutate the original array", () => {
-    const initiatives = [
-      createInitiative("1", "Small", 10, 5),
-      createInitiative("2", "Large", 50, 25),
+    const objectives = [
+      createObjective("1", "Small", 10, 5),
+      createObjective("2", "Large", 50, 25),
     ];
-    const original = [...initiatives];
+    const original = [...objectives];
 
-    sortInitiatives(initiatives);
+    sortObjectives(objectives);
 
-    expect(initiatives).toEqual(original);
+    expect(objectives).toEqual(original);
   });
 
   it("should handle empty array", () => {
-    expect(sortInitiatives([])).toEqual([]);
+    expect(sortObjectives([])).toEqual([]);
   });
 });
 
-describe("summarizeInitiatives", () => {
-  it("should return all initiatives when count is less than max", () => {
-    const initiatives = [
-      createInitiative("1", "A", 10, 5),
-      createInitiative("2", "B", 20, 10),
-      createInitiative("3", "C", 15, 7),
+describe("summarizeObjectives", () => {
+  it("should return all objectives when count is less than max", () => {
+    const objectives = [
+      createObjective("1", "A", 10, 5),
+      createObjective("2", "B", 20, 10),
+      createObjective("3", "C", 15, 7),
     ];
 
-    const result = summarizeInitiatives(initiatives, 8);
+    const result = summarizeObjectives(objectives, 8);
 
     expect(result).toHaveLength(3);
-    // Initiatives are sorted by weeks (descending), so order should be: B (20), C (15), A (10)
-    // Note: Since count < max, summarizeInitiatives sorts and returns all
+    // Objectives are sorted by weeks (descending), so order should be: B (20), C (15), A (10)
+    // Note: Since count < max, summarizeObjectives sorts and returns all
     const sortedIds = result.map((i) => i.id);
     expect(sortedIds).toContain("1");
     expect(sortedIds).toContain("2");
@@ -106,17 +106,12 @@ describe("summarizeInitiatives", () => {
     expect(result[2].weeks).toBe(10); // A
   });
 
-  it("should summarize initiatives when count exceeds max", () => {
-    const initiatives = Array.from({ length: 10 }, (_, i) =>
-      createInitiative(
-        `init-${i}`,
-        `Initiative ${i}`,
-        10 * (i + 1),
-        5 * (i + 1),
-      ),
+  it("should summarize objectives when count exceeds max", () => {
+    const objectives = Array.from({ length: 10 }, (_, i) =>
+      createObjective(`obj-${i}`, `Objective ${i}`, 10 * (i + 1), 5 * (i + 1)),
     );
 
-    const result = summarizeInitiatives(initiatives, 8);
+    const result = summarizeObjectives(objectives, 8);
 
     expect(result).toHaveLength(8); // 7 head + 1 "Other Projects"
     // Find "Other Projects" - it should be in the result (not necessarily at index 7 due to sorting)
@@ -125,42 +120,42 @@ describe("summarizeInitiatives", () => {
     expect(otherProject?.name).toBe("Other Projects");
   });
 
-  it("should aggregate tail initiatives into 'Other Projects'", () => {
-    const initiatives = Array.from({ length: 10 }, (_, i) =>
-      createInitiative(`init-${i}`, `Initiative ${i}`, 10, 5),
+  it("should aggregate tail objectives into 'Other Projects'", () => {
+    const objectives = Array.from({ length: 10 }, (_, i) =>
+      createObjective(`obj-${i}`, `Objective ${i}`, 10, 5),
     );
 
-    const result = summarizeInitiatives(initiatives, 8);
+    const result = summarizeObjectives(objectives, 8);
 
     const otherProject = result.find((i) => i.id === "other");
     expect(otherProject).toBeDefined();
-    expect(otherProject?.weeks).toBe(30); // 3 tail initiatives × 10 weeks
-    expect(otherProject?.weeksDone).toBe(15); // 3 tail initiatives × 5 weeks done
+    expect(otherProject?.weeks).toBe(30); // 3 tail objectives × 10 weeks
+    expect(otherProject?.weeksDone).toBe(15); // 3 tail objectives × 5 weeks done
   });
 
-  it("should calculate progress for summarized initiative", () => {
-    const initiatives = Array.from({ length: 10 }, (_, i) =>
-      createInitiative(
-        `init-${i}`,
-        `Initiative ${i}`,
+  it("should calculate progress for summarized objective", () => {
+    const objectives = Array.from({ length: 10 }, (_, i) =>
+      createObjective(
+        `obj-${i}`,
+        `Objective ${i}`,
         100, // 50% progress each
         50,
       ),
     );
 
-    const result = summarizeInitiatives(initiatives, 8);
+    const result = summarizeObjectives(objectives, 8);
 
     const otherProject = result.find((i) => i.id === "other");
     expect(otherProject?.progress).toBe(50); // 50/100 = 50%
     expect(otherProject?.progressWithInProgress).toBe(50); // 50/100 = 50%
   });
 
-  it("should handle zero weeks in summarized initiative", () => {
-    const initiatives = Array.from({ length: 10 }, (_, i) =>
-      createInitiative(`init-${i}`, `Initiative ${i}`, 0, 0),
+  it("should handle zero weeks in summarized objective", () => {
+    const objectives = Array.from({ length: 10 }, (_, i) =>
+      createObjective(`obj-${i}`, `Objective ${i}`, 0, 0),
     );
 
-    const result = summarizeInitiatives(initiatives, 8);
+    const result = summarizeObjectives(objectives, 8);
 
     const otherProject = result.find((i) => i.id === "other");
     expect(otherProject?.progress).toBe(0);
@@ -168,32 +163,32 @@ describe("summarizeInitiatives", () => {
   });
 
   it("should use custom maxCount", () => {
-    const initiatives = Array.from({ length: 15 }, (_, i) =>
-      createInitiative(`init-${i}`, `Initiative ${i}`, 10, 5),
+    const objectives = Array.from({ length: 15 }, (_, i) =>
+      createObjective(`obj-${i}`, `Objective ${i}`, 10, 5),
     );
 
-    const result = summarizeInitiatives(initiatives, 5);
+    const result = summarizeObjectives(objectives, 5);
 
     expect(result).toHaveLength(5); // 4 head + 1 "Other Projects"
   });
 });
 
-describe("calculateInitiativeRelativeValues", () => {
+describe("calculateObjectiveRelativeValues", () => {
   it("should return empty array for empty input", () => {
-    expect(calculateInitiativeRelativeValues([])).toEqual([]);
+    expect(calculateObjectiveRelativeValues([])).toEqual([]);
   });
 
-  it("should calculate relative track lengths based on longest initiative", () => {
-    const initiatives = [
-      createInitiative("1", "Small", 10, 5, 0), // 10 weeks
-      createInitiative("2", "Large", 100, 50, 0), // 100 weeks (longest)
-      createInitiative("3", "Medium", 50, 25, 0), // 50 weeks
+  it("should calculate relative track lengths based on longest objective", () => {
+    const objectives = [
+      createObjective("1", "Small", 10, 5, 0), // 10 weeks
+      createObjective("2", "Large", 100, 50, 0), // 100 weeks (longest)
+      createObjective("3", "Medium", 50, 25, 0), // 50 weeks
     ];
 
-    // Note: calculateInitiativeRelativeValues expects initiatives sorted by weeks (largest first)
-    // The result is based on first initiative being the longest
-    const sorted = sortInitiatives(initiatives);
-    const result = calculateInitiativeRelativeValues(sorted);
+    // Note: calculateObjectiveRelativeValues expects objectives sorted by weeks (largest first)
+    // The result is based on first objective being the longest
+    const sorted = sortObjectives(objectives);
+    const result = calculateObjectiveRelativeValues(sorted);
 
     expect(result).toHaveLength(3);
     // Large should have longest track (first item)
@@ -210,11 +205,11 @@ describe("calculateInitiativeRelativeValues", () => {
   });
 
   it("should calculate progress on track correctly", () => {
-    const initiatives = [
-      createInitiative("1", "Half Done", 100, 50, 0), // 50% progress
+    const objectives = [
+      createObjective("1", "Half Done", 100, 50, 0), // 50% progress
     ];
 
-    const result = calculateInitiativeRelativeValues(initiatives);
+    const result = calculateObjectiveRelativeValues(objectives);
 
     expect(result[0].progress).toBe(50);
     // progressOnTrack should be proportional to trackLength
@@ -225,22 +220,22 @@ describe("calculateInitiativeRelativeValues", () => {
   });
 
   it("should handle zero progress correctly", () => {
-    const initiatives = [createInitiative("1", "Not Started", 100, 0, 0)];
+    const objectives = [createObjective("1", "Not Started", 100, 0, 0)];
 
-    const result = calculateInitiativeRelativeValues(initiatives);
+    const result = calculateObjectiveRelativeValues(objectives);
 
     expect(result[0].progress).toBe(0);
     expect(result[0].progressOnTrack).toBe(0);
   });
 
   it("should ensure all values are within safe bounds", () => {
-    const initiatives = [
-      createInitiative("1", "Test", 100, 50, 25),
-      createInitiative("2", "Test2", 0, 0, 0), // Edge case: zero weeks
-      createInitiative("3", "Test3", -10, -5, 0), // Edge case: negative
+    const objectives = [
+      createObjective("1", "Test", 100, 50, 25),
+      createObjective("2", "Test2", 0, 0, 0), // Edge case: zero weeks
+      createObjective("3", "Test3", -10, -5, 0), // Edge case: negative
     ];
 
-    const result = calculateInitiativeRelativeValues(initiatives);
+    const result = calculateObjectiveRelativeValues(objectives);
 
     result.forEach((item) => {
       expect(item.trackLength).toBeGreaterThanOrEqual(1);
@@ -253,7 +248,7 @@ describe("calculateInitiativeRelativeValues", () => {
   });
 });
 
-describe("extractInitiativeTracks", () => {
+describe("extractObjectiveTracks", () => {
   it("should extract track lengths from chart data", () => {
     const chartData = [
       {
@@ -276,7 +271,7 @@ describe("extractInitiativeTracks", () => {
       },
     ];
 
-    const tracks = extractInitiativeTracks(chartData);
+    const tracks = extractObjectiveTracks(chartData);
 
     expect(tracks).toEqual([50, 75]);
   });
@@ -312,7 +307,7 @@ describe("extractInitiativeTracks", () => {
       },
     ];
 
-    const tracks = extractInitiativeTracks(chartData);
+    const tracks = extractObjectiveTracks(chartData);
 
     // All should be clamped to valid range [1, 100]
     tracks.forEach((track) => {
@@ -323,7 +318,7 @@ describe("extractInitiativeTracks", () => {
   });
 });
 
-describe("extractInitiativeProgresses", () => {
+describe("extractObjectiveProgresses", () => {
   it("should extract progress values from chart data", () => {
     const chartData = [
       {
@@ -346,7 +341,7 @@ describe("extractInitiativeProgresses", () => {
       },
     ];
 
-    const progresses = extractInitiativeProgresses(chartData);
+    const progresses = extractObjectiveProgresses(chartData);
 
     expect(progresses).toEqual([25, 37]);
   });
@@ -373,7 +368,7 @@ describe("extractInitiativeProgresses", () => {
       },
     ];
 
-    const progresses = extractInitiativeProgresses(chartData);
+    const progresses = extractObjectiveProgresses(chartData);
 
     progresses.forEach((progress) => {
       expect(progress).toBeGreaterThanOrEqual(0);
@@ -383,7 +378,7 @@ describe("extractInitiativeProgresses", () => {
   });
 });
 
-describe("extractInitiativeInProgress", () => {
+describe("extractObjectiveInProgress", () => {
   it("should extract in-progress values from chart data", () => {
     const chartData = [
       {
@@ -406,7 +401,7 @@ describe("extractInitiativeInProgress", () => {
       },
     ];
 
-    const inProgress = extractInitiativeInProgress(chartData);
+    const inProgress = extractObjectiveInProgress(chartData);
 
     expect(inProgress).toEqual([30, 45]);
   });
@@ -433,7 +428,7 @@ describe("extractInitiativeInProgress", () => {
       },
     ];
 
-    const inProgress = extractInitiativeInProgress(chartData);
+    const inProgress = extractObjectiveInProgress(chartData);
 
     inProgress.forEach((value) => {
       expect(value).toBeGreaterThanOrEqual(0);
@@ -444,7 +439,7 @@ describe("extractInitiativeInProgress", () => {
 });
 
 describe("validateChartOptions", () => {
-  it("should not modify options when initiative count is <= 4", () => {
+  it("should not modify options when objective count is <= 4", () => {
     const options = {
       plotOptions: {
         radialBar: {
@@ -461,7 +456,7 @@ describe("validateChartOptions", () => {
     expect(result.plotOptions?.radialBar?.track?.margin).toBe(5);
   });
 
-  it("should adjust options when initiative count > 4", () => {
+  it("should adjust options when objective count > 4", () => {
     const options = {
       plotOptions: {
         radialBar: {
@@ -503,25 +498,25 @@ describe("validateChartOptions", () => {
   });
 });
 
-describe("getInitiativeLengthClass", () => {
-  it("should generate CSS classes for initiative count", () => {
-    const classes = getInitiativeLengthClass(5);
+describe("getObjectiveLengthClass", () => {
+  it("should generate CSS classes for objective count", () => {
+    const classes = getObjectiveLengthClass(5);
 
-    expect(classes["global-initiatives__details-5"]).toBe(true);
-    expect(classes["global-initiatives__details-gt4"]).toBe(true);
+    expect(classes["global-objectives__details-5"]).toBe(true);
+    expect(classes["global-objectives__details-gt4"]).toBe(true);
   });
 
   it("should not include gt4 class when count <= 4", () => {
-    const classes = getInitiativeLengthClass(4);
+    const classes = getObjectiveLengthClass(4);
 
-    expect(classes["global-initiatives__details-4"]).toBe(true);
-    expect(classes["global-initiatives__details-gt4"]).toBe(false);
+    expect(classes["global-objectives__details-4"]).toBe(true);
+    expect(classes["global-objectives__details-gt4"]).toBe(false);
   });
 
   it("should handle count of 1", () => {
-    const classes = getInitiativeLengthClass(1);
+    const classes = getObjectiveLengthClass(1);
 
-    expect(classes["global-initiatives__details-1"]).toBe(true);
-    expect(classes["global-initiatives__details-gt4"]).toBe(false);
+    expect(classes["global-objectives__details-1"]).toBe(true);
+    expect(classes["global-objectives__details-gt4"]).toBe(false);
   });
 });

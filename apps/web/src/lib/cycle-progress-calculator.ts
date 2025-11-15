@@ -6,38 +6,38 @@
  */
 
 import {
-  calculateReleaseItemProgress,
+  calculateCycleItemProgress,
   calculateCycleMetadata,
 } from "./calculations/cycle-calculations";
 import type { Cycle } from "@headnorth/types";
 import type {
   CycleWithProgress,
-  InitiativeWithProgress,
+  ObjectiveWithProgress,
 } from "../types/ui-types";
 
 /**
- * Calculate cycle progress data by aggregating progress from all initiatives
+ * Calculate cycle progress data by aggregating progress from all objectives
  * @param cycle - Basic cycle object
- * @param initiatives - Array of initiatives with progress data
+ * @param objectives - Array of objectives with progress data
  * @returns CycleWithProgress object with calculated progress metrics
  */
 export const calculateCycleProgress = (
   cycle: Cycle,
-  initiatives: readonly InitiativeWithProgress[],
+  objectives: readonly ObjectiveWithProgress[],
 ): CycleWithProgress => {
   // Calculate cycle metadata (months, days, etc.)
   const cycleMetadata = calculateCycleMetadata(cycle);
 
-  // Collect all release items from all initiatives
-  const allReleaseItems = initiatives.flatMap(
-    (initiative) =>
-      initiative.roadmapItems?.flatMap(
-        (roadmapItem) => roadmapItem.releaseItems || [],
+  // Collect all cycle items from all objectives
+  const allCycleItems = objectives.flatMap(
+    (objective) =>
+      objective.roadmapItems?.flatMap(
+        (roadmapItem) => roadmapItem.cycleItems || [],
       ) || [],
   );
 
-  // Calculate progress metrics from all release items
-  const progressMetrics = calculateReleaseItemProgress(allReleaseItems);
+  // Calculate progress metrics from all cycle items
+  const progressMetrics = calculateCycleItemProgress(allCycleItems);
 
   // Combine cycle data with progress metrics and metadata
   return {

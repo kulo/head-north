@@ -8,10 +8,10 @@
  */
 
 import { Maybe } from "purify-ts";
-import type { CycleData, InitiativeId, ValidationItem } from "@headnorth/types";
+import type { CycleData, ObjectiveId, ValidationItem } from "@headnorth/types";
 import type {
   FilterCriteria,
-  InitiativeWithProgress,
+  ObjectiveWithProgress,
   NestedCycleData,
   RoadmapItemWithProgress,
   RoadmapData,
@@ -21,10 +21,10 @@ import type {
 import { filter } from "../utils/filter";
 import { selectDefaultCycle } from "../selectors/cycle-selector";
 import { calculateCycleProgress } from "../cycle-progress-calculator";
-import { calculateReleaseItemProgress } from "../calculations/cycle-calculations";
+import { calculateCycleItemProgress } from "../calculations/cycle-calculations";
 import {
-  DEFAULT_INITIATIVE,
-  getDefaultInitiativeId,
+  DEFAULT_OBJECTIVE,
+  getDefaultObjectiveId,
 } from "../constants/default-values";
 import { pipe } from "@headnorth/utils";
 import HeadNorthConfig from "@headnorth/config";
@@ -40,7 +40,7 @@ function hydrateValidations(
   const dictionary = config.getValidationDictionary();
 
   return validations.map((v) => {
-    // Parse code to determine if it's releaseItem or roadmapItem
+    // Parse code to determine if it's cycleItem or roadmapItem
     const [category, ruleKey] = parseValidationCode(v.code);
 
     // Use Maybe chain for safe dictionary lookup without extract()
@@ -60,8 +60,8 @@ function hydrateValidations(
  * Parse validation code to determine category and rule key
  */
 function parseValidationCode(code: string): [string, string] {
-  // Check if it's a release item validation
-  const releaseItemValidations = [
+  // Check if it's a cycle item validation
+  const cycleItemValidations = [
     "noProjectId",
     "missingAreaLabel",
     "missingTeamLabel",
@@ -73,8 +73,8 @@ function parseValidationCode(code: string): [string, string] {
     "tooLowStageWithoutProperRoadmapItem",
   ];
 
-  if (releaseItemValidations.includes(code)) {
-    return ["releaseItem", code];
+  if (cycleItemValidations.includes(code)) {
+    return ["cycleItem", code];
   }
 
   // Otherwise it's a roadmap item validation
@@ -89,22 +89,22 @@ export function transformToNestedStructure(
   config: HeadNorthConfig,
   rawData: CycleData,
 ): NestedCycleData {
-  const { cycles, roadmapItems, releaseItems, initiatives } = rawData;
+  const { cycles, roadmapItems, cycleItems, objectives } = rawData;
 
-  // Create initiatives lookup using functional reduce
-  const initiativesLookup: Record<string, string> = Array.isArray(initiatives)
-    ? initiatives.reduce(
-        (acc, init) => {
-          acc[init.id] = init.name;
+  // Create objectives lookup using functional reduce
+  const objectivesLookup: Record<string, string> = Array.isArray(objectives)
+    ? objectives.reduce(
+        (acc, obj) => {
+          acc[obj.id] = obj.name;
           return acc;
         },
         {} as Record<string, string>,
       )
     : {};
 
-  // Group roadmap items by initiative using functional reduce
+  // Group roadmap items by objective using functional reduce
   // Using mutable type during construction, will be cast to readonly at return
-  type MutableInitiative = {
+  type MutableObjective = {
     id: string;
     name: string;
     roadmapItems: RoadmapItemWithProgress[];
@@ -115,11 +115,11 @@ export function transformToNestedStructure(
     weeksNotToDo: number;
     weeksCancelled: number;
     weeksPostponed: number;
-    releaseItemsCount: number;
-    releaseItemsDoneCount: number;
+    cycleItemsCount: number;
+    cycleItemsDoneCount: number;
     progress: number;
     progressWithInProgress: number;
-    progressByReleaseItems: number;
+    progressByCycleItems: number;
     percentageNotToDo: number;
     startMonth: string;
     endMonth: string;
@@ -129,17 +129,17 @@ export function transformToNestedStructure(
   };
 
   // Use reduce instead of forEach for functional aggregation
-  const groupedInitiatives = roadmapItems.reduce<
-    Record<string, MutableInitiative>
+  const groupedObjectives = roadmapItems.reduce<
+    Record<string, MutableObjective>
   >((acc, item) => {
-    const initiativeId = getDefaultInitiativeId(item.initiativeId);
+    const objectiveId = getDefaultObjectiveId(item.objectiveId);
 
-    // Initialize initiative if not exists
-    if (!acc[initiativeId]) {
-      acc[initiativeId] = {
-        id: initiativeId,
-        name: Maybe.fromNullable(initiativesLookup[initiativeId]).orDefault(
-          DEFAULT_INITIATIVE.NAME,
+    // Initialize objective if not exists
+    if (!acc[objectiveId]) {
+      acc[objectiveId] = {
+        id: objectiveId,
+        name: Maybe.fromNullable(objectivesLookup[objectiveId]).orDefault(
+          DEFAULT_OBJECTIVE.NAME,
         ),
         roadmapItems: [],
         // Initialize progress metrics
@@ -150,11 +150,11 @@ export function transformToNestedStructure(
         weeksNotToDo: 0,
         weeksCancelled: 0,
         weeksPostponed: 0,
-        releaseItemsCount: 0,
-        releaseItemsDoneCount: 0,
+        cycleItemsCount: 0,
+        cycleItemsDoneCount: 0,
         progress: 0,
         progressWithInProgress: 0,
-        progressByReleaseItems: 0,
+        progressByCycleItems: 0,
         percentageNotToDo: 0,
         startMonth: "",
         endMonth: "",
@@ -164,13 +164,13 @@ export function transformToNestedStructure(
       };
     }
 
-    // Find release items for this roadmap item
-    const itemReleaseItems = releaseItems.filter(
-      (ri) => ri.roadmapItemId === item.id,
+    // Find cycle items for this roadmap item
+    const itemCycleItems = cycleItems.filter(
+      (ci) => ci.roadmapItemId === item.id,
     );
 
     // Transform roadmap item with progress metrics
-    const roadmapItemMetrics = calculateReleaseItemProgress(itemReleaseItems);
+    const roadmapItemMetrics = calculateCycleItemProgress(itemCycleItems);
 
     // Extract values using Maybe for safe transformation
     const name = Maybe.fromNullable(item.summary)
@@ -200,15 +200,15 @@ export function transformToNestedStructure(
         .orDefault([]),
       startDate: item.startDate,
       endDate: item.endDate,
-      releaseItems: itemReleaseItems.map((releaseItem) => ({
-        ...releaseItem,
-        validations: Maybe.fromNullable(releaseItem.validations)
+      cycleItems: itemCycleItems.map((cycleItem) => ({
+        ...cycleItem,
+        validations: Maybe.fromNullable(cycleItem.validations)
           .filter(Array.isArray)
           .map((vals) => hydrateValidations(config, vals))
           .orDefault([]),
-        cycle: Maybe.fromNullable(releaseItem.cycle)
+        cycle: Maybe.fromNullable(cycleItem.cycle)
           .alt(
-            Maybe.fromNullable(releaseItem.cycleId).map((cycleId) => ({
+            Maybe.fromNullable(cycleItem.cycleId).map((cycleId) => ({
               id: cycleId,
               name: getCycleName(cycles, cycleId),
             })),
@@ -224,105 +224,102 @@ export function transformToNestedStructure(
       currentDayPercentage: 0,
     };
 
-    // Create new initiative with updated values (functional style - immutable update)
-    const currentInitiative = acc[initiativeId];
-    acc[initiativeId] = {
-      ...currentInitiative,
-      roadmapItems: [...currentInitiative.roadmapItems, roadmapItem],
-      // Aggregate metrics to initiative level (calculate new values)
-      weeks: currentInitiative.weeks + roadmapItemMetrics.weeks,
-      weeksDone: currentInitiative.weeksDone + roadmapItemMetrics.weeksDone,
+    // Create new objective with updated values (functional style - immutable update)
+    const currentObjective = acc[objectiveId];
+    acc[objectiveId] = {
+      ...currentObjective,
+      roadmapItems: [...currentObjective.roadmapItems, roadmapItem],
+      // Aggregate metrics to objective level (calculate new values)
+      weeks: currentObjective.weeks + roadmapItemMetrics.weeks,
+      weeksDone: currentObjective.weeksDone + roadmapItemMetrics.weeksDone,
       weeksInProgress:
-        currentInitiative.weeksInProgress + roadmapItemMetrics.weeksInProgress,
-      weeksTodo: currentInitiative.weeksTodo + roadmapItemMetrics.weeksTodo,
+        currentObjective.weeksInProgress + roadmapItemMetrics.weeksInProgress,
+      weeksTodo: currentObjective.weeksTodo + roadmapItemMetrics.weeksTodo,
       weeksNotToDo:
-        currentInitiative.weeksNotToDo + roadmapItemMetrics.weeksNotToDo,
+        currentObjective.weeksNotToDo + roadmapItemMetrics.weeksNotToDo,
       weeksCancelled:
-        currentInitiative.weeksCancelled + roadmapItemMetrics.weeksCancelled,
+        currentObjective.weeksCancelled + roadmapItemMetrics.weeksCancelled,
       weeksPostponed:
-        currentInitiative.weeksPostponed + roadmapItemMetrics.weeksPostponed,
-      releaseItemsCount:
-        currentInitiative.releaseItemsCount +
-        roadmapItemMetrics.releaseItemsCount,
-      releaseItemsDoneCount:
-        currentInitiative.releaseItemsDoneCount +
-        roadmapItemMetrics.releaseItemsDoneCount,
+        currentObjective.weeksPostponed + roadmapItemMetrics.weeksPostponed,
+      cycleItemsCount:
+        currentObjective.cycleItemsCount + roadmapItemMetrics.cycleItemsCount,
+      cycleItemsDoneCount:
+        currentObjective.cycleItemsDoneCount +
+        roadmapItemMetrics.cycleItemsDoneCount,
     };
 
     return acc;
   }, {});
 
-  // Calculate final initiative-level percentages (functional style)
-  const initiativesWithPercentages = Object.values(groupedInitiatives).map(
-    (initiative): MutableInitiative => ({
-      ...initiative,
+  // Calculate final objective-level percentages (functional style)
+  const objectivesWithPercentages = Object.values(groupedObjectives).map(
+    (objective): MutableObjective => ({
+      ...objective,
       progress:
-        initiative.weeks > 0
-          ? Math.round((initiative.weeksDone / initiative.weeks) * 100)
+        objective.weeks > 0
+          ? Math.round((objective.weeksDone / objective.weeks) * 100)
           : 0,
       progressWithInProgress:
-        initiative.weeks > 0
+        objective.weeks > 0
           ? Math.round(
-              ((initiative.weeksDone + initiative.weeksInProgress) /
-                initiative.weeks) *
+              ((objective.weeksDone + objective.weeksInProgress) /
+                objective.weeks) *
                 100,
             )
           : 0,
-      progressByReleaseItems:
-        initiative.releaseItemsCount > 0
+      progressByCycleItems:
+        objective.cycleItemsCount > 0
           ? Math.round(
-              (initiative.releaseItemsDoneCount /
-                initiative.releaseItemsCount) *
-                100,
+              (objective.cycleItemsDoneCount / objective.cycleItemsCount) * 100,
             )
           : 0,
       percentageNotToDo:
-        initiative.weeks > 0
+        objective.weeks > 0
           ? Math.max(
               0,
-              Math.round((initiative.weeksNotToDo / initiative.weeks) * 100),
+              Math.round((objective.weeksNotToDo / objective.weeks) * 100),
             )
           : 0,
     }),
   );
 
-  // Sort initiatives by weeks (largest first) and cast to readonly at return
-  const sortedInitiatives = initiativesWithPercentages
+  // Sort objectives by weeks (largest first) and cast to readonly at return
+  const sortedObjectives = objectivesWithPercentages
     .sort((a, b) => b.weeks - a.weeks)
     .map(
-      (init): InitiativeWithProgress => ({
-        ...init,
-        roadmapItems: init.roadmapItems,
+      (obj): ObjectiveWithProgress => ({
+        ...obj,
+        roadmapItems: obj.roadmapItems,
       }),
-    ) as readonly InitiativeWithProgress[];
+    ) as readonly ObjectiveWithProgress[];
 
   return {
-    initiatives: sortedInitiatives,
+    objectives: sortedObjectives,
   };
 }
 
 /**
- * Apply initiative filter at the initiative level
+ * Apply objective filter at the objective level
  * Pure function - no side effects, uses Maybe for safe filtering
  */
-export function applyInitiativeFilter(
+export function applyObjectiveFilter(
   data: NestedCycleData,
-  initiatives?: readonly InitiativeId[],
+  objectives?: readonly ObjectiveId[],
 ): NestedCycleData {
   // Use Maybe to handle optional/empty filter arrays
-  const filteredInitiatives = Maybe.fromNullable(initiatives)
+  const filteredObjectives = Maybe.fromNullable(objectives)
     .filter((ids) => ids.length > 0)
     .map(
       (ids) =>
-        data.initiatives.filter((initiative) =>
-          ids.includes(initiative.id),
-        ) as readonly InitiativeWithProgress[],
+        data.objectives.filter((objective) =>
+          ids.includes(objective.id),
+        ) as readonly ObjectiveWithProgress[],
     )
-    .orDefault(data.initiatives);
+    .orDefault(data.objectives);
 
   return {
     ...data,
-    initiatives: filteredInitiatives,
+    objectives: filteredObjectives,
   };
 }
 
@@ -340,7 +337,7 @@ export function processCycleData(
     rawData,
     (data: CycleData) => transformToNestedStructure(config, data),
     (nestedData: NestedCycleData) =>
-      applyInitiativeFilter(nestedData, filters.initiatives),
+      applyObjectiveFilter(nestedData, filters.objectives),
     (filteredData: NestedCycleData) => filter.apply(filteredData, filters),
     (result: FilterResult) => result.data,
   );
@@ -359,7 +356,7 @@ export function generateRoadmapData(
       orderedCycles: [],
       roadmapItems: [],
       activeCycle: null,
-      initiatives: [],
+      objectives: [],
     };
   }
 
@@ -371,7 +368,7 @@ export function generateRoadmapData(
     activeCycle: selectDefaultCycle(
       Maybe.fromNullable(rawData?.cycles).orDefault([]),
     ),
-    initiatives: Maybe.fromNullable(processedData.initiatives).orDefault([]),
+    objectives: Maybe.fromNullable(processedData.objectives).orDefault([]),
   };
 }
 
@@ -400,7 +397,7 @@ export function generateCycleOverviewData(
 
   return {
     cycle: selectedCycle,
-    initiatives: Maybe.fromNullable(processedData.initiatives).orDefault([]),
+    objectives: Maybe.fromNullable(processedData.objectives).orDefault([]),
   };
 }
 
@@ -418,7 +415,7 @@ export function generateFilteredRoadmapData(
       orderedCycles: [],
       roadmapItems: [],
       activeCycle: null,
-      initiatives: [],
+      objectives: [],
     };
   }
 
@@ -433,9 +430,7 @@ export function generateFilteredRoadmapData(
     activeCycle: selectDefaultCycle(
       Maybe.fromNullable(rawData?.cycles).orDefault([]),
     ),
-    initiatives: Maybe.fromNullable(filteredData.data.initiatives).orDefault(
-      [],
-    ),
+    objectives: Maybe.fromNullable(filteredData.data.objectives).orDefault([]),
   };
 }
 
@@ -467,19 +462,19 @@ export function generateFilteredCycleOverviewData(
     .map((cycle) => {
       // Apply filters using unified filter system
       const filteredData = filter.apply(processedData, activeFilters);
-      const filteredInitiatives = Maybe.fromNullable(
-        filteredData.data.initiatives,
+      const filteredObjectives = Maybe.fromNullable(
+        filteredData.data.objectives,
       ).orDefault([]);
 
       // Calculate cycle progress data
       const cycleWithProgress = calculateCycleProgress(
         cycle,
-        filteredInitiatives,
+        filteredObjectives,
       );
 
       return {
         cycle: cycleWithProgress,
-        initiatives: filteredInitiatives,
+        objectives: filteredObjectives,
       };
     })
     .orDefault(null);
@@ -510,7 +505,7 @@ function getCycleName(cycles: readonly unknown[], cycleId: string): string {
 // Export all functions as a single object
 export const dataTransformer = {
   transformToNestedStructure,
-  applyInitiativeFilter,
+  applyObjectiveFilter,
   processCycleData,
   generateRoadmapData,
   generateCycleOverviewData,

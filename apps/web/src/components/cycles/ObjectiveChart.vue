@@ -1,61 +1,61 @@
 <template>
-  <div class="global-initiatives__container">
+  <div class="global-objectives__container">
     <div
-      v-if="!initiatives || initiatives.length === 0"
-      class="global-initiatives__loading"
+      v-if="!objectives || objectives.length === 0"
+      class="global-objectives__loading"
     >
-      <p>Loading initiatives...</p>
+      <p>Loading objectives...</p>
     </div>
     <div
       v-else-if="isReady"
-      class="global-initiatives__chart-container"
+      class="global-objectives__chart-container"
       style="transform: rotateY(180deg) rotateX(180deg)"
     >
       <apexchart
-        :key="`background-${initiatives.length}`"
-        class="global-initiatives__chart global-initiatives__chart_background"
+        :key="`background-${objectives.length}`"
+        class="global-objectives__chart global-objectives__chart_background"
         type="radialBar"
         height="100%"
         :options="options2"
-        :series="initiativeTracks"
+        :series="objectiveTracks"
       ></apexchart>
       <apexchart
-        :key="`inprogress-${initiatives.length}`"
-        class="global-initiatives__chart"
+        :key="`inprogress-${objectives.length}`"
+        class="global-objectives__chart"
         type="radialBar"
         height="100%"
         :options="inProgressOptions"
-        :series="initiativeInProgress"
+        :series="objectiveInProgress"
       ></apexchart>
       <apexchart
-        :key="`progress-${initiatives.length}`"
-        class="global-initiatives__chart"
+        :key="`progress-${objectives.length}`"
+        class="global-objectives__chart"
         type="radialBar"
         height="100%"
         :options="options1"
-        :series="initiativeProgresses"
+        :series="objectiveProgresses"
       ></apexchart>
     </div>
     <div
-      v-if="initiatives && initiatives.length > 0 && isReady"
-      class="global-initiatives__details"
-      :class="initiativeLengthClass()"
+      v-if="objectives && objectives.length > 0 && isReady"
+      class="global-objectives__details"
+      :class="objectiveLengthClass()"
     >
       <div>
         <div
-          v-for="initiative in initiativesWithRelativeValues"
-          :key="initiative.name"
-          class="global-initiatives__detail"
+          v-for="objective in objectivesWithRelativeValues"
+          :key="objective.name"
+          class="global-objectives__detail"
         >
-          <div class="global-initiatives__detail__progress">
-            {{ initiative.progress }}%
-            <div class="global-initiatives__detail__weeks">
-              <strong>{{ initiative.weeksDone }}</strong> of
-              {{ initiative.weeks }} weeks
+          <div class="global-objectives__detail__progress">
+            {{ objective.progress }}%
+            <div class="global-objectives__detail__weeks">
+              <strong>{{ objective.weeksDone }}</strong> of
+              {{ objective.weeks }} weeks
             </div>
           </div>
-          <div class="global-initiatives__detail__name">
-            <span class="initiative">{{ initiative.name }}</span>
+          <div class="global-objectives__detail__name">
+            <span class="objective">{{ objective.name }}</span>
           </div>
         </div>
       </div>
@@ -66,19 +66,19 @@
 <script>
 import { computed, nextTick, onMounted, ref } from "vue";
 import {
-  summarizeInitiatives,
-  calculateInitiativeRelativeValues,
-  extractInitiativeTracks,
-  extractInitiativeProgresses,
-  extractInitiativeInProgress,
+  summarizeObjectives,
+  calculateObjectiveRelativeValues,
+  extractObjectiveTracks,
+  extractObjectiveProgresses,
+  extractObjectiveInProgress,
   validateChartOptions,
-  getInitiativeLengthClass,
-} from "../../lib/charts/initiative-chart-calculations";
+  getObjectiveLengthClass,
+} from "../../lib/charts/objective-chart-calculations";
 
 export default {
-  name: "initiative-chart",
+  name: "objective-chart",
   props: {
-    initiatives: {
+    objectives: {
       type: Array,
       required: true,
     },
@@ -256,60 +256,60 @@ export default {
       },
     };
 
-    const summarizedInitiatives = computed(() =>
-      summarizeInitiatives(props.initiatives, 8),
+    const summarizedObjectives = computed(() =>
+      summarizeObjectives(props.objectives, 8),
     );
 
     const options1 = computed(() => {
       return validateChartOptions(
         options1Default,
-        summarizedInitiatives.value.length,
+        summarizedObjectives.value.length,
       );
     });
 
     const options2 = computed(() => {
       return validateChartOptions(
         options2Default,
-        summarizedInitiatives.value.length,
+        summarizedObjectives.value.length,
       );
     });
 
     const inProgressOptions = computed(() => {
       return validateChartOptions(
         inProgressOptionsDefault,
-        summarizedInitiatives.value.length,
+        summarizedObjectives.value.length,
       );
     });
 
-    const initiativesWithRelativeValues = computed(() =>
-      calculateInitiativeRelativeValues(summarizedInitiatives.value),
+    const objectivesWithRelativeValues = computed(() =>
+      calculateObjectiveRelativeValues(summarizedObjectives.value),
     );
 
-    const initiativeTracks = computed(() =>
-      extractInitiativeTracks(initiativesWithRelativeValues.value),
+    const objectiveTracks = computed(() =>
+      extractObjectiveTracks(objectivesWithRelativeValues.value),
     );
 
-    const initiativeProgresses = computed(() =>
-      extractInitiativeProgresses(initiativesWithRelativeValues.value),
+    const objectiveProgresses = computed(() =>
+      extractObjectiveProgresses(objectivesWithRelativeValues.value),
     );
 
-    const initiativeInProgress = computed(() =>
-      extractInitiativeInProgress(initiativesWithRelativeValues.value),
+    const objectiveInProgress = computed(() =>
+      extractObjectiveInProgress(objectivesWithRelativeValues.value),
     );
 
-    const initiativeLengthClass = () =>
-      getInitiativeLengthClass(summarizedInitiatives.value.length);
+    const objectiveLengthClass = () =>
+      getObjectiveLengthClass(summarizedObjectives.value.length);
 
     return {
       isReady,
       options1,
       options2,
       inProgressOptions,
-      initiativeTracks,
-      initiativeProgresses,
-      initiativeInProgress,
-      initiativesWithRelativeValues,
-      initiativeLengthClass,
+      objectiveTracks,
+      objectiveProgresses,
+      objectiveInProgress,
+      objectivesWithRelativeValues,
+      objectiveLengthClass,
     };
   },
 };

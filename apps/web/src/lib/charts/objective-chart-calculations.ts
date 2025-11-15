@@ -1,12 +1,12 @@
 /**
- * Initiative Chart Calculations
+ * Objective Chart Calculations
  *
- * Pure functions for calculating initiative chart data.
- * Extracted from InitiativeChart.vue for better testability and reusability.
+ * Pure functions for calculating objective chart data.
+ * Extracted from ObjectiveChart.vue for better testability and reusability.
  */
 
 import { Maybe } from "purify-ts";
-import type { InitiativeWithProgress } from "../../types/ui-types";
+import type { ObjectiveWithProgress } from "../../types/ui-types";
 
 /**
  * Safe numeric value with bounds checking
@@ -30,31 +30,31 @@ const safeValue = (
 const deepCopy = <T>(src: T): T => JSON.parse(JSON.stringify(src));
 
 /**
- * Sort initiatives by weeks (largest first)
+ * Sort objectives by weeks (largest first)
  */
-export const sortInitiatives = (
-  initiatives: readonly InitiativeWithProgress[],
-): readonly InitiativeWithProgress[] => {
-  return [...initiatives].sort((init1, init2) => init2.weeks - init1.weeks);
+export const sortObjectives = (
+  objectives: readonly ObjectiveWithProgress[],
+): readonly ObjectiveWithProgress[] => {
+  return [...objectives].sort((obj1, obj2) => obj2.weeks - obj1.weeks);
 };
 
 /**
- * Summarize initiatives when there are more than maxCount
- * Combines smaller initiatives into "Other Projects"
+ * Summarize objectives when there are more than maxCount
+ * Combines smaller objectives into "Other Projects"
  */
-export const summarizeInitiatives = (
-  initiatives: readonly InitiativeWithProgress[],
+export const summarizeObjectives = (
+  objectives: readonly ObjectiveWithProgress[],
   maxCount: number = 8,
-): readonly InitiativeWithProgress[] => {
-  if (initiatives.length <= maxCount) {
-    return sortInitiatives(initiatives);
+): readonly ObjectiveWithProgress[] => {
+  if (objectives.length <= maxCount) {
+    return sortObjectives(objectives);
   }
 
-  const sortedInitiatives = sortInitiatives(initiatives);
-  const headInitiatives = sortedInitiatives.slice(0, maxCount - 1);
-  const tailInitiatives = sortedInitiatives.slice(maxCount - 1);
+  const sortedObjectives = sortObjectives(objectives);
+  const headObjectives = sortedObjectives.slice(0, maxCount - 1);
+  const tailObjectives = sortedObjectives.slice(maxCount - 1);
 
-  const defaultOtherInitiative: InitiativeWithProgress = {
+  const defaultOtherObjective: ObjectiveWithProgress = {
     id: "other",
     name: "Other Projects",
     roadmapItems: [],
@@ -65,11 +65,11 @@ export const summarizeInitiatives = (
     weeksNotToDo: 0,
     weeksCancelled: 0,
     weeksPostponed: 0,
-    releaseItemsCount: 0,
-    releaseItemsDoneCount: 0,
+    cycleItemsCount: 0,
+    cycleItemsDoneCount: 0,
     progress: 0,
     progressWithInProgress: 0,
-    progressByReleaseItems: 0,
+    progressByCycleItems: 0,
     percentageNotToDo: 0,
     startMonth: "",
     endMonth: "",
@@ -78,17 +78,17 @@ export const summarizeInitiatives = (
     currentDayPercentage: 0,
   };
 
-  // Aggregate tail initiatives
-  const aggregated = tailInitiatives.reduce(
-    (acc, init) => ({
-      weeks: acc.weeks + init.weeks,
-      weeksDone: acc.weeksDone + init.weeksDone,
-      weeksInProgress: acc.weeksInProgress + init.weeksInProgress,
+  // Aggregate tail objectives
+  const aggregated = tailObjectives.reduce(
+    (acc, obj) => ({
+      weeks: acc.weeks + obj.weeks,
+      weeksDone: acc.weeksDone + obj.weeksDone,
+      weeksInProgress: acc.weeksInProgress + obj.weeksInProgress,
     }),
     {
-      weeks: defaultOtherInitiative.weeks,
-      weeksDone: defaultOtherInitiative.weeksDone,
-      weeksInProgress: defaultOtherInitiative.weeksInProgress,
+      weeks: defaultOtherObjective.weeks,
+      weeksDone: defaultOtherObjective.weeksDone,
+      weeksInProgress: defaultOtherObjective.weeksInProgress,
     },
   );
 
@@ -103,21 +103,21 @@ export const summarizeInitiatives = (
       : 0;
   const progressWithInProgress = Math.round(inprogressRate * 100) || 0;
 
-  // Create final summarized initiative with calculated progress
-  const summarizedOtherInitiative: InitiativeWithProgress = {
-    ...defaultOtherInitiative,
+  // Create final summarized objective with calculated progress
+  const summarizedOtherObjective: ObjectiveWithProgress = {
+    ...defaultOtherObjective,
     ...aggregated,
     progress,
     progressWithInProgress,
   };
 
-  return sortInitiatives([...headInitiatives, summarizedOtherInitiative]);
+  return sortObjectives([...headObjectives, summarizedOtherObjective]);
 };
 
 /**
- * Initiative data with relative track calculations for chart display
+ * Objective data with relative track calculations for chart display
  */
-export interface InitiativeChartData {
+export interface ObjectiveChartData {
   readonly name: string;
   readonly weeks: number;
   readonly weeksDone: number;
@@ -129,32 +129,30 @@ export interface InitiativeChartData {
 
 /**
  * Calculate relative values for chart display
- * Determines track lengths and progress positions based on initiative sizes
+ * Determines track lengths and progress positions based on objective sizes
  */
-export const calculateInitiativeRelativeValues = (
-  initiatives: readonly InitiativeWithProgress[],
-): readonly InitiativeChartData[] => {
-  if (initiatives.length === 0) {
+export const calculateObjectiveRelativeValues = (
+  objectives: readonly ObjectiveWithProgress[],
+): readonly ObjectiveChartData[] => {
+  if (objectives.length === 0) {
     return [];
   }
 
-  // Extract basic initiative data
-  const basicData = initiatives.map((initiative) => ({
-    name: initiative.name,
-    weeks: initiative.weeks,
-    weeksDone: initiative.weeksDone,
-    progress: initiative.progress || 0,
-    progressWithInProgress: initiative.progressWithInProgress || 0,
+  // Extract basic objective data
+  const basicData = objectives.map((objective) => ({
+    name: objective.name,
+    weeks: objective.weeks,
+    weeksDone: objective.weeksDone,
+    progress: objective.progress || 0,
+    progressWithInProgress: objective.progressWithInProgress || 0,
   }));
 
-  const longestInitiative = basicData[0];
+  const longestObjective = basicData[0];
 
-  return basicData.map((initiative) => {
-    // Calculate relative modifier to longest initiative
+  return basicData.map((objective) => {
+    // Calculate relative modifier to longest objective
     const relativeModifierToLongest = Maybe.fromNullable(
-      longestInitiative.weeks > 0
-        ? initiative.weeks / longestInitiative.weeks
-        : 0,
+      longestObjective.weeks > 0 ? objective.weeks / longestObjective.weeks : 0,
     )
       .map((modifier) => Math.max(0, Math.min(10, modifier))) // Cap at 10
       .filter((modifier) => isFinite(modifier))
@@ -179,9 +177,9 @@ export const calculateInitiativeRelativeValues = (
             : trackLength;
 
     // Ensure progress values are safe
-    const safeProgress = safeValue(initiative.progress, 0, 100, 0);
+    const safeProgress = safeValue(objective.progress, 0, 100, 0);
     const safeInProgress = safeValue(
-      initiative.progressWithInProgress,
+      objective.progressWithInProgress,
       0,
       100,
       0,
@@ -203,9 +201,9 @@ export const calculateInitiativeRelativeValues = (
     );
 
     return {
-      name: initiative.name,
-      weeks: initiative.weeks,
-      weeksDone: initiative.weeksDone,
+      name: objective.name,
+      weeks: objective.weeks,
+      weeksDone: objective.weeksDone,
       progress: safeProgress,
       trackLength,
       progressOnTrack,
@@ -215,50 +213,50 @@ export const calculateInitiativeRelativeValues = (
 };
 
 /**
- * Extract track lengths from initiative chart data
+ * Extract track lengths from objective chart data
  */
-export const extractInitiativeTracks = (
-  chartData: readonly InitiativeChartData[],
+export const extractObjectiveTracks = (
+  chartData: readonly ObjectiveChartData[],
 ): readonly number[] => {
-  return chartData.map((initiative) =>
-    safeValue(initiative.trackLength, 1, 100, 1),
+  return chartData.map((objective) =>
+    safeValue(objective.trackLength, 1, 100, 1),
   );
 };
 
 /**
- * Extract progress values from initiative chart data
+ * Extract progress values from objective chart data
  */
-export const extractInitiativeProgresses = (
-  chartData: readonly InitiativeChartData[],
+export const extractObjectiveProgresses = (
+  chartData: readonly ObjectiveChartData[],
 ): readonly number[] => {
-  return chartData.map((initiative) =>
-    safeValue(initiative.progressOnTrack, 0, 100, 0),
+  return chartData.map((objective) =>
+    safeValue(objective.progressOnTrack, 0, 100, 0),
   );
 };
 
 /**
- * Extract in-progress values from initiative chart data
+ * Extract in-progress values from objective chart data
  */
-export const extractInitiativeInProgress = (
-  chartData: readonly InitiativeChartData[],
+export const extractObjectiveInProgress = (
+  chartData: readonly ObjectiveChartData[],
 ): readonly number[] => {
-  return chartData.map((initiative) =>
-    safeValue(initiative.inprogressOnTrack, 0, 100, 0),
+  return chartData.map((objective) =>
+    safeValue(objective.inprogressOnTrack, 0, 100, 0),
   );
 };
 
 /**
- * Validate chart options based on initiative count
- * Adjusts radial bar settings for better display with many initiatives
+ * Validate chart options based on objective count
+ * Adjusts radial bar settings for better display with many objectives
  */
 export const validateChartOptions = <T extends { plotOptions?: unknown }>(
   options: T,
-  initiativeCount: number,
+  objectiveCount: number,
 ): T => {
   const safeOptions = deepCopy(options);
 
-  // For many initiatives, ensure we have enough space for the radial bars
-  if (initiativeCount > 4) {
+  // For many objectives, ensure we have enough space for the radial bars
+  if (objectiveCount > 4) {
     const plotOptions = safeOptions.plotOptions as {
       radialBar?: {
         hollow?: { size?: string; margin?: number };
@@ -282,13 +280,13 @@ export const validateChartOptions = <T extends { plotOptions?: unknown }>(
 };
 
 /**
- * Generate CSS class name for initiative length styling
+ * Generate CSS class name for objective length styling
  */
-export const getInitiativeLengthClass = (
-  initiativeCount: number,
+export const getObjectiveLengthClass = (
+  objectiveCount: number,
 ): Record<string, boolean> => {
   return {
-    [`global-initiatives__details-${initiativeCount}`]: true,
-    "global-initiatives__details-gt4": initiativeCount > 4,
+    [`global-objectives__details-${objectiveCount}`]: true,
+    "global-objectives__details-gt4": objectiveCount > 4,
   };
 };

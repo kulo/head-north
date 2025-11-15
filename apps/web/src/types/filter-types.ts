@@ -9,7 +9,7 @@ import type { Either } from "purify-ts";
 import type { ViewFilterCriteria } from "./ui-types";
 import type {
   AreaId,
-  InitiativeId,
+  ObjectiveId,
   StageId,
   PersonId,
   CycleId,
@@ -30,7 +30,7 @@ export type PageId = "root" | "cycle-overview" | "roadmap";
  */
 export type FilterKey =
   | "area"
-  | "initiatives"
+  | "objectives"
   | "stages"
   | "assignees"
   | "cycle"
@@ -74,7 +74,7 @@ export interface ViewFilterConfig {
  */
 export interface TypedFilterCriteria {
   area?: AreaId;
-  initiatives?: InitiativeId[];
+  objectives?: ObjectiveId[];
   stages?: StageId[];
   assignees?: PersonId[];
   cycle?: CycleId;

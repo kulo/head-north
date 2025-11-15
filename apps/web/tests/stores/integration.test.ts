@@ -46,7 +46,7 @@ const mockCycleDataViewCoordinator = {
     orderedCycles: rawData?.cycles || [],
     roadmapItems: [],
     activeCycle: null,
-    initiatives: processedData?.initiatives || [],
+    objectives: processedData?.objectives || [],
   })),
 };
 
@@ -77,12 +77,12 @@ describe("Store Integration", () => {
 
     const mockData = {
       cycles: [{ id: "cycle1", name: "Cycle 1", state: "active" }],
-      initiatives: [],
+      objectives: [],
       areas: [],
       assignees: [],
       stages: [],
       roadmapItems: [],
-      releaseItems: [],
+      cycleItems: [],
     };
 
     (cycleDataService as any).getCycleData.mockResolvedValue(Right(mockData));
@@ -150,12 +150,12 @@ describe("Store Integration", () => {
 
     const mockData = {
       cycles: [{ id: "cycle1", name: "Cycle 1", state: "active" }],
-      initiatives: [{ id: "init1", name: "Initiative 1" }],
+      objectives: [{ id: "obj1", name: "Objective 1" }],
       areas: [{ id: "area1", name: "Area 1" }],
       assignees: [],
       stages: [],
       roadmapItems: [],
-      releaseItems: [],
+      cycleItems: [],
     };
 
     (cycleDataService as any).getCycleData.mockResolvedValue(Right(mockData));
