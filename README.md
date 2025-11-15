@@ -8,39 +8,88 @@ _Head North_ is inspired by a similar tool, called _Omega_, that was originally 
 
 ## 🎯 Core Concepts
 
-_Head North_ organizes product development around several key concepts that work together to provide comprehensive visibility into your development process:
+_Head North_ organizes product development around several key concepts that work together to provide comprehensive visibility into your development process. Understanding these concepts is essential for getting the most out of the tool.
 
 ### Development Cycles
 
-High-level iterations that represent major development phases. Each cycle typically spans several weeks and contains multiple work items. Cycles are mapped to JIRA Sprints and provide the primary timeline structure for planning and tracking progress.
+**Development Cycles** are high-level iterations that represent major development phases. Each cycle typically spans several weeks and contains multiple work items. Cycles are mapped to JIRA Sprints and provide the primary timeline structure for planning and tracking progress. They serve as the fundamental time-based container for all work in _Head North_.
 
-### Roadmap Items
+### Work Hierarchy: From Strategic Goals to Execution
 
-Customer-facing features or capabilities that represent value delivered to end users. These are the high-level items that appear on product roadmaps and are typically planned across multiple cycles. Roadmap items serve as the primary organizing principle for customer-facing work and may or may not be mapped to dedicated JIRA issue types.
+Work in _Head North_ is organized in a hierarchical structure that connects strategic objectives to concrete execution:
 
-### Cycle Items
+#### Objectives
 
-Concrete work packages that implement roadmap items. These usually group together one or more epics from one or more teams that work on the same topic within a specific cycle. Cycle items are linked to their parent roadmap items and represent the granular work that moves roadmap items toward completion.
+**Objectives** are strategic programs or themes that span multiple roadmap items and cycles. They represent larger business goals and help align individual roadmap items with broader organizational strategy. Objectives provide the "why" behind the work and connect day-to-day development to long-term vision.
 
-### Product Areas
+#### Roadmap Items
 
-Organizational units that group related functionality or business domains (e.g., "Frontend", "Backend", "Mobile", "Analytics"). Areas help organize work and provide visibility into how different parts of the product are progressing across cycles. Another word often used for product areas are Tribes (stemming from the "Spotify Model").
+**Roadmap Items** are customer-facing features or capabilities that represent value delivered to end users. These are the high-level items that appear on product roadmaps and are typically planned across multiple cycles. Roadmap items serve as the primary organizing principle for customer-facing work and may or may not be mapped to dedicated JIRA issue types. Each roadmap item can be linked to one or more objectives.
 
-### Teams
+#### Cycle Items
 
-Development teams responsible for delivering work. Teams are assigned to cycle items and provide accountability and resource planning visibility. Team assignments help track capacity and identify bottlenecks.
+**Cycle Items** are concrete work packages that implement roadmap items within a specific cycle. These usually group together one or more epics from one or more teams that work on the same topic. Cycle items are linked to their parent roadmap items and represent the granular work that moves roadmap items toward completion. Each cycle item belongs to exactly one cycle and one roadmap item. A cylce might have a Release Stage assigned if it's aiming for a customer-facing release, e.g. a piloting readiness behind a feature toggle or general availability, etc..
 
-### Assignees
+#### Release Stages
 
-Individual contributors assigned to specific cycle items. Assignee information provides granular visibility into individual workloads and helps with capacity planning and knowledge distribution.
+**Release Stages** track the current state of roadmap items in the development process (e.g., "Discovery / Shaping", "Piloting Readiness", "Sales Readiness", "General Availability", "Post-Release Refinement", etc.). Release stages provide status visibility and help track progress from conception to delivery, giving you a clear view of where each roadmap item stands in its lifecycle. Cycle Items might have a release stage assigned.
 
-### Objectives
+### Organizational Structure: From Product Areas to Individuals
 
-Strategic programs or themes that span multiple roadmap items and cycles. Objectives represent larger business goals and help align individual roadmap items with broader organizational strategy.
+_Head North_ also models your organizational structure to provide visibility into who is doing what:
 
-### Release Stages
+#### Product Areas
 
-The current state of roadmap items in the development process (e.g., "Discovery", "Development", "Testing", "Released"). Release stages provide status visibility and help track progress from conception to delivery.
+**Product Areas** (also known as "Tribes" in e.g. the "Spotify Model") are organizational units that group together teams and related functionality or business domains (e.g., "Platform", "Mobile", "Analytics", etc.). Areas help organize work and provide visibility into how different parts of the product are progressing across cycles.
+
+#### Teams
+
+**Teams** map cross-functional development teams responsible for delivering work. Teams are assigned to both cycle and roadmap items and provide accountability and resource planning visibility. Team assignments help track capacity and identify bottlenecks. Each team belongs to a product area.
+
+#### Assignees
+
+**Assignees** are individual contributors assigned to specific cycle items. Assignee information provides granular visibility into individual workloads and helps with capacity planning and knowledge distribution. Assignees belong to teams and work on cycle items.
+
+### Visual Overview
+
+The following diagram illustrates how these concepts relate to each other:
+
+```mermaid
+graph TB
+    subgraph "Strategic Goals"
+        O[Objectives]
+    end
+
+    subgraph "Work Hierarchy"
+        O -->|contains| RI[Roadmap Items]
+        RI -->|implemented by| CI[Cycle Items]
+        RI -.->|has status| RS[Release Stages]
+        CI -.->|may have| RS
+    end
+
+    subgraph "Time Structure"
+        C[Development Cycles]
+        CI -->|belongs to| C
+    end
+
+    subgraph "Organizational Structure"
+        PA[Product Areas]
+        PA -->|contains| T[Teams]
+        T -->|contains| A[Assignees]
+        CI -->|assigned to| T
+        RI -->|assigned to| T
+        CI -->|worked on by| A
+    end
+
+    style O fill:#e1f5ff
+    style RI fill:#b3e5fc
+    style CI fill:#81d4fa
+    style C fill:#4fc3f7
+    style PA fill:#fff3e0
+    style T fill:#ffe0b2
+    style A fill:#ffcc80
+    style RS fill:#f3e5f5
+```
 
 ## 📊 Views & Dashboards
 
