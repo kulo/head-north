@@ -47,7 +47,7 @@ describe("Filter", () => {
       expect(result.totalCycleItems).toBe(2);
     });
 
-    it("should filter by area", () => {
+    it("should filter by product area", () => {
       const criteria: FilterCriteria = { area: "frontend" };
 
       const result = filter.apply(mockData, criteria);
@@ -59,7 +59,7 @@ describe("Filter", () => {
       );
     });
 
-    it("should filter by area 'all' (no filtering)", () => {
+    it("should filter by product area 'all' (no filtering)", () => {
       const criteria: FilterCriteria = { area: "all" };
 
       const result = filter.apply(mockData, criteria);
@@ -67,7 +67,7 @@ describe("Filter", () => {
       expect(result.data).toEqual(mockData);
     });
 
-    it("should filter by stages", () => {
+    it("should filter by release stages", () => {
       const criteria: FilterCriteria = { stages: ["s2"] };
 
       const result = filter.apply(mockData, criteria);
@@ -214,7 +214,7 @@ describe("Filter", () => {
       expect(result.data.objectives).toHaveLength(0);
     });
 
-    it("should include roadmap items that match area filter even without matching cycle items", () => {
+    it("should include roadmap items that match product area filter even without matching cycle items", () => {
       const dataWithAreaMatch: NestedCycleData = {
         objectives: [
           {
@@ -284,7 +284,7 @@ describe("Filter", () => {
   });
 
   describe("private methods (tested through public interface)", () => {
-    it("should handle area filtering with string area", () => {
+    it("should handle product area filtering with string area", () => {
       const dataWithStringArea: NestedCycleData = {
         objectives: [
           {
@@ -313,7 +313,7 @@ describe("Filter", () => {
       expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
-    it("should handle area filtering with area object", () => {
+    it("should handle product area filtering with area object", () => {
       const dataWithAreaObject: NestedCycleData = {
         objectives: [
           {
@@ -342,7 +342,7 @@ describe("Filter", () => {
       expect(result.data.objectives[0].roadmapItems).toHaveLength(1);
     });
 
-    it("should handle area filtering with areaIds array", () => {
+    it("should handle product area filtering with areaIds array", () => {
       const dataWithAreaIds: NestedCycleData = {
         objectives: [
           {

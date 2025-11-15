@@ -48,7 +48,7 @@ const personSchema = z.object({
 });
 
 /**
- * Area schema
+ * Product Area schema
  */
 const areaSchema = z.object({
   id: z.string().min(1, "Area ID is required"),
@@ -57,7 +57,7 @@ const areaSchema = z.object({
 });
 
 /**
- * Stage schema
+ * Release Stage schema
  */
 const stageSchema = z.object({
   id: z.string().min(1, "Stage ID is required"),

@@ -237,7 +237,7 @@ describe("DataTransformer", () => {
       }
     });
 
-    it("should handle roadmap items with string area", () => {
+    it("should handle roadmap items with string product area", () => {
       const rawData = {
         ...createMockCycleData(),
         roadmapItems: [
@@ -256,7 +256,7 @@ describe("DataTransformer", () => {
       expect(result.objectives[0].roadmapItems[0].area).toBe("frontend");
     });
 
-    it("should handle roadmap items with area object", () => {
+    it("should handle roadmap items with product area object", () => {
       const rawData = {
         ...createMockCycleData(),
         roadmapItems: [
@@ -275,7 +275,7 @@ describe("DataTransformer", () => {
       expect(result.objectives[0].roadmapItems[0].area).toBe("Frontend");
     });
 
-    it("should handle roadmap items with missing area", () => {
+    it("should handle roadmap items with missing product area", () => {
       const rawData = {
         ...createMockCycleData(),
         roadmapItems: [

@@ -102,7 +102,7 @@ function filterObjective(
     .filter((roadmapItem) => {
       // Keep roadmap items that either:
       // 1. Have matching cycle items, OR
-      // 2. Match the area filter directly (even if no cycle items match)
+      // 2. Match the product area filter directly (even if no cycle items match)
       const hasMatchingCycleItems = roadmapItem.cycleItems.length > 0;
       const matchesAreaDirectly = Maybe.fromNullable(criteria.area)
         .filter((area) => area !== "all")
@@ -112,7 +112,7 @@ function filterObjective(
       return hasMatchingCycleItems || matchesAreaDirectly;
     });
 
-  // If area filter is applied and no roadmap items match, hide the entire objective
+  // If product area filter is applied and no roadmap items match, hide the entire objective
   const shouldHideObjective = Maybe.fromNullable(criteria.area)
     .filter((area) => area !== "all")
     .map(() => filteredRoadmapItems.length === 0)
@@ -143,7 +143,7 @@ function filterRoadmapItem(
     matchesAllCriteria(cycleItem, criteria),
   );
 
-  // Check if roadmap item should be included based on area filter
+  // Check if roadmap item should be included based on product area filter
   const shouldIncludeRoadmapItem = shouldIncludeRoadmapItemCheck(
     roadmapItem,
     filteredCycleItems,
@@ -199,7 +199,7 @@ function shouldIncludeRoadmapItemCheck(
   filteredCycleItems: readonly CycleItem[],
   criteria: FilterCriteria,
 ): boolean {
-  // If no area filter is applied, include the roadmap item
+  // If no product area filter is applied, include the roadmap item
   // Use Maybe pattern matching instead of extract() to stay in Maybe context
   return Maybe.fromNullable(criteria.area)
     .filter((area) => area !== "all")
@@ -209,7 +209,7 @@ function shouldIncludeRoadmapItemCheck(
         return true;
       }
 
-      // Rule 2: Include if the roadmap item itself matches the area filter
+      // Rule 2: Include if the roadmap item itself matches the product area filter
       if (roadmapItemMatchesArea(roadmapItem, areaFilter)) {
         return true;
       }
@@ -217,11 +217,11 @@ function shouldIncludeRoadmapItemCheck(
       // Rule 3: Exclude if neither cycle items nor roadmap item match
       return false;
     })
-    .orDefault(true); // If no area filter, include by default
+    .orDefault(true); // If no product area filter, include by default
 }
 
 /**
- * Check if a roadmap item matches the area filter directly
+ * Check if a roadmap item matches the product area filter directly
  */
 function roadmapItemMatchesArea(
   roadmapItem: RoadmapItem,
@@ -229,12 +229,12 @@ function roadmapItemMatchesArea(
 ): boolean {
   return Maybe.fromNullable(roadmapItem.area)
     .map((areaValue) => {
-      // Use pattern matching for type-safe area comparison
+      // Use pattern matching for type-safe product area comparison
       if (typeof areaValue === "string") {
         return areaValue === area;
       }
 
-      // Handle Area object
+      // Handle Product Area object
       if (
         typeof areaValue === "object" &&
         areaValue !== null &&
@@ -255,7 +255,7 @@ function matchesAllCriteria(
   cycleItem: CycleItem,
   criteria: FilterCriteria,
 ): boolean {
-  // Area filter - empty string or "all" means no filter
+  // Product area filter - empty string or "all" means no filter
   const areaMatch = Maybe.fromNullable(criteria.area)
     .filter((area) => area !== "all" && area !== "")
     .map((area) => matchesArea(cycleItem, area))
@@ -263,7 +263,7 @@ function matchesAllCriteria(
 
   if (!areaMatch) return false;
 
-  // Stage filter - empty array means no filter
+  // Release stage filter - empty array means no filter
   const stageMatch = Maybe.fromNullable(criteria.stages)
     .filter((stages) => stages.length > 0)
     .map((stages) => matchesStages(cycleItem, stages))
@@ -305,10 +305,10 @@ function matchesAllCriteria(
 }
 
 /**
- * Check if cycle item matches area filter
+ * Check if cycle item matches product area filter
  */
 function matchesArea(cycleItem: CycleItem, area: AreaId): boolean {
-  // Check areaIds array (primary field for cycle items)
+  // Check product area IDs array (primary field for cycle items)
   const areaIdsMatch = Maybe.fromNullable(cycleItem.areaIds)
     .filter(Array.isArray)
     .map((areaIds) => areaIds.includes(area))
@@ -316,15 +316,15 @@ function matchesArea(cycleItem: CycleItem, area: AreaId): boolean {
 
   if (areaIdsMatch) return true;
 
-  // Fallback to area field if areaIds doesn't exist
+  // Fallback to product area field if areaIds doesn't exist
   return Maybe.fromNullable(cycleItem.area)
     .map((areaValue) => {
-      // Handle string area
+      // Handle string product area
       if (typeof areaValue === "string") {
         return areaValue === area;
       }
 
-      // Handle Area object
+      // Handle Product Area object
       if (typeof areaValue === "object" && "id" in areaValue) {
         return areaValue.id === area;
       }
@@ -335,7 +335,7 @@ function matchesArea(cycleItem: CycleItem, area: AreaId): boolean {
 }
 
 /**
- * Check if cycle item matches stage filter
+ * Check if cycle item matches release stage filter
  */
 function matchesStages(
   cycleItem: CycleItem,

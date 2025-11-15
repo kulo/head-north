@@ -567,7 +567,7 @@ body {
   color: var(--color-info);
 }
 
-/* Area Container */
+/* Product Area Container */
 .cycle-overview-container {
   margin: 20px;
 }
@@ -1479,7 +1479,7 @@ body {
   }
 }
 
-/* Stage selector now uses unified external-selector styling */
+/* Release stage selector now uses unified external-selector styling */
 
 .theme-pill {
   border: 1px solid var(--color-info);
@@ -1937,7 +1937,7 @@ ant-dropdown-menu-vertical
   color: var(--color-info) !important;
 }
 
-/* Stage Colors for Roadmap Popover */
+/* Release Stage Colors for Roadmap Popover */
 .roadmap-popover__cycle-item__stage.stage-done,
 .roadmap-popover__cycle-item__stage.stage-completed,
 .roadmap-popover__cycle-item__stage.stage-finished {
@@ -1978,7 +1978,7 @@ ant-dropdown-menu-vertical
   color: var(--color-text-primary) !important;
 }
 
-/* Generic status/stage coloring based on common values */
+/* Generic status/release stage coloring based on common values */
 .roadmap-popover__cycle-item__status[class*="done"],
 .roadmap-popover__cycle-item__status[class*="complete"],
 .roadmap-popover__cycle-item__status[class*="finish"] {

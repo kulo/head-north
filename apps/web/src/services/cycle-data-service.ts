@@ -235,8 +235,8 @@ class CycleDataService {
   }
 
   /**
-   * Get config areas for translations
-   * @returns {Area[]} Array of config areas
+   * Get config product areas for translations
+   * @returns {Area[]} Array of config product areas
    */
   #getConfigAreas(): Area[] {
     const config = this.#config.getAreas();
@@ -248,8 +248,8 @@ class CycleDataService {
   }
 
   /**
-   * Get all areas from appropriate data source union with areas from the configuration.
-   * @returns {Promise<Either<Error, Area[]>>} Array of areas with id and name properties wrapped in Either
+   * Get all product areas from appropriate data source union with areas from the configuration.
+   * @returns {Promise<Either<Error, Area[]>>} Array of product areas with id and name properties wrapped in Either
    */
   async getAllAreas(): Promise<Either<Error, Area[]>> {
     const data = await this.#getCachedCycleData();
@@ -271,8 +271,8 @@ class CycleDataService {
   }
 
   /**
-   * Get all stages from the unified data
-   * @returns {Promise<Either<Error, readonly Stage[]>>} Array of stages wrapped in Either
+   * Get all release stages from the unified data
+   * @returns {Promise<Either<Error, readonly Stage[]>>} Array of release stages wrapped in Either
    */
   async getAllStages(): Promise<Either<Error, readonly Stage[]>> {
     const data = await this.#getCachedCycleData();

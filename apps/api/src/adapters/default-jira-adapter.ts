@@ -176,7 +176,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
       owningTeamId,
     );
 
-    // Extract area ID using Maybe
+    // Extract product area ID using Maybe
     const areaId = Maybe.fromNullable(areaLabels[0]).orDefault("unknown");
     const themeId = Maybe.fromNullable(themeLabel).orDefault("unknown");
 
@@ -214,7 +214,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
     const areaLabels = extractLabelsWithPrefix(issue.fields.labels, "area:");
     const teamLabels = extractLabelsWithPrefix(issue.fields.labels, "team:");
 
-    // Extract stage from name
+    // Extract release stage from name
     const stage = this.extractStageFromName(issue.fields.summary).orDefault("");
 
     // Map status
@@ -328,7 +328,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
   }
 
   /**
-   * Extract stage from issue name (text in last parentheses)
+   * Extract release stage from issue name (text in last parentheses)
    * This is adapter-specific policy for DefaultJiraAdapter
    * Returns Maybe<string> - empty string becomes Nothing
    */

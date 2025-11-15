@@ -22,7 +22,7 @@ export const DEFAULT_TEAM = {
 } as const;
 
 /**
- * Default values for stages
+ * Default values for release stages
  */
 export const DEFAULT_STAGE = {
   ID: "unknown",
@@ -44,9 +44,9 @@ export const getDefaultTeamId = (teamId: string | null | undefined): string => {
 };
 
 /**
- * Helper function to get default stage
- * @param stage - The stage to check
- * @returns The stage or default if null/undefined
+ * Helper function to get default release stage
+ * @param stage - The release stage to check
+ * @returns The release stage or default if null/undefined
  */
 export const getDefaultStage = (stage: string | null | undefined): string => {
   return stage || DEFAULT_STAGE.ID;

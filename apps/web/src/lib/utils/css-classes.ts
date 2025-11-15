@@ -17,9 +17,9 @@ export function getStatusClass(status: string | null | undefined): string {
 }
 
 /**
- * Generates a CSS class name for a stage value
- * @param stage - The stage value to convert to a CSS class
- * @returns CSS class name or empty string if no stage
+ * Generates a CSS class name for a release stage value
+ * @param stage - The release stage value to convert to a CSS class
+ * @returns CSS class name or empty string if no release stage
  */
 export function getStageClass(stage: string | null | undefined): string {
   if (!stage) return "";

@@ -32,7 +32,7 @@ const validationDictionary: ValidationRules = {
       reference: createURL("https://docs.example.com/estimation-guidelines"),
     },
     missingStage: {
-      label: "The stage is missing from the Cycle Item",
+      label: "The release stage is missing from the Cycle Item",
       reference: createURL("https://docs.example.com/stage-requirements"),
     },
     missingAssignee: {
@@ -82,7 +82,7 @@ const validationDictionary: ValidationRules = {
     },
     iternalWithStagedCycleItem: {
       label:
-        "This roadmap item should be either marked as external / public (because at least one of its cycle item has a stage), or either changed its cycle items' stages to internal",
+        "This roadmap item should be either marked as external / public (because at least one of its cycle item has a release stage), or either changed its cycle items' release stages to internal",
       reference: createURL(
         "https://docs.example.com/external-roadmap-requirements",
       ),

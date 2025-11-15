@@ -22,10 +22,10 @@ export const ALL_OBJECTIVES_FILTER = {
 };
 
 /**
- * "All Stages" filter option
- * Used when no specific stage filter is applied
+ * "All Release Stages" filter option
+ * Used when no specific release stage filter is applied
  */
 export const ALL_STAGES_FILTER = {
   id: "all",
-  name: "All Stages",
+  name: "All Release Stages",
 };

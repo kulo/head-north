@@ -41,7 +41,7 @@ export default {
 
     const activeFilters = computed(() => filterStore.activeFilters);
 
-    // Filter out "All Stages" from the dropdown options
+    // Filter out "All Release Stages" from the dropdown options
     const filteredStages = computed(() => {
       return stages.value.filter((stage) => stage.id !== "all");
     });
@@ -69,7 +69,7 @@ export default {
       try {
         await filterStore.updateArrayFilter("stages", stageIds, "all");
       } catch (error) {
-        console.error("Failed to update stages filter:", error);
+        console.error("Failed to update release stages filter:", error);
       }
     };
 

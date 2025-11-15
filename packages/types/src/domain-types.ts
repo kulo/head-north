@@ -15,6 +15,10 @@ export type TeamId = string;
 export type PersonId = string;
 export type ProjectId = string;
 
+/**
+ * Product Area - Organizational unit that groups related functionality or business domains.
+ * Represents a product area (e.g., "Frontend", "Backend", "Mobile", "Analytics").
+ */
 export interface Area {
   readonly id: AreaId;
   readonly name: string;
@@ -67,6 +71,7 @@ export interface RoadmapItem {
   readonly id: RoadmapItemId;
   readonly name: string;
   readonly summary: string;
+  /** Product area associated with this roadmap item */
   readonly area?: string | Area;
   readonly theme?: string | Readonly<Record<string, unknown>>;
   readonly objective?: Readonly<Record<string, unknown>>;
@@ -86,11 +91,13 @@ export interface CycleItem {
   readonly ticketId: TicketId;
   readonly effort: number;
   readonly name: string;
+  /** Product area IDs associated with this cycle item */
   readonly areaIds: readonly AreaId[];
   readonly teams: readonly string[];
   readonly status: string;
   readonly url: string;
   readonly isExternal: boolean;
+  /** Release stage of this cycle item */
   readonly stage: string;
   readonly assignee: Person | Readonly<Record<string, unknown>>;
   readonly validations: readonly ValidationItem[];
@@ -102,10 +109,15 @@ export interface CycleItem {
   readonly summary?: string;
   readonly closedSprints?: readonly Readonly<Record<string, unknown>>[];
   readonly parent?: string;
+  /** Product area associated with this cycle item */
   readonly area?: string | Area;
   readonly sprint?: { readonly id: string; readonly name: string } | null;
 }
 
+/**
+ * Release Stage - The current state of roadmap items in the development process.
+ * Represents a release stage (e.g., "Discovery", "Development", "Testing", "Released").
+ */
 export interface Stage {
   readonly id: StageId;
   readonly name: string;
@@ -137,8 +149,10 @@ export interface RawCycleData {
   readonly roadmapItems: readonly RoadmapItem[];
   readonly cycleItems: readonly CycleItem[];
   readonly assignees: readonly Person[];
+  /** Product areas indexed by ID */
   readonly areas: Readonly<Record<string, Area>>;
   readonly objectives: readonly Objective[];
+  /** Release stages */
   readonly stages: readonly Stage[];
   readonly teams?: readonly Team[];
 }
@@ -152,8 +166,10 @@ export interface CycleData {
   readonly cycles: readonly Cycle[];
   readonly roadmapItems: readonly RoadmapItem[];
   readonly cycleItems: readonly CycleItem[];
+  /** Product areas */
   readonly areas: readonly Area[];
   readonly objectives: readonly Objective[];
   readonly assignees: readonly Person[];
+  /** Release stages */
   readonly stages: readonly Stage[];
 }

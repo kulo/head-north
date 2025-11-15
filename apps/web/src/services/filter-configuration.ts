@@ -24,7 +24,7 @@ const DEFAULT_FILTER_CATEGORIES: FilterCategory[] = [
     key: "area",
     type: "common",
     views: ["cycle-overview", "roadmap"],
-    description: "Filter by area/team",
+    description: "Filter by product area/team",
   },
   {
     key: "objectives",
@@ -36,7 +36,7 @@ const DEFAULT_FILTER_CATEGORIES: FilterCategory[] = [
     key: "stages",
     type: "view-specific",
     views: ["cycle-overview"],
-    description: "Filter by development stages",
+    description: "Filter by release stages",
   },
   {
     key: "assignees",

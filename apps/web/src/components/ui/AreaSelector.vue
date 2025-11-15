@@ -2,10 +2,10 @@
   <a-select
     v-model:value="selectedArea"
     class="external-selector area-selector"
-    placeholder="All Areas"
+    placeholder="All Product Areas"
     @change="handleAreaChange"
   >
-    <a-select-option key="all" value="all"> All Areas </a-select-option>
+    <a-select-option key="all" value="all"> All Product Areas </a-select-option>
     <a-select-option v-for="area in areas" :key="area.id" :value="area.id">
       {{ area.name }}
     </a-select-option>
@@ -35,7 +35,7 @@ export default {
         try {
           await filterStore.updateSingleFilter("area", value, "all");
         } catch (error) {
-          console.error("Failed to update area filter:", error);
+          console.error("Failed to update product area filter:", error);
         }
       },
     });
@@ -45,9 +45,12 @@ export default {
     };
 
     onMounted(() => {
-      // Areas will be loaded automatically when data is fetched
+      // Product areas will be loaded automatically when data is fetched
       // No need to manually trigger data fetching here
-      console.log("AreaSelector mounted, areas available:", areas.value.length);
+      console.log(
+        "AreaSelector mounted, product areas available:",
+        areas.value.length,
+      );
     });
 
     return {

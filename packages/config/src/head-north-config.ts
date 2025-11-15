@@ -100,7 +100,7 @@ export default class HeadNorthConfig {
             { id: "s3+", name: "Enhancements" },
           ],
 
-          // Stage Categorization
+          // Release Stage Categorization
           stageCategories: {
             finalReleaseStage: ["s3", "s3+"],
             releasableStage: ["s1", "s2", "s3", "s3+"],
@@ -426,8 +426,8 @@ export default class HeadNorthConfig {
   }
 
   /**
-   * Get stage categories configuration
-   * @returns Stage categories configuration
+   * Get release stage categories configuration
+   * @returns Release stage categories configuration
    */
   getStageCategories(): {
     finalReleaseStage: string[];
@@ -462,7 +462,7 @@ export default class HeadNorthConfig {
 
   /**
    * Get organization configuration
-   * @returns Organization configuration (areas and teams)
+   * @returns Organization configuration (product areas and teams)
    */
   getOrganisationConfig(): {
     areas: Record<string, string>;
@@ -472,8 +472,8 @@ export default class HeadNorthConfig {
   }
 
   /**
-   * Get areas configuration
-   * @returns Areas configuration
+   * Get product areas configuration
+   * @returns Product areas configuration
    */
   getAreas(): Record<string, string> {
     return this.config.common.organisation.areas;
@@ -515,9 +515,9 @@ export default class HeadNorthConfig {
   }
 
   /**
-   * Check if a stage is a final release stage
-   * @param stage - Stage value to check
-   * @returns True if stage is final release
+   * Check if a release stage is a final release stage
+   * @param stage - Release stage value to check
+   * @returns True if release stage is final release
    */
   isFinalReleaseStage(stage: string): boolean {
     return this.config.common.releaseStrategy.stageCategories.finalReleaseStage.includes(
@@ -526,9 +526,9 @@ export default class HeadNorthConfig {
   }
 
   /**
-   * Check if a stage is releasable
-   * @param stage - Stage value to check
-   * @returns True if stage is releasable
+   * Check if a release stage is releasable
+   * @param stage - Release stage value to check
+   * @returns True if release stage is releasable
    */
   isReleasableStage(stage: string): boolean {
     return this.config.common.releaseStrategy.stageCategories.releasableStage.includes(
@@ -537,9 +537,9 @@ export default class HeadNorthConfig {
   }
 
   /**
-   * Check if a stage is external
-   * @param stage - Stage value to check
-   * @returns True if stage is external
+   * Check if a release stage is external
+   * @param stage - Release stage value to check
+   * @returns True if release stage is external
    */
   isExternalStage(stage: string): boolean {
     return this.config.common.releaseStrategy.stageCategories.externalStages.includes(

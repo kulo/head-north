@@ -38,7 +38,7 @@ export class FakeDataAdapter implements JiraAdapter {
       { id: "emma.davis", name: "Emma Davis" },
     ];
 
-    // Initialize areas from config
+    // Initialize product areas from config
     const areasConfig = this.config.getAreas();
     this.areas = Object.entries(areasConfig).map(([id, name]) => ({
       id,
@@ -53,7 +53,7 @@ export class FakeDataAdapter implements JiraAdapter {
       name,
     }));
 
-    // Generate roadmap items dynamically based on areas and objectives from config
+    // Generate roadmap items dynamically based on product areas and objectives from config
     this.roadmapItems = this.generateRoadmapItems();
 
     // Generate sprints following Shape-up methodology (2-month cycles)
@@ -187,12 +187,12 @@ export class FakeDataAdapter implements JiraAdapter {
         const roadmapItemKey = `ROAD-${roadmapItemCounter}`;
         const summary = `${objective.name} - ${roadmapItemCounter}`;
 
-        // Pick a random area for this roadmap item
+        // Pick a random product area for this roadmap item
         const area = this.areas[Math.floor(Math.random() * this.areas.length)];
 
-        if (!area) continue; // Skip if no area
+        if (!area) continue; // Skip if no product area
 
-        // Pick a team that matches the area
+        // Pick a team that matches the product area
         const areaTeams = teamKeys.filter((teamKey) =>
           teamKey.startsWith(area.id),
         );
@@ -233,9 +233,9 @@ export class FakeDataAdapter implements JiraAdapter {
       const area = this.areas[Math.floor(Math.random() * this.areas.length)];
       const summary = `Unassigned - ${roadmapItemCounter}`;
 
-      if (!area) continue; // Skip if no area
+      if (!area) continue; // Skip if no product area
 
-      // Pick a team that matches the area
+      // Pick a team that matches the product area
       const areaTeams = teamKeys.filter((teamKey) =>
         teamKey.startsWith(area.id),
       );
@@ -304,7 +304,7 @@ export class FakeDataAdapter implements JiraAdapter {
    * Get cycle items for a specific roadmap item
    */
   private getCycleItemsForRoadmapItem(roadmapItemKey: string): CycleItem[] {
-    const stages = ["s0", "s1", "s2", "s3", "s3+"]; // Stage progression order
+    const stages = ["s0", "s1", "s2", "s3", "s3+"]; // Release stage progression order
     const roadmapItem = this.roadmapItems[roadmapItemKey];
     const cycleItems: CycleItem[] = [];
 
@@ -313,7 +313,7 @@ export class FakeDataAdapter implements JiraAdapter {
     // Generate 1-3 cycle items per roadmap item
     const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items
 
-    // Select random stages in progression order (s0 → s1 → s2 → s3 → s3+)
+    // Select random release stages in progression order (s0 → s1 → s2 → s3 → s3+)
     const selectedStages = stages.slice(0, numItems);
 
     for (let i = 0; i < numItems; i++) {
