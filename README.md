@@ -6,15 +6,15 @@ The tool provides a bird's eye view onto what's going on in your product develop
 
 ## Table of Contents
 
-- [📊 Use Cases](#use-cases)
-- [🎯 Core Concepts](#core-concepts)
-- [🏗️ Architecture & Repository Structure](#architecture--repository-structure)
-- [🔌 Data Source Adapter Architecture](#data-source-adapter-architecture)
-- [🚀 Quick Start](#quick-start)
-- [📚 Documentation](#documentation)
-- [🤝 Contributing](#contributing)
-- [📄 License](#license)
-- [Credits](#credits)
+- [📊 Use Cases](#-use-cases)
+- [🎯 Core Concepts](#-core-concepts)
+- [🏗️ Architecture & Repository Structure](#-architecture--repository-structure)
+- [🔌 Data Source Adapter Architecture](#-data-source-adapter-architecture)
+- [🚀 Quick Start](#-quick-start)
+- [📚 Documentation](#-documentation)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Credits](#-credits)
 
 ## 📊 Use Cases
 
