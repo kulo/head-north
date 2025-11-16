@@ -8,20 +8,20 @@
 const fs = require("fs");
 const path = require("path");
 
-// Required environment variables for development
+// Required environment variables for development (when using Jira adapters)
 const REQUIRED_ENV_VARS = [
-  "JIRA_EPIC_FIELD",
-  "JIRA_URL",
-  "JIRA_USERNAME",
-  "JIRA_API_TOKEN",
+  "HN_JIRA_USER",
+  "HN_JIRA_TOKEN",
+  "HN_JIRA_HOST",
+  "HN_JIRA_BOARD_ID",
 ];
 
 // Optional environment variables with defaults
 const OPTIONAL_ENV_VARS = {
-  PORT: "3000",
-  MAX_RETRY: "3",
-  DELAY_BETWEEN_RETRY: "2",
-  USE_FAKE_DATA: "false",
+  HN_PORT: "3000",
+  HN_MAX_RETRY: "3",
+  HN_DELAY_BETWEEN_RETRY: "2",
+  HN_DATA_SOURCE_ADAPTER: "default",
 };
 
 console.log("🔍 Validating development environment...\n");
@@ -29,13 +29,16 @@ console.log("🔍 Validating development environment...\n");
 let hasErrors = false;
 
 // Check required environment variables
-console.log("📋 Required Environment Variables:");
-const isFakeDataMode = process.env.USE_FAKE_DATA === "true";
+console.log("📋 Required Environment Variables (for Jira adapters):");
+const adapterType = (
+  process.env.HN_DATA_SOURCE_ADAPTER || "default"
+).toLowerCase();
+const isFakeDataMode = adapterType === "fake";
 
 REQUIRED_ENV_VARS.forEach((varName) => {
   if (process.env[varName] || isFakeDataMode) {
     console.log(
-      `  ✅ ${varName}: ${process.env[varName] ? "Set" : "Skipped (fake data mode)"}`,
+      `  ✅ ${varName}: ${process.env[varName] ? "Set" : "Skipped (fake adapter mode)"}`,
     );
   } else {
     console.log(`  ❌ ${varName}: Missing`);

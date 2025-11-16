@@ -51,11 +51,16 @@ export class DefaultJiraAdapter implements JiraAdapter {
 
       const [sprints, roadmapIssues, cycleIssues] = await Promise.all([
         this.jiraClient.getSprints(boardId),
-        this.jiraClient.searchIssues('issuetype = "Roadmap Item"', [
-          "summary",
-          "labels",
-        ]),
-        this.jiraClient.searchIssues('issuetype = "Cycle Item"', ["*"]),
+        this.jiraClient.searchIssues(
+          'issuetype = "Roadmap Item"',
+          ["summary", "labels"],
+          boardId,
+        ),
+        this.jiraClient.searchIssues(
+          'issuetype = "Cycle Item"',
+          ["*"],
+          boardId,
+        ),
       ]);
 
       // 2. Transform sprints to cycles

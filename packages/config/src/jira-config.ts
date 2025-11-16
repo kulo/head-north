@@ -29,15 +29,15 @@ export default class JiraConfig {
         maxIssuesPerRequest: 100,
       },
       fields: {
-        epic: "customfield_10014",
-        sprint: "customfield_10020",
-        storyPoints: "customfield_10016",
-      },
+        epic: this.processEnv.HN_JIRA_FIELD_EPIC || undefined,
+        sprint: this.processEnv.HN_JIRA_FIELD_SPRINT || undefined,
+        storyPoints: this.processEnv.HN_JIRA_FIELD_STORY_POINTS || undefined,
+      } as JiraFields,
       connection: {
-        user: this.processEnv.JIRA_USER || null,
-        token: this.processEnv.JIRA_TOKEN || null,
-        host: this.processEnv.JIRA_HOST || null,
-        boardId: parseInt(this.processEnv.JIRA_BOARD_ID || "0", 10),
+        user: this.processEnv.HN_JIRA_USER || null,
+        token: this.processEnv.HN_JIRA_TOKEN || null,
+        host: this.processEnv.HN_JIRA_HOST || null,
+        boardId: Number(this.processEnv.HN_JIRA_BOARD_ID),
       },
     };
   }
@@ -51,11 +51,11 @@ export default class JiraConfig {
   }
 }
 
-export interface JiraFields {
+export type JiraFields = Partial<{
   epic: string;
   sprint: string;
   storyPoints: string;
-}
+}>;
 
 export interface JiraConnection {
   user: string | null;

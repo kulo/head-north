@@ -39,8 +39,8 @@ export const getCycleData = async (
     Left: (error) => {
       // Check if error is from collection or validation
       if ("validationErrors" in error) {
-        logger.default.error("Raw cycle data validation failed", {
-          errors: error.validationErrors,
+        logger.default.errorSafe("Raw cycle data validation failed", error, {
+          validationErrors: error.validationErrors,
         });
         context.status = 500;
         context.body = {
@@ -51,7 +51,10 @@ export const getCycleData = async (
         };
       } else {
         // Error from collection (adapter failure)
-        logger.default.error("Error fetching raw cycle data", error);
+        logger.default.errorSafe("Error fetching raw cycle data", error, {
+          errorType:
+            error instanceof Error ? error.constructor.name : typeof error,
+        });
         context.status = 500;
         context.body = {
           success: false,

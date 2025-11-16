@@ -189,26 +189,46 @@ export class MyCompanyJiraAdapter implements JiraAdapter {
 
 ### 4. Add to Adapter Factory
 
-Update the factory in `collect-cycle-data.ts`:
+Update the factory in `apps/api/src/adapters/adapter-factory.ts`:
 
 ```typescript
-function createAdapter(headNorthConfig: HeadNorthConfig): JiraAdapter {
-  if (headNorthConfig.isUsingFakeCycleData()) {
-    return new FakeDataAdapter(headNorthConfig);
+export function createJiraAdapter(
+  headNorthConfig: HeadNorthConfig,
+): Either<Error, JiraAdapter> {
+  // Get adapter type from environment variable
+  const adapterType =
+    process.env.HN_DATA_SOURCE_ADAPTER?.toLowerCase() || "default";
+
+  // Handle fake adapter (replaces USE_FAKE_DATA functionality)
+  if (adapterType === "fake") {
+    return Right(new FakeDataAdapter(headNorthConfig));
   }
 
-  const jiraClient = new JiraClient(headNorthConfig.getJiraConfig()!);
+  // Validate JIRA config
+  const jiraConfigResult = headNorthConfig.getJiraConfig();
+  return jiraConfigResult.map((jiraConfig) => {
+    const clientConfig = transformJiraConfigData(jiraConfig);
+    const jiraClient = new JiraClient(clientConfig);
 
-  // Add organization detection logic
-  const organization = headNorthConfig.get("organization");
-  switch (organization) {
-    case "mycompany":
-      return new MyCompanyJiraAdapter(jiraClient, headNorthConfig);
-    default:
-      return new DefaultJiraAdapter(jiraClient, headNorthConfig);
-  }
+    // Select adapter based on type
+    if (adapterType === "prewave") {
+      return new PrewaveJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
+    }
+    if (adapterType === "mycompany") {
+      return new MyCompanyJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
+    }
+
+    // Default adapter
+    return new DefaultJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
+  });
 }
 ```
+
+**Note**: Adapter selection is now controlled via the `HN_DATA_SOURCE_ADAPTER` environment variable:
+
+- `"fake"` → Uses `FakeDataAdapter` (replaces `USE_FAKE_DATA`)
+- `"prewave"` → Uses `PrewaveJiraAdapter`
+- `"default"` or unset → Uses `DefaultJiraAdapter`
 
 ## Data Flow
 

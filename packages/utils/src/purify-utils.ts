@@ -209,9 +209,52 @@ export const safeAsync = <T>(
 ): Promise<Either<Error, T>> => {
   return fn()
     .then((value) => Right(value))
-    .catch((error) =>
-      Left(error instanceof Error ? error : new Error(String(error))),
-    );
+    .catch((error) => {
+      // Handle different error types
+      if (error instanceof Error) {
+        return Left(error);
+      }
+
+      // If error is an object with a message property
+      if (error && typeof error === "object" && "message" in error) {
+        const errorMessage = String(error.message);
+        const enhancedError = new Error(errorMessage);
+        // Copy additional properties if they exist
+        if ("code" in error) {
+          (enhancedError as Error & { code: unknown }).code = error.code;
+        }
+        if ("statusCode" in error) {
+          (enhancedError as Error & { statusCode: unknown }).statusCode =
+            error.statusCode;
+        }
+        if ("response" in error) {
+          (enhancedError as Error & { response: unknown }).response =
+            error.response;
+        }
+        if ("stack" in error) {
+          enhancedError.stack = String(error.stack);
+        }
+        return Left(enhancedError);
+      }
+
+      // If error is an object, try to stringify it for the message
+      if (error && typeof error === "object") {
+        try {
+          const errorString = JSON.stringify(error, null, 2);
+          return Left(new Error(`API Error: ${errorString}`));
+        } catch {
+          // If stringify fails, use a generic message
+          return Left(
+            new Error(
+              `Unknown error occurred: ${String(error)} (type: ${typeof error})`,
+            ),
+          );
+        }
+      }
+
+      // Fallback for primitive types
+      return Left(new Error(String(error)));
+    });
 };
 
 /**

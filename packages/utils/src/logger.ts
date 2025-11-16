@@ -19,6 +19,56 @@ export const getSafeErrorStack = (error: unknown): string => {
   return "No stack trace available";
 };
 
+// Extract all error properties for detailed logging
+export const getErrorDetails = (error: unknown): Record<string, unknown> => {
+  if (!error || typeof error !== "object") {
+    return {};
+  }
+
+  const details: Record<string, unknown> = {};
+
+  // Extract common error properties
+  if ("message" in error) {
+    details.message = String(error.message);
+  }
+  if ("name" in error) {
+    details.name = String(error.name);
+  }
+  if ("code" in error) {
+    details.code = error.code;
+  }
+  if ("statusCode" in error) {
+    details.statusCode = error.statusCode;
+  }
+  if ("status" in error) {
+    details.status = error.status;
+  }
+  if ("response" in error) {
+    // Try to extract response details safely
+    try {
+      const response = error.response as unknown;
+      if (response && typeof response === "object") {
+        if ("status" in response) {
+          details.responseStatus = response.status;
+        }
+        if ("statusText" in response) {
+          details.responseStatusText = response.statusText;
+        }
+        if ("data" in response) {
+          details.responseData = response.data;
+        }
+      }
+    } catch {
+      // Ignore errors when extracting response details
+    }
+  }
+  if ("cause" in error) {
+    details.cause = error.cause;
+  }
+
+  return details;
+};
+
 // Logger interface
 export interface Logger {
   debug: (...args: unknown[]) => void;
@@ -62,9 +112,11 @@ const createConsoleLogger = (component?: string): Logger => {
     ) => {
       const errorMessage = getSafeErrorMessage(error);
       const errorStack = getSafeErrorStack(error);
+      const errorDetails = getErrorDetails(error);
       console.error(prefix, message, {
         error: errorMessage,
         stack: errorStack,
+        ...errorDetails,
         ...additionalData,
       });
     },
@@ -76,9 +128,11 @@ const createConsoleLogger = (component?: string): Logger => {
     ) => {
       const errorMessage = getSafeErrorMessage(error);
       const errorStack = getSafeErrorStack(error);
+      const errorDetails = getErrorDetails(error);
       console.warn(prefix, message, {
         error: errorMessage,
         stack: errorStack,
+        ...errorDetails,
         ...additionalData,
       });
     },

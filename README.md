@@ -167,11 +167,13 @@ For development and testing, the API can run with fake data to avoid Jira authen
 ```bash
 # Start API with fake data
 cd apps/api
-USE_FAKE_DATA=true npm run start-dev
+HN_DATA_SOURCE_ADAPTER=fake npm run start-dev
 
 # Or start both apps with fake data
-USE_FAKE_DATA=true npm run dev
+HN_DATA_SOURCE_ADAPTER=fake npm run dev
 ```
+
+**Note**: All Head North environment variables now use the `HN_` prefix. See `env.example` for the complete list of environment variables.
 
 ### Installation
 
