@@ -2,9 +2,41 @@
 
 _Head North_ is a visualisation tool or dashboard for product development organisations that work in a common cadence via high-level iterations called "development cycles" or just "cycles".
 
-_Head North_ provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making towards your north star / objectives.
+The tool provides a bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making towards your north star / objectives.
 
-_Head North_ is inspired by a similar tool, called _Omega_, that was originally envisioned and developed as internal tool at [Emarsys](https://github.com/emartech/).
+## Table of Contents
+
+- [📊 Use Cases](#use-cases)
+- [🎯 Core Concepts](#core-concepts)
+- [🏗️ Architecture & Repository Structure](#architecture--repository-structure)
+- [🔌 Data Source Adapter Architecture](#data-source-adapter-architecture)
+- [🚀 Quick Start](#quick-start)
+- [📚 Documentation](#documentation)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
+- [Credits](#credits)
+
+## 📊 Use Cases
+
+The primary user personas are all members of your product development organisation and its interal clients / downstream, like customer-facing roles.
+
+_Head North_ provides two main views which cater for it's two primary use cases:
+
+#### Cycle Overview
+
+Shows the scope and progress of all development cycles - completed, active, and planned ones. It a visualisation of all work items of a cycle - grouped by roadmap item and objective. This view might contain both customer-facing work on roadmap items as well as internal efforts for e.g. "keeping the lights on", etc.
+
+#### Roadmap View
+
+Visualizes all customer-facing roadmap items for the last completed, currently active, and next two upcoming cycles – while omitting non-customer-facing items to focus on user value delivery.
+
+### Read-only Visualisation
+
+_Head North_ focususes on visualising the state of your product development. It does not provide any management functionality is thus a read-only view on top of the tool which you use for managing your product development. By default _Head North_ supports jira as data source - with a pluggable and configurable adapter architecture that let's you customise _Head North_ to whatever tool setup you've got. See [🔌 Data Source Adapter Architecture](#-data-source-adapter-architecture) for further details.
+
+### Filtering
+
+_Head North_ comes with fine grained filtering support in it's top bar, which let's you focus on the plans and progress towards a specific objective, for a certain part of the organisation, etc..
 
 ## 🎯 Core Concepts
 
@@ -91,14 +123,6 @@ graph TB
     style RS fill:#f3e5f5
 ```
 
-## 📊 Views & Dashboards
-
-_Head North_ provides two main views:
-
-- **Cycle Overview**: Shows the current progress and status of completed, active, and planned cycles, containing all work packages that teams have planned into their cycles.
-
-- **Roadmap View**: Visualizes all customer-facing roadmap items for the last completed, currently active, and next two upcoming cycles – while omitting non-customer-facing items to focus on user value delivery.
-
 ## 🏗️ Architecture & Repository Structure
 
 _Head North_ is built as a modern web application with a clear separation between data collection, processing, and visualization. The system consists of:
@@ -134,22 +158,22 @@ head-north/
 
 ## 🔌 Data Source Adapter Architecture
 
-Head North's default data source is **JIRA** with a specific model that maps Head North's internal domain model 1:1 to JIRA concepts:
+Head North's default data source is **JIRA** with a specific model that maps Head North's internal domain model to JIRA concepts. Therefore _Head North_ comes with DefaultJiraAdapter that 1:1 expects your JIRA setup to fit Head North's core structure:
 
 - **Roadmap Items** → JIRA issue type "Roadmap Item"
 - **Cycle Items** → JIRA issue type "Cycle Item"
 - **Cycles** → JIRA Sprints
-- **Metadata** (areas, teams, objectives, release stages, etc.) → Fields within these issue types
+- **Metadata** (areas, teams, objectives, release stages, etc.) → Fields within these issue types or well-defined labels.
 
-This direct mapping allows for straightforward data transformation and ensures consistency between your JIRA setup and Head North's visualization.
+If you haven't gotten any JIRA project set up already then you might wanna go for this adapter and craft your JIRA setup accordingly.
 
-### Customization Options
+### Customization Data Source
 
-You have two main approaches:
+For most users it will however be the case that they already got a JIRA set up and will want to define a mapping from their specific setup towards _Head North's_ core data concepts.
 
-1. **Use the Default Adapter**: Model your JIRA setup to fit Head North's expected structure (separate issue types, label-based metadata, etc.)
+This is doen via creating a custom adapter for your data source. See for instance the one for Prewave.
 
-2. **Create a Custom Adapter**: If you already have a different JIRA setup or prefer a different structure, you can create your own data adapter. The `@headnorth/jira-primitives` package provides reusable utilities for JIRA data transformation, validation, and API interaction to simplify this process.
+The `@headnorth/jira-primitives` package provides reusable utilities for JIRA data transformation, validation, and API interaction to simplify this process.
 
 For detailed information about creating custom adapters, see the [JIRA Adapters documentation](apps/api/src/adapters/README.md).
 
@@ -180,17 +204,12 @@ See `env.example` for required Jira variables. For detailed developer commands a
 
 ## 📚 Documentation
 
-- Development Guide: [docs/development.md](docs/development.md)
-  - Purpose: How to run locally (fake and Jira adapters), environment setup, scripts, tooling, and day-to-day workflows.
-- Deployment Guide: [docs/deployment.md](docs/deployment.md)
-  - Purpose: How to build and deploy (Docker, static frontend, cloud/local manifests).
-- Architecture: [docs/architecture.md](docs/architecture.md)
-  - Purpose: Deep overview of the system, monorepo layout, domain concepts, shared configuration (single source of truth).
-- JIRA Adapters: [apps/api/src/adapters/README.md](apps/api/src/adapters/README.md)
-  - Purpose: Available adapters (default, prewave, fake), how selection works, when to build custom adapters.
-- Package References:
-  - Config: [packages/config/README.md](packages/config/README.md) – endpoints, routes, validation dictionaries, usage.
-  - Jira primitives: [packages/jira-primitives/README.md](packages/jira-primitives/README.md) – extractors, transformers, validators, Jira client.
+| [docs/development.md](docs/development.md) | How to run locally (fake and Jira adapters), environment setup, scripts, tooling, and day-to-day workflows. |
+| [docs/deployment.md](docs/deployment.md) | How to build and deploy (Docker, static frontend, cloud/local manifests). |
+| [docs/architecture.md](docs/architecture.md) | Deep overview of the system, monorepo layout, domain concepts, shared configuration (single source of truth). |
+| [apps/api/src/adapters/README.md](apps/api/src/adapters/README.md) | Available adapters (default, prewave, fake), how selection works, when to build custom adapters. |
+| [packages/config/README.md](packages/config/README.md) | Package reference: endpoints, routes, validation dictionaries, usage. |
+| [packages/jira-primitives/README.md](packages/jira-primitives/README.md) | Package reference: extractors, transformers, validators, Jira client. |
 
 ## 🤝 Contributing
 
@@ -203,5 +222,10 @@ See `env.example` for required Jira variables. For detailed developer commands a
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Copyright (c) 2025 Michael Wagner-Kulovits
-Developed while employed at Prewave
+Copyright (c) 2025 [Michael Wagner-Kulovits](https://github.com/kulo).
+
+Developed while employed at ]Prewave](https://github.com/prewave).
+
+## 🙏 Credits
+
+_Head North_ is inspired by a similar tool, that used to be developed as internal tool at [Emarsys](https://github.com/emartech/) and which was called _Omega_.
