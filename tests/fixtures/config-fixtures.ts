@@ -7,6 +7,7 @@
 
 import type { HeadNorthConfig } from "@headnorth/config";
 import { createURL } from "@headnorth/config";
+import { Right } from "@headnorth/utils";
 
 /**
  * Create a mock HeadNorthConfig with default test values
@@ -15,24 +16,33 @@ export function createMockHeadNorthConfig(
   overrides: Partial<HeadNorthConfig> = {},
 ): HeadNorthConfig {
   const defaultConfig = {
-    getJiraConfig: () => ({
-      connection: {
-        host: "https://test.atlassian.net",
-        user: "test@example.com",
-        token: "test-token",
-        boardId: 123,
-      },
-      statusMappings: {
-        "1": "todo",
-        "2": "inprogress",
-        "3": "done",
-        "4": "cancelled",
-        "5": "postponed",
-      },
-      limits: {
-        maxResults: 100,
-      },
-    }),
+    getJiraConfig: () =>
+      Right({
+        connection: {
+          host: "https://test.atlassian.net",
+          user: "test@example.com",
+          token: "test-token",
+          boardId: 123,
+        },
+        statusMappings: {
+          "1": "todo",
+          "2": "inprogress",
+          "3": "done",
+          "4": "cancelled",
+          "5": "postponed",
+        },
+        statusCategories: {
+          finished: ["done", "cancelled"],
+          active: ["inprogress"],
+          future: ["todo"],
+        },
+        limits: {
+          maxResults: 100,
+        },
+        fields: {
+          effort: "customfield_10002",
+        },
+      }),
 
     getLabelTranslations: () => ({
       areas: {
@@ -191,7 +201,27 @@ export function createMockHeadNorthConfig(
  */
 export function createMinimalMockHeadNorthConfig(): HeadNorthConfig {
   return createMockHeadNorthConfig({
-    getJiraConfig: () => null,
+    getJiraConfig: () =>
+      Right({
+        connection: {
+          host: "https://test.atlassian.net",
+          user: "test@example.com",
+          token: "test-token",
+          boardId: 123,
+        },
+        statusMappings: {},
+        statusCategories: {
+          finished: [],
+          active: [],
+          future: [],
+        },
+        limits: {
+          maxResults: 100,
+        },
+        fields: {
+          effort: "customfield_10002",
+        },
+      }),
     getLabelTranslations: () => ({}),
     getItemStatusValues: () => ({
       TODO: "todo",

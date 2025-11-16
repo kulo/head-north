@@ -250,17 +250,14 @@ npx knip --exclude '**/*.test.ts'
     "apps/web/src/main.ts",
     "apps/web/webpack.config.mjs"
   ],
-  "project": {
-    "apps/api/**": {
-      "entry": ["src/index.ts"],
-      "ignore": ["src/**/*.test.ts"]
-    },
-    "apps/web/**": {
-      "entry": ["src/main.ts"],
-      "ignore": ["src/**/*.test.ts"]
-    }
-  },
-  "ignore": ["**/*.d.ts", "**/dist/**", "**/coverage/**"]
+  "ignore": ["**/*.d.ts", "**/dist/**", "**/coverage/**", "**/node_modules/**"],
+  "ignoreDependencies": [
+    "@types/*",
+    "eslint-*",
+    "webpack-*",
+    "@babel/*",
+    "@vitest/*"
+  ]
 }
 ```
 
@@ -466,10 +463,6 @@ export default [
     "@typescript-eslint/*",
     "vue-eslint-parser",
     "webpack-*",
-    "@babel/*",
-    "@vitest/*",
-    "ts-loader",
-    "vue-loader",
     "html-webpack-plugin",
     "copy-webpack-plugin"
   ],

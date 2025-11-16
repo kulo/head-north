@@ -1,6 +1,14 @@
 # Contributing to Head North
 
-Thank you for your interest in contributing to Head North! This document provides guidelines and instructions for contributing to the project.
+This document lays out how to propose, implement, and submit changes. Use this when you plan to contribute code or docs.
+
+For a project overview and quick start, see [README.md](README.md)
+
+For local development, see [docs/development.md](docs/development.md).
+
+For architecture and code structure, see [docs/architecture.md](docs/architecture.md).
+
+For deployment specifics, see [docs/deployment.md](docs/deployment.md).
 
 ## Quick Start
 
@@ -82,11 +90,6 @@ See [README.md](README.md) for all available commands. Most common:
 
 - **Run all tests**: `npm run test`
 - **Lint all code**: `npm run lint`
-
-## Documentation
-
-- **[README.md](README.md)** - Project overview, architecture, setup, and commands
-- **[Coding Guidelines](docs/CODING_GUIDELINES.md)** - Comprehensive coding standards (includes FP patterns, TypeScript, testing, migration patterns, quick reference)
 
 ## Getting Help
 

@@ -24,6 +24,9 @@ export function extractCustomField<T>(
   issue: JiraIssue,
   fieldName: string,
 ): Maybe<T> {
+  if (!issue.fields) {
+    return Maybe.empty();
+  }
   const value = (issue.fields as unknown as Record<string, unknown>)[fieldName];
   return Maybe.fromNullable(value as T | null | undefined);
 }

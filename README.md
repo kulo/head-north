@@ -2,9 +2,41 @@
 
 _Head North_ is a visualisation tool or dashboard for product development organisations that work in a common cadence via high-level iterations called "development cycles" or just "cycles".
 
-_Head North_ provides bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making towards your north star / objectives.
+The tool provides a bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making towards your north star / objectives.
 
-_Head North_ is inspired by a similar tool, called _Omega_, that was originally envisioned and developed as internal tool at [Emarsys](https://github.com/emartech/).
+## Table of Contents
+
+- [📊 Use Cases](#-use-cases)
+- [🎯 Core Concepts](#-core-concepts)
+- [🏗️ Architecture & Repository Structure](#-architecture--repository-structure)
+- [🔌 Data Source Adapter Architecture](#-data-source-adapter-architecture)
+- [🚀 Quick Start](#-quick-start)
+- [📚 Documentation](#-documentation)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Credits](#-credits)
+
+## 📊 Use Cases
+
+The primary user personas are all members of your product development organisation and its interal clients / downstream, like customer-facing roles.
+
+_Head North_ provides two main views which cater for it's two primary use cases:
+
+#### Cycle Overview
+
+Shows the scope and progress of all development cycles - completed, active, and planned ones. It a visualisation of all work items of a cycle - grouped by roadmap item and objective. This view might contain both customer-facing work on roadmap items as well as internal efforts for e.g. "keeping the lights on", etc.
+
+#### Roadmap View
+
+Visualizes all customer-facing roadmap items for the last completed, currently active, and next two upcoming cycles – while omitting non-customer-facing items to focus on user value delivery.
+
+### Read-only Visualisation
+
+_Head North_ focususes on visualising the state of your product development. It does not provide any management functionality is thus a read-only view on top of the tool which you use for managing your product development. By default _Head North_ supports jira as data source - with a pluggable and configurable adapter architecture that let's you customise _Head North_ to whatever tool setup you've got. See [🔌 Data Source Adapter Architecture](#-data-source-adapter-architecture) for further details.
+
+### Filtering
+
+_Head North_ comes with fine grained filtering support in it's top bar, which let's you focus on the plans and progress towards a specific objective, for a certain part of the organisation, etc..
 
 ## 🎯 Core Concepts
 
@@ -91,14 +123,6 @@ graph TB
     style RS fill:#f3e5f5
 ```
 
-## 📊 Views & Dashboards
-
-_Head North_ provides two main views:
-
-- **Cycle Overview**: Shows the current progress and status of completed, active, and planned cycles, containing all work packages that teams have planned into their cycles.
-
-- **Roadmap View**: Visualizes all customer-facing roadmap items for the last completed, currently active, and next two upcoming cycles – while omitting non-customer-facing items to focus on user value delivery.
-
 ## 🏗️ Architecture & Repository Structure
 
 _Head North_ is built as a modern web application with a clear separation between data collection, processing, and visualization. The system consists of:
@@ -134,22 +158,22 @@ head-north/
 
 ## 🔌 Data Source Adapter Architecture
 
-Head North's default data source is **JIRA** with a specific model that maps Head North's internal domain model 1:1 to JIRA concepts:
+Head North's default data source is **JIRA** with a specific model that maps Head North's internal domain model to JIRA concepts. Therefore _Head North_ comes with DefaultJiraAdapter that 1:1 expects your JIRA setup to fit Head North's core structure:
 
 - **Roadmap Items** → JIRA issue type "Roadmap Item"
 - **Cycle Items** → JIRA issue type "Cycle Item"
 - **Cycles** → JIRA Sprints
-- **Metadata** (areas, teams, objectives, release stages, etc.) → Fields within these issue types
+- **Metadata** (areas, teams, objectives, release stages, etc.) → Fields within these issue types or well-defined labels.
 
-This direct mapping allows for straightforward data transformation and ensures consistency between your JIRA setup and Head North's visualization.
+If you haven't gotten any JIRA project set up already then you might wanna go for this adapter and craft your JIRA setup accordingly.
 
-### Customization Options
+### Customization Data Source
 
-You have two main approaches:
+For most users it will however be the case that they already got a JIRA set up and will want to define a mapping from their specific setup towards _Head North's_ core data concepts.
 
-1. **Use the Default Adapter**: Model your JIRA setup to fit Head North's expected structure (separate issue types, label-based metadata, etc.)
+This is doen via creating a custom adapter for your data source. See for instance the one for Prewave.
 
-2. **Create a Custom Adapter**: If you already have a different JIRA setup or prefer a different structure, you can create your own data adapter. The `@headnorth/jira-primitives` package provides reusable utilities for JIRA data transformation, validation, and API interaction to simplify this process.
+The `@headnorth/jira-primitives` package provides reusable utilities for JIRA data transformation, validation, and API interaction to simplify this process.
 
 For detailed information about creating custom adapters, see the [JIRA Adapters documentation](apps/api/src/adapters/README.md).
 
@@ -160,251 +184,38 @@ For detailed information about creating custom adapters, see the [JIRA Adapters 
 - Node.js 22.x LTS
 - npm 10.x
 
-### Development Mode with Fake Data
-
-For development and testing, the API can run with fake data to avoid Jira authentication requirements:
+### Fastest way to run
 
 ```bash
-# Start API with fake data
+# Start API backend with fake data (no Jira required)
+# as well as the web frontend at the same time!
+HN_DATA_SOURCE_ADAPTER=fake npm run dev
+```
+
+### Use the Prewave Jira adapter
+
+```bash
+# Start API with Prewave adapter (requires Jira env vars)
 cd apps/api
-USE_FAKE_DATA=true npm run start-dev
-
-# Or start both apps with fake data
-USE_FAKE_DATA=true npm run dev
+HN_DATA_SOURCE_ADAPTER=prewave npm run start-dev
 ```
 
-### Installation
-
-```bash
-# Install all dependencies
-npm install
-
-# Or install individually
-npm run install:web     # Web application
-npm run install:api     # API service
-npm run install:packages # Shared packages (types, utils, config)
-```
-
-### Development
-
-```bash
-# Run both applications in development mode
-npm run dev
-
-# Or run individually
-npm run dev:web         # Web app on http://localhost:8080
-npm run dev:api         # API on http://localhost:3000
-```
-
-### Production
-
-```bash
-# Build both applications
-npm run build
-
-# Start both applications
-npm run start
-```
-
-## 📦 Workspace Commands
-
-### Web Application (Vue.js)
-
-- `npm run dev:web` - Start development server
-- `npm run build:web` - Build for production
-- `npm run test:web` - Run web app tests
-- `npm run lint:web` - Lint web app code
-
-### API Service (Node.js/Koa)
-
-- `npm run dev:api` - Start API in development mode
-- `npm run start:api` - Start API in production mode
-- `npm run test:api` - Run API tests
-- `npm run lint:api` - Lint API code
-
-### Global Commands
-
-- `npm run dev` - Start both applications in development
-- `npm run build` - Build both applications
-- `npm run test` - Run all tests
-- `npm run lint` - Lint all code
-- `npm run clean` - Remove all node_modules
-- `npm run clean:install` - Clean and reinstall everything
-
-## 📦 Shared Packages
-
-The monorepo includes several shared packages for code reuse and consistency. All packages use modern scoped naming (`@headnorth/*`) and follow current Node.js monorepo best practices:
-
-### Types (`@headnorth/types`)
-
-Common TypeScript types and interfaces used across web app and API service. Provides type safety and consistency across the entire monorepo.
-
-### Utils (`@headnorth/utils`)
-
-Shared utility functions used by both web app and API service applications. Currently includes logging functionality for consistent log formatting across the monorepo.
-
-### Config (`@headnorth/config`)
-
-**Single Source of Truth** for all API endpoints and configuration settings. Ensures web app and API service always use the same API paths and configuration values. Includes:
-
-- API endpoint definitions
-- Environment-specific configurations
-- Route consistency validation
-- Cross-platform configuration management
-- Jira integration settings
-- **Page definitions and routing** - Centralized page configuration for the frontend
-- **Filter system configuration** - Type-safe filter definitions and validation rules
-
-### JIRA Primitives (`@headnorth/jira-primitives`)
-
-Specialized utilities for JIRA data transformation and validation. Provides reusable building blocks for creating custom JIRA adapters:
-
-- **Data Extractors**: Extract metadata from JIRA issues (labels, custom fields, etc.)
-- **Transformers**: Convert JIRA objects to Head North domain objects
-- **Validators**: Validate data quality and create validation reports
-- **JIRA Client**: Standardized JIRA API client with authentication
-- **Type Definitions**: JIRA-specific TypeScript types and interfaces
-
-## 📦 Package Usage Examples
-
-```typescript
-// Import shared types
-import type { Cycle, RoadmapItem } from "@headnorth/types";
-
-// Import utilities
-import { logger } from "@headnorth/utils";
-
-// Import configuration
-import { HeadNorthConfig } from "@headnorth/config";
-
-// Import JIRA primitives for adapter development
-import {
-  extractLabelsWithPrefix,
-  jiraSprintToCycle,
-  JiraClient,
-} from "@headnorth/jira-primitives";
-```
-
-### Tools
-
-- **ESLint Config** (`tools/eslint-config/`): Shared ESLint configuration
-- **Prettier Config** (`tools/prettier-config/`): Shared Prettier configuration
-- **TypeScript Config** (`tools/typescript-config/`): Shared TypeScript configuration
-- **Test Config** (`tools/test-config/`): Shared test configuration
-- **Build Config** (`tools/build-config/`): Shared build configuration
-
-## 🛠️ Development Tools
-
-### Code Quality
-
-- **ESLint**: Configured for TypeScript and Vue.js
-- **Prettier**: Code formatting with shared configuration
-- **Husky**: Git hooks for pre-commit linting
-- **lint-staged**: Run linters on staged files only
-
-### Environment Validation
-
-- `npm run validate:env` - Validates required environment variables
-- `npm run dev:with-check` - Starts development with environment validation
-
-### Package Development
-
-```bash
-# Watch mode for shared packages
-npm run dev:packages
-
-# Individual package development
-npm run dev:types    # Watch types package
-npm run dev:utils    # Watch utils package
-npm run dev:config   # Watch config package
-```
-
-## 🔧 Individual Package Management
-
-Each workspace maintains its own `package.json` and can be managed independently:
-
-```bash
-# Work in web app directory
-cd apps/web
-npm install <package>
-npm run <script>
-
-# Work in API directory
-cd apps/api
-npm install <package>
-npm run <script>
-
-# Work in shared packages
-cd packages/types
-npm install <package>
-```
-
-## 🐳 Docker Support
-
-### Backend Docker
-
-The backend includes Docker support:
-
-```bash
-cd apps/api
-make build    # Build Docker image
-make start    # Run Docker container
-```
-
-### Frontend Build
-
-The frontend can be built and served statically:
-
-```bash
-cd apps/web
-npm run build
-# Serve the dist/ directory with any static file server
-```
-
-## 🚀 Deployment
-
-### Cloud Build (Backend)
-
-The backend includes Google Cloud Build configuration:
-
-- `cloudbuild-production.yaml` - Production deployment
-- `minikube-manifest.yaml` - Local Kubernetes deployment
-
-### Frontend Deployment
-
-The frontend builds to static files in `dist/` directory and can be deployed to any static hosting service.
-
-## 🔍 Development Workflow
-
-1. **Start Development**: `npm run dev` (runs both services)
-2. **Frontend**: Access at http://localhost:8080
-3. **Backend API**: Access at http://localhost:3000
-4. **Make Changes**: Edit files in respective directories
-5. **Testing**: `npm run test` to run all tests
-6. **Linting**: `npm run lint` to check code quality
-
-### 🎯 Shared Configuration
-
-The project uses a **Single Source of Truth** approach for configuration:
-
-- **API Endpoints**: Defined once in `packages/config/`
-- **Frontend**: Uses shared endpoints for API calls
-- **Backend**: Uses shared endpoints for route registration
-- **Consistency**: Frontend and backend automatically stay in sync
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines, including:
-
-- Development setup and workflow
-- Code style and coding standards
-- Pull request process and checklist
-- Commit message conventions
+See `env.example` for required Jira variables. For detailed developer commands and workflows, see [docs/development.md](docs/development.md).
 
 ## 📚 Documentation
 
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute, coding standards, PR process
-- **[Coding Guidelines](docs/CODING_GUIDELINES.md)** - Comprehensive coding standards and best practices (includes FP patterns, TypeScript, testing, migration patterns, quick reference)
+| [docs/development.md](docs/development.md) | How to run locally (fake and Jira adapters), environment setup, scripts, tooling, and day-to-day workflows. |
+| [docs/deployment.md](docs/deployment.md) | How to build and deploy (Docker, static frontend, cloud/local manifests). |
+| [docs/architecture.md](docs/architecture.md) | Deep overview of the system, monorepo layout, domain concepts, shared configuration (single source of truth). |
+| [apps/api/src/adapters/README.md](apps/api/src/adapters/README.md) | Available adapters (default, prewave, fake), how selection works, when to build custom adapters. |
+| [packages/config/README.md](packages/config/README.md) | Package reference: endpoints, routes, validation dictionaries, usage. |
+| [packages/jira-primitives/README.md](packages/jira-primitives/README.md) | Package reference: extractors, transformers, validators, Jira client. |
+
+## 🤝 Contributing
+
+- Start here: [CONTRIBUTING.md](CONTRIBUTING.md) – contribution process, branching/PR flow, checklists.
+- Development Howto: [docs/development.md](docs/development.md) – how to run locally, environment setup, scripts, tooling, and day-to-day workflows.
+- Code style and practices: [docs/CODING_GUIDELINES.md](docs/CODING_GUIDELINES.md) – FP patterns (Maybe/Either), TypeScript best practices, testing, migration patterns, quick reference.
 
 ---
 
@@ -412,5 +223,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines, inc
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Copyright (c) 2025 Michael Wagner-Kulovits
-Developed while employed at Prewave
+Copyright (c) 2025 [Michael Wagner-Kulovits](https://github.com/kulo).
+
+Developed while employed at ]Prewave](https://github.com/prewave).
+
+## 🙏 Credits
+
+_Head North_ is inspired by a similar tool, that used to be developed as internal tool at [Emarsys](https://github.com/emartech/) and which was called _Omega_.

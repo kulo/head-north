@@ -5,11 +5,8 @@
  * These fixtures represent realistic Jira issue structures and edge cases.
  */
 
-import type {
-  JiraIssue,
-  JiraSprint,
-  JiraRoadmapItemsData,
-} from "../../src/types";
+import type { JiraIssue, JiraSprint } from "@headnorth/jira-primitives";
+import type { JiraRoadmapItemsData } from "../../src/types";
 
 /**
  * Create a mock Jira issue with default values
@@ -310,4 +307,127 @@ export function createMockSprintCollection(): JiraSprint[] {
     createMockJiraSprint({ id: 2, name: "Sprint 2", state: "closed" }),
     createMockJiraSprint({ id: 3, name: "Sprint 3", state: "future" }),
   ];
+}
+
+/**
+ * Create a mock Epic issue (Prewave-specific)
+ */
+export function createMockEpicIssue(
+  overrides: Partial<JiraIssue> = {},
+): JiraIssue {
+  return {
+    id: "EPIC-123",
+    key: "PRODUCT-123",
+    fields: {
+      summary: "Test Epic Feature",
+      status: {
+        id: "2",
+        name: "In Progress",
+        statusCategory: {
+          id: 4,
+          key: "indeterminate",
+          colorName: "yellow",
+          name: "In Progress",
+        },
+      },
+      sprint: {
+        id: 1,
+        name: "Sprint 1",
+        state: "active" as const,
+        startDate: "2024-01-01",
+        endDate: "2024-01-14",
+        originBoardId: 1314,
+        goal: "Test sprint goal",
+      },
+      labels: ["area:platform", "team:platform-frontend"],
+      issuetype: {
+        id: "10000",
+        name: "Epic",
+        subtask: false,
+      },
+      assignee: {
+        accountId: "user123",
+        displayName: "John Doe",
+        emailAddress: "john.doe@prewave.ai",
+        avatarUrls: {
+          "48x48": "https://example.com/avatar.png",
+        },
+        active: true,
+        timeZone: "UTC",
+      },
+      reporter: {
+        accountId: "reporter123",
+        displayName: "Jane Smith",
+        emailAddress: "jane.smith@prewave.ai",
+        avatarUrls: {
+          "48x48": "https://example.com/avatar2.png",
+        },
+        active: true,
+        timeZone: "UTC",
+      },
+      effort: 5.0,
+    },
+    summary: "Test Epic Feature",
+    status: "In Progress",
+    ...overrides,
+  };
+}
+
+/**
+ * Create a mock Epic with specific Prewave status
+ */
+export function createMockEpicWithStatus(
+  statusName: string,
+  overrides: Partial<JiraIssue> = {},
+): JiraIssue {
+  return createMockEpicIssue({
+    fields: {
+      ...createMockEpicIssue().fields,
+      status: {
+        id: "1",
+        name: statusName,
+        statusCategory: {
+          id: 2,
+          key: "new",
+          colorName: "blue",
+          name: statusName,
+        },
+      },
+    },
+    status: statusName,
+    ...overrides,
+  });
+}
+
+/**
+ * Create a mock Epic without sprint assignment
+ */
+export function createMockEpicWithoutSprint(
+  overrides: Partial<JiraIssue> = {},
+): JiraIssue {
+  const baseEpic = createMockEpicIssue();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { sprint, ...fieldsWithoutSprint } = baseEpic.fields;
+  return {
+    ...baseEpic,
+    key: "PRODUCT-NO-SPRINT",
+    fields: fieldsWithoutSprint,
+    ...overrides,
+  };
+}
+
+/**
+ * Create a mock Epic without assignee
+ */
+export function createMockEpicWithoutAssignee(
+  overrides: Partial<JiraIssue> = {},
+): JiraIssue {
+  return createMockEpicIssue({
+    key: "PRODUCT-NO-ASSIGNEE",
+    fields: {
+      ...createMockEpicIssue().fields,
+      assignee: null,
+    },
+    ...overrides,
+  });
 }

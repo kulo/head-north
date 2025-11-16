@@ -88,8 +88,8 @@ describe("HeadNorthConfig - Complex Tests", () => {
       config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
-          PORT: "3001",
-          JIRA_USER: "test-user",
+          HN_PORT: "3001",
+          HN_JIRA_USER: "test-user",
         },
       });
       const fullConfig = config.getConfig();
@@ -107,9 +107,9 @@ describe("HeadNorthConfig - Complex Tests", () => {
       config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
-          PORT: "3001",
-          MAX_RETRY: "3",
-          DELAY_BETWEEN_RETRY: "2",
+          HN_PORT: "3001",
+          HN_MAX_RETRY: "3",
+          HN_DELAY_BETWEEN_RETRY: "2",
         },
       });
       expect(config.get("environment")).toBe("test");
@@ -120,10 +120,10 @@ describe("HeadNorthConfig - Complex Tests", () => {
       config = new HeadNorthConfig({
         processEnv: {
           NODE_ENV: "test",
-          JIRA_USER: "test-user",
-          JIRA_TOKEN: "test-token",
-          JIRA_HOST: "https://test.atlassian.net",
-          JIRA_BOARD_ID: "123",
+          HN_JIRA_USER: "test-user",
+          HN_JIRA_TOKEN: "test-token",
+          HN_JIRA_HOST: "https://test.atlassian.net",
+          HN_JIRA_BOARD_ID: "123",
         },
       });
       const jiraConfigResult = config.getJiraConfig();

@@ -14,6 +14,7 @@ import type { JiraConfig } from "@headnorth/jira-primitives";
 import type { JiraAdapter } from "./jira-adapter.interface";
 import { DefaultJiraAdapter } from "./default-jira-adapter";
 import { FakeDataAdapter } from "./fake-data-adapter";
+import { PrewaveJiraAdapter } from "./prewave-jira-adapter";
 
 /**
  * Transform validated JiraConfigData to JiraConfig format expected by JiraClient
@@ -45,9 +46,11 @@ function transformJiraConfigData(config: JiraConfigData): JiraConfig {
 }
 
 /**
- * Create the appropriate JIRA adapter based on configuration
- * - If using fake data: returns FakeDataAdapter
- * - If using real JIRA: validates config and returns DefaultJiraAdapter
+ * Create the appropriate data source adapter based on configuration
+ * - Uses HN_DATA_SOURCE_ADAPTER environment variable to select adapter
+ * - "fake" → FakeDataAdapter (replaces USE_FAKE_DATA functionality)
+ * - "prewave" → PrewaveJiraAdapter
+ * - "default" or unset → DefaultJiraAdapter
  * - Returns Either<Error, JiraAdapter> - client code should fail fast on Left
  *
  * @param headNorthConfig - Head North configuration instance
@@ -56,8 +59,15 @@ function transformJiraConfigData(config: JiraConfigData): JiraConfig {
 export function createJiraAdapter(
   headNorthConfig: HeadNorthConfig,
 ): Either<Error, JiraAdapter> {
-  if (headNorthConfig.isUsingFakeCycleData()) {
-    logger.default.info("Using FakeDataAdapter for cycle data");
+  // Get adapter type from environment variable
+  const adapterType =
+    process.env.HN_DATA_SOURCE_ADAPTER?.toLowerCase() || "default";
+
+  // Handle fake adapter (replaces USE_FAKE_DATA functionality)
+  if (adapterType === "fake") {
+    logger.default.info(
+      "Using FakeDataAdapter for cycle data (HN_DATA_SOURCE_ADAPTER=fake)",
+    );
     return Right(new FakeDataAdapter(headNorthConfig));
   }
 
@@ -70,6 +80,18 @@ export function createJiraAdapter(
     const clientConfig = transformJiraConfigData(jiraConfig);
     const jiraClient = new JiraClient(clientConfig);
 
+    // Select adapter based on type
+    if (adapterType === "prewave") {
+      logger.default.info(
+        "Using PrewaveJiraAdapter (HN_DATA_SOURCE_ADAPTER=prewave)",
+      );
+      return new PrewaveJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
+    }
+
+    // Default adapter
+    logger.default.info(
+      "Using DefaultJiraAdapter (HN_DATA_SOURCE_ADAPTER=default or unset)",
+    );
     return new DefaultJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
   });
 }

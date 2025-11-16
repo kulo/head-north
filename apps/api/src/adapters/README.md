@@ -16,6 +16,14 @@ JIRA Data → Adapter → Head North Domain Objects
 - **Adapter**: Organization-specific transformation logic
 - **Head North Domain**: Standardized business objects (cycles, roadmap items, etc.)
 
+## Data Flow
+
+1. **Fetch Raw Data**: Use `JiraClient` to fetch sprints, issues, etc.
+2. **Transform Entities**: Convert JIRA objects to Head North objects
+3. **Extract Metadata**: Build areas, teams, objectives from data
+4. **Apply Validations**: Check data quality and create validation items
+5. **Return Complete Data**: Return `RawCycleData` with all entities
+
 ## Interface
 
 All adapters implement the `JiraAdapter` interface:
@@ -62,6 +70,34 @@ const adapter = new DefaultJiraAdapter(jiraClient, config);
 const data = await adapter.fetchCycleData();
 ```
 
+### PrewaveJiraAdapter
+
+Organization-specific adapter that maps Prewave's current Jira setup to Head North. Key characteristics:
+
+- Uses Epic issues as the primary work items
+- Generates one virtual Roadmap Item per Epic (`VIRTUAL-<ISSUE_KEY>`)
+- Derives Cycles from Jira Sprints
+- Extracts metadata (areas, teams) from labels when present; falls back to minimal mapping
+- Provides validation warnings for missing Product Area until labels/mapping are finalized
+- Defaults Objective to `uncategorized` for now
+
+Environment:
+
+- Select via `HN_DATA_SOURCE_ADAPTER=prewave`
+- Sprint field can be overridden via `HN_JIRA_FIELD_SPRINT` (defaults to `customfield_10021` if not set)
+- Future overrides (planned): effort/appetite field via `HN_JIRA_FIELD_EFFORT`
+
+Usage:
+
+```typescript
+import { PrewaveJiraAdapter } from "./prewave-jira-adapter";
+import { JiraClient } from "@headnorth/jira-primitives";
+
+const jiraClient = new JiraClient(config.getJiraConfig());
+const adapter = new PrewaveJiraAdapter(jiraClient, config, jiraConfig);
+const data = await adapter.fetchCycleData();
+```
+
 ### FakeDataAdapter
 
 Generates realistic fake data for development:
@@ -82,28 +118,37 @@ const data = await adapter.fetchCycleData();
 
 ## Creating a Custom Adapter
 
-If your JIRA setup doesn't match the default adapter's expectations, you can create your own adapter. This is useful when:
+If your JIRA setup doesn't match the default adapter's expectations, you can create your own adapter.
 
-- Your JIRA project uses different issue types or field structures
+### When to create a custom adapter
+
+Consider creating your own adapter if:
+
+- Your JIRA project uses different issue types or field structures (e.g., only "Epic" and "Story" instead of "Roadmap Item" + "Cycle Item")
 - You have existing JIRA configurations that cannot be changed
-- You need specialized business logic or data transformations
-- You want to optimize for your specific use case
-
-### When to Create a Custom Adapter
-
-**Consider creating your own adapter if:**
-
-- You use different issue types (e.g., only "Story" instead of "Roadmap Item" + "Cycle Item")
 - Your metadata is stored differently (e.g., in components instead of labels)
 - You have custom fields with different names or structures
-- You need complex data relationships or transformations
+- You need specialized business logic, complex data relationships, or data transformations
 - You want to integrate with other systems beyond JIRA
+- You want to optimize for your specific use case
 
 **Stick with the default adapter if:**
 
 - You can adjust your JIRA project to match the expected structure
 - You want to minimize development and maintenance overhead
 - Your requirements are straightforward and fit the standard model
+
+### Implementation checklist
+
+In order to come up with your own adapter you'll have to:
+
+1. **Identify Data Sources**: What JIRA data does your organization use?
+2. **Map Transformations**: How do JIRA concepts map to Head North concepts?
+3. **Extract Logic**: Move transformation logic from parsers to adapter.
+4. **Use Primitives**: Replace custom utilities with primitives.
+5. **Test Thoroughly**: Ensure data structure matches expectations.
+
+Here's the steps in more details:
 
 ### 1. Implement the Interface
 
@@ -189,34 +234,45 @@ export class MyCompanyJiraAdapter implements JiraAdapter {
 
 ### 4. Add to Adapter Factory
 
-Update the factory in `collect-cycle-data.ts`:
+Update the factory in `apps/api/src/adapters/adapter-factory.ts`:
 
 ```typescript
-function createAdapter(headNorthConfig: HeadNorthConfig): JiraAdapter {
-  if (headNorthConfig.isUsingFakeCycleData()) {
-    return new FakeDataAdapter(headNorthConfig);
+export function createJiraAdapter(
+  headNorthConfig: HeadNorthConfig,
+): Either<Error, JiraAdapter> {
+  // Get adapter type from environment variable
+  const adapterType =
+    process.env.HN_DATA_SOURCE_ADAPTER?.toLowerCase() || "default";
+
+  if (adapterType === "fake") {
+    return Right(new FakeDataAdapter(headNorthConfig));
   }
 
-  const jiraClient = new JiraClient(headNorthConfig.getJiraConfig()!);
+  // Validate JIRA config
+  const jiraConfigResult = headNorthConfig.getJiraConfig();
+  return jiraConfigResult.map((jiraConfig) => {
+    const clientConfig = transformJiraConfigData(jiraConfig);
+    const jiraClient = new JiraClient(clientConfig);
 
-  // Add organization detection logic
-  const organization = headNorthConfig.get("organization");
-  switch (organization) {
-    case "mycompany":
-      return new MyCompanyJiraAdapter(jiraClient, headNorthConfig);
-    default:
-      return new DefaultJiraAdapter(jiraClient, headNorthConfig);
-  }
+    // Select adapter based on type
+    if (adapterType === "prewave") {
+      return new PrewaveJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
+    }
+    if (adapterType === "mycompany") {
+      return new MyCompanyJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
+    }
+
+    // Default adapter
+    return new DefaultJiraAdapter(jiraClient, headNorthConfig, jiraConfig);
+  });
 }
 ```
 
-## Data Flow
+**Note**: Adapter selection is now controlled via the `HN_DATA_SOURCE_ADAPTER` environment variable:
 
-1. **Fetch Raw Data**: Use `JiraClient` to fetch sprints, issues, etc.
-2. **Transform Entities**: Convert JIRA objects to Head North objects
-3. **Extract Metadata**: Build areas, teams, objectives from data
-4. **Apply Validations**: Check data quality and create validation items
-5. **Return Complete Data**: Return `RawCycleData` with all entities
+- `"fake"` → Uses `FakeDataAdapter`
+- `"default"` or unset → Uses `DefaultJiraAdapter`
+- `"prewave"` → Uses `PrewaveJiraAdapter`
 
 ## Best Practices
 
@@ -307,16 +363,6 @@ describe("MyCompanyJiraAdapter", () => {
   });
 });
 ```
-
-## Migration Guide
-
-When migrating from the old parser-based approach:
-
-1. **Identify Data Sources**: What JIRA data does your organization use?
-2. **Map Transformations**: How do JIRA concepts map to Head North concepts?
-3. **Extract Logic**: Move transformation logic from parsers to adapter
-4. **Use Primitives**: Replace custom utilities with primitives
-5. **Test Thoroughly**: Ensure data structure matches expectations
 
 ## Examples
 

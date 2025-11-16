@@ -227,30 +227,27 @@ export default class HeadNorthConfig {
       // Server Configuration
       config.backend.port = getEnvVarWithFallback(
         this.processEnv,
-        "PORT",
+        "HN_PORT",
         "3000",
         "Server port",
       );
       config.backend.maxRetry = getEnvVarWithFallback(
         this.processEnv,
-        "MAX_RETRY",
+        "HN_MAX_RETRY",
         "3",
         "Max retry count",
       );
       config.backend.delayBetweenRetry = getEnvVarWithFallback(
         this.processEnv,
-        "DELAY_BETWEEN_RETRY",
+        "HN_DELAY_BETWEEN_RETRY",
         "2",
         "Retry delay",
       );
 
       // Jira Configuration (backend-specific) - using JiraConfig class
-      const useFakeData = this._getUseFakeData();
-      // Update the common config with the actual useFakeData value
-      config.common.development.useFakeData = useFakeData;
-      const jiraConfig = new JiraConfig(this.processEnv, useFakeData);
+      // Note: useFakeData is no longer used - adapter selection is handled via HN_DATA_SOURCE_ADAPTER
+      const jiraConfig = new JiraConfig(this.processEnv, false);
       config.backend.jira = jiraConfig.getConfig();
-      config.backend.useFakeData = useFakeData;
     }
 
     return config;
@@ -291,20 +288,6 @@ export default class HeadNorthConfig {
     }
 
     return result;
-  }
-
-  /**
-   * Check if fake data should be used
-   * @private
-   */
-  private _getUseFakeData(): boolean {
-    const useFakeData = getEnvVarWithFallback(
-      this.processEnv,
-      "USE_FAKE_DATA",
-      "false",
-      "Fake data mode",
-    );
-    return useFakeData === "true" || useFakeData === "1";
   }
 
   /**
@@ -406,15 +389,6 @@ export default class HeadNorthConfig {
   getJiraConfig(): Either<Error, JiraConfigData> {
     const jiraConfig = this.config.backend.jira as JiraConfigData | undefined;
     return validateJiraConfig(jiraConfig);
-  }
-
-  /**
-   * Check if fake cycle data is being used or whether are real data backend is used that is e.g. accesssing JIRA.
-   *
-   * @returns True if fake data is enabled
-   */
-  isUsingFakeCycleData(): boolean {
-    return this.config.common.development.useFakeData || false;
   }
 
   /**
