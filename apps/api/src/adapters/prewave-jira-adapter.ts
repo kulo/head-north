@@ -21,7 +21,6 @@ import type { JiraAdapter } from "./jira-adapter.interface";
 import {
   JiraClient,
   extractLabelsWithPrefix,
-  extractCustomField,
   extractAssignee,
   extractAllAssignees,
   jiraSprintToCycle,
@@ -32,6 +31,8 @@ import {
 import type { JiraIssue } from "@headnorth/jira-primitives";
 
 /**
+type JiraSprintField = { id?: number | string; name?: string; state?: string; boardId?: number; startDate?: string; endDate?: string; goal?: string; [key: string]: unknown };
+
  * Prewave-specific mapping: Product Areas → Teams → Assignees
  *
  * This mapping structure defines the organizational hierarchy for Prewave:
@@ -201,9 +202,9 @@ export class PrewaveJiraAdapter implements JiraAdapter {
 
       const inspectEpic =
         epicIssues.find((e) => e.key === "PRODUCT-43") || epicIssues[0];
-       
+
       const inspectSprintField = (
-        inspectEpic?.fields as unknown as Record<string, any>
+        inspectEpic?.fields as unknown as Record<string, unknown>
       )?.[PREWAVE_FIELDS.sprint];
       logger.default.info("PrewaveJiraAdapter: sprint field inspection", {
         key: inspectEpic?.key,
@@ -211,7 +212,7 @@ export class PrewaveJiraAdapter implements JiraAdapter {
           ? "array"
           : typeof inspectSprintField,
         ids: Array.isArray(inspectSprintField)
-          ? inspectSprintField.map((s: any) => s?.id)
+          ? inspectSprintField.map((s: JiraSprintField) => s?.id)
           : inspectSprintField?.id,
       });
 
@@ -322,7 +323,7 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     const status = this.mapPrewaveStatus(issue.fields.status);
 
     // Extract sprint/cycle (Prewave sprint field returns an array of sprint objects)
-    const sprintField = (issue.fields as unknown as Record<string, any>)[
+    const sprintField = (issue.fields as unknown as Record<string, unknown>)[
       PREWAVE_FIELDS.sprint
     ];
     const sprintIdValue = Array.isArray(sprintField)
@@ -335,7 +336,7 @@ export class PrewaveJiraAdapter implements JiraAdapter {
           ? "array"
           : typeof sprintField,
         sprintIds: Array.isArray(sprintField)
-          ? sprintField.map((s: any) => s?.id)
+          ? sprintField.map((s: JiraSprintField) => s?.id)
           : sprintField?.id,
       });
     }
