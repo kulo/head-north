@@ -1,6 +1,12 @@
 # Deployment Guide
 
-Purpose: How to build and run the system in non-local environments (Docker, static hosting, cloud). For local development, see Development. For architecture and code structure, see Architecture. For contribution process, see Contributing.
+This document show you how to build and run the system in non-local environments (Docker, static hosting, cloud).
+
+For local development, see [docs/development.md](docs/development.md).
+
+For architecture and code structure, see [docs/architecture.md](docs/architecture.md).
+
+For the contribution process, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Backend Docker
 
@@ -30,9 +36,3 @@ The backend includes configuration for cloud and local deployments:
 - `minikube-manifest.yaml` - Local Kubernetes deployment
 
 Ensure required environment variables are provided (see `env.example`) for any environment you deploy to.
-
-## Related
-
-- Development guide: `docs/development.md`
-- Architecture: `docs/architecture.md`
-- Contributing: `CONTRIBUTING.md`

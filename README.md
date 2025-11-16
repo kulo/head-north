@@ -214,6 +214,7 @@ See `env.example` for required Jira variables. For detailed developer commands a
 ## 🤝 Contributing
 
 - Start here: [CONTRIBUTING.md](CONTRIBUTING.md) – contribution process, branching/PR flow, checklists.
+- Development Howto: [docs/development.md](docs/development.md) – how to run locally, environment setup, scripts, tooling, and day-to-day workflows.
 - Code style and practices: [docs/CODING_GUIDELINES.md](docs/CODING_GUIDELINES.md) – FP patterns (Maybe/Either), TypeScript best practices, testing, migration patterns, quick reference.
 
 ---

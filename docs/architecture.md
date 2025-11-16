@@ -1,6 +1,12 @@
 # Architecture
 
-Purpose: System design and repository structure. Use this to understand how components fit together and where code lives. For local workflows, see Development. For deployment specifics, see Deployment. For contribution process, see Contributing.
+This document lays out the system design and repository structure and should help you understand how components fit together and where code lives.
+
+Related docs:
+
+- Local workflows: [docs/development.md](docs/development.md)
+- Deployment specifics: [docs/deployment.md](docs/deployment.md)
+- Contribution process: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## High-level Overview
 
@@ -73,9 +79,3 @@ The project uses a centralized approach for configuration to keep frontend and b
 3. Extract: areas, teams, objectives, stages
 4. Validate: data quality into validations array
 5. Serve: `RawCycleData` to the frontend
-
-## Related
-
-- Development guide: `docs/development.md`
-- Deployment guide: `docs/deployment.md`
-- Contributing: `CONTRIBUTING.md`

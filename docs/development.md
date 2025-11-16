@@ -1,6 +1,12 @@
 # Development Guide
 
-Purpose: How to run and work on the project locally. Covers environment, commands, tooling, and day-to-day workflows. For system-level design, see Architecture. For release/runtime, see Deployment. For contribution process, see Contributing.
+This document lays out how to run and work on the project locally. Covers environment, commands, tooling, and day-to-day workflows.
+
+For architecture and code structure, see [docs/architecture.md](docs/architecture.md).
+
+For deployment specifics, see [docs/deployment.md](docs/deployment.md).
+
+For the contribution process, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Prerequisites
 
@@ -9,7 +15,9 @@ Purpose: How to run and work on the project locally. Covers environment, command
 
 ## Environment
 
-All Head North environment variables use the `HN_` prefix. See `env.example` for the complete list and copy it to create your `.env`.
+All Head North environment variables use the `HN_` prefix.
+
+See [env.example](../env.example) for the complete list and copy it to create your `.env`.
 
 ### Quick dev runs
 
@@ -22,7 +30,7 @@ HN_DATA_SOURCE_ADAPTER=fake npm run start-dev
 HN_DATA_SOURCE_ADAPTER=fake npm run dev
 ```
 
-### Use the Prewave Jira adapter
+### Use an existing Jira adapter
 
 ```bash
 # Start API with Prewave adapter (requires Jira env vars)
@@ -38,6 +46,10 @@ Optional adapter-specific overrides:
 ```bash
 HN_JIRA_FIELD_SPRINT=customfield_10021
 ```
+
+### Build a custom Jira adapter
+
+For developing your own, custom adapter see the [Adapters README.md](apps/api/src/adapters/README.md).
 
 ## Installation
 
@@ -141,15 +153,6 @@ npm install <package>
 4. Make Changes: Edit files in respective directories
 5. Testing: `npm run test`
 6. Linting: `npm run lint`
-
-## Links
-
-- Adapters documentation: `apps/api/src/adapters/README.md`
-- Configuration package: `packages/config/README.md`
-- Jira primitives: `packages/jira-primitives/README.md`
-- Architecture overview: `docs/architecture.md`
-- Deployment guide: `docs/deployment.md`
-- Contributing: `CONTRIBUTING.md`
 
 ## Package Usage Examples
 
