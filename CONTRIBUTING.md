@@ -1,6 +1,6 @@
 # Contributing to Head North
 
-Thank you for your interest in contributing to Head North! This document provides guidelines and instructions for contributing to the project.
+Purpose: How to propose, implement, and submit changes. Use this when you plan to contribute code or docs. For local setup and commands, see Development. For system design, see Architecture. For deployment, see Deployment.
 
 ## Quick Start
 
@@ -85,8 +85,13 @@ See [README.md](README.md) for all available commands. Most common:
 
 ## Documentation
 
-- **[README.md](README.md)** - Project overview, architecture, setup, and commands
-- **[Coding Guidelines](docs/CODING_GUIDELINES.md)** - Comprehensive coding standards (includes FP patterns, TypeScript, testing, migration patterns, quick reference)
+Use the following documents depending on your need:
+
+- Project overview and quick start: `README.md`
+- Local workflows and commands: `docs/development.md`
+- Deployment: `docs/deployment.md`
+- System design and repository layout: `docs/architecture.md`
+- Coding standards and best practices: `docs/CODING_GUIDELINES.md`
 
 ## Getting Help
 

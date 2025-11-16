@@ -62,6 +62,34 @@ const adapter = new DefaultJiraAdapter(jiraClient, config);
 const data = await adapter.fetchCycleData();
 ```
 
+### PrewaveJiraAdapter
+
+Organization-specific adapter that maps Prewave's current Jira setup to Head North. Key characteristics:
+
+- Uses Epic issues as the primary work items
+- Generates one virtual Roadmap Item per Epic (`VIRTUAL-<ISSUE_KEY>`)
+- Derives Cycles from Jira Sprints
+- Extracts metadata (areas, teams) from labels when present; falls back to minimal mapping
+- Provides validation warnings for missing Product Area until labels/mapping are finalized
+- Defaults Objective to `uncategorized` for now
+
+Environment:
+
+- Select via `HN_DATA_SOURCE_ADAPTER=prewave`
+- Sprint field can be overridden via `HN_JIRA_FIELD_SPRINT` (defaults to `customfield_10021` if not set)
+- Future overrides (planned): effort/appetite field via `HN_JIRA_FIELD_EFFORT`
+
+Usage:
+
+```typescript
+import { PrewaveJiraAdapter } from "./prewave-jira-adapter";
+import { JiraClient } from "@headnorth/jira-primitives";
+
+const jiraClient = new JiraClient(config.getJiraConfig());
+const adapter = new PrewaveJiraAdapter(jiraClient, config, jiraConfig);
+const data = await adapter.fetchCycleData();
+```
+
 ### FakeDataAdapter
 
 Generates realistic fake data for development:

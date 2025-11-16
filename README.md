@@ -160,253 +160,42 @@ For detailed information about creating custom adapters, see the [JIRA Adapters 
 - Node.js 22.x LTS
 - npm 10.x
 
-### Development Mode with Fake Data
-
-For development and testing, the API can run with fake data to avoid Jira authentication requirements:
+### Fastest way to run
 
 ```bash
-# Start API with fake data
-cd apps/api
-HN_DATA_SOURCE_ADAPTER=fake npm run start-dev
-
-# Or start both apps with fake data
+# Start API backend with fake data (no Jira required)
+# as well as the web frontend at the same time!
 HN_DATA_SOURCE_ADAPTER=fake npm run dev
 ```
 
-**Note**: All Head North environment variables now use the `HN_` prefix. See `env.example` for the complete list of environment variables.
-
-### Installation
+### Use the Prewave Jira adapter
 
 ```bash
-# Install all dependencies
-npm install
-
-# Or install individually
-npm run install:web     # Web application
-npm run install:api     # API service
-npm run install:packages # Shared packages (types, utils, config)
-```
-
-### Development
-
-```bash
-# Run both applications in development mode
-npm run dev
-
-# Or run individually
-npm run dev:web         # Web app on http://localhost:8080
-npm run dev:api         # API on http://localhost:3000
-```
-
-### Production
-
-```bash
-# Build both applications
-npm run build
-
-# Start both applications
-npm run start
-```
-
-## 📦 Workspace Commands
-
-### Web Application (Vue.js)
-
-- `npm run dev:web` - Start development server
-- `npm run build:web` - Build for production
-- `npm run test:web` - Run web app tests
-- `npm run lint:web` - Lint web app code
-
-### API Service (Node.js/Koa)
-
-- `npm run dev:api` - Start API in development mode
-- `npm run start:api` - Start API in production mode
-- `npm run test:api` - Run API tests
-- `npm run lint:api` - Lint API code
-
-### Global Commands
-
-- `npm run dev` - Start both applications in development
-- `npm run build` - Build both applications
-- `npm run test` - Run all tests
-- `npm run lint` - Lint all code
-- `npm run clean` - Remove all node_modules
-- `npm run clean:install` - Clean and reinstall everything
-
-## 📦 Shared Packages
-
-The monorepo includes several shared packages for code reuse and consistency. All packages use modern scoped naming (`@headnorth/*`) and follow current Node.js monorepo best practices:
-
-### Types (`@headnorth/types`)
-
-Common TypeScript types and interfaces used across web app and API service. Provides type safety and consistency across the entire monorepo.
-
-### Utils (`@headnorth/utils`)
-
-Shared utility functions used by both web app and API service applications. Currently includes logging functionality for consistent log formatting across the monorepo.
-
-### Config (`@headnorth/config`)
-
-**Single Source of Truth** for all API endpoints and configuration settings. Ensures web app and API service always use the same API paths and configuration values. Includes:
-
-- API endpoint definitions
-- Environment-specific configurations
-- Route consistency validation
-- Cross-platform configuration management
-- Jira integration settings
-- **Page definitions and routing** - Centralized page configuration for the frontend
-- **Filter system configuration** - Type-safe filter definitions and validation rules
-
-### JIRA Primitives (`@headnorth/jira-primitives`)
-
-Specialized utilities for JIRA data transformation and validation. Provides reusable building blocks for creating custom JIRA adapters:
-
-- **Data Extractors**: Extract metadata from JIRA issues (labels, custom fields, etc.)
-- **Transformers**: Convert JIRA objects to Head North domain objects
-- **Validators**: Validate data quality and create validation reports
-- **JIRA Client**: Standardized JIRA API client with authentication
-- **Type Definitions**: JIRA-specific TypeScript types and interfaces
-
-## 📦 Package Usage Examples
-
-```typescript
-// Import shared types
-import type { Cycle, RoadmapItem } from "@headnorth/types";
-
-// Import utilities
-import { logger } from "@headnorth/utils";
-
-// Import configuration
-import { HeadNorthConfig } from "@headnorth/config";
-
-// Import JIRA primitives for adapter development
-import {
-  extractLabelsWithPrefix,
-  jiraSprintToCycle,
-  JiraClient,
-} from "@headnorth/jira-primitives";
-```
-
-### Tools
-
-- **ESLint Config** (`tools/eslint-config/`): Shared ESLint configuration
-- **Prettier Config** (`tools/prettier-config/`): Shared Prettier configuration
-- **TypeScript Config** (`tools/typescript-config/`): Shared TypeScript configuration
-- **Test Config** (`tools/test-config/`): Shared test configuration
-- **Build Config** (`tools/build-config/`): Shared build configuration
-
-## 🛠️ Development Tools
-
-### Code Quality
-
-- **ESLint**: Configured for TypeScript and Vue.js
-- **Prettier**: Code formatting with shared configuration
-- **Husky**: Git hooks for pre-commit linting
-- **lint-staged**: Run linters on staged files only
-
-### Environment Validation
-
-- `npm run validate:env` - Validates required environment variables
-- `npm run dev:with-check` - Starts development with environment validation
-
-### Package Development
-
-```bash
-# Watch mode for shared packages
-npm run dev:packages
-
-# Individual package development
-npm run dev:types    # Watch types package
-npm run dev:utils    # Watch utils package
-npm run dev:config   # Watch config package
-```
-
-## 🔧 Individual Package Management
-
-Each workspace maintains its own `package.json` and can be managed independently:
-
-```bash
-# Work in web app directory
-cd apps/web
-npm install <package>
-npm run <script>
-
-# Work in API directory
+# Start API with Prewave adapter (requires Jira env vars)
 cd apps/api
-npm install <package>
-npm run <script>
-
-# Work in shared packages
-cd packages/types
-npm install <package>
+HN_DATA_SOURCE_ADAPTER=prewave npm run start-dev
 ```
 
-## 🐳 Docker Support
-
-### Backend Docker
-
-The backend includes Docker support:
-
-```bash
-cd apps/api
-make build    # Build Docker image
-make start    # Run Docker container
-```
-
-### Frontend Build
-
-The frontend can be built and served statically:
-
-```bash
-cd apps/web
-npm run build
-# Serve the dist/ directory with any static file server
-```
-
-## 🚀 Deployment
-
-### Cloud Build (Backend)
-
-The backend includes Google Cloud Build configuration:
-
-- `cloudbuild-production.yaml` - Production deployment
-- `minikube-manifest.yaml` - Local Kubernetes deployment
-
-### Frontend Deployment
-
-The frontend builds to static files in `dist/` directory and can be deployed to any static hosting service.
-
-## 🔍 Development Workflow
-
-1. **Start Development**: `npm run dev` (runs both services)
-2. **Frontend**: Access at http://localhost:8080
-3. **Backend API**: Access at http://localhost:3000
-4. **Make Changes**: Edit files in respective directories
-5. **Testing**: `npm run test` to run all tests
-6. **Linting**: `npm run lint` to check code quality
-
-### 🎯 Shared Configuration
-
-The project uses a **Single Source of Truth** approach for configuration:
-
-- **API Endpoints**: Defined once in `packages/config/`
-- **Frontend**: Uses shared endpoints for API calls
-- **Backend**: Uses shared endpoints for route registration
-- **Consistency**: Frontend and backend automatically stay in sync
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines, including:
-
-- Development setup and workflow
-- Code style and coding standards
-- Pull request process and checklist
-- Commit message conventions
+See `env.example` for required Jira variables. For detailed developer commands and workflows, see [docs/development.md](docs/development.md).
 
 ## 📚 Documentation
 
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute, coding standards, PR process
-- **[Coding Guidelines](docs/CODING_GUIDELINES.md)** - Comprehensive coding standards and best practices (includes FP patterns, TypeScript, testing, migration patterns, quick reference)
+- Development Guide: [docs/development.md](docs/development.md)
+  - Purpose: How to run locally (fake and Jira adapters), environment setup, scripts, tooling, and day-to-day workflows.
+- Deployment Guide: [docs/deployment.md](docs/deployment.md)
+  - Purpose: How to build and deploy (Docker, static frontend, cloud/local manifests).
+- Architecture: [docs/architecture.md](docs/architecture.md)
+  - Purpose: Deep overview of the system, monorepo layout, domain concepts, shared configuration (single source of truth).
+- JIRA Adapters: [apps/api/src/adapters/README.md](apps/api/src/adapters/README.md)
+  - Purpose: Available adapters (default, prewave, fake), how selection works, when to build custom adapters.
+- Package References:
+  - Config: [packages/config/README.md](packages/config/README.md) – endpoints, routes, validation dictionaries, usage.
+  - Jira primitives: [packages/jira-primitives/README.md](packages/jira-primitives/README.md) – extractors, transformers, validators, Jira client.
+
+## 🤝 Contributing
+
+- Start here: [CONTRIBUTING.md](CONTRIBUTING.md) – contribution process, branching/PR flow, checklists.
+- Code style and practices: [docs/CODING_GUIDELINES.md](docs/CODING_GUIDELINES.md) – FP patterns (Maybe/Either), TypeScript best practices, testing, migration patterns, quick reference.
 
 ---
 
