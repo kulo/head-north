@@ -49,9 +49,11 @@ describe("PrewaveJiraAdapter", () => {
       },
       limits: {
         maxResults: 100,
+        maxIssuesPerRequest: 100,
       },
       fields: {
-        effort: "customfield_10002",
+        storyPoints: "customfield_10002",
+        sprint: "customfield_10021",
       },
     };
 
@@ -288,21 +290,23 @@ describe("PrewaveJiraAdapter", () => {
 
     it("should assign sprint/cycle correctly", async () => {
       const sprints = createMockSprintCollection();
-      const epic = createMockEpicIssue({
-        fields: {
-          ...createMockEpicIssue().fields,
-          customfield_10021: [
-            {
-              id: 1,
-              name: "Sprint 1",
-              state: "active" as const,
-              startDate: "2024-01-01",
-              endDate: "2024-01-14",
-              boardId: 1314,
-              goal: "Test sprint goal",
-            },
-          ],
+      const baseEpic = createMockEpicIssue();
+      const fieldsWithSprint: any = {
+        ...baseEpic.fields,
+      };
+      fieldsWithSprint[jiraConfig.fields.sprint as string] = [
+        {
+          id: 1,
+          name: "Sprint 1",
+          state: "active" as const,
+          startDate: "2024-01-01",
+          endDate: "2024-01-14",
+          boardId: 1314,
+          goal: "Test sprint goal",
         },
+      ];
+      const epic = createMockEpicIssue({
+        fields: fieldsWithSprint,
       });
 
       vi.mocked(mockJiraClient.getSprints).mockResolvedValue(sprints);
@@ -421,7 +425,12 @@ describe("PrewaveJiraAdapter", () => {
         // RoadmapItem should exist
         expect(data.roadmapItems[0]).toBeDefined();
         // Should have validation warning for missing Product Area when no assignee
-        expect(data.roadmapItems[0].validations.length).toBeGreaterThan(0);
+        const firstRoadmapItem = data.roadmapItems[0];
+        if (firstRoadmapItem) {
+          expect((firstRoadmapItem.validations ?? []).length).toBeGreaterThan(
+            0,
+          );
+        }
       }
     });
   });
