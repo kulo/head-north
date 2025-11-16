@@ -1,6 +1,14 @@
 # Contributing to Head North
 
-Purpose: How to propose, implement, and submit changes. Use this when you plan to contribute code or docs. For local setup and commands, see Development. For system design, see Architecture. For deployment, see Deployment.
+This document lays out how to propose, implement, and submit changes. Use this when you plan to contribute code or docs.
+
+For a project overview and quick start, see [README.md](README.md)
+
+For local development, see [docs/development.md](docs/development.md).
+
+For architecture and code structure, see [docs/architecture.md](docs/architecture.md).
+
+For deployment specifics, see [docs/deployment.md](docs/deployment.md).
 
 ## Quick Start
 
@@ -82,16 +90,6 @@ See [README.md](README.md) for all available commands. Most common:
 
 - **Run all tests**: `npm run test`
 - **Lint all code**: `npm run lint`
-
-## Documentation
-
-Use the following documents depending on your need:
-
-- Project overview and quick start: `README.md`
-- Local workflows and commands: `docs/development.md`
-- Deployment: `docs/deployment.md`
-- System design and repository layout: `docs/architecture.md`
-- Coding standards and best practices: `docs/CODING_GUIDELINES.md`
 
 ## Getting Help
 
