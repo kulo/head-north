@@ -16,6 +16,14 @@ JIRA Data → Adapter → Head North Domain Objects
 - **Adapter**: Organization-specific transformation logic
 - **Head North Domain**: Standardized business objects (cycles, roadmap items, etc.)
 
+## Data Flow
+
+1. **Fetch Raw Data**: Use `JiraClient` to fetch sprints, issues, etc.
+2. **Transform Entities**: Convert JIRA objects to Head North objects
+3. **Extract Metadata**: Build areas, teams, objectives from data
+4. **Apply Validations**: Check data quality and create validation items
+5. **Return Complete Data**: Return `RawCycleData` with all entities
+
 ## Interface
 
 All adapters implement the `JiraAdapter` interface:
@@ -110,28 +118,37 @@ const data = await adapter.fetchCycleData();
 
 ## Creating a Custom Adapter
 
-If your JIRA setup doesn't match the default adapter's expectations, you can create your own adapter. This is useful when:
+If your JIRA setup doesn't match the default adapter's expectations, you can create your own adapter.
 
-- Your JIRA project uses different issue types or field structures
+### When to create a custom adapter
+
+Consider creating your own adapter if:
+
+- Your JIRA project uses different issue types or field structures (e.g., only "Epic" and "Story" instead of "Roadmap Item" + "Cycle Item")
 - You have existing JIRA configurations that cannot be changed
-- You need specialized business logic or data transformations
-- You want to optimize for your specific use case
-
-### When to Create a Custom Adapter
-
-**Consider creating your own adapter if:**
-
-- You use different issue types (e.g., only "Story" instead of "Roadmap Item" + "Cycle Item")
 - Your metadata is stored differently (e.g., in components instead of labels)
 - You have custom fields with different names or structures
-- You need complex data relationships or transformations
+- You need specialized business logic, complex data relationships, or data transformations
 - You want to integrate with other systems beyond JIRA
+- You want to optimize for your specific use case
 
 **Stick with the default adapter if:**
 
 - You can adjust your JIRA project to match the expected structure
 - You want to minimize development and maintenance overhead
 - Your requirements are straightforward and fit the standard model
+
+### Implementation checklist
+
+In order to come up with your own adapter you'll have to:
+
+1. **Identify Data Sources**: What JIRA data does your organization use?
+2. **Map Transformations**: How do JIRA concepts map to Head North concepts?
+3. **Extract Logic**: Move transformation logic from parsers to adapter.
+4. **Use Primitives**: Replace custom utilities with primitives.
+5. **Test Thoroughly**: Ensure data structure matches expectations.
+
+Here's the steps in more details:
 
 ### 1. Implement the Interface
 
@@ -227,7 +244,6 @@ export function createJiraAdapter(
   const adapterType =
     process.env.HN_DATA_SOURCE_ADAPTER?.toLowerCase() || "default";
 
-  // Handle fake adapter (replaces USE_FAKE_DATA functionality)
   if (adapterType === "fake") {
     return Right(new FakeDataAdapter(headNorthConfig));
   }
@@ -254,17 +270,9 @@ export function createJiraAdapter(
 
 **Note**: Adapter selection is now controlled via the `HN_DATA_SOURCE_ADAPTER` environment variable:
 
-- `"fake"` → Uses `FakeDataAdapter` (replaces `USE_FAKE_DATA`)
-- `"prewave"` → Uses `PrewaveJiraAdapter`
+- `"fake"` → Uses `FakeDataAdapter`
 - `"default"` or unset → Uses `DefaultJiraAdapter`
-
-## Data Flow
-
-1. **Fetch Raw Data**: Use `JiraClient` to fetch sprints, issues, etc.
-2. **Transform Entities**: Convert JIRA objects to Head North objects
-3. **Extract Metadata**: Build areas, teams, objectives from data
-4. **Apply Validations**: Check data quality and create validation items
-5. **Return Complete Data**: Return `RawCycleData` with all entities
+- `"prewave"` → Uses `PrewaveJiraAdapter`
 
 ## Best Practices
 
@@ -355,16 +363,6 @@ describe("MyCompanyJiraAdapter", () => {
   });
 });
 ```
-
-## Migration Guide
-
-When migrating from the old parser-based approach:
-
-1. **Identify Data Sources**: What JIRA data does your organization use?
-2. **Map Transformations**: How do JIRA concepts map to Head North concepts?
-3. **Extract Logic**: Move transformation logic from parsers to adapter
-4. **Use Primitives**: Replace custom utilities with primitives
-5. **Test Thoroughly**: Ensure data structure matches expectations
 
 ## Examples
 
