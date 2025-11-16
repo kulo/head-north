@@ -95,9 +95,8 @@ describe("PrewaveJiraAdapter", () => {
       const result = await adapter.fetchCycleData();
 
       expect(mockJiraClient.searchIssues).toHaveBeenCalledWith(
-        'issuetype = "Epic"',
-        ["*"],
-        expect.any(Number), // boardId
+        'project = PRODUCT AND issuetype = "Epic" ORDER BY updated DESC',
+        ["summary", "status", "assignee", "labels", "customfield_10021"],
       );
       expect(result.isRight()).toBe(true);
       if (result.isRight()) {
@@ -246,7 +245,7 @@ describe("PrewaveJiraAdapter", () => {
   });
 
   describe("Epic to CycleItem Transformation", () => {
-    it("should extract effort from custom field", async () => {
+    it("should set effort to default 1 (Prewave placeholder)", async () => {
       const sprints = createMockSprintCollection();
       const epic = createMockEpicIssue({
         fields: {
@@ -263,7 +262,7 @@ describe("PrewaveJiraAdapter", () => {
       expect(result.isRight()).toBe(true);
       if (result.isRight()) {
         const data = result.extract();
-        expect(data.cycleItems[0].effort).toBe(8.5);
+        expect(data.cycleItems[0].effort).toBe(1);
       }
     });
 
@@ -292,15 +291,17 @@ describe("PrewaveJiraAdapter", () => {
       const epic = createMockEpicIssue({
         fields: {
           ...createMockEpicIssue().fields,
-          sprint: {
-            id: 1,
-            name: "Sprint 1",
-            state: "active" as const,
-            startDate: "2024-01-01",
-            endDate: "2024-01-14",
-            originBoardId: 1314,
-            goal: "Test sprint goal",
-          },
+          customfield_10021: [
+            {
+              id: 1,
+              name: "Sprint 1",
+              state: "active" as const,
+              startDate: "2024-01-01",
+              endDate: "2024-01-14",
+              boardId: 1314,
+              goal: "Test sprint goal",
+            },
+          ],
         },
       });
 
