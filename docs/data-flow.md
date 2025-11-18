@@ -15,26 +15,26 @@ JIRA API → Adapter → API Service → API Controller → Frontend Service →
 ```mermaid
 graph TB
     subgraph "Backend"
-        JIRA[JIRA API<br/>JiraIssue[], JiraSprint[]]
-        ADAPTER[Adapter Layer<br/>DefaultJiraAdapter / PrewaveJiraAdapter / FakeDataAdapter]
-        SERVICE[API Service<br/>collect-cycle-data.ts]
-        CONTROLLER[API Controller<br/>get-cycle-data.ts]
+        JIRA["JIRA API<br/>JiraIssue Array, JiraSprint Array"]
+        ADAPTER["Adapter Layer<br/>DefaultJiraAdapter / PrewaveJiraAdapter / FakeDataAdapter"]
+        SERVICE["API Service<br/>collect-cycle-data.ts"]
+        CONTROLLER["API Controller<br/>get-cycle-data.ts"]
     end
 
     subgraph "Frontend"
-        FRONTEND_SERVICE[Frontend Service<br/>cycle-data-service.ts<br/>Caching]
-        TRANSFORMER[Data Transformer<br/>data-transformer.ts<br/>Progress Calculation]
-        STORE[Pinia Store<br/>data-store.ts]
-        COMPONENTS[Vue Components<br/>Roadmap.vue / CycleOverview.vue]
+        FRONTEND_SERVICE["Frontend Service<br/>cycle-data-service.ts<br/>Caching"]
+        TRANSFORMER["Data Transformer<br/>data-transformer.ts<br/>Progress Calculation"]
+        STORE["Pinia Store<br/>data-store.ts"]
+        COMPONENTS["Vue Components<br/>Roadmap.vue / CycleOverview.vue"]
     end
 
-    JIRA -->|JiraIssue[], JiraSprint[]| ADAPTER
-    ADAPTER -->|CycleData<br/>Area[]| SERVICE
-    SERVICE -->|CycleData<br/>Validated| CONTROLLER
-    CONTROLLER -->|HTTP JSON<br/>CycleData| FRONTEND_SERVICE
-    FRONTEND_SERVICE -->|CycleData<br/>Cached| TRANSFORMER
-    TRANSFORMER -->|NestedCycleData<br/>With Progress| STORE
-    STORE -->|NestedCycleData| COMPONENTS
+    JIRA -->|"JiraIssue Array, JiraSprint Array"| ADAPTER
+    ADAPTER -->|"CycleData<br/>Area Array"| SERVICE
+    SERVICE -->|"CycleData<br/>Validated"| CONTROLLER
+    CONTROLLER -->|"HTTP JSON<br/>CycleData"| FRONTEND_SERVICE
+    FRONTEND_SERVICE -->|"CycleData<br/>Cached"| TRANSFORMER
+    TRANSFORMER -->|"NestedCycleData<br/>With Progress"| STORE
+    STORE -->|"NestedCycleData"| COMPONENTS
 
     style JIRA fill:#e1f5ff
     style ADAPTER fill:#b3e5fc
@@ -50,9 +50,9 @@ graph TB
 
 ```mermaid
 graph LR
-    A[JIRA Raw Data<br/>JiraIssue, JiraSprint] -->|Transform| B[CycleData<br/>Area[], Objective[], etc.]
-    B -->|Group & Calculate Progress| C[NestedCycleData<br/>objectives → roadmapItems → cycleItems]
-    C -->|Display| D[Vue Components]
+    A["JIRA Raw Data<br/>JiraIssue, JiraSprint"] -->|Transform| B["CycleData<br/>Area Array, Objective Array, etc."]
+    B -->|"Group & Calculate Progress"| C["NestedCycleData<br/>objectives → roadmapItems → cycleItems"]
+    C -->|Display| D["Vue Components"]
 
     style A fill:#e1f5ff
     style B fill:#b3e5fc
