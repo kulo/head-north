@@ -234,7 +234,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Copyright (c) 2025 [Michael Wagner-Kulovits](https://github.com/kulo).
 
-Developed while employed at ]Prewave](https://github.com/prewave).
+Developed while employed at [Prewave](https://github.com/prewave).
 
 ## 🙏 Credits
 
