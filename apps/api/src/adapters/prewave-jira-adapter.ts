@@ -7,7 +7,7 @@ import { logger } from "@headnorth/utils";
 import { match } from "ts-pattern";
 import type { HeadNorthConfig, JiraConfigData } from "@headnorth/config";
 import type {
-  RawCycleData,
+  CycleData,
   Cycle,
   RoadmapItem,
   CycleItem,
@@ -180,7 +180,7 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     this.config = config;
   }
 
-  async fetchCycleData(): Promise<Either<Error, RawCycleData>> {
+  async fetchCycleData(): Promise<Either<Error, CycleData>> {
     return safeAsync(async () => {
       // 1. Fetch all JIRA data in parallel
       const boardId = this.jiraConfig.connection.boardId;
@@ -246,11 +246,12 @@ export class PrewaveJiraAdapter implements JiraAdapter {
 
       // 5. Extract metadata from all issues
       const assignees = extractAllAssignees(epicIssues);
-      const areas = this.extractAreas(epicIssues, assignees);
       const objectives = this.extractObjectives();
       const teams = this.extractTeams(epicIssues, assignees);
+      // Extract areas and associate teams (needs teams to be extracted first)
+      const areas = this.extractAreas(epicIssues, assignees, teams);
 
-      const rawData: RawCycleData = {
+      const rawData: CycleData = {
         cycles,
         roadmapItems,
         cycleItems,
@@ -264,7 +265,7 @@ export class PrewaveJiraAdapter implements JiraAdapter {
       logger.default.info("PrewaveJiraAdapter: rawData prepared", {
         cycles: rawData.cycles?.length || 0,
         cycleItems: rawData.cycleItems?.length || 0,
-        areas: Object.keys(rawData.areas || {}).length,
+        areas: rawData.areas?.length || 0,
         objectives: rawData.objectives?.length || 0,
         teams: rawData.teams?.length || 0,
       });
@@ -514,11 +515,18 @@ export class PrewaveJiraAdapter implements JiraAdapter {
   /**
    * Extract Product Areas from issues and assignees
    * Uses Prewave-specific mapping as fallback
+   * Associates teams with areas using PREWAVE_MAPPING.teamToArea
    */
   private extractAreas(
     allIssues: readonly JiraIssue[],
     assignees: readonly Person[],
-  ): Record<string, Area> {
+    teams: readonly Team[],
+  ): Area[] {
+    const DEFAULT_AREA_UNASSIGNED = {
+      ID: "unassigned-teams",
+      NAME: "Unassigned Teams",
+    } as const;
+
     // First try to extract from labels
     const areaLabels = new Set(
       allIssues.flatMap((issue) =>
@@ -526,72 +534,119 @@ export class PrewaveJiraAdapter implements JiraAdapter {
       ),
     );
 
-    // Build areas from labels using reduce (immutable)
-    const areasFromLabels = Array.from(areaLabels).reduce(
-      (acc, label) => {
-        const areaId = label.replace("area:", "");
-        return {
-          ...acc,
-          [areaId]: {
-            id: areaId,
-            name:
-              this.config.getLabelTranslations().areas[label] ||
-              PREWAVE_MAPPING.areas[areaId]?.name ||
-              areaId,
-            teams: [],
-          },
-        };
-      },
-      {} as Record<string, Area>,
-    );
+    // Build areas from labels as array
+    const areasFromLabels = Array.from(areaLabels).map((label) => {
+      const areaId = label.replace("area:", "");
+      return {
+        id: areaId,
+        name:
+          this.config.getLabelTranslations().areas[label] ||
+          PREWAVE_MAPPING.areas[areaId]?.name ||
+          areaId,
+        teams: [] as Team[],
+      };
+    });
 
     // If no areas from labels, try to derive from assignees using mapping
     const areasFromAssignees =
-      Object.keys(areasFromLabels).length === 0
-        ? assignees.reduce(
-            (acc, assignee) => {
-              const areaId =
-                this.mapAssigneeToProductArea(assignee).orDefault(null);
-              if (areaId && !acc[areaId]) {
-                return {
-                  ...acc,
-                  [areaId]: {
+      areasFromLabels.length === 0
+        ? (() => {
+            const seenAreaIds = new Set<string>();
+            return assignees
+              .map((assignee) => {
+                const areaId =
+                  this.mapAssigneeToProductArea(assignee).orDefault(null);
+                if (areaId && !seenAreaIds.has(areaId)) {
+                  seenAreaIds.add(areaId);
+                  return {
                     id: areaId,
                     name: PREWAVE_MAPPING.areas[areaId]?.name || areaId,
-                    teams: [],
-                  },
-                };
-              }
-              return acc;
-            },
-            {} as Record<string, Area>,
-          )
-        : {};
+                    teams: [] as Team[],
+                  };
+                }
+                return null;
+              })
+              .filter((area): area is Area => area !== null);
+          })()
+        : [];
 
     // If still no areas, add default Prewave areas
     const defaultAreas =
-      Object.keys(areasFromLabels).length === 0 &&
-      Object.keys(areasFromAssignees).length === 0
-        ? Object.keys(PREWAVE_MAPPING.areas).reduce(
-            (acc, areaId) => ({
-              ...acc,
-              [areaId]: {
-                id: areaId,
-                name: PREWAVE_MAPPING.areas[areaId].name,
-                teams: [],
-              },
-            }),
-            {} as Record<string, Area>,
-          )
-        : {};
+      areasFromLabels.length === 0 && areasFromAssignees.length === 0
+        ? Object.keys(PREWAVE_MAPPING.areas).map((areaId) => ({
+            id: areaId,
+            name: PREWAVE_MAPPING.areas[areaId].name,
+            teams: [] as Team[],
+          }))
+        : [];
 
-    if (Object.keys(defaultAreas).length > 0) {
+    if (defaultAreas.length > 0) {
       logger.default.warn(
         "No Product Areas found in Jira data. Using default Prewave areas. TODO: Implement proper Product Area extraction from labels or assignee mapping.",
       );
     }
 
-    return { ...areasFromLabels, ...areasFromAssignees, ...defaultAreas };
+    // Merge arrays and deduplicate by area ID
+    const allAreas = [
+      ...areasFromLabels,
+      ...areasFromAssignees,
+      ...defaultAreas,
+    ];
+    const seenIds = new Set<string>();
+    const areas = allAreas.filter((area) => {
+      if (seenIds.has(area.id)) {
+        return false;
+      }
+      seenIds.add(area.id);
+      return true;
+    });
+
+    // Associate teams to areas using PREWAVE_MAPPING.teamToArea
+    const unassociatedTeams: Team[] = [];
+
+    for (const team of teams) {
+      const teamId = team.id.replace("team:", "");
+      const areaId = PREWAVE_MAPPING.teamToArea[teamId];
+
+      if (areaId) {
+        const area = areas.find((a) => a.id === areaId);
+        if (area) {
+          area.teams.push(team);
+        } else {
+          // Area not found, add to unassociated
+          unassociatedTeams.push(team);
+        }
+      } else {
+        // No mapping found, add to unassociated
+        unassociatedTeams.push(team);
+      }
+    }
+
+    // Create default area for orphaned teams if needed
+    if (unassociatedTeams.length > 0) {
+      // Check if default area already exists
+      const defaultAreaExists = areas.some(
+        (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+      );
+
+      if (!defaultAreaExists) {
+        areas.push({
+          id: DEFAULT_AREA_UNASSIGNED.ID,
+          name: DEFAULT_AREA_UNASSIGNED.NAME,
+          teams: unassociatedTeams,
+        });
+      } else {
+        // Add orphaned teams to existing default area
+        const defaultArea = areas.find(
+          (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+        );
+        if (defaultArea) {
+          defaultArea.teams.push(...unassociatedTeams);
+        }
+      }
+    }
+
+    return areas;
   }
 
   /**

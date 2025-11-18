@@ -22,7 +22,6 @@ import type {
   Person,
   Area,
   Stage,
-  RawCycleData,
   CycleData,
 } from "@headnorth/types";
 
@@ -43,7 +42,7 @@ import type {
  * ```
  * Backend API → CycleDataService → Frontend Components
  *     ↓              ↓                    ↓
- * RawCycleData → Cached Data → Processed UI Data
+ * CycleData → Cached Data → Processed UI Data
  * ```
  *
  * @class CycleDataService
@@ -93,17 +92,17 @@ class CycleDataService {
   /**
    * Transform raw cycle data to processed cycle data for frontend consumption
    *
-   * TODO check whether we can change RawCycleData to CycleData in the backend and remove this method and the RawCycleData type
+   * TODO check whether we can change CycleData to CycleData in the backend and remove this method and the CycleData type
    *
-   * @param {RawCycleData} rawData - Raw data from backend
+   * @param {CycleData} rawData - Raw data from backend
    * @returns {CycleData} Processed data ready for frontend
    */
-  #transformRawToProcessed(rawData: RawCycleData): CycleData {
+  #transformRawToProcessed(rawData: CycleData): CycleData {
     return {
       cycles: rawData.cycles, // Return raw cycles without progress calculations
       roadmapItems: rawData.roadmapItems,
       cycleItems: rawData.cycleItems,
-      areas: Object.values(rawData.areas), // Convert Record<string, Area> to Area[]
+      areas: rawData.areas, // Areas are already an array
       objectives: rawData.objectives,
       assignees: rawData.assignees,
       stages: rawData.stages, // Keep Stage[] as-is
@@ -159,13 +158,13 @@ class CycleDataService {
    * Handles fetch errors, HTTP error responses, and JSON parsing errors with Either
    * @param {string} url - The full URL to fetch
    * @param {RequestInit} requestOptions - Fetch request options
-   * @returns {Promise<Either<Error, RawCycleData>>} The parsed response data wrapped in Either
+   * @returns {Promise<Either<Error, CycleData>>} The parsed response data wrapped in Either
    */
   async #fetchAndParseResponse(
     url: string,
     requestOptions: RequestInit,
-  ): Promise<Either<Error, RawCycleData>> {
-    return EitherAsync<Error, RawCycleData>(async ({ fromPromise, throwE }) => {
+  ): Promise<Either<Error, CycleData>> {
+    return EitherAsync<Error, CycleData>(async ({ fromPromise, throwE }) => {
       const response = await fromPromise(
         safeAsync(() => fetch(url, requestOptions)),
       );
@@ -175,7 +174,7 @@ class CycleDataService {
       }
 
       const data = await fromPromise(
-        safeAsync(() => response.json() as Promise<RawCycleData>),
+        safeAsync(() => response.json() as Promise<CycleData>),
       );
 
       return data;
@@ -187,12 +186,12 @@ class CycleDataService {
    * Uses functional retry pattern with Either for error handling
    * @param {string} endpoint - The API endpoint
    * @param {object} options - Fetch options
-   * @returns {Promise<Either<Error, RawCycleData>>} The response data wrapped in Either
+   * @returns {Promise<Either<Error, CycleData>>} The response data wrapped in Either
    */
   async #request(
     endpoint: string,
     options: RequestInit = {},
-  ): Promise<Either<Error, RawCycleData>> {
+  ): Promise<Either<Error, CycleData>> {
     const url = this.#config.getUrl(endpoint);
 
     const defaultOptions = {

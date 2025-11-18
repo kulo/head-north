@@ -71,11 +71,6 @@ export const summarizeObjectives = (
     progressWithInProgress: 0,
     progressByCycleItems: 0,
     percentageNotToDo: 0,
-    startMonth: "",
-    endMonth: "",
-    daysFromStartOfCycle: 0,
-    daysInCycle: 0,
-    currentDayPercentage: 0,
   };
 
   // Aggregate tail objectives

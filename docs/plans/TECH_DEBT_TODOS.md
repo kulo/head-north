@@ -71,7 +71,7 @@ This document tracks important cleanup tasks, architectural decisions, and techn
 
 - ✅ **Consistent endpoint:** Single `/cycle-data` endpoint returns processed data
 - ✅ **Standardized format:** `prepareCycleDataResponse()` function standardizes response format
-- ✅ **Type safety:** Response types are well-defined (`RawCycleData`, `ApiResponse<T>`)
+- ✅ **Type safety:** Response types are well-defined (`CycleData`, `ApiResponse<T>`)
 - ✅ **Validation:** Zod schemas validate incoming/outgoing data
 - ⚠️ **Note:** The concern about `generate-overview.ts` vs raw data is no longer relevant (file removed)
 

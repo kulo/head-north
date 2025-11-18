@@ -40,56 +40,6 @@ export interface RoadmapData {
 // ============================================================================
 
 /**
- * Complete progress data including cycle metadata.
- * Contains both progress metrics and cycle-specific metadata like dates and months.
- * Used by complete entities (CycleWithProgress, ObjectiveWithProgress) that need
- * both progress calculations and contextual cycle information.
- */
-export interface ProgressWithinCycle {
-  readonly progress: number;
-  readonly progressWithInProgress: number;
-  readonly progressByCycleItems: number;
-  readonly weeks: number;
-  readonly weeksDone: number;
-  readonly weeksInProgress: number;
-  readonly weeksNotToDo: number;
-  readonly weeksCancelled: number;
-  readonly weeksPostponed: number;
-  readonly weeksTodo: number;
-  readonly cycleItemsCount: number;
-  readonly cycleItemsDoneCount: number;
-  readonly percentageNotToDo: number;
-  readonly startMonth: string;
-  readonly endMonth: string;
-  readonly daysFromStartOfCycle: number;
-  readonly daysInCycle: number;
-  readonly currentDayPercentage: number;
-}
-
-// Cycle with calculated progress data - extends core cycle
-export interface CycleWithProgress extends Cycle, ProgressWithinCycle {}
-
-// Objective with calculated progress data - extends base objective
-export interface ObjectiveWithProgress extends Objective, ProgressWithinCycle {}
-
-export interface RoadmapItemWithProgress
-  extends RoadmapItem,
-    ProgressWithinCycle {}
-
-/**
- * Cycle-specific metadata for date and time calculations.
- * Contains temporal information about cycles like start/end months,
- * days elapsed, and percentage completion within the cycle timeframe.
- */
-export interface CycleMetadata {
-  readonly startMonth: string;
-  readonly endMonth: string;
-  readonly daysFromStartOfCycle: number;
-  readonly daysInCycle: number;
-  readonly currentDayPercentage: number;
-}
-
-/**
  * Pure progress metrics for calculation functions.
  * Contains only the core progress data without cycle metadata.
  * Used by calculation functions that need to work with progress metrics
@@ -112,6 +62,31 @@ export interface ProgressMetrics {
 }
 
 /**
+ * Cycle-specific metadata for date and time calculations.
+ * Contains temporal information about cycles like start/end months,
+ * days elapsed, and percentage completion within the cycle timeframe.
+ */
+export interface CycleMetadata {
+  readonly startMonth: string;
+  readonly endMonth: string;
+  readonly daysFromStartOfCycle: number;
+  readonly daysInCycle: number;
+  readonly currentDayPercentage: number;
+}
+
+// Cycle with calculated progress data - extends core cycle with progress metrics and cycle metadata
+export interface CycleWithProgress
+  extends Cycle,
+    ProgressMetrics,
+    CycleMetadata {}
+
+// Objective with calculated progress data - extends base objective with progress metrics only
+export interface ObjectiveWithProgress extends Objective, ProgressMetrics {}
+
+// Roadmap item with calculated progress data - extends base roadmap item with progress metrics only
+export interface RoadmapItemWithProgress extends RoadmapItem, ProgressMetrics {}
+
+/**
  * Nested cycle data structure that represents the hierarchical
  * relationship: Objective -> RoadmapItem -> CycleItem
  *
@@ -128,7 +103,7 @@ export interface NestedCycleData {
  * calculated progress metrics for the cycle overview view.
  */
 export interface CycleOverviewData extends NestedCycleData {
-  readonly cycle: Cycle;
+  readonly cycle: CycleWithProgress;
 }
 
 export interface StoreState {

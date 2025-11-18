@@ -243,7 +243,7 @@ This section covers TypeScript-specific best practices. For guidance on using Ty
 
 ```typescript
 // ✅ GOOD - Explicit types, strict mode enabled
-function processData(data: RawCycleData): ProcessedCycleData {
+function processData(data: CycleData): ProcessedCycleData {
   // TypeScript ensures type safety
 }
 

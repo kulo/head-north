@@ -54,7 +54,7 @@ describe("Cycle Data Service", () => {
         cycles: [],
         roadmapItems: [],
         cycleItems: [],
-        areas: {},
+        areas: [],
         objectives: [],
         assignees: [],
         stages: [],

@@ -61,7 +61,7 @@ describe("PrewaveJiraAdapter", () => {
   });
 
   describe("fetchCycleData", () => {
-    it("should return Either<Error, RawCycleData>", async () => {
+    it("should return Either<Error, CycleData>", async () => {
       const sprints = createMockSprintCollection();
       const epics = [createMockEpicIssue()];
 
@@ -453,7 +453,8 @@ describe("PrewaveJiraAdapter", () => {
       expect(result.isRight()).toBe(true);
       if (result.isRight()) {
         const data = result.extract();
-        expect(Object.keys(data.areas).length).toBeGreaterThan(0);
+        expect(Array.isArray(data.areas)).toBe(true);
+        expect(data.areas.length).toBeGreaterThan(0);
       }
     });
 

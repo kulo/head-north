@@ -6,7 +6,7 @@ import type { Either } from "@headnorth/utils";
 import { safeAsync } from "@headnorth/utils";
 import type { HeadNorthConfig } from "@headnorth/config";
 import type {
-  RawCycleData,
+  CycleData,
   Cycle,
   RoadmapItem,
   CycleItem,
@@ -60,13 +60,14 @@ export class FakeDataAdapter implements JiraAdapter {
     this.sprints = this.generateSprints();
   }
 
-  async fetchCycleData(): Promise<Either<Error, RawCycleData>> {
+  async fetchCycleData(): Promise<Either<Error, CycleData>> {
     return safeAsync(async () => {
       // Generate cycle items based on roadmap items and sprints
       const cycleItems = this.generateCycleItems();
-      const areas = this.generateAreas();
       const objectives = this.generateObjectives();
       const teams = this.generateTeams();
+      // Generate areas and associate teams (needs teams to be generated first)
+      const areas = this.generateAreas(teams);
       const assignees = this.generateAssignees();
       const stages = this.config.getStages();
 
@@ -79,7 +80,7 @@ export class FakeDataAdapter implements JiraAdapter {
         assignees,
         stages,
         teams,
-      } as RawCycleData;
+      } as CycleData;
     });
   }
 
@@ -354,25 +355,48 @@ export class FakeDataAdapter implements JiraAdapter {
     return cycleItems;
   }
 
-  private generateAreas(): Record<string, Area> {
+  private generateAreas(teams: Team[]): Area[] {
+    const DEFAULT_AREA_UNASSIGNED = {
+      ID: "unassigned-teams",
+      NAME: "Unassigned Teams",
+    } as const;
+
     const areas = this.config.getAreas();
-    const teams = this.config.getTeams();
 
-    const result: Record<string, Area> = {};
+    // Build areas array and associate teams using prefix matching
+    const areasList: Area[] = Object.entries(areas).map(
+      ([areaId, areaName]) => {
+        const areaTeams = teams.filter((team) => {
+          const teamId = team.id;
+          return teamId.startsWith(areaId);
+        });
 
-    Object.entries(areas).forEach(([areaId, areaName]) => {
-      const areaTeams = Object.entries(teams)
-        .filter(([teamId]) => teamId.startsWith(areaId))
-        .map(([teamId, teamName]) => ({ id: teamId, name: teamName }));
+        return {
+          id: areaId,
+          name: areaName,
+          teams: areaTeams,
+        };
+      },
+    );
 
-      result[areaId] = {
-        id: areaId,
-        name: areaName,
-        teams: areaTeams,
-      };
-    });
+    // Find orphaned teams (teams not associated with any area)
+    const associatedTeamIds = new Set(
+      areasList.flatMap((area) => area.teams.map((team) => team.id)),
+    );
+    const unassociatedTeams = teams.filter(
+      (team) => !associatedTeamIds.has(team.id),
+    );
 
-    return result;
+    // Create default area for orphaned teams if needed
+    if (unassociatedTeams.length > 0) {
+      areasList.push({
+        id: DEFAULT_AREA_UNASSIGNED.ID,
+        name: DEFAULT_AREA_UNASSIGNED.NAME,
+        teams: unassociatedTeams,
+      });
+    }
+
+    return areasList;
   }
 
   private generateObjectives(): Objective[] {
