@@ -9,7 +9,7 @@ import { z } from "zod";
 import type { Either } from "@headnorth/utils";
 import { Left, Right } from "@headnorth/utils";
 import type { Context } from "koa";
-import type { RawCycleData } from "@headnorth/types";
+import type { CycleData } from "@headnorth/types";
 
 // ============================================================================
 // Zod Schemas
@@ -122,14 +122,14 @@ const objectiveSchema = z.object({
 });
 
 /**
- * RawCycleData schema - main schema for API response validation
+ * CycleData schema - main schema for API response validation
  */
-export const rawCycleDataSchema = z.object({
+export const cycleDataSchema = z.object({
   cycles: z.array(cycleSchema),
   roadmapItems: z.array(roadmapItemSchema),
   cycleItems: z.array(cycleItemSchema),
   assignees: z.array(personSchema),
-  areas: z.union([z.record(z.string(), areaSchema), z.array(areaSchema)]),
+  areas: z.array(areaSchema),
   stages: z.array(stageSchema),
   objectives: z.union([
     z.record(z.string(), objectiveSchema),
@@ -143,16 +143,14 @@ export const rawCycleDataSchema = z.object({
 // ============================================================================
 
 /**
- * Validate RawCycleData using Zod schema
- * Returns Either<z.ZodError, RawCycleData> for functional error handling
+ * Validate CycleData using Zod schema
+ * Returns Either<z.ZodError, CycleData> for functional error handling
  */
-export const validateRawCycleData = (
+export const validateCycleData = (
   data: unknown,
-): Either<z.ZodError, RawCycleData> => {
-  const result = rawCycleDataSchema.safeParse(data);
-  return result.success
-    ? Right(result.data as RawCycleData)
-    : Left(result.error);
+): Either<z.ZodError, CycleData> => {
+  const result = cycleDataSchema.safeParse(data);
+  return result.success ? Right(result.data as CycleData) : Left(result.error);
 };
 
 /**

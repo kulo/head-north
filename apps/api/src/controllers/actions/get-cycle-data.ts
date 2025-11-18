@@ -2,7 +2,7 @@ import collectCycleData, {
   validateAndPrepareCycleData,
 } from "../../services/collect-cycle-data";
 import { Either, logger } from "@headnorth/utils";
-import type { RawCycleData } from "@headnorth/types";
+import type { CycleData } from "@headnorth/types";
 import type { HeadNorthContext } from "../../types/koa-context";
 
 /**
@@ -24,13 +24,13 @@ export const getCycleData = async (
 
   // Collect raw data (I/O operation) - now returns Either
   // Adapter is pre-validated at app startup, so no config extraction needed
-  const collectResult: Either<Error, RawCycleData> = await collectCycleData(
+  const collectResult: Either<Error, CycleData> = await collectCycleData(
     jiraAdapter,
     headNorthConfig,
   );
 
   // Chain validation and preparation, handling errors functionally
-  const validationResult = collectResult.chain((rawData: RawCycleData) =>
+  const validationResult = collectResult.chain((rawData: CycleData) =>
     validateAndPrepareCycleData(rawData),
   );
 

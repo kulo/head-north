@@ -78,4 +78,6 @@ The project uses a centralized approach for configuration to keep frontend and b
 2. Transform: sprints → cycles; issues → cycle items and roadmap items
 3. Extract: areas, teams, objectives, stages
 4. Validate: data quality into validations array
-5. Serve: `RawCycleData` to the frontend
+5. Serve: `CycleData` to the frontend
+
+For detailed information about data formats and transformations at each layer, see [Data Flow Documentation](data-flow.md).

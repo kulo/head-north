@@ -39,7 +39,7 @@
     "build": "node esbuild.config.js",
     "dev": "tsc --watch",
     "start": "node --import=extensionless/register dist/index.js",
-    "start-dev": "nodemon --exec \"node --import=extensionless/register\" -r dotenv/config dist/index.js",
+    "start-dev": "nodemon --exec \"node --import=extensionless/register\" --import ./load-env.js dist/index.js",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "lint": "eslint . --fix",

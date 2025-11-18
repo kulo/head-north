@@ -39,6 +39,14 @@ export const DEFAULT_AREA = {
 } as const;
 
 /**
+ * Default area for teams without assigned areas
+ */
+export const DEFAULT_AREA_UNASSIGNED = {
+  ID: "unassigned-teams",
+  NAME: "Unassigned Teams",
+} as const;
+
+/**
  * Default values for stages
  */
 export const DEFAULT_STAGE = {

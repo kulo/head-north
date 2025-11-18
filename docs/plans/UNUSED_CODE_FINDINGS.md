@@ -127,8 +127,7 @@
 - `CycleItem`
 - `Stage`
 - `ValidationItem`
-- `RawCycleData`
-- `CycleData`
+- `CycleData` (formerly `RawCycleData`, unified with old `CycleData`)
 
 **Note:** These are core domain types that are almost certainly used. **ts-prune may have false positives for types.** **Manual review required.**
 

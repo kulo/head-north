@@ -22,7 +22,7 @@ JIRA Data → Adapter → Head North Domain Objects
 2. **Transform Entities**: Convert JIRA objects to Head North objects
 3. **Extract Metadata**: Build areas, teams, objectives from data
 4. **Apply Validations**: Check data quality and create validation items
-5. **Return Complete Data**: Return `RawCycleData` with all entities
+5. **Return Complete Data**: Return `CycleData` with all entities
 
 ## Interface
 
@@ -30,7 +30,7 @@ All adapters implement the `JiraAdapter` interface:
 
 ```typescript
 interface JiraAdapter {
-  fetchCycleData(): Promise<RawCycleData>;
+  fetchCycleData(): Promise<CycleData>;
 }
 ```
 
@@ -154,7 +154,7 @@ Here's the steps in more details:
 
 ```typescript
 import type { JiraAdapter } from "./jira-adapter.interface";
-import type { RawCycleData } from "@headnorth/types";
+import type { CycleData } from "@headnorth/types";
 
 export class MyCompanyJiraAdapter implements JiraAdapter {
   constructor(
@@ -162,7 +162,7 @@ export class MyCompanyJiraAdapter implements JiraAdapter {
     private config: HeadNorthConfig,
   ) {}
 
-  async fetchCycleData(): Promise<RawCycleData> {
+  async fetchCycleData(): Promise<CycleData> {
     // Your organization-specific logic here
   }
 }
@@ -207,7 +207,7 @@ Different organizations may have different setups:
 
 ```typescript
 export class MyCompanyJiraAdapter implements JiraAdapter {
-  async fetchCycleData(): Promise<RawCycleData> {
+  async fetchCycleData(): Promise<CycleData> {
     // Fetch only stories
     const stories = await this.jiraClient.searchIssues('issuetype = "Story"');
 

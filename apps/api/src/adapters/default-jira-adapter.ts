@@ -5,7 +5,7 @@
 import { Either, Maybe, safeAsync } from "@headnorth/utils";
 import type { HeadNorthConfig, JiraConfigData } from "@headnorth/config";
 import type {
-  RawCycleData,
+  CycleData,
   Cycle,
   RoadmapItem,
   CycleItem,
@@ -44,7 +44,7 @@ export class DefaultJiraAdapter implements JiraAdapter {
     this.config = config;
   }
 
-  async fetchCycleData(): Promise<Either<Error, RawCycleData>> {
+  async fetchCycleData(): Promise<Either<Error, CycleData>> {
     return safeAsync(async () => {
       // 1. Fetch all JIRA data in parallel
       const boardId = this.jiraConfig.connection.boardId;
@@ -77,12 +77,13 @@ export class DefaultJiraAdapter implements JiraAdapter {
 
       // 4. Extract metadata from all issues
       const allIssues = [...roadmapIssues, ...cycleIssues];
-      const areas = this.extractAreas(allIssues);
       const objectives = this.extractObjectives(allIssues);
       const teams = this.extractTeams(allIssues);
       const assignees = extractAllAssignees(allIssues);
+      // Extract areas and associate teams (needs teams to be extracted first)
+      const areas = this.extractAreas(allIssues, teams);
 
-      const rawData: RawCycleData = {
+      const rawData: CycleData = {
         cycles,
         roadmapItems,
         cycleItems,
@@ -283,27 +284,72 @@ export class DefaultJiraAdapter implements JiraAdapter {
     };
   }
 
-  private extractAreas(allIssues: JiraIssue[]): Record<string, Area> {
+  private extractAreas(allIssues: JiraIssue[], teams: Team[]): Area[] {
+    const DEFAULT_AREA_UNASSIGNED = {
+      ID: "unassigned-teams",
+      NAME: "Unassigned Teams",
+    } as const;
+
     const areaLabels = new Set(
       allIssues.flatMap((issue) =>
         extractLabelsWithPrefix(issue.fields.labels, "area:"),
       ),
     );
 
-    // Use reduce for immutable transformation instead of forEach
-    return Array.from(areaLabels).reduce(
-      (acc, label) => {
-        return {
-          ...acc,
-          [label]: {
-            id: label,
-            name: this.config.getLabelTranslations().areas[label] || label,
-            teams: [], // Will be populated elsewhere
-          },
-        };
-      },
-      {} as Record<string, Area>,
-    );
+    // Build areas array
+    const areas = Array.from(areaLabels).map((label) => ({
+      id: label,
+      name: this.config.getLabelTranslations().areas[label] || label,
+      teams: [] as Team[],
+    }));
+
+    // Associate teams to areas using prefix matching
+    // Team ID should start with area ID (e.g., team "platform-frontend" belongs to area "platform")
+    const unassociatedTeams: Team[] = [];
+
+    for (const team of teams) {
+      const teamId = team.id.replace("team:", "");
+      let associated = false;
+
+      for (const area of areas) {
+        const areaId = area.id.replace("area:", "");
+        if (teamId.startsWith(areaId)) {
+          area.teams.push(team);
+          associated = true;
+          break;
+        }
+      }
+
+      if (!associated) {
+        unassociatedTeams.push(team);
+      }
+    }
+
+    // Create default area for orphaned teams if needed
+    if (unassociatedTeams.length > 0) {
+      // Check if default area already exists
+      const defaultAreaExists = areas.some(
+        (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+      );
+
+      if (!defaultAreaExists) {
+        areas.push({
+          id: DEFAULT_AREA_UNASSIGNED.ID,
+          name: DEFAULT_AREA_UNASSIGNED.NAME,
+          teams: unassociatedTeams,
+        });
+      } else {
+        // Add orphaned teams to existing default area
+        const defaultArea = areas.find(
+          (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+        );
+        if (defaultArea) {
+          defaultArea.teams.push(...unassociatedTeams);
+        }
+      }
+    }
+
+    return areas;
   }
 
   private extractObjectives(allIssues: JiraIssue[]): Objective[] {

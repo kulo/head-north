@@ -121,11 +121,6 @@ export function transformToNestedStructure(
     progressWithInProgress: number;
     progressByCycleItems: number;
     percentageNotToDo: number;
-    startMonth: string;
-    endMonth: string;
-    daysFromStartOfCycle: number;
-    daysInCycle: number;
-    currentDayPercentage: number;
   };
 
   // Use reduce instead of forEach for functional aggregation
@@ -156,11 +151,6 @@ export function transformToNestedStructure(
         progressWithInProgress: 0,
         progressByCycleItems: 0,
         percentageNotToDo: 0,
-        startMonth: "",
-        endMonth: "",
-        daysFromStartOfCycle: 0,
-        daysInCycle: 0,
-        currentDayPercentage: 0,
       };
     }
 
@@ -217,11 +207,6 @@ export function transformToNestedStructure(
       })),
       // Add calculated metrics
       ...roadmapItemMetrics,
-      startMonth: "",
-      endMonth: "",
-      daysFromStartOfCycle: 0,
-      daysInCycle: 0,
-      currentDayPercentage: 0,
     };
 
     // Create new objective with updated values (functional style - immutable update)

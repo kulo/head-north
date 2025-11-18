@@ -140,36 +140,19 @@ export interface ValidationItem {
 // ============================================================================
 
 /**
- * Raw cycle data collected from Jira and other sources before any frontend processing.
- * This represents the initial, unprocessed data structure returned by the backend API.
- * Contains raw Jira objects and domain entities in their original form.
- */
-export interface RawCycleData {
-  readonly cycles: readonly Cycle[];
-  readonly roadmapItems: readonly RoadmapItem[];
-  readonly cycleItems: readonly CycleItem[];
-  readonly assignees: readonly Person[];
-  /** Product areas indexed by ID */
-  readonly areas: Readonly<Record<string, Area>>;
-  readonly objectives: readonly Objective[];
-  /** Release stages */
-  readonly stages: readonly Stage[];
-  readonly teams?: readonly Team[];
-}
-
-/**
- * Processed cycle data from the data service layer.
- * This represents the data structure returned by CycleDataService after basic processing.
- * Contains raw cycles without progress calculations - progress is added in the transformation layer.
+ * Cycle data collected from Jira and other sources.
+ * This represents the data structure returned by the backend API and used throughout the application.
+ * Contains cycles, roadmap items, cycle items, and domain entities in their processed form.
  */
 export interface CycleData {
   readonly cycles: readonly Cycle[];
   readonly roadmapItems: readonly RoadmapItem[];
   readonly cycleItems: readonly CycleItem[];
+  readonly assignees: readonly Person[];
   /** Product areas */
   readonly areas: readonly Area[];
   readonly objectives: readonly Objective[];
-  readonly assignees: readonly Person[];
   /** Release stages */
   readonly stages: readonly Stage[];
+  readonly teams?: readonly Team[];
 }

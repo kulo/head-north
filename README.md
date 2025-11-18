@@ -207,6 +207,7 @@ See `env.example` for required Jira variables. For detailed developer commands a
 | [docs/development.md](docs/development.md) | How to run locally (fake and Jira adapters), environment setup, scripts, tooling, and day-to-day workflows. |
 | [docs/deployment.md](docs/deployment.md) | How to build and deploy (Docker, static frontend, cloud/local manifests). |
 | [docs/architecture.md](docs/architecture.md) | Deep overview of the system, monorepo layout, domain concepts, shared configuration (single source of truth). |
+| [docs/data-flow.md](docs/data-flow.md) | Detailed data flow from JIRA adapters to Vue components, including all format transformations. |
 | [apps/api/src/adapters/README.md](apps/api/src/adapters/README.md) | Available adapters (default, prewave, fake), how selection works, when to build custom adapters. |
 | [packages/config/README.md](packages/config/README.md) | Package reference: endpoints, routes, validation dictionaries, usage. |
 | [packages/jira-primitives/README.md](packages/jira-primitives/README.md) | Package reference: extractors, transformers, validators, Jira client. |
