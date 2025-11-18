@@ -4,6 +4,10 @@ _Head North_ is a visualisation tool or dashboard for product development organi
 
 The tool provides a bird's eye view onto what's going on in your product development organisation, where you're putting your strategic focus and what is the progress you're making towards your north star / objectives.
 
+### Disclaimer: Pre-Alpha Version
+
+Head North development is not finished. Especially the UI needs significant further polishing and bug fixing. However, it ought to be good enough to give it a try - even for non-technical users!
+
 ## Table of Contents
 
 - [📊 Use Cases](#-use-cases)
