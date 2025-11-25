@@ -356,11 +356,6 @@ export class FakeDataAdapter implements JiraAdapter {
   }
 
   private generateAreas(teams: Team[]): Area[] {
-    const DEFAULT_AREA_UNASSIGNED = {
-      ID: "unassigned-teams",
-      NAME: "Unassigned Teams",
-    } as const;
-
     const areas = this.config.getAreas();
 
     // Build areas array and associate teams using prefix matching
@@ -390,8 +385,8 @@ export class FakeDataAdapter implements JiraAdapter {
     // Create default area for orphaned teams if needed
     if (unassociatedTeams.length > 0) {
       areasList.push({
-        id: DEFAULT_AREA_UNASSIGNED.ID,
-        name: DEFAULT_AREA_UNASSIGNED.NAME,
+        id: this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID,
+        name: this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.NAME,
         teams: unassociatedTeams,
       });
     }

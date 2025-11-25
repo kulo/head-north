@@ -23,6 +23,7 @@ import {
   extractParent,
   extractAssignee,
   extractAllAssignees,
+  extractSprintId,
   jiraSprintToCycle,
   mapJiraStatus,
   createJiraUrl,
@@ -172,7 +173,9 @@ export class DefaultJiraAdapter implements JiraAdapter {
     const teamLabels = relatedCycleItems.flatMap((ci) =>
       extractLabelsWithPrefix(ci.fields.labels, "team:"),
     );
-    const owningTeamId = Maybe.fromNullable(teamLabels[0]).orDefault("unknown");
+    const owningTeamId = Maybe.fromNullable(teamLabels[0]).orDefault(
+      this.config.getDefaultValues().DEFAULT_TEAM.ID,
+    );
 
     // Get team translation using Maybe
     const teamTranslations = this.config.getLabelTranslations().teams;
@@ -183,7 +186,9 @@ export class DefaultJiraAdapter implements JiraAdapter {
     );
 
     // Extract product area ID using Maybe
-    const areaId = Maybe.fromNullable(areaLabels[0]).orDefault("unknown");
+    const areaId = Maybe.fromNullable(areaLabels[0]).orDefault(
+      this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID,
+    );
     const themeId = Maybe.fromNullable(themeLabel).orDefault("unknown");
 
     // Extract host URL using Maybe
@@ -221,7 +226,9 @@ export class DefaultJiraAdapter implements JiraAdapter {
     const teamLabels = extractLabelsWithPrefix(issue.fields.labels, "team:");
 
     // Extract release stage from name
-    const stage = this.extractStageFromName(issue.fields.summary).orDefault("");
+    const stage = this.extractStageFromName(issue.fields.summary).orDefault(
+      this.config.getDefaultValues().DEFAULT_RELEASE_STAGE.ID,
+    );
 
     // Map status
     const status = mapJiraStatus(
@@ -230,24 +237,27 @@ export class DefaultJiraAdapter implements JiraAdapter {
       this.config.getItemStatusValues().TODO,
     );
 
-    // Extract assignee with empty object fallback
+    // Extract assignee - use DEFAULT_ASSIGNEE if missing
     const assignee = extractAssignee(issue).orDefault({
-      id: "",
-      name: "",
+      id: this.config.getDefaultValues().DEFAULT_ASSIGNEE.ID,
+      name: this.config.getDefaultValues().DEFAULT_ASSIGNEE.NAME,
     } as Person);
 
     // Extract parent (roadmapItemId)
     const roadmapItemId = extractParent(issue).orDefault("");
 
-    // Extract cycleId from sprint using Maybe
-    const cycleId = Maybe.fromNullable(issue.fields.sprint?.id)
-      .map((id) => id.toString())
+    // Extract cycleId from sprint - uses standard sprint field
+    const cycleId = extractSprintId(issue)
+      .map((id: string | number) => id.toString())
       .orDefault("");
 
     // Find cycle using Maybe for safe lookup and transform to required shape
     const cycle = Maybe.fromNullable(cycles.find((c) => c.id === cycleId))
       .map((c) => ({ id: c.id, name: c.name }))
-      .orDefault({ id: "", name: "" });
+      .orDefault({
+        id: this.config.getDefaultValues().DEFAULT_TICKET_ID,
+        name: "Unknown Cycle",
+      });
 
     // Generate validations
     const validations: ValidationItem[] = [
@@ -285,11 +295,6 @@ export class DefaultJiraAdapter implements JiraAdapter {
   }
 
   private extractAreas(allIssues: JiraIssue[], teams: Team[]): Area[] {
-    const DEFAULT_AREA_UNASSIGNED = {
-      ID: "unassigned-teams",
-      NAME: "Unassigned Teams",
-    } as const;
-
     const areaLabels = new Set(
       allIssues.flatMap((issue) =>
         extractLabelsWithPrefix(issue.fields.labels, "area:"),
@@ -329,19 +334,21 @@ export class DefaultJiraAdapter implements JiraAdapter {
     if (unassociatedTeams.length > 0) {
       // Check if default area already exists
       const defaultAreaExists = areas.some(
-        (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+        (area) =>
+          area.id === this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID,
       );
 
       if (!defaultAreaExists) {
         areas.push({
-          id: DEFAULT_AREA_UNASSIGNED.ID,
-          name: DEFAULT_AREA_UNASSIGNED.NAME,
+          id: this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID,
+          name: this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.NAME,
           teams: unassociatedTeams,
         });
       } else {
         // Add orphaned teams to existing default area
         const defaultArea = areas.find(
-          (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+          (area) =>
+            area.id === this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID,
         );
         if (defaultArea) {
           defaultArea.teams.push(...unassociatedTeams);

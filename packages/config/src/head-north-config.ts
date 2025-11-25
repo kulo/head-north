@@ -33,6 +33,7 @@ import JiraConfig from "./jira-config";
 import type { JiraConfigData } from "./jira-config";
 import { validateJiraConfig } from "./jira-config-validation";
 import { getEnvVarWithFallback } from "./utils";
+import { defaultValues } from "./default-values";
 import type {
   ProcessEnv,
   ConfigOverrides,
@@ -43,6 +44,7 @@ import type {
   PageConfig,
   ValidationRules,
 } from "./types";
+import type { DefaultValues } from "@headnorth/types";
 
 export default class HeadNorthConfig {
   private readonly processEnv: Readonly<ProcessEnv>;
@@ -663,6 +665,14 @@ export default class HeadNorthConfig {
    */
   getValidationDictionary(): ValidationRules {
     return validationDictionary;
+  }
+
+  /**
+   * Get default values for unassigned, unknown, or uncategorised items
+   * @returns Default values object
+   */
+  getDefaultValues(): DefaultValues {
+    return defaultValues;
   }
 
   /**

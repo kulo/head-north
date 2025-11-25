@@ -161,6 +161,34 @@ export function createMockHeadNorthConfig(
       { id: "s3+", name: "s3+" },
     ],
 
+    getDefaultValues: () => ({
+      DEFAULT_OBJECTIVE: {
+        ID: "unassigned",
+        NAME: "Unassigned Objective",
+      },
+      DEFAULT_ASSIGNEE: {
+        ID: "unassigned",
+        NAME: "Unassigned",
+      },
+      DEFAULT_PRODUCT_AREA: {
+        ID: "unassigned-teams",
+        NAME: "Unassigned Teams",
+      },
+      DEFAULT_RELEASE_STAGE: {
+        ID: "non-customer-facing",
+        NAME: "Non-Customer Facing",
+      },
+      DEFAULT_STATUS: {
+        ID: "unknown",
+        NAME: "Unknown",
+      },
+      DEFAULT_TEAM: {
+        ID: "unknown",
+        NAME: "Unknown Team",
+      },
+      DEFAULT_TICKET_ID: "unknown",
+    }),
+
     getAreas: () => ({
       frontend: "Frontend",
       backend: "Backend",

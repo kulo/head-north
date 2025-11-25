@@ -13,6 +13,7 @@ export {
   extractParent,
   extractAssignee,
   extractAllAssignees,
+  extractSprintId,
 } from "./extractors";
 
 // Transformers

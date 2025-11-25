@@ -350,7 +350,7 @@ describe("PrewaveJiraAdapter", () => {
       expect(result.isRight()).toBe(true);
       if (result.isRight()) {
         const data = result.extract();
-        expect(data.cycleItems[0].stage).toBe("");
+        expect(data.cycleItems[0].stage).toBe("non-customer-facing");
       }
     });
   });
@@ -394,7 +394,7 @@ describe("PrewaveJiraAdapter", () => {
       }
     });
 
-    it("should set default objectiveId to 'uncategorized'", async () => {
+    it("should set default objectiveId to default value", async () => {
       const sprints = createMockSprintCollection();
       const epic = createMockEpicIssue();
 
@@ -406,7 +406,7 @@ describe("PrewaveJiraAdapter", () => {
       expect(result.isRight()).toBe(true);
       if (result.isRight()) {
         const data = result.extract();
-        expect(data.roadmapItems[0].objectiveId).toBe("uncategorized");
+        expect(data.roadmapItems[0].objectiveId).toBe("unassigned");
       }
     });
 
@@ -458,7 +458,7 @@ describe("PrewaveJiraAdapter", () => {
       }
     });
 
-    it("should extract objectives (returns single uncategorized)", async () => {
+    it("should extract objectives (returns single default objective)", async () => {
       const sprints = createMockSprintCollection();
       const epic = createMockEpicIssue();
 
@@ -471,8 +471,8 @@ describe("PrewaveJiraAdapter", () => {
       if (result.isRight()) {
         const data = result.extract();
         expect(data.objectives).toHaveLength(1);
-        expect(data.objectives[0].id).toBe("uncategorized");
-        expect(data.objectives[0].name).toBe("Uncategorized");
+        expect(data.objectives[0].id).toBe("unassigned");
+        expect(data.objectives[0].name).toBe("Unassigned Objective");
       }
     });
 

@@ -22,10 +22,6 @@ import { filter } from "../utils/filter";
 import { selectDefaultCycle } from "../selectors/cycle-selector";
 import { calculateCycleProgress } from "../cycle-progress-calculator";
 import { calculateCycleItemProgress } from "../calculations/cycle-calculations";
-import {
-  DEFAULT_OBJECTIVE,
-  getDefaultObjectiveId,
-} from "../constants/default-values";
 import { pipe } from "@headnorth/utils";
 import HeadNorthConfig from "@headnorth/config";
 
@@ -127,14 +123,15 @@ export function transformToNestedStructure(
   const groupedObjectives = roadmapItems.reduce<
     Record<string, MutableObjective>
   >((acc, item) => {
-    const objectiveId = getDefaultObjectiveId(item.objectiveId);
+    const objectiveId =
+      item.objectiveId || config.getDefaultValues().DEFAULT_OBJECTIVE.ID;
 
     // Initialize objective if not exists
     if (!acc[objectiveId]) {
       acc[objectiveId] = {
         id: objectiveId,
         name: Maybe.fromNullable(objectivesLookup[objectiveId]).orDefault(
-          DEFAULT_OBJECTIVE.NAME,
+          config.getDefaultValues().DEFAULT_OBJECTIVE.NAME,
         ),
         roadmapItems: [],
         // Initialize progress metrics
@@ -380,9 +377,14 @@ export function generateCycleOverviewData(
     return null;
   }
 
+  const objectives = Maybe.fromNullable(processedData.objectives).orDefault([]);
+
+  // Calculate cycle progress data
+  const cycleWithProgress = calculateCycleProgress(selectedCycle, objectives);
+
   return {
-    cycle: selectedCycle,
-    objectives: Maybe.fromNullable(processedData.objectives).orDefault([]),
+    cycle: cycleWithProgress,
+    objectives,
   };
 }
 

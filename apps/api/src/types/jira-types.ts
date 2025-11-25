@@ -10,13 +10,10 @@ import type {
   JiraConnection,
 } from "@headnorth/config";
 
-export interface JiraSprintsData {
-  sprints: JiraSprint[];
-  total: number;
-  startAt: number;
-  maxResults: number;
-}
-
+/**
+ * Standard JIRA sprint object from Agile API
+ * Used when fetching sprints via getSprints() and in issue.fields.sprint
+ */
 export interface JiraSprint {
   id: string | number;
   name: string;
@@ -26,6 +23,16 @@ export interface JiraSprint {
   originBoardId?: number;
   goal?: string;
 }
+
+/**
+ * Minimal type for sprint data stored in custom fields.
+ * Only the `id` field is actually extracted by extractSprintId().
+ * Custom fields can be an array or single object (e.g., customfield_10021).
+ */
+export type JiraSprintFieldId = {
+  id?: string | number;
+  [key: string]: unknown; // Allow other fields but we only use id
+};
 
 export interface JiraIssue {
   id: string;

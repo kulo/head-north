@@ -4,7 +4,7 @@
  * Tests the DataTransformer class that handles data transformation and filtering.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { dataTransformer } from "../../../src/lib/transformers/data-transformer";
 import {
   createMockCycleData,
@@ -42,6 +42,33 @@ const mockConfig: HeadNorthConfig = {
     roadmapItem: {
       missingThemeLabel: { label: "Missing theme label", reference: "ref3" },
     },
+  })),
+  getDefaultValues: vi.fn(() => ({
+    DEFAULT_OBJECTIVE: {
+      ID: "unassigned",
+      NAME: "Unassigned Objective",
+    },
+    DEFAULT_ASSIGNEE: {
+      ID: "unassigned",
+      NAME: "Unassigned",
+    },
+    DEFAULT_PRODUCT_AREA: {
+      ID: "unassigned-teams",
+      NAME: "Unassigned Teams",
+    },
+    DEFAULT_RELEASE_STAGE: {
+      ID: "non-customer-facing",
+      NAME: "Non-Customer Facing",
+    },
+    DEFAULT_STATUS: {
+      ID: "unknown",
+      NAME: "Unknown",
+    },
+    DEFAULT_TEAM: {
+      ID: "unknown",
+      NAME: "Unknown Team",
+    },
+    DEFAULT_TICKET_ID: "unknown",
   })),
 } as unknown as HeadNorthConfig;
 
@@ -550,7 +577,16 @@ describe("DataTransformer", () => {
       );
 
       expect(result).not.toBeNull();
-      expect(result!.cycle).toEqual(rawData.cycles[0]);
+      // Cycle should contain base cycle properties plus computed progress metrics
+      const baseCycle = rawData.cycles[0];
+      expect(result!.cycle.id).toBe(baseCycle.id);
+      expect(result!.cycle.name).toBe(baseCycle.name);
+      expect(result!.cycle.start).toBe(baseCycle.start);
+      expect(result!.cycle.end).toBe(baseCycle.end);
+      expect(result!.cycle.delivery).toBe(baseCycle.delivery);
+      // Should have additional progress properties
+      expect(result!.cycle.cycleItemsCount).toBeDefined();
+      expect(result!.cycle.cycleItemsDoneCount).toBeDefined();
       expect(result!.objectives).toEqual(processedData.objectives);
     });
 

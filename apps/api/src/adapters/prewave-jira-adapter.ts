@@ -16,6 +16,7 @@ import type {
   Objective,
   ValidationItem,
   Person,
+  ISODateString,
 } from "@headnorth/types";
 import type { JiraAdapter } from "./jira-adapter.interface";
 import {
@@ -23,6 +24,7 @@ import {
   extractLabelsWithPrefix,
   extractAssignee,
   extractAllAssignees,
+  extractSprintId,
   jiraSprintToCycle,
   mapJiraStatus,
   createJiraUrl,
@@ -31,8 +33,6 @@ import {
 import type { JiraIssue } from "@headnorth/jira-primitives";
 
 /**
-type JiraSprintField = { id?: number | string; name?: string; state?: string; boardId?: number; startDate?: string; endDate?: string; goal?: string; [key: string]: unknown };
-
  * Prewave-specific mapping: Product Areas → Teams → Assignees
  *
  * This mapping structure defines the organizational hierarchy for Prewave:
@@ -203,29 +203,36 @@ export class PrewaveJiraAdapter implements JiraAdapter {
       const inspectEpic =
         epicIssues.find((e) => e.key === "PRODUCT-43") || epicIssues[0];
 
-      const inspectSprintField = (
-        inspectEpic?.fields as unknown as Record<string, unknown>
-      )?.[PREWAVE_FIELDS.sprint];
-      logger.default.info("PrewaveJiraAdapter: sprint field inspection", {
-        key: inspectEpic?.key,
-        type: Array.isArray(inspectSprintField)
-          ? "array"
-          : typeof inspectSprintField,
-        ids: Array.isArray(inspectSprintField)
-          ? inspectSprintField.map((s: JiraSprintField) => s?.id)
-          : inspectSprintField?.id,
-      });
+      if (inspectEpic) {
+        const sprintId = extractSprintId(inspectEpic, PREWAVE_FIELDS.sprint);
+        sprintId.caseOf({
+          Just: (id) => {
+            logger.default.info("PrewaveJiraAdapter: sprint field inspection", {
+              key: inspectEpic.key,
+              sprintId: id,
+            });
+          },
+          Nothing: () => {
+            logger.default.info("PrewaveJiraAdapter: sprint field inspection", {
+              key: inspectEpic.key,
+              sprintId: null,
+            });
+          },
+        });
+      }
 
       // 2. Transform sprints to cycles and normalize dates to YYYY-MM-DD
       const cycles = sprints.map(jiraSprintToCycle).map((c) => ({
         ...c,
         start: c.start
-          ? (c.start as string).slice(0, 10)
-          : ("" as typeof c.start),
-        end: c.end ? (c.end as string).slice(0, 10) : ("" as typeof c.end),
+          ? ((c.start as string).slice(0, 10) as ISODateString)
+          : ("" as ISODateString),
+        end: c.end
+          ? ((c.end as string).slice(0, 10) as ISODateString)
+          : ("" as ISODateString),
         delivery: c.delivery
-          ? (c.delivery as string).slice(0, 10)
-          : ("" as typeof c.delivery),
+          ? ((c.delivery as string).slice(0, 10) as ISODateString)
+          : ("" as ISODateString),
       }));
 
       // 3. Transform Epics to CycleItems
@@ -314,63 +321,54 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     // TODO: Prewave doesn't use story points; replace with concrete Effort/Appetite field once available
     const effort = 1;
 
-    // Extract assignee
+    // Extract assignee - use DEFAULT_ASSIGNEE if missing
     const assignee = extractAssignee(issue).orDefault({
-      id: "",
-      name: "",
+      id: this.config.getDefaultValues().DEFAULT_ASSIGNEE.ID,
+      name: this.config.getDefaultValues().DEFAULT_ASSIGNEE.NAME,
     } as Person);
 
     // Map status using Prewave-specific mapping
     const status = this.mapPrewaveStatus(issue.fields.status);
 
-    // Extract sprint/cycle (Prewave sprint field returns an array of sprint objects)
-    const sprintField = (issue.fields as unknown as Record<string, unknown>)[
-      PREWAVE_FIELDS.sprint
-    ];
-    const sprintIdValue = Array.isArray(sprintField)
-      ? sprintField[0]?.id
-      : sprintField?.id;
-    if (issue.key === "PRODUCT-43") {
-      logger.default.info("PrewaveJiraAdapter: sprint extraction", {
-        key: issue.key,
-        sprintFieldType: Array.isArray(sprintField)
-          ? "array"
-          : typeof sprintField,
-        sprintIds: Array.isArray(sprintField)
-          ? sprintField.map((s: JiraSprintField) => s?.id)
-          : sprintField?.id,
-      });
-    }
-    const cycleId = Maybe.fromNullable(sprintIdValue)
+    // Extract sprint/cycle ID - tries standard field first, then custom field
+    // Prewave stores sprint in customfield_10021 (can be array or single object)
+    const cycleId = extractSprintId(issue, PREWAVE_FIELDS.sprint)
       .map((id: string | number) => id.toString())
       .orDefault("");
 
     const cycle = Maybe.fromNullable(cycles.find((c) => c.id === cycleId))
       .map((c) => ({ id: c.id, name: c.name }))
-      .orDefault({ id: "", name: "" });
+      .orDefault({
+        id: this.config.getDefaultValues().DEFAULT_TICKET_ID,
+        name: "Unknown Cycle",
+      });
 
     // Generate virtual roadmap item ID
     const roadmapItemId = `VIRTUAL-${issue.key}`;
 
     // Extract Product Area from assignee mapping (TODO: will be in labels later)
+    const defaultProductAreaId =
+      this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID;
     const productAreaId =
-      this.mapAssigneeToProductArea(assignee).orDefault(null);
-    const areaIds = productAreaId ? [productAreaId] : [];
+      this.mapAssigneeToProductArea(assignee).orDefault(defaultProductAreaId);
+    const isProductAreaDefault = productAreaId === defaultProductAreaId;
+    const areaIds = !isProductAreaDefault ? [productAreaId] : [];
 
     // Extract Team from assignee mapping (TODO: will be in labels later)
-    const teamId = this.mapAssigneeToTeam(assignee).orDefault(null);
-    const teams = teamId ? [teamId] : [];
+    const defaultTeamId = this.config.getDefaultValues().DEFAULT_TEAM.ID;
+    const teamId = this.mapAssigneeToTeam(assignee).orDefault(defaultTeamId);
+    const isTeamDefault = teamId === defaultTeamId;
+    const teams = !isTeamDefault ? [teamId] : [];
 
     // Release Stage not available yet (TODO: will be added later)
-    const stage = "";
+    const stage = this.config.getDefaultValues().DEFAULT_RELEASE_STAGE.ID;
 
     // Generate validations
     const validations: ValidationItem[] = [
       ...validateRequired(effort, issue.key, "effort"),
-      // Product Area validation - warn if missing but don't fail
-      ...(productAreaId
-        ? []
-        : [
+      // Product Area validation - warn if using default value
+      ...(isProductAreaDefault
+        ? [
             {
               id: `${issue.key}-missingArea`,
               code: "missingArea",
@@ -379,7 +377,8 @@ export class PrewaveJiraAdapter implements JiraAdapter {
               description:
                 "Product Area not available in Jira data yet. TODO: Will be extracted from labels or assignee mapping.",
             },
-          ]),
+          ]
+        : []),
     ];
 
     const host = Maybe.fromNullable(this.jiraConfig.connection.host).orDefault(
@@ -417,11 +416,14 @@ export class PrewaveJiraAdapter implements JiraAdapter {
   private createVirtualRoadmapItem(issue: JiraIssue): RoadmapItem {
     // Extract Product Area from assignee mapping (TODO: will be in labels later)
     const assignee = extractAssignee(issue).orDefault({
-      id: "",
-      name: "",
+      id: this.config.getDefaultValues().DEFAULT_ASSIGNEE.ID,
+      name: this.config.getDefaultValues().DEFAULT_ASSIGNEE.NAME,
     } as Person);
+    const defaultProductAreaId =
+      this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID;
     const productAreaId =
-      this.mapAssigneeToProductArea(assignee).orDefault(null);
+      this.mapAssigneeToProductArea(assignee).orDefault(defaultProductAreaId);
+    const isProductAreaDefault = productAreaId === defaultProductAreaId;
 
     // Extract host URL
     const host = Maybe.fromNullable(this.jiraConfig.connection.host).orDefault(
@@ -429,9 +431,8 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     );
 
     // Generate validations
-    const validations: ValidationItem[] = productAreaId
-      ? []
-      : [
+    const validations: ValidationItem[] = isProductAreaDefault
+      ? [
           {
             id: `${issue.key}-missingArea`,
             code: "missingArea",
@@ -440,20 +441,21 @@ export class PrewaveJiraAdapter implements JiraAdapter {
             description:
               "Product Area not available in Jira data yet. TODO: Will be extracted from labels or assignee mapping.",
           },
-        ];
+        ]
+      : [];
 
     return {
       id: `VIRTUAL-${issue.key}`,
       name: issue.fields.summary,
       summary: issue.fields.summary,
-      area: productAreaId
-        ? {
-            id: productAreaId,
-            name: PREWAVE_MAPPING.areas[productAreaId]?.name || productAreaId,
-            teams: [],
-          }
-        : undefined,
-      objectiveId: "uncategorized", // TODO: Objectives not available yet
+      ...(productAreaId && {
+        area: {
+          id: productAreaId,
+          name: PREWAVE_MAPPING.areas[productAreaId]?.name || productAreaId,
+          teams: [],
+        },
+      }),
+      objectiveId: this.config.getDefaultValues().DEFAULT_OBJECTIVE.ID, // TODO: Objectives not available yet
       url: createJiraUrl(issue.key, host),
       isExternal: false,
       validations,
@@ -522,28 +524,27 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     assignees: readonly Person[],
     teams: readonly Team[],
   ): Area[] {
-    const DEFAULT_AREA_UNASSIGNED = {
-      ID: "unassigned-teams",
-      NAME: "Unassigned Teams",
-    } as const;
-
     // First try to extract from labels
     const areaLabels = new Set(
       allIssues.flatMap((issue) =>
-        extractLabelsWithPrefix(issue.fields.labels, "area:"),
+        extractLabelsWithPrefix(issue.fields.labels, "area"),
       ),
     );
 
     // Build areas from labels as array
+    // Note: extractLabelsWithPrefix already removes the "area:" prefix
     const areasFromLabels = Array.from(areaLabels).map((label) => {
-      const areaId = label.replace("area:", "");
+      const areaId = label; // Label already has prefix removed
+      const translations = this.config.getLabelTranslations().areas;
+      const name = Maybe.fromNullable(translations[label]).orDefault(
+        Maybe.fromNullable(PREWAVE_MAPPING.areas[areaId]?.name).orDefault(
+          areaId,
+        ),
+      );
       return {
         id: areaId,
-        name:
-          this.config.getLabelTranslations().areas[label] ||
-          PREWAVE_MAPPING.areas[areaId]?.name ||
-          areaId,
-        teams: [] as Team[],
+        name,
+        teams: [] as readonly Team[],
       };
     });
 
@@ -554,14 +555,20 @@ export class PrewaveJiraAdapter implements JiraAdapter {
             const seenAreaIds = new Set<string>();
             return assignees
               .map((assignee) => {
-                const areaId =
-                  this.mapAssigneeToProductArea(assignee).orDefault(null);
+                const areaId = this.mapAssigneeToProductArea(
+                  assignee,
+                ).orDefault(
+                  this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID,
+                );
                 if (areaId && !seenAreaIds.has(areaId)) {
                   seenAreaIds.add(areaId);
+                  const name = Maybe.fromNullable(
+                    PREWAVE_MAPPING.areas[areaId]?.name,
+                  ).orDefault(areaId);
                   return {
                     id: areaId,
-                    name: PREWAVE_MAPPING.areas[areaId]?.name || areaId,
-                    teams: [] as Team[],
+                    name,
+                    teams: [] as readonly Team[],
                   };
                 }
                 return null;
@@ -573,11 +580,16 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     // If still no areas, add default Prewave areas
     const defaultAreas =
       areasFromLabels.length === 0 && areasFromAssignees.length === 0
-        ? Object.keys(PREWAVE_MAPPING.areas).map((areaId) => ({
-            id: areaId,
-            name: PREWAVE_MAPPING.areas[areaId].name,
-            teams: [] as Team[],
-          }))
+        ? Object.keys(PREWAVE_MAPPING.areas).map((areaId) => {
+            const name = Maybe.fromNullable(
+              PREWAVE_MAPPING.areas[areaId]?.name,
+            ).orDefault(areaId);
+            return {
+              id: areaId,
+              name,
+              teams: [] as readonly Team[],
+            };
+          })
         : [];
 
     if (defaultAreas.length > 0) {
@@ -593,7 +605,7 @@ export class PrewaveJiraAdapter implements JiraAdapter {
       ...defaultAreas,
     ];
     const seenIds = new Set<string>();
-    const areas = allAreas.filter((area) => {
+    const baseAreas = allAreas.filter((area) => {
       if (seenIds.has(area.id)) {
         return false;
       }
@@ -602,64 +614,97 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     });
 
     // Associate teams to areas using PREWAVE_MAPPING.teamToArea
-    const unassociatedTeams: Team[] = [];
+    // Build a map of areaId -> teams to associate immutably using reduce
+    // Note: team.id already has "team:" prefix removed by extractLabelsWithPrefix
+    const { teamsByAreaId, unassociatedTeams } = teams.reduce(
+      (acc, team) => {
+        const teamId = team.id; // Already without "team:" prefix
+        const areaId = PREWAVE_MAPPING.teamToArea[teamId];
 
-    for (const team of teams) {
-      const teamId = team.id.replace("team:", "");
-      const areaId = PREWAVE_MAPPING.teamToArea[teamId];
-
-      if (areaId) {
-        const area = areas.find((a) => a.id === areaId);
-        if (area) {
-          area.teams.push(team);
+        if (areaId) {
+          const existingTeams = Maybe.fromNullable(
+            acc.teamsByAreaId.get(areaId),
+          ).orDefault([]);
+          return {
+            teamsByAreaId: new Map(acc.teamsByAreaId).set(areaId, [
+              ...existingTeams,
+              team,
+            ]),
+            unassociatedTeams: acc.unassociatedTeams,
+          };
         } else {
-          // Area not found, add to unassociated
-          unassociatedTeams.push(team);
+          return {
+            teamsByAreaId: acc.teamsByAreaId,
+            unassociatedTeams: [...acc.unassociatedTeams, team],
+          };
         }
-      } else {
-        // No mapping found, add to unassociated
-        unassociatedTeams.push(team);
-      }
-    }
+      },
+      {
+        teamsByAreaId: new Map<string, Team[]>(),
+        unassociatedTeams: [] as Team[],
+      },
+    );
 
-    // Create default area for orphaned teams if needed
+    // Create areas with associated teams immutably
+    const areasWithTeams = baseAreas.map((area) => {
+      const associatedTeams = Maybe.fromNullable(
+        teamsByAreaId.get(area.id),
+      ).orDefault([]);
+      if (associatedTeams.length === 0) {
+        return area;
+      }
+      return {
+        ...area,
+        teams: [...area.teams, ...associatedTeams] as readonly Team[],
+      };
+    });
+
+    // Handle unassociated teams - create or update default area immutably
     if (unassociatedTeams.length > 0) {
-      // Check if default area already exists
-      const defaultAreaExists = areas.some(
-        (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+      const defaultAreaId =
+        this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.ID;
+      const existingDefaultArea = areasWithTeams.find(
+        (area) => area.id === defaultAreaId,
       );
 
-      if (!defaultAreaExists) {
-        areas.push({
-          id: DEFAULT_AREA_UNASSIGNED.ID,
-          name: DEFAULT_AREA_UNASSIGNED.NAME,
-          teams: unassociatedTeams,
-        });
-      } else {
-        // Add orphaned teams to existing default area
-        const defaultArea = areas.find(
-          (area) => area.id === DEFAULT_AREA_UNASSIGNED.ID,
+      if (existingDefaultArea) {
+        // Update existing default area with unassociated teams
+        const updatedAreas = areasWithTeams.map((area) =>
+          area.id === defaultAreaId
+            ? {
+                ...area,
+                teams: [...area.teams, ...unassociatedTeams] as readonly Team[],
+              }
+            : area,
         );
-        if (defaultArea) {
-          defaultArea.teams.push(...unassociatedTeams);
-        }
+        return updatedAreas;
+      } else {
+        // Create new default area with unassociated teams
+        return [
+          ...areasWithTeams,
+          {
+            id: defaultAreaId,
+            name: this.config.getDefaultValues().DEFAULT_PRODUCT_AREA.NAME,
+            teams: unassociatedTeams as readonly Team[],
+          },
+        ];
       }
     }
 
-    return areas;
+    return areasWithTeams;
   }
 
   /**
-   * Extract Objectives - for now return single uncategorized objective
+   * Extract Objectives - for now return single default objective
    * TODO: Objectives not available yet - will be extracted from labels or custom field later
    */
   private extractObjectives(): Objective[] {
     // TODO: Extract from labels with "objective:" prefix when available
-    // For now, return single default uncategorized objective
+    // For now, return single default objective
     return [
       {
-        id: "uncategorized",
-        name: "Uncategorized",
+        id: this.config.getDefaultValues().DEFAULT_OBJECTIVE.ID,
+        name: this.config.getDefaultValues().DEFAULT_OBJECTIVE.NAME,
       },
     ];
   }
@@ -675,7 +720,7 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     // First try to extract from labels
     const teamLabels = new Set(
       allIssues.flatMap((issue) =>
-        extractLabelsWithPrefix(issue.fields.labels || [], "team:"),
+        extractLabelsWithPrefix(issue.fields.labels || [], "team"),
       ),
     );
 
@@ -695,7 +740,11 @@ export class PrewaveJiraAdapter implements JiraAdapter {
     const teamsFromAssignees =
       teamsFromLabels.length === 0
         ? assignees
-            .map((assignee) => this.mapAssigneeToTeam(assignee).orDefault(null))
+            .map((assignee) =>
+              this.mapAssigneeToTeam(assignee).orDefault(
+                this.config.getDefaultValues().DEFAULT_TEAM.ID,
+              ),
+            )
             .filter((teamId): teamId is string => teamId !== null)
             .filter(
               (teamId, index, self) => self.indexOf(teamId) === index, // Remove duplicates

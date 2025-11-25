@@ -136,6 +136,32 @@ export interface ValidationItem {
 }
 
 // ============================================================================
+// Default Value Types
+// ============================================================================
+
+/**
+ * Default value structure for unassigned, unknown, or uncategorised items
+ */
+export interface DefaultValue {
+  readonly ID: string;
+  readonly NAME: string;
+}
+
+/**
+ * Complete interface for all default values used across the application.
+ * This defines the contract that the configuration package must implement.
+ */
+export interface DefaultValues {
+  readonly DEFAULT_OBJECTIVE: DefaultValue;
+  readonly DEFAULT_ASSIGNEE: DefaultValue;
+  readonly DEFAULT_PRODUCT_AREA: DefaultValue;
+  readonly DEFAULT_RELEASE_STAGE: DefaultValue;
+  readonly DEFAULT_STATUS: DefaultValue;
+  readonly DEFAULT_TEAM: DefaultValue;
+  readonly DEFAULT_TICKET_ID: TicketId;
+}
+
+// ============================================================================
 // Data Collection and Processing Types
 // ============================================================================
 

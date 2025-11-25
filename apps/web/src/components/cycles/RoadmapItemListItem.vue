@@ -61,13 +61,13 @@
               class="roadmap-popover__cycle-item__stage"
               :class="getStageClass(cycleItem.stage)"
             >
-              {{ cycleItem.stage || DEFAULT_UNKNOWN.NAME }}
+              {{ cycleItem.stage || defaultValues.DEFAULT_RELEASE_STAGE.NAME }}
             </div>
             <div
               class="roadmap-popover__cycle-item__status"
               :class="getStatusClass(cycleItem.status)"
             >
-              {{ cycleItem.status || DEFAULT_UNKNOWN.NAME }}
+              {{ cycleItem.status || defaultValues.DEFAULT_STATUS.NAME }}
             </div>
             <div
               v-if="cycleItem.validations && cycleItem.validations.length > 0"
@@ -117,9 +117,8 @@
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed, ref, inject } from "vue";
 import { useValidationStore } from "../../stores";
-import { DEFAULT_UNKNOWN } from "../../lib/constants/default-values";
 import { getStatusClass, getStageClass } from "../../lib/utils/css-classes";
 
 export default {
@@ -136,6 +135,8 @@ export default {
   },
   setup(props, { emit }) {
     const validationStore = useValidationStore();
+    const config = inject("config");
+    const defaultValues = config.getDefaultValues();
 
     const validationEnabled = computed(() => validationStore.validationEnabled);
     const popoverVisible = ref(false);
@@ -160,7 +161,7 @@ export default {
       closePopover,
       getStatusClass,
       getStageClass,
-      DEFAULT_UNKNOWN,
+      defaultValues,
     };
   },
 };
