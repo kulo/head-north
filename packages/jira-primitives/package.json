@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:@headnorth/config --external:@headnorth/types --external:jira.js --external:lodash --external:purify-ts && npm run build:types",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:@headnorth/config --external:@headnorth/types --external:jira.js --external:purify-ts && npm run build:types",
     "build:types": "tsc --project tsconfig.declaration.json",
     "dev": "tsc --watch",
     "test": "vitest run",
@@ -18,15 +18,13 @@
   "dependencies": {
     "@headnorth/config": "file:../config",
     "@headnorth/types": "file:../types",
-    "jira.js": "^3.0.0",
-    "lodash": "^4.17.21",
+    "jira.js": "^5.2.2",
     "purify-ts": "^2.1.2"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.195",
-    "esbuild": "^0.19.0",
-    "typescript": "^5.0.0",
-    "vitest": "^3.2.4"
+    "esbuild": "^0.27.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
   },
   "engines": {
     "node": ">=22.0.0",

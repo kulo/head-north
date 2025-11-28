@@ -44,7 +44,7 @@ export class JiraClient {
         fields,
       });
 
-      return (response as { issues: JiraIssue[] }).issues;
+      return (response as unknown as { issues: JiraIssue[] }).issues;
     }
 
     // Otherwise, use the regular issue search API (better for Epic issues that aren't on boards)

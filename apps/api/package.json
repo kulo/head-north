@@ -6,28 +6,26 @@
   "main": "dist/index.js",
   "dependencies": {
     "@koa/cors": "^5.0.0",
-    "@koa/router": "^12.0.0",
+    "@koa/router": "^14.0.0",
     "@headnorth/utils": "file:../../packages/utils",
     "@headnorth/config": "file:../../packages/config",
     "@headnorth/jira-primitives": "file:../../packages/jira-primitives",
     "@headnorth/types": "file:../../packages/types",
     "axios": "^1.6.0",
     "jira.js": "^5.2.2",
-    "koa": "^2.14.2",
-    "lodash": "4.17.21"
+    "koa": "^2.14.2"
   },
   "devDependencies": {
-    "@types/koa": "^2.15.0",
+    "@types/koa": "^3.0.1",
     "@types/koa__cors": "^3.0.0",
     "@types/koa__router": "^12.0.0",
     "@types/koa-router": "^7.4.8",
-    "@types/lodash": "^4.14.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.10.1",
     "dotenv": "^16.3.0",
-    "esbuild": "^0.25.10",
+    "esbuild": "^0.27.0",
     "nodemon": "^3.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^3.2.4"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
   },
   "engines": {
     "node": ">=22.0.0",

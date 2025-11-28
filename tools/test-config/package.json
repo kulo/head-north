@@ -14,9 +14,9 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "vitest": "^1.0.0",
-    "@vitest/ui": "^1.0.0",
-    "typescript": "^5.0.0"
+    "vitest": "^4.0.14",
+    "@vitest/ui": "^4.0.14",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=22.0.0",
