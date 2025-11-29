@@ -37,7 +37,6 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
-    historyApiFallback: true,
   },
   build: {
     outDir: "dist",
