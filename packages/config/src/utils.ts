@@ -40,9 +40,29 @@ export function getEnvVarWithFallback(
 ): string {
   const value = processEnv[key];
   if (!value) {
-    console.warn(
-      `⚠️  Using fallback for ${description}: ${key}=${fallback} (set ${key} environment variable for production)`,
-    );
+    // Suppress warnings in test environments
+    // Check multiple ways to detect test environment:
+    // 1. Check processEnv parameter (may not have NODE_ENV)
+    // 2. Check actual process.env (more reliable for test detection)
+    // 3. Check for vitest-specific indicators
+    const isTestEnv =
+      processEnv.NODE_ENV === "test" ||
+      processEnv.VITEST === "true" ||
+      (typeof process !== "undefined" &&
+        process.env &&
+        (process.env.NODE_ENV === "test" ||
+          process.env.VITEST === "true" ||
+          // Vitest sets this when running
+          process.env.VITEST_WORKER_ID !== undefined)) ||
+      // Check if vitest is running via global
+      (typeof globalThis !== "undefined" &&
+        (globalThis as any).__vitest__ !== undefined);
+
+    if (!isTestEnv) {
+      console.warn(
+        `⚠️  Using fallback for ${description}: ${key}=${fallback} (set ${key} environment variable for production)`,
+      );
+    }
     return fallback;
   }
   return value;

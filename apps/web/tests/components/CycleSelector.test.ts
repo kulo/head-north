@@ -13,21 +13,6 @@ import { useFilterStore } from "../../src/stores/filters-store";
 import { setupTestApp, getMockServices } from "../setup-stores";
 import CycleSelector from "../../src/components/ui/CycleSelector.vue";
 
-// Mock Ant Design Vue components
-vi.mock("ant-design-vue", () => ({
-  Select: {
-    name: "a-select",
-    template: '<select class="cycle-selector"><slot /></select>',
-    props: ["value", "placeholder"],
-    emits: ["change", "update:value"],
-  },
-  SelectOption: {
-    name: "a-select-option",
-    template: "<option><slot /></option>",
-    props: ["value"],
-  },
-}));
-
 // Mock services
 const mockCycleDataService = {
   getCycleData: () => Promise.resolve({}),
@@ -67,9 +52,11 @@ const mockHeadNorthConfig = {
 } as any;
 
 describe("CycleSelector", () => {
+  let testApp: ReturnType<typeof setupTestApp>;
+
   beforeEach(() => {
-    const { app, pinia } = setupTestApp();
-    setActivePinia(pinia);
+    testApp = setupTestApp();
+    setActivePinia(testApp.pinia);
   });
 
   it("should render with cycles from store", () => {
@@ -99,7 +86,11 @@ describe("CycleSelector", () => {
     // Mock the data store
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue(mockCycles);
 
-    const wrapper = mount(CycleSelector);
+    const wrapper = mount(CycleSelector, {
+      global: {
+        plugins: [testApp.pinia],
+      },
+    });
 
     // Test that the component mounts successfully
     expect(wrapper.exists()).toBe(true);
@@ -124,7 +115,11 @@ describe("CycleSelector", () => {
 
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue(mockCycles);
 
-    const wrapper = mount(CycleSelector);
+    const wrapper = mount(CycleSelector, {
+      global: {
+        plugins: [testApp.pinia],
+      },
+    });
 
     // Simulate cycle change
     await wrapper.vm.handleCycleChange("cycle1");
@@ -154,7 +149,11 @@ describe("CycleSelector", () => {
     // Initially no cycles, then cycles are loaded
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue([]);
 
-    const wrapper = mount(CycleSelector);
+    const wrapper = mount(CycleSelector, {
+      global: {
+        plugins: [testApp.pinia],
+      },
+    });
 
     // Simulate cycles being loaded
     vi.spyOn(dataStore, "cycles", "get").mockReturnValue(mockCycles);

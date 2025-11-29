@@ -10,6 +10,9 @@ export default defineConfig({
     include: ["tests/**/*.test.{js,ts,vue}"],
     exclude: ["node_modules", "dist"],
     setupFiles: ["./tests/setup.ts"],
+    env: {
+      NODE_ENV: "test",
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

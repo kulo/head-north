@@ -2,6 +2,7 @@
 // This file is automatically loaded by Vitest
 
 import { vi } from "vitest";
+import { config } from "@vue/test-utils";
 
 // Mock localStorage for jsdom environment
 // Vue devtools and other libraries may try to access it
@@ -29,3 +30,19 @@ if (typeof global !== "undefined") {
     writable: true,
   });
 }
+
+// Register Ant Design Vue components globally for all tests
+// These are stub components that match the component names used in templates
+config.global.components = {
+  "a-select": {
+    name: "ASelect",
+    template: '<select class="ant-select"><slot /></select>',
+    props: ["value", "placeholder", "class"],
+    emits: ["change", "update:value"],
+  },
+  "a-select-option": {
+    name: "ASelectOption",
+    template: "<option><slot /></option>",
+    props: ["value"],
+  },
+};
