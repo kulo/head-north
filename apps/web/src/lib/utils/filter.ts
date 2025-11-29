@@ -56,7 +56,7 @@ function applyFilter(
   // Filter objectives, which will cascade down to roadmap items and cycle items
   const filteredObjectives = data.objectives
     .map((objective) => filterObjective(objective, criteria))
-    .filter((objective) => objective.roadmapItems.length > 0);
+    .filter((objective) => (objective.roadmapItems?.length ?? 0) > 0);
 
   const filteredData: NestedCycleData = {
     objectives: filteredObjectives,
@@ -97,13 +97,13 @@ function filterObjective(
   }
 
   // Filter roadmap items within this objective
-  const filteredRoadmapItems = objective.roadmapItems
+  const filteredRoadmapItems = (objective.roadmapItems ?? [])
     .map((roadmapItem) => filterRoadmapItem(roadmapItem, criteria))
     .filter((roadmapItem) => {
       // Keep roadmap items that either:
       // 1. Have matching cycle items, OR
       // 2. Match the product area filter directly (even if no cycle items match)
-      const hasMatchingCycleItems = roadmapItem.cycleItems.length > 0;
+      const hasMatchingCycleItems = (roadmapItem.cycleItems?.length ?? 0) > 0;
       const matchesAreaDirectly = Maybe.fromNullable(criteria.area)
         .filter((area) => area !== "all")
         .map((area) => roadmapItemMatchesArea(roadmapItem, area))
@@ -139,8 +139,8 @@ function filterRoadmapItem(
   criteria: FilterCriteria,
 ): RoadmapItem {
   // Filter cycle items within this roadmap item
-  const filteredCycleItems = roadmapItem.cycleItems.filter((cycleItem) =>
-    matchesAllCriteria(cycleItem, criteria),
+  const filteredCycleItems = (roadmapItem.cycleItems ?? []).filter(
+    (cycleItem) => matchesAllCriteria(cycleItem, criteria),
   );
 
   // Check if roadmap item should be included based on product area filter
@@ -415,8 +415,10 @@ function countData(data: NestedCycleData): {
   roadmapItems: number;
   cycleItems: number;
 } {
-  const roadmapItems = data.objectives.flatMap((obj) => obj.roadmapItems);
-  const cycleItems = roadmapItems.flatMap((item) => item.cycleItems);
+  const roadmapItems = data.objectives.flatMap((obj) => obj.roadmapItems ?? []);
+  const cycleItems = roadmapItems
+    .flatMap((item) => item?.cycleItems ?? [])
+    .filter((item): item is NonNullable<typeof item> => item !== undefined);
 
   return {
     objectives: data.objectives.length,

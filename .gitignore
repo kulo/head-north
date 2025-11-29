@@ -23,6 +23,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+pnpm-debug.log*
+.pnpm-debug.log*
 
 # Runtime data
 pids
@@ -36,6 +38,13 @@ coverage/
 
 # nyc test coverage
 .nyc_output
+
+# Playwright test artifacts
+test-results/
+playwright-report/
+
+# Turborepo
+.turbo
 
 # Dependency directories
 jspm_packages/

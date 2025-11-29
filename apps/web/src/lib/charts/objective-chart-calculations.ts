@@ -143,6 +143,9 @@ export const calculateObjectiveRelativeValues = (
   }));
 
   const longestObjective = basicData[0];
+  if (!longestObjective) {
+    return [];
+  }
 
   return basicData.map((objective) => {
     // Calculate relative modifier to longest objective

@@ -127,11 +127,6 @@ export default [
     },
   },
 
-  // esbuild config files - more lenient rules
-  {
-    files: ["**/esbuild.config.js"],
-    rules: {
-      "no-unused-vars": "warn",
-    },
-  },
+  // Note: esbuild.config.js files were removed in Phase 4 (migrated to tsup)
+  // This section kept for reference but no longer needed
 ];

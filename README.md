@@ -152,13 +152,30 @@ head-north/
 │   ├── eslint-config/ # Shared ESLint configuration
 │   ├── prettier-config/ # Shared Prettier configuration
 │   ├── typescript-config/ # Shared TypeScript configuration
-│   ├── test-config/ # Shared test configuration
-│   └── build-config/ # Shared build configuration
+│   └── test-config/ # Shared test configuration
 ├── scripts/
 │   └── validate-env.js # Environment validation script
 ├── package.json       # Root package.json with workspace configuration
+├── pnpm-workspace.yaml # pnpm workspace configuration
+├── turbo.json         # Turborepo pipeline configuration
 └── README.md          # This file
 ```
+
+### Monorepo Tooling
+
+This project uses modern monorepo tooling for optimal performance:
+
+- **pnpm**: Fast, disk-efficient package manager with built-in workspace support. Commands are the same as npm (`pnpm install`, `pnpm run dev`, etc.), but with better performance and disk usage.
+- **Turborepo**: Build system that provides intelligent caching and parallel task execution. All commands run through Turborepo for optimal performance.
+
+**Key differences from npm:**
+
+- Use `pnpm` instead of `npm` (e.g., `pnpm install`, `pnpm run dev`)
+- Commands are faster due to pnpm's efficient dependency resolution
+- Turborepo automatically caches build outputs, making subsequent builds much faster
+- All workspace commands are orchestrated by Turborepo for parallel execution
+
+For more details, see [docs/development.md](docs/development.md).
 
 ## 🔌 Data Source Adapter Architecture
 
@@ -186,14 +203,33 @@ For detailed information about creating custom adapters, see the [JIRA Adapters 
 ### Prerequisites
 
 - Node.js 22.x LTS
-- npm 10.x
+- pnpm 9.x
+
+**Installing pnpm:**
+
+```bash
+# Using npm (if you have it)
+npm install -g pnpm
+
+# Or using corepack (recommended, comes with Node.js)
+corepack enable
+corepack prepare pnpm@9.0.0 --activate
+```
+
+**Note for contributors:** If you're new to pnpm, don't worry! The commands are nearly identical to npm. Just replace `npm` with `pnpm` in all commands. For example:
+
+- `npm install` → `pnpm install`
+- `npm run dev` → `pnpm dev` (or `pnpm run dev`)
+- `npm test` → `pnpm test` (or `pnpm run test`)
+
+See [docs/development.md](docs/development.md) for more details.
 
 ### Fastest way to run
 
 ```bash
 # Start API backend with fake data (no Jira required)
 # as well as the web frontend at the same time!
-HN_DATA_SOURCE_ADAPTER=fake npm run dev
+HN_DATA_SOURCE_ADAPTER=fake pnpm dev
 ```
 
 ### Use the Prewave Jira adapter
@@ -201,7 +237,7 @@ HN_DATA_SOURCE_ADAPTER=fake npm run dev
 ```bash
 # Start API with Prewave adapter (requires Jira env vars)
 cd apps/api
-HN_DATA_SOURCE_ADAPTER=prewave npm run start-dev
+HN_DATA_SOURCE_ADAPTER=prewave pnpm start-dev
 ```
 
 See `env.example` for required Jira variables. For detailed developer commands and workflows, see [docs/development.md](docs/development.md).

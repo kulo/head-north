@@ -7,15 +7,15 @@
   "types": "dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "node esbuild.config.js && tsc --project tsconfig.declaration.json",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "lint": "eslint . --fix",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "esbuild": "^0.27.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.14"
   },

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import HeadNorthConfig from "../dist/head-north-config.js";
+import HeadNorthConfig from "../dist/index.js";
 
 describe("HeadNorthConfig - Simplified", () => {
   let config: HeadNorthConfig;

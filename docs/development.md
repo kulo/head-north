@@ -11,7 +11,20 @@ For the contribution process, see [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Prerequisites
 
 - Node.js 22.x LTS
-- npm 10.x
+- pnpm 9.x
+
+**Installing pnpm:**
+
+```bash
+# Using npm (if you have it)
+npm install -g pnpm
+
+# Or using corepack (recommended, comes with Node.js)
+corepack enable
+corepack prepare pnpm@9.0.0 --activate
+```
+
+**New to pnpm?** Don't worry! Commands are nearly identical to npm - just replace `npm` with `pnpm`. See [Package Manager](#package-manager) section below for details.
 
 ## Environment
 
@@ -24,10 +37,10 @@ See [env.example](../env.example) for the complete list and copy it to create yo
 ```bash
 # Start API with fake data (no Jira required)
 cd apps/api
-HN_DATA_SOURCE_ADAPTER=fake npm run start-dev
+HN_DATA_SOURCE_ADAPTER=fake pnpm start-dev
 
 # Or start both apps with fake data
-HN_DATA_SOURCE_ADAPTER=fake npm run dev
+HN_DATA_SOURCE_ADAPTER=fake pnpm dev
 ```
 
 ### Use an existing Jira adapter
@@ -35,10 +48,10 @@ HN_DATA_SOURCE_ADAPTER=fake npm run dev
 ```bash
 # Start API with Prewave adapter (requires Jira env vars)
 cd apps/api
-HN_DATA_SOURCE_ADAPTER=prewave npm run start-dev
+HN_DATA_SOURCE_ADAPTER=prewave pnpm start-dev
 
 # Or start both apps with the Prewave adapter
-HN_DATA_SOURCE_ADAPTER=prewave npm run dev
+HN_DATA_SOURCE_ADAPTER=prewave pnpm dev
 ```
 
 Optional adapter-specific overrides:
@@ -54,52 +67,127 @@ For developing your own, custom adapter see the [Adapters README.md](apps/api/sr
 ## Installation
 
 ```bash
-# Install all dependencies
-npm install
-
-# Or install individually
-npm run install:web     # Web application
-npm run install:api     # API service
-npm run install:packages # Shared packages (types, utils, config)
+# Install all dependencies (pnpm automatically handles all workspaces)
+pnpm install
 ```
+
+**Note:** With pnpm, you don't need separate install commands for individual packages. pnpm automatically installs dependencies for all workspaces defined in `pnpm-workspace.yaml`.
 
 ## Running
 
 ```bash
 # Run both applications in development mode
-npm run dev
+pnpm dev
 
 # Or run individually
-npm run dev:web         # Web app on http://localhost:8080
-npm run dev:api         # API on http://localhost:3000
+pnpm dev:web         # Web app on http://localhost:8080
+pnpm dev:api         # API on http://localhost:3000
 ```
+
+**Note:** All commands are orchestrated by Turborepo, which provides intelligent caching and parallel execution. Subsequent runs will be faster thanks to Turborepo's cache.
 
 ## Workspace Commands
 
+All commands use `pnpm` and are orchestrated by Turborepo for optimal performance.
+
 ### Web Application (Vue.js)
 
-- `npm run dev:web` - Start development server
-- `npm run build:web` - Build for production
-- `npm run test:web` - Run web app tests
-- `npm run lint:web` - Lint web app code
+- `pnpm dev:web` - Start development server
+- `pnpm build:web` - Build for production (via Turborepo)
+- `pnpm test:web` - Run web app tests (via Turborepo)
+- `pnpm lint:web` - Lint web app code (via Turborepo)
 
 ### API Service (Node.js/Koa)
 
-- `npm run dev:api` - Start API in development mode
-- `npm run start:api` - Start API in production mode
-- `npm run test:api` - Run API tests
-- `npm run lint:api` - Lint API code
+- `pnpm dev:api` - Start API in development mode (builds with tsup --watch and runs with nodemon)
+- `pnpm start:api` - Start API in production mode (requires build first)
+- `pnpm start-dev` - Start API server directly (from apps/api directory, requires build)
+- `pnpm test:api` - Run API tests (via Turborepo)
+- `pnpm lint:api` - Lint API code (via Turborepo)
+
+**Note**: The API `dev` script uses `concurrently` to run both `tsup --watch` (for rebuilding) and `nodemon` (for running the server) simultaneously.
 
 ### Global Commands
 
-- `npm run dev` - Start both applications in development
-- `npm run build` - Build both applications
-- `npm run test` - Run all tests
-- `npm run lint` - Lint all code
-- `npm run clean` - Remove all node_modules
-- `npm run clean:install` - Clean and reinstall everything
+- `pnpm dev` - Start both applications in development (via Turborepo)
+- `pnpm build` - Build all packages and applications (via Turborepo, cached)
+- `pnpm test` - Run all tests across all packages (via Turborepo, parallel)
+- `pnpm test:e2e` - Run end-to-end tests (via Turborepo)
+- `pnpm lint` - Lint all code across all packages (via Turborepo, parallel)
+- `pnpm type-check` - Type check all packages (via Turborepo, parallel)
+- `pnpm clean` - Remove all node_modules and build artifacts
 
 ## Tooling
+
+### Package Manager: pnpm
+
+This project uses **pnpm** instead of npm for better performance and disk efficiency in monorepos.
+
+**Key differences from npm:**
+
+- Commands are nearly identical: just replace `npm` with `pnpm`
+- Faster installs: pnpm uses a content-addressable store, making installs 2-3x faster
+- Better disk usage: shared dependencies across workspaces, saving disk space
+- Stricter: prevents phantom dependencies (accessing packages not declared in package.json)
+
+**Common commands:**
+
+```bash
+pnpm install          # Install all dependencies
+pnpm add <package>    # Add a dependency
+pnpm add -D <package> # Add a dev dependency
+pnpm remove <package> # Remove a dependency
+pnpm update           # Update dependencies
+```
+
+**Working in individual packages:**
+
+```bash
+# Navigate to a package
+cd apps/web
+pnpm add <package>    # Add dependency to web app
+
+cd packages/utils
+pnpm add <package>    # Add dependency to utils package
+```
+
+For more information, see [pnpm documentation](https://pnpm.io/).
+
+### Build System: Turborepo
+
+This project uses **Turborepo** for orchestrating tasks across the monorepo.
+
+**Benefits:**
+
+- **Intelligent caching**: Build outputs are cached, making subsequent builds much faster
+- **Parallel execution**: Tasks run in parallel when possible
+- **Task dependencies**: Automatically handles build order (e.g., packages build before apps)
+- **Remote caching**: Can optionally use remote cache for CI/CD (not configured by default)
+
+**How it works:**
+
+- All commands like `pnpm build`, `pnpm test`, `pnpm lint` are routed through Turborepo
+- Turborepo analyzes task dependencies and runs them in the correct order
+- Build outputs are cached in `.turbo/` directory (gitignored)
+- Subsequent runs with unchanged code are nearly instant thanks to caching
+
+**Turborepo commands:**
+
+```bash
+pnpm build            # Build all packages (cached)
+pnpm test             # Run all tests (parallel, cached)
+pnpm lint             # Lint all code (parallel)
+pnpm type-check       # Type check all packages (parallel)
+```
+
+**Filtering to specific packages:**
+
+```bash
+pnpm turbo build --filter=@headnorth/web    # Build only web app
+pnpm turbo test --filter=@headnorth/api     # Test only API
+```
+
+For more information, see [Turborepo documentation](https://turbo.build/repo/docs).
 
 ### Code Quality
 
@@ -110,20 +198,28 @@ npm run dev:api         # API on http://localhost:3000
 
 ### Environment Validation
 
-- `npm run validate:env` - Validates required environment variables
-- `npm run dev:with-check` - Starts development with environment validation
+- `pnpm validate:env` - Validates required environment variables
+- `pnpm dev:with-check` - Starts development with environment validation
 
 ### Package Development
 
-```bash
-# Watch mode for shared packages
-npm run dev:packages
+All packages use **tsup** for building with watch mode support:
 
-# Individual package development
-npm run dev:types    # Watch types package
-npm run dev:utils    # Watch utils package
-npm run dev:config   # Watch config package
+```bash
+# Watch mode for shared packages (via Turborepo)
+pnpm dev --filter=@headnorth/types    # Watch types package (tsup --watch)
+pnpm dev --filter=@headnorth/utils   # Watch utils package (tsup --watch)
+pnpm dev --filter=@headnorth/config  # Watch config package (tsup --watch)
+pnpm dev --filter=@headnorth/jira-primitives  # Watch jira-primitives package (tsup --watch)
 ```
+
+**Build System**: All packages use `tsup` with:
+
+- **Target**: ES2022 (modern JavaScript features)
+- **Format**: ESM (ES Modules)
+- **Type Declarations**: Automatically generated (.d.ts files)
+- **Source Maps**: Enabled for debugging
+- **Bundling**: Configured per package (utils, config, jira-primitives bundle; types doesn't)
 
 ### Individual Package Management
 
@@ -132,27 +228,30 @@ Each workspace maintains its own `package.json` and can be managed independently
 ```bash
 # Work in web app directory
 cd apps/web
-npm install <package>
-npm run <script>
+pnpm add <package>
+pnpm <script>
 
 # Work in API directory
 cd apps/api
-npm install <package>
-npm run <script>
+pnpm add <package>
+pnpm <script>
 
 # Work in shared packages
 cd packages/types
-npm install <package>
+pnpm add <package>
 ```
+
+**Note:** With pnpm, dependencies are automatically linked between workspaces when using `workspace:*` protocol in package.json.
 
 ## Development Workflow
 
-1. Start Development: `npm run dev` (runs both services)
+1. Start Development: `pnpm dev` (runs both services via Turborepo)
 2. Frontend: http://localhost:8080
 3. Backend API: http://localhost:3000
 4. Make Changes: Edit files in respective directories
-5. Testing: `npm run test`
-6. Linting: `npm run lint`
+5. Testing: `pnpm test` (runs all tests in parallel via Turborepo)
+6. Linting: `pnpm lint` (runs linters in parallel via Turborepo)
+7. Type Checking: `pnpm type-check` (runs type checks in parallel via Turborepo)
 
 ## Package Usage Examples
 
