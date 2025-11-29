@@ -94,8 +94,8 @@ This document combines the analysis from `MODERNIZATION_ANALYSIS.md` and decisio
    - Update root tsconfig if needed
    - **Cursor Impact**: ✅ Better tree-shaking awareness
 
-3. **Update esbuild Target**
-   - Change `target: "node18"` → `"node22"` in `apps/api/esbuild.config.js`
+3. **Update Build Target** ✅ **COMPLETE (via Phase 4)**
+   - Changed to `target: "node22"` in `apps/api/tsup.config.ts` (completed in Phase 4)
    - **Cursor Impact**: ✅ Aligns with Node version
 
 4. **Remove Unused Babel Config**
@@ -279,68 +279,61 @@ This document combines the analysis from `MODERNIZATION_ANALYSIS.md` and decisio
 
 ---
 
-### Phase 4: Package Build Simplification (1-2 days)
+### Phase 4: Package Build Simplification ✅ **COMPLETE**
 
 **Goal**: Replace esbuild + tsc with tsup for simpler builds
 
-#### Tasks
+**Status**: ✅ **Completed** - All packages migrated to tsup
 
-1. **Install tsup**
+#### Tasks Completed
 
-   ```bash
-   # In each package directory
-   cd packages/types
-   pnpm add -D tsup
-   ```
+1. ✅ **Installed tsup** in all packages and apps/api
+2. ✅ **Created `tsup.config.ts`** for each package with:
+   - ES2022 target (modern JavaScript features)
+   - ESM format
+   - Type declaration generation (DTS)
+   - Source maps
+   - Proper bundling configuration
+3. ✅ **Updated `package.json` Scripts**:
+   - Build: `tsup`
+   - Dev: `tsup --watch` (packages) or `concurrently` with nodemon (API)
+4. ✅ **Removed Old Build Configs**:
+   - Deleted all `esbuild.config.js` files
+   - Removed esbuild from devDependencies
+5. ✅ **Tested Builds**:
+   - All packages build successfully
+   - Type declarations generated correctly
+   - Imports work from apps
+6. ✅ **Updated API Dev Script**:
+   - Uses `concurrently` to run `tsup --watch` and `nodemon` together
+   - Server starts automatically after build completes
 
-2. **Create `tsup.config.ts` for Each Package**
+**Packages Migrated**:
 
-   ```typescript
-   import { defineConfig } from "tsup";
+- ✅ `packages/types` - Using tsup with ES2022
+- ✅ `packages/utils` - Using tsup with ES2022 (bundled)
+- ✅ `packages/config` - Using tsup with ES2022 (bundled)
+- ✅ `packages/jira-primitives` - Using tsup with ES2022 (bundled, Node.js platform)
+- ✅ `apps/api` - Using tsup with node22 target
 
-   export default defineConfig({
-     entry: ["src/index.ts"],
-     format: ["esm"],
-     dts: true,
-     sourcemap: true,
-     clean: true,
-     splitting: false,
-   });
-   ```
-
-3. **Update `package.json` Scripts**
-   - Replace build script with `tsup`
-   - Remove esbuild and tsc build steps
-
-4. **Remove Old Build Configs**
-   - Delete `esbuild.config.js`
-   - Delete `tsconfig.declaration.json` (if tsup handles it)
-   - Keep `tsconfig.json` for type checking
-
-5. **Test Builds**
-   - Build each package
-   - Verify type declarations generated
-   - Test imports from packages
-
-6. **Update Turborepo Pipeline** (if needed)
-   - Ensure package builds are cached correctly
-
-**Packages to Migrate**:
-
-- `packages/types`
-- `packages/utils`
-- `packages/config`
-- `packages/jira-primitives`
-
-**Success Criteria**:
+**Success Criteria**: ✅ All met
 
 - ✅ All packages build with tsup
 - ✅ Type declarations generated correctly
 - ✅ Imports work from apps
-- ✅ Builds are faster
+- ✅ Builds are faster and simpler
 - ✅ Cursor IDE type checking works
+- ✅ API dev script starts server automatically
 
-**Rollback Plan**: Restore esbuild configs from git
+**Current Build Configuration**:
+
+All packages use `tsup.config.ts` with:
+
+- Target: `es2022` (packages) or `node22` (API)
+- Format: `esm`
+- DTS: Enabled with proper compiler options
+- Source maps: Enabled
+- Bundling: Configured per package needs
 
 **Cursor Compatibility**: ✅ tsup works excellently with Cursor
 
@@ -404,27 +397,24 @@ This document combines the analysis from `MODERNIZATION_ANALYSIS.md` and decisio
 
 ---
 
-#### 1.3 Update esbuild Target
+#### 1.3 Update Build Target ✅ **COMPLETE (via Phase 4)**
 
-**File**: `apps/api/esbuild.config.js`
+**Note**: This was completed as part of Phase 4 migration to tsup.
 
-**Changes**:
+**File**: `apps/api/tsup.config.ts`
 
-```javascript
-const config = {
+**Current Configuration**:
+
+```typescript
+export default defineConfig({
   // ...
-  target: "node22", // Changed from node18
+  target: "node22", // Modern Node.js target
+  platform: "node",
   // ...
-};
+});
 ```
 
-**Steps**:
-
-1. Update target
-2. Test build
-3. Verify API still runs
-
-**Estimated Time**: 5 minutes
+**Status**: ✅ Completed - All packages now use modern targets (ES2022 for packages, node22 for API)
 
 ---
 
@@ -728,17 +718,21 @@ export default defineConfig({
 
 ```bash
 git checkout HEAD -- apps/web/tsconfig.json
-git checkout HEAD -- apps/api/esbuild.config.js
+# Note: apps/api/esbuild.config.js was removed in Phase 4 (migrated to tsup)
 # Restore babel.config.cjs if deleted
 ```
+
+**Note**: Phase 1 is complete and stable. Rollback not recommended.
 
 ### Phase 2 Rollback
 
 ```bash
 git checkout HEAD -- apps/web/
-# Restore webpack.config.mjs
+# Restore webpack.config.mjs (if needed)
 pnpm install  # Restore dependencies
 ```
+
+**Note**: Phase 2 is complete and stable. Rollback not recommended.
 
 ### Phase 3 Rollback
 
@@ -753,11 +747,16 @@ rm turbo.json
 
 ### Phase 4 Rollback
 
+**Note**: Phase 4 is complete and working. Rollback would require:
+
 ```bash
-# Restore esbuild configs
+# Restore esbuild configs (if needed)
 git checkout HEAD -- packages/*/esbuild.config.js
 # Restore package.json scripts
+# Reinstall esbuild dependencies
 ```
+
+**Current Status**: ✅ No rollback needed - Phase 4 is stable and complete
 
 ---
 
@@ -838,6 +837,23 @@ git checkout HEAD -- packages/*/esbuild.config.js
 4. ✅ **Test thoroughly** - After each phase
 5. ✅ **Update documentation** - As you go
 6. ✅ **Merge when ready** - After all phases complete and tested
+
+## ✅ Modernization Status: **COMPLETE**
+
+All 4 phases have been successfully completed:
+
+- ✅ **Phase 1**: Quick Wins (TypeScript strict mode, module resolution)
+- ✅ **Phase 2**: Frontend Modernization (Vite migration)
+- ✅ **Phase 3**: Monorepo Tooling (pnpm + Turborepo)
+- ✅ **Phase 4**: Package Build Simplification (esbuild + tsc → tsup)
+
+**Current Build System**:
+
+- **Packages**: tsup with ES2022 target
+- **API**: tsup with node22 target
+- **Web**: Vite
+- **Package Manager**: pnpm
+- **Task Runner**: Turborepo
 
 ---
 

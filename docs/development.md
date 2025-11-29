@@ -99,10 +99,13 @@ All commands use `pnpm` and are orchestrated by Turborepo for optimal performanc
 
 ### API Service (Node.js/Koa)
 
-- `pnpm dev:api` - Start API in development mode
-- `pnpm start:api` - Start API in production mode
+- `pnpm dev:api` - Start API in development mode (builds with tsup --watch and runs with nodemon)
+- `pnpm start:api` - Start API in production mode (requires build first)
+- `pnpm start-dev` - Start API server directly (from apps/api directory, requires build)
 - `pnpm test:api` - Run API tests (via Turborepo)
 - `pnpm lint:api` - Lint API code (via Turborepo)
+
+**Note**: The API `dev` script uses `concurrently` to run both `tsup --watch` (for rebuilding) and `nodemon` (for running the server) simultaneously.
 
 ### Global Commands
 
@@ -200,12 +203,23 @@ For more information, see [Turborepo documentation](https://turbo.build/repo/doc
 
 ### Package Development
 
+All packages use **tsup** for building with watch mode support:
+
 ```bash
 # Watch mode for shared packages (via Turborepo)
-pnpm dev --filter=@headnorth/types    # Watch types package
-pnpm dev --filter=@headnorth/utils   # Watch utils package
-pnpm dev --filter=@headnorth/config  # Watch config package
+pnpm dev --filter=@headnorth/types    # Watch types package (tsup --watch)
+pnpm dev --filter=@headnorth/utils   # Watch utils package (tsup --watch)
+pnpm dev --filter=@headnorth/config  # Watch config package (tsup --watch)
+pnpm dev --filter=@headnorth/jira-primitives  # Watch jira-primitives package (tsup --watch)
 ```
+
+**Build System**: All packages use `tsup` with:
+
+- **Target**: ES2022 (modern JavaScript features)
+- **Format**: ESM (ES Modules)
+- **Type Declarations**: Automatically generated (.d.ts files)
+- **Source Maps**: Enabled for debugging
+- **Bundling**: Configured per package (utils, config, jira-primitives bundle; types doesn't)
 
 ### Individual Package Management
 

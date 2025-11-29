@@ -152,8 +152,7 @@ head-north/
 │   ├── eslint-config/ # Shared ESLint configuration
 │   ├── prettier-config/ # Shared Prettier configuration
 │   ├── typescript-config/ # Shared TypeScript configuration
-│   ├── test-config/ # Shared test configuration
-│   └── build-config/ # Shared build configuration
+│   └── test-config/ # Shared test configuration
 ├── scripts/
 │   └── validate-env.js # Environment validation script
 ├── package.json       # Root package.json with workspace configuration

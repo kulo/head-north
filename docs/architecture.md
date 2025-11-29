@@ -33,8 +33,7 @@ head-north/
 │   ├── eslint-config/ # Shared ESLint configuration
 │   ├── prettier-config/ # Shared Prettier configuration
 │   ├── typescript-config/ # Shared TypeScript configuration
-│   ├── test-config/ # Shared test configuration
-│   └── build-config/ # Shared build configuration
+│   └── test-config/ # Shared test configuration
 ├── scripts/
 │   └── validate-env.js # Environment validation script
 └── README.md
@@ -58,10 +57,21 @@ See `apps/api/src/adapters/README.md` for details:
 
 ## Shared Packages
 
-- `packages/types` – domain types
-- `packages/utils` – utilities, `Either`, `Maybe`, logger, etc.
-- `packages/config` – endpoints, routes, validation dictionaries, shared page/filters config
-- `packages/jira-primitives` – extractors, transformers, validators, Jira client
+All packages use **tsup** for building with modern ES2022 target:
+
+- `packages/types` – domain types (built with tsup)
+- `packages/utils` – utilities, `Either`, `Maybe`, logger, etc. (built with tsup, bundled)
+- `packages/config` – endpoints, routes, validation dictionaries, shared page/filters config (built with tsup, bundled)
+- `packages/jira-primitives` – extractors, transformers, validators, Jira client (built with tsup, bundled for Node.js)
+
+**Build System**: All packages use `tsup` which provides:
+
+- Fast builds (uses esbuild internally for bundling)
+- Automatic TypeScript declaration file generation (.d.ts files)
+- Source maps for debugging
+- Modern ES2022 JavaScript output (packages) or Node.js 22 target (API)
+- Single command: `tsup` (replaces the previous esbuild + tsc dual build)
+- Watch mode: `tsup --watch` for development
 
 ## Shared Configuration (Single Source of Truth)
 
