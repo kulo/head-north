@@ -13,6 +13,7 @@ import {
   createMockCycleItem,
 } from "../fixtures/cycle-data-fixtures";
 import type { ObjectiveWithProgress } from "../../src/types/ui-types";
+import type { ISODateString } from "@headnorth/types";
 
 describe("cycle-progress-calculator", () => {
   describe("calculateCycleProgress", () => {
@@ -59,9 +60,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 100,
           progressByCycleItems: 50,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 15,
-          daysInCycle: 90,
-          currentDayPercentage: 17,
         },
       ];
 
@@ -124,9 +122,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 100,
           progressByCycleItems: 50,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 15,
-          daysInCycle: 90,
-          currentDayPercentage: 17,
         },
         {
           id: "obj-2",
@@ -165,9 +160,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 83,
           progressByCycleItems: 67,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 15,
-          daysInCycle: 90,
-          currentDayPercentage: 17,
         },
       ];
 
@@ -237,9 +229,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 0,
-          daysInCycle: 0,
-          currentDayPercentage: 0,
         },
       ];
 
@@ -286,9 +275,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 0,
-          daysInCycle: 0,
-          currentDayPercentage: 0,
         },
       ];
 
@@ -335,9 +321,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 0,
-          daysInCycle: 0,
-          currentDayPercentage: 0,
         },
       ];
 
@@ -389,9 +372,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 0,
-          daysInCycle: 0,
-          currentDayPercentage: 0,
         },
       ];
 
@@ -438,8 +418,9 @@ describe("cycle-progress-calculator", () => {
       const cycle = createMockCycle({
         id: "cycle-1",
         name: "Q1 2024",
-        delivery: null,
-        end: null,
+        // Intentionally testing edge case with missing dates - bypassing type safety for test
+        delivery: undefined as unknown as ISODateString,
+        end: undefined as unknown as ISODateString,
       });
 
       const objectives: ObjectiveWithProgress[] = [
@@ -460,9 +441,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 100,
           progressByCycleItems: 50,
           percentageNotToDo: 0,
-          daysFromStartOfCycle: 0,
-          daysInCycle: 0,
-          currentDayPercentage: 0,
         },
       ];
 
