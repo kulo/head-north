@@ -13,21 +13,6 @@ import { useFilterStore } from "../../src/stores/filters-store";
 import { setupTestApp, getMockServices } from "../setup-stores";
 import PageSelector from "../../src/components/ui/PageSelector.vue";
 
-// Mock Ant Design Vue components
-vi.mock("ant-design-vue", () => ({
-  Select: {
-    name: "a-select",
-    template: '<select class="page-selector"><slot /></select>',
-    props: ["value", "placeholder"],
-    emits: ["change", "update:value"],
-  },
-  SelectOption: {
-    name: "a-select-option",
-    template: "<option><slot /></option>",
-    props: ["value"],
-  },
-}));
-
 // Mock services
 const mockCycleDataService = {
   getCycleData: () => Promise.resolve({}),
@@ -63,9 +48,11 @@ const mockHeadNorthConfig = {
 } as any;
 
 describe("PageSelector", () => {
+  let testApp: ReturnType<typeof setupTestApp>;
+
   beforeEach(() => {
-    const { app, pinia } = setupTestApp();
-    setActivePinia(pinia);
+    testApp = setupTestApp();
+    setActivePinia(testApp.pinia);
   });
 
   it("should render with pages from store", () => {
@@ -81,7 +68,11 @@ describe("PageSelector", () => {
     appStore.setPages(mockPages);
     appStore.setCurrentPage("roadmap");
 
-    const wrapper = mount(PageSelector);
+    const wrapper = mount(PageSelector, {
+      global: {
+        plugins: [testApp.pinia],
+      },
+    });
 
     // Test that the component mounts successfully
     expect(wrapper.exists()).toBe(true);
@@ -106,7 +97,11 @@ describe("PageSelector", () => {
     appStore.setPages(mockPages);
     appStore.setCurrentPage("roadmap");
 
-    const wrapper = mount(PageSelector);
+    const wrapper = mount(PageSelector, {
+      global: {
+        plugins: [testApp.pinia],
+      },
+    });
 
     // Simulate page change
     await wrapper.vm.handlePageChange("cycle-overview");
@@ -126,7 +121,11 @@ describe("PageSelector", () => {
     appStore.setPages(mockPages);
     appStore.setCurrentPage("roadmap");
 
-    const wrapper = mount(PageSelector);
+    const wrapper = mount(PageSelector, {
+      global: {
+        plugins: [testApp.pinia],
+      },
+    });
 
     // Change current page
     appStore.setCurrentPage("cycle-overview");

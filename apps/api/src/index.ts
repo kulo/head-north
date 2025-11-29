@@ -45,8 +45,26 @@ try {
 
   // Start server
   const port = headNorthConfig.get("backend.port");
-  app.listen(port);
-  logger.default.info("started", { port });
+  const server = app.listen(port);
+
+  // Handle server errors (e.g., port already in use)
+  server.on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code === "EADDRINUSE") {
+      logger.default.error(
+        `Port ${port} is already in use. Please stop the process using this port or use a different port.`,
+      );
+      logger.default.info(
+        `You can stop processes on port ${port} by running: pnpm stop:api or lsof -ti:${port} | xargs kill -9`,
+      );
+    } else {
+      logger.error.errorSafe("Server error:", error);
+    }
+    process.exit(1);
+  });
+
+  server.on("listening", () => {
+    logger.default.info("started", { port });
+  });
 } catch (error) {
   logger.error.errorSafe("Backend App crashed:", error);
   process.exit(1);

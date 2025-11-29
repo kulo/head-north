@@ -102,6 +102,21 @@ export function setupTestApp() {
 
   app.use(pinia);
 
+  // Register Ant Design Vue components globally for tests
+  // These are stub components that match the component names used in templates
+  app.component("a-select", {
+    name: "ASelect",
+    template: '<select class="ant-select"><slot /></select>',
+    props: ["value", "placeholder", "class"],
+    emits: ["change", "update:value"],
+  });
+
+  app.component("a-select-option", {
+    name: "ASelectOption",
+    template: "<option><slot /></option>",
+    props: ["value"],
+  });
+
   // Provide all required dependencies
   app.provide("config", mockHeadNorthConfig);
   app.provide("dataService", mockCycleDataService);

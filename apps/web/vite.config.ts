@@ -41,6 +41,9 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: true,
+    // Increase chunk size warning limit to 1500KB
+    // ant-design-vue is inherently large (~1.4MB) and is already properly code-split
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks: {
