@@ -44,8 +44,6 @@ const createObjective = (
     weeks > 0 ? Math.round(((weeksDone + weeksInProgress) / weeks) * 100) : 0,
   progressByCycleItems: 0,
   percentageNotToDo: 0,
-  startMonth: "",
-  endMonth: "",
   daysFromStartOfCycle: 0,
   daysInCycle: 0,
   currentDayPercentage: 0,
@@ -61,9 +59,9 @@ describe("sortObjectives", () => {
 
     const sorted = sortObjectives(objectives);
 
-    expect(sorted[0].id).toBe("2"); // Largest first
-    expect(sorted[1].id).toBe("3");
-    expect(sorted[2].id).toBe("1");
+    expect(sorted[0]?.id).toBe("2"); // Largest first
+    expect(sorted[1]?.id).toBe("3");
+    expect(sorted[2]?.id).toBe("1");
   });
 
   it("should not mutate the original array", () => {
@@ -101,9 +99,9 @@ describe("summarizeObjectives", () => {
     expect(sortedIds).toContain("2");
     expect(sortedIds).toContain("3");
     // Verify sorting: largest first
-    expect(result[0].weeks).toBe(20); // B
-    expect(result[1].weeks).toBe(15); // C
-    expect(result[2].weeks).toBe(10); // A
+    expect(result[0]?.weeks).toBe(20); // B
+    expect(result[1]?.weeks).toBe(15); // C
+    expect(result[2]?.weeks).toBe(10); // A
   });
 
   it("should summarize objectives when count exceeds max", () => {
@@ -200,8 +198,8 @@ describe("calculateObjectiveRelativeValues", () => {
     // Large (100 weeks) = 100% = max track length
     // Medium (50 weeks) = 50% of large
     // Small (10 weeks) = 10% of large
-    expect(large.trackLength).toBeGreaterThan(medium.trackLength);
-    expect(medium.trackLength).toBeGreaterThan(small.trackLength);
+    expect(large?.trackLength).toBeGreaterThan(medium?.trackLength ?? 0);
+    expect(medium?.trackLength).toBeGreaterThan(small?.trackLength ?? 0);
   });
 
   it("should calculate progress on track correctly", () => {
@@ -211,11 +209,11 @@ describe("calculateObjectiveRelativeValues", () => {
 
     const result = calculateObjectiveRelativeValues(objectives);
 
-    expect(result[0].progress).toBe(50);
+    expect(result[0]?.progress).toBe(50);
     // progressOnTrack should be proportional to trackLength
-    expect(result[0].progressOnTrack).toBeGreaterThan(0);
-    expect(result[0].progressOnTrack).toBeLessThanOrEqual(
-      result[0].trackLength,
+    expect(result[0]?.progressOnTrack).toBeGreaterThan(0);
+    expect(result[0]?.progressOnTrack).toBeLessThanOrEqual(
+      result[0]?.trackLength ?? 0,
     );
   });
 
@@ -224,8 +222,8 @@ describe("calculateObjectiveRelativeValues", () => {
 
     const result = calculateObjectiveRelativeValues(objectives);
 
-    expect(result[0].progress).toBe(0);
-    expect(result[0].progressOnTrack).toBe(0);
+    expect(result[0]?.progress).toBe(0);
+    expect(result[0]?.progressOnTrack).toBe(0);
   });
 
   it("should ensure all values are within safe bounds", () => {

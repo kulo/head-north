@@ -236,7 +236,7 @@ describe("cycle-calculations", () => {
             super(...(args as [number, number, number]));
           }
         }
-        static now() {
+        static override now() {
           return mockDate.getTime();
         }
       } as any;
@@ -255,8 +255,8 @@ describe("cycle-calculations", () => {
 
     it("should return zero metadata for cycle without dates", () => {
       const cycle = createMockCycle({
-        delivery: null,
-        end: null,
+        delivery: undefined,
+        end: undefined,
       });
 
       const result = calculateCycleMetadata(cycle);
@@ -300,7 +300,7 @@ describe("cycle-calculations", () => {
             super(...(args as [number, number, number]));
           }
         }
-        static now() {
+        static override now() {
           return mockDate.getTime();
         }
       } as any;
@@ -425,7 +425,7 @@ describe("cycle-calculations", () => {
         {
           weeks: 4,
           weeksDone: 2,
-          weeksInProgress: undefined,
+          weeksInProgress: 0,
           weeksTodo: 1,
           weeksNotToDo: 0,
           weeksCancelled: 0,

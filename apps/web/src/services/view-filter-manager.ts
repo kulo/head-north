@@ -36,18 +36,24 @@ const createMutableArray = <T>(
  */
 const createMutableFilters = (
   filters: ViewFilterCriteria,
-): ViewFilterCriteria => ({
-  common: {
-    ...filters.common,
-    objectives: createMutableArray(filters.common.objectives),
-  },
-  cycleOverview: {
-    ...filters.cycleOverview,
-    stages: createMutableArray(filters.cycleOverview.stages),
-    assignees: createMutableArray(filters.cycleOverview.assignees),
-  },
-  roadmap: { ...filters.roadmap },
-});
+): ViewFilterCriteria => {
+  const mutableObjectives = createMutableArray(filters.common.objectives);
+  const mutableStages = createMutableArray(filters.cycleOverview.stages);
+  const mutableAssignees = createMutableArray(filters.cycleOverview.assignees);
+
+  return {
+    common: {
+      ...filters.common,
+      ...(mutableObjectives !== undefined && { objectives: mutableObjectives }),
+    },
+    cycleOverview: {
+      ...filters.cycleOverview,
+      ...(mutableStages !== undefined && { stages: mutableStages }),
+      ...(mutableAssignees !== undefined && { assignees: mutableAssignees }),
+    },
+    roadmap: { ...filters.roadmap },
+  };
+};
 
 /**
  * Factory function to create ViewFilterManager with immutable state management
@@ -159,23 +165,27 @@ export function createViewFilterManager(
    */
   const getActiveFilters = (): TypedFilterCriteria => {
     const activeFilters: TypedFilterCriteria = {
-      area: viewFilters.common.area,
-      objectives: viewFilters.common.objectives
-        ? [...viewFilters.common.objectives]
-        : undefined,
+      ...(viewFilters.common.area !== undefined && {
+        area: viewFilters.common.area,
+      }),
+      ...(viewFilters.common.objectives && {
+        objectives: [...viewFilters.common.objectives],
+      }),
     };
 
     // Use pattern matching to add view-specific filters
     match(currentView)
       .with("cycle-overview", () => {
         // Include cycle overview specific filters (create mutable copies)
-        activeFilters.stages = viewFilters.cycleOverview.stages
-          ? [...viewFilters.cycleOverview.stages]
-          : undefined;
-        activeFilters.assignees = viewFilters.cycleOverview.assignees
-          ? [...viewFilters.cycleOverview.assignees]
-          : undefined;
-        activeFilters.cycle = viewFilters.cycleOverview.cycle;
+        if (viewFilters.cycleOverview.stages) {
+          activeFilters.stages = [...viewFilters.cycleOverview.stages];
+        }
+        if (viewFilters.cycleOverview.assignees) {
+          activeFilters.assignees = [...viewFilters.cycleOverview.assignees];
+        }
+        if (viewFilters.cycleOverview.cycle !== undefined) {
+          activeFilters.cycle = viewFilters.cycleOverview.cycle;
+        }
       })
       .with("roadmap", () => {
         // Include roadmap specific filters (currently none)

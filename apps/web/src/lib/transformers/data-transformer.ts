@@ -40,14 +40,27 @@ function hydrateValidations(
     const [category, ruleKey] = parseValidationCode(v.code);
 
     // Use Maybe chain for safe dictionary lookup without extract()
-    const rule = Maybe.fromNullable(dictionary[category]).chain(
-      (categoryDict) => Maybe.fromNullable(categoryDict[ruleKey]),
-    );
+    // Type assertion needed because category is a string but ValidationRules has specific keys
+    const rule = Maybe.fromNullable(
+      (
+        dictionary as unknown as Record<
+          string,
+          Record<string, { label: string; reference: URL }>
+        >
+      )[category],
+    ).chain((categoryDict) => Maybe.fromNullable(categoryDict[ruleKey]));
+
+    const hydratedName = rule.map((r) => r.label).orDefault(v.name);
+    const hydratedDescription = rule
+      .map((r) => r.reference.toString())
+      .orDefault(v.description ?? "");
 
     return {
       ...v,
-      name: rule.map((r) => r.label).orDefault(v.name),
-      description: rule.map((r) => r.reference).orDefault(v.description),
+      name: hydratedName,
+      ...(hydratedDescription !== undefined && {
+        description: hydratedDescription,
+      }),
     };
   });
 }
@@ -185,8 +198,8 @@ export function transformToNestedStructure(
         .filter(Array.isArray)
         .map((vals) => hydrateValidations(config, vals))
         .orDefault([]),
-      startDate: item.startDate,
-      endDate: item.endDate,
+      ...(item.startDate !== undefined && { startDate: item.startDate }),
+      ...(item.endDate !== undefined && { endDate: item.endDate }),
       cycleItems: itemCycleItems.map((cycleItem) => ({
         ...cycleItem,
         validations: Maybe.fromNullable(cycleItem.validations)
@@ -368,7 +381,7 @@ export function generateCycleOverviewData(
     .filter((cycles) => cycles.length > 0)
     .isJust();
 
-  if (!hasValidData) {
+  if (!hasValidData || !rawData || !processedData) {
     return null;
   }
 
@@ -437,7 +450,7 @@ export function generateFilteredCycleOverviewData(
     .filter((cycles) => cycles.length > 0)
     .isJust();
 
-  if (!hasValidData) {
+  if (!hasValidData || !rawData || !processedData) {
     return null;
   }
 
@@ -445,26 +458,23 @@ export function generateFilteredCycleOverviewData(
   const selectedCycle = Maybe.fromNullable(selectDefaultCycle(rawData.cycles));
 
   // Compose pipeline using Maybe for safe transformations
-  return selectedCycle
-    .map((cycle) => {
-      // Apply filters using unified filter system
-      const filteredData = filter.apply(processedData, activeFilters);
-      const filteredObjectives = Maybe.fromNullable(
-        filteredData.data.objectives,
-      ).orDefault([]);
+  const result = selectedCycle.map((cycle) => {
+    // Apply filters using unified filter system
+    const filteredData = filter.apply(processedData, activeFilters);
+    const filteredObjectives = Maybe.fromNullable(
+      filteredData.data.objectives,
+    ).orDefault([]);
 
-      // Calculate cycle progress data
-      const cycleWithProgress = calculateCycleProgress(
-        cycle,
-        filteredObjectives,
-      );
+    // Calculate cycle progress data
+    const cycleWithProgress = calculateCycleProgress(cycle, filteredObjectives);
 
-      return {
-        cycle: cycleWithProgress,
-        objectives: filteredObjectives,
-      };
-    })
-    .orDefault(null);
+    return {
+      cycle: cycleWithProgress,
+      objectives: filteredObjectives,
+    };
+  });
+
+  return result.isJust() ? result.extract() : null;
 }
 
 /**

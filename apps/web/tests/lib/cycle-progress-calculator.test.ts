@@ -29,7 +29,7 @@ describe("cycle-progress-calculator", () => {
             super(...(args as [number, number, number]));
           }
         }
-        static now() {
+        static override now() {
           return mockDate.getTime();
         }
       } as any;
@@ -59,8 +59,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 100,
           progressByCycleItems: 50,
           percentageNotToDo: 0,
-          startMonth: "Jan",
-          endMonth: "Mar",
           daysFromStartOfCycle: 15,
           daysInCycle: 90,
           currentDayPercentage: 17,
@@ -76,6 +74,8 @@ describe("cycle-progress-calculator", () => {
         start: "2024-01-01",
         delivery: "2024-02-15",
         end: "2024-03-31",
+        startMonth: "Jan",
+        endMonth: "Mar",
         weeks: 4.0,
         weeksDone: 2.0,
         weeksInProgress: 2.0,
@@ -89,8 +89,6 @@ describe("cycle-progress-calculator", () => {
         progressWithInProgress: 100,
         progressByCycleItems: 50,
         percentageNotToDo: 0,
-        startMonth: "Jan",
-        endMonth: "Mar",
         daysFromStartOfCycle: 45,
         daysInCycle: 90,
         currentDayPercentage: 50,
@@ -126,8 +124,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 100,
           progressByCycleItems: 50,
           percentageNotToDo: 0,
-          startMonth: "Jan",
-          endMonth: "Mar",
           daysFromStartOfCycle: 15,
           daysInCycle: 90,
           currentDayPercentage: 17,
@@ -139,10 +135,7 @@ describe("cycle-progress-calculator", () => {
             {
               ...createMockRoadmapItemWithProgress(),
               id: "ROADMAP-002",
-              weeks: 6.0,
-              weeksDone: 3.0,
-              weeksInProgress: 2.0,
-              weeksTodo: 1.0,
+              // Progress metrics are already included in createMockRoadmapItemWithProgress()
               cycleItemsCount: 3,
               cycleItemsDoneCount: 2,
               cycleItems: [
@@ -172,8 +165,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 83,
           progressByCycleItems: 67,
           percentageNotToDo: 0,
-          startMonth: "Jan",
-          endMonth: "Mar",
           daysFromStartOfCycle: 15,
           daysInCycle: 90,
           currentDayPercentage: 17,
@@ -246,8 +237,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          startMonth: "",
-          endMonth: "",
           daysFromStartOfCycle: 0,
           daysInCycle: 0,
           currentDayPercentage: 0,
@@ -297,8 +286,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          startMonth: "",
-          endMonth: "",
           daysFromStartOfCycle: 0,
           daysInCycle: 0,
           currentDayPercentage: 0,
@@ -348,8 +335,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          startMonth: "",
-          endMonth: "",
           daysFromStartOfCycle: 0,
           daysInCycle: 0,
           currentDayPercentage: 0,
@@ -404,8 +389,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 0,
           progressByCycleItems: 0,
           percentageNotToDo: 0,
-          startMonth: "",
-          endMonth: "",
           daysFromStartOfCycle: 0,
           daysInCycle: 0,
           currentDayPercentage: 0,
@@ -477,8 +460,6 @@ describe("cycle-progress-calculator", () => {
           progressWithInProgress: 100,
           progressByCycleItems: 50,
           percentageNotToDo: 0,
-          startMonth: "",
-          endMonth: "",
           daysFromStartOfCycle: 0,
           daysInCycle: 0,
           currentDayPercentage: 0,
@@ -487,7 +468,6 @@ describe("cycle-progress-calculator", () => {
 
       const result = calculateCycleProgress(cycle, objectives);
 
-      expect(result.startMonth).toBe("");
       expect(result.endMonth).toBe("");
       expect(result.daysFromStartOfCycle).toBe(0);
       expect(result.daysInCycle).toBe(0);

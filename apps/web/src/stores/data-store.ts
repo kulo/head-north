@@ -15,6 +15,7 @@ import type {
   NestedCycleData,
   RoadmapData,
   CycleOverviewData,
+  CycleWithProgress,
 } from "../types/ui-types";
 import type { default as CycleDataService } from "../services/cycle-data-service";
 import type { CycleDataViewCoordinator } from "../services/cycle-data-view-coordinator";
@@ -137,8 +138,10 @@ export const useDataStore = defineStore("data", () => {
     if (!selectedCycle) {
       return null;
     }
+    // TODO: Calculate cycle progress properly instead of type assertion
+    // This should use calculateCycleProgress from cycle-progress-calculator
     return {
-      cycle: selectedCycle,
+      cycle: selectedCycle as CycleWithProgress,
       objectives: processedData.value.objectives || [],
     };
   });
