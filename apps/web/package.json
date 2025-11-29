@@ -21,6 +21,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
     "@headnorth/config": "file:../../packages/config",
     "@headnorth/types": "file:../../packages/types",
     "@headnorth/utils": "file:../../packages/utils",

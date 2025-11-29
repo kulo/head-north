@@ -23,8 +23,12 @@ make start    # Run Docker container
 The frontend can be built and served statically:
 
 ```bash
+# From root directory (recommended - uses Turborepo)
+pnpm build
+
+# Or from web app directory
 cd apps/web
-npm run build
+pnpm build
 # Serve the dist/ directory with any static file server
 ```
 

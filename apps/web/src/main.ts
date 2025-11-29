@@ -1,4 +1,4 @@
-import { createApp, type Plugin } from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import createAppRouter from "./router/index";
 import { CycleDataService } from "./services/index";
@@ -55,7 +55,7 @@ app.provide("coordinator", cycleDataViewCoordinator);
 app.provide("router", router);
 
 app.use(Antd);
-app.use(VueApexCharts as Plugin);
+app.use(VueApexCharts);
 
 // Initialize app
 async function initializeApp() {

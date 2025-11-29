@@ -6,7 +6,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "jsx": "preserve",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -25,10 +27,9 @@
     "incremental": false,
     "noEmit": true,
     "noEmitOnError": false,
-    "types": ["vitest/globals", "node", "jsdom"],
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*"],
       "@headnorth/types": ["../../packages/types/src"],
       "@headnorth/utils": ["../../packages/utils/src"],
       "@headnorth/config": ["../../packages/config/src"]

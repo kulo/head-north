@@ -16,9 +16,9 @@ For deployment specifics, see [docs/deployment.md](docs/deployment.md).
 2. **Set up development environment**: See [README.md](README.md) for installation and setup
 3. **Read the coding guidelines**: See [docs/CODING_GUIDELINES.md](docs/CODING_GUIDELINES.md)
 4. **Make your changes** following our standards
-5. **Run tests**: `npm run test`
-6. **Lint your code**: `npm run lint`
-7. **Create a pull request**
+5. **Run tests**: `pnpm test`
+6. **Lint your code**: `pnpm lint`
+7. \*\*Create a pull request`
 
 ## Code Style & Guidelines
 
@@ -35,10 +35,11 @@ See [docs/CODING_GUIDELINES.md](docs/CODING_GUIDELINES.md) for comprehensive cod
 1. **Create a feature branch** from `main`
 2. **Make your changes** following coding guidelines
 3. **Write/update tests** as needed
-4. **Ensure all tests pass**: `npm run test`
-5. **Ensure linting passes**: `npm run lint`
-6. **Update documentation** if needed
-7. **Create a pull request** with a clear description
+4. **Ensure all tests pass**: `pnpm test`
+5. **Ensure linting passes**: `pnpm lint`
+6. **Ensure type checking passes**: `pnpm type-check`
+7. **Update documentation** if needed
+8. **Create a pull request** with a clear description
 
 ### PR Checklist
 
@@ -86,10 +87,12 @@ See [README.md](README.md) for the complete monorepo structure and architecture 
 
 ## Testing & Linting
 
-See [README.md](README.md) for all available commands. Most common:
+See [README.md](README.md) and [docs/development.md](docs/development.md) for all available commands. Most common:
 
-- **Run all tests**: `npm run test`
-- **Lint all code**: `npm run lint`
+- **Run all tests**: `pnpm test` (runs via Turborepo in parallel)
+- **Lint all code**: `pnpm lint` (runs via Turborepo in parallel)
+- **Type check all code**: `pnpm type-check` (runs via Turborepo in parallel)
+- **Run e2e tests**: `pnpm test:e2e` (runs via Turborepo)
 
 ## Getting Help
 
