@@ -71,7 +71,9 @@ describe("getCycleData Controller", () => {
     expect(mockJiraAdapter.fetchCycleData).toHaveBeenCalled();
     expect(mockReply.send).toHaveBeenCalledWith(mockCycleData);
     expect(mockReply.status).not.toHaveBeenCalled();
-    expect(logger.default.info).toHaveBeenCalledWith("fetching raw cycle data");
+    expect(logger.default.info).toHaveBeenCalledWith(
+      "Fetching raw cycle data.",
+    );
   });
 
   it("should handle adapter errors", async () => {
