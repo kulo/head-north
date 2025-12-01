@@ -13,9 +13,8 @@ export default defineConfig({
   outDir: "dist",
   external: [
     // Keep these as external dependencies
-    "koa",
-    "@koa/cors",
-    "@koa/router",
+    "fastify",
+    "@fastify/cors",
     "axios",
     "csv-parse",
     "jira.js",

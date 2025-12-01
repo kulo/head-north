@@ -33,6 +33,7 @@
   "license": "MIT",
   "dependencies": {
     "@headnorth/types": "file:../../packages/types",
+    "@headnorth/utils": "file:../utils",
     "purify-ts": "^2.1.2",
     "zod": "^4.1.12"
   }

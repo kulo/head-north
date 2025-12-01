@@ -171,8 +171,7 @@
 
 **Root DevDependencies:**
 
-- `@types/koa` - Type definitions (used at compile time)
-- `@types/koa-router` - Type definitions (used at compile time)
+- Note: `@types/koa` and `@types/koa-router` have been removed after migration to Fastify
 - `@vitest/coverage-v8` - Used in test scripts
 - `@vitest/ui` - Used in test scripts
 - `vitest` - Test framework (used in all packages)

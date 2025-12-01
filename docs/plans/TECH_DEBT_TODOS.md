@@ -97,13 +97,13 @@ This document tracks important cleanup tasks, architectural decisions, and techn
 - ✅ **Test infrastructure:** Vitest configured with coverage reporting across all packages
 - ✅ **Unit tests:** Comprehensive unit tests exist (adapters, services, utilities)
 - ✅ **Service tests:** API service tests exist (`apps/web/tests/services/api-service.test.ts`)
-- ❌ **Missing:** No integration tests for Koa routes/controllers found
+- ❌ **Missing:** No integration tests for Fastify routes/controllers found
 - ❌ **Missing:** No E2E tests for Vue components
 - ❌ **Missing:** No integration tests for actual Jira API calls (only mocked)
 
 **Remaining Integration Testing Needs:**
 
-- [ ] **API Integration Tests** - Add tests for Koa routes and HTTP controllers (currently using Koa, not Express)
+- [ ] **API Integration Tests** - Add tests for Fastify routes and HTTP controllers
 - [ ] **Vue Component Tests** - Add integration/E2E tests for UI components
 - [ ] **Service Layer Integration** - Add tests for real Jira API interactions (with test credentials)
 - [ ] **End-to-End Testing** - Consider Cypress/Playwright for full user workflows
@@ -211,16 +211,17 @@ This document tracks important cleanup tasks, architectural decisions, and techn
 
 ### ⚠️ **Still Relevant (Updated):**
 
-1. **Type Safety** - Some `unknown` types can be improved (reduced scope)
-2. **Test Coverage Gaps** - Integration tests still needed
-3. **Test Infrastructure** - Coverage thresholds not enforced
-4. **Code Documentation** - ADRs and some JSDoc gaps
-5. **Performance Optimization** - Still relevant
+1. **Validation Improvements** - See `VALIDATION_IMPROVEMENTS_PLAN.md` for all validation-related improvements
+2. **Type Safety** - Some `unknown` types can be improved (reduced scope)
+3. **Test Coverage Gaps** - Integration tests still needed
+4. **Test Infrastructure** - Coverage thresholds not enforced
+5. **Code Documentation** - ADRs and some JSDoc gaps
+6. **Performance Optimization** - Still relevant
 
 ### 📝 **Key Findings:**
 
 - No `.disabled` files found - `generate-overview.ts` has been completely removed
-- API uses Koa (not Express) - Update test documentation accordingly
+- API uses Fastify - Modern HTTP framework with built-in JSON schema validation support
 - Type safety is mostly good, but a few specific `unknown` usages need improvement
 - Test infrastructure exists but lacks enforcement thresholds
 - Documentation is good but missing ADRs
@@ -230,6 +231,10 @@ This document tracks important cleanup tasks, architectural decisions, and techn
 - See `UNUSED_CODE_ANALYSIS.md` for comprehensive analysis and tool recommendations
 - Recommended tools: `ts-prune`, `depcheck`, `knip` for finding unused code
 - No automated unused code detection currently configured
+
+### 📋 **Related Plans:**
+
+- **Validation Improvements**: See `VALIDATION_IMPROVEMENTS_PLAN.md` for all validation-related improvements and plans
 
 ---
 

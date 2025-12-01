@@ -132,7 +132,7 @@ graph TB
 _Head North_ is built as a modern web application with a clear separation between data collection, processing, and visualization. The system consists of:
 
 1. **Web Application**: A Vue.js frontend that provides interactive dashboards for cycle visualization and roadmap planning
-2. **API Service**: A Node.js/Koa backend that collects, transforms, and serves cycle data through RESTful endpoints
+2. **API Service**: A Node.js/Fastify backend that collects, transforms, and serves cycle data through RESTful endpoints
 3. **Data Adapters**: Flexible integration layer that connects to external data sources (primarily JIRA) and transforms raw data into Head North's standardized domain model
 4. **Shared Packages**: Common TypeScript types, utilities, and configuration shared across the entire application
 
@@ -142,7 +142,7 @@ The architecture follows a **monorepo structure** with the following organizatio
 head-north/
 ├── apps/
 │   ├── web/           # Vue.js web application (port 8080)
-│   └── api/           # Node.js/Koa API service (port 3000)
+│   └── api/           # Node.js/Fastify API service (port 3000)
 ├── packages/
 │   ├── types/         # Shared TypeScript types and interfaces
 │   ├── utils/         # Shared utility functions (logging)

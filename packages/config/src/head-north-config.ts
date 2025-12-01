@@ -32,7 +32,7 @@ import validationDictionary from "./validation-dictionary";
 import JiraConfig from "./jira-config";
 import type { JiraConfigData } from "./jira-config";
 import { validateJiraConfig } from "./jira-config-validation";
-import { getEnvVarWithFallback } from "./utils";
+import { getEnvVarWithFallback, createURL } from "./utils";
 import { defaultValues } from "./default-values";
 import type {
   ProcessEnv,
@@ -43,6 +43,7 @@ import type {
   BackendConfig,
   PageConfig,
   ValidationRules,
+  URL,
 } from "./types";
 import type { DefaultValues } from "@headnorth/types";
 
@@ -227,6 +228,12 @@ export default class HeadNorthConfig {
     // Add backend-specific configuration if processEnv is provided
     if (this.processEnv && Object.keys(this.processEnv).length > 0) {
       // Server Configuration
+      config.backend.host = getEnvVarWithFallback(
+        this.processEnv,
+        "HN_HOST",
+        "localhost",
+        "Server host",
+      );
       config.backend.port = getEnvVarWithFallback(
         this.processEnv,
         "HN_PORT",
@@ -293,31 +300,39 @@ export default class HeadNorthConfig {
   }
 
   /**
-   * Get backend host based on environment
+   * Get backend host URL by combining host and port
    * @private
    */
-  private _getBackendHost(): string {
-    // Check for environment variable first
+  private _getBackendHost(): URL {
+    // Check for legacy environment variables first (for backward compatibility)
     const envBackendHost =
       this.processEnv.API_HOST || this.processEnv.REACT_APP_API_HOST;
     if (envBackendHost) {
-      return envBackendHost;
+      return createURL(envBackendHost);
     }
 
-    // Fall back to environment-specific defaults
-    const environmentConfig =
-      this.config.common.environments[
-        this.environment as keyof typeof this.config.common.environments
-      ];
-    if (environmentConfig && environmentConfig.backendHost) {
-      return environmentConfig.backendHost;
-    }
+    // Use backend.host and backend.port from config
+    const host = this.config.backend.host || "localhost";
+    const port = this._getBackendPort();
 
-    // Final fallback to development
-    return (
-      this.config.common.environments.development.backendHost ||
-      "http://localhost:3000"
-    );
+    // Determine protocol based on host
+    const protocol =
+      host === "localhost" || host.startsWith("127.0.0.1") ? "http" : "https";
+
+    const url = `${protocol}://${host}:${port}`;
+    return createURL(url);
+  }
+
+  /**
+   * Get backend port as a number
+   * @private
+   */
+  private _getBackendPort(): number {
+    const portValue = this.config.backend.port;
+    if (!portValue) {
+      return 3000; // Default port
+    }
+    return typeof portValue === "string" ? parseInt(portValue, 10) : portValue;
   }
 
   /**
@@ -343,8 +358,16 @@ export default class HeadNorthConfig {
    * Get backend host
    * @returns Backend host URL
    */
-  getHost(): string {
+  getHost(): URL {
     return this._getBackendHost();
+  }
+
+  /**
+   * Get backend port
+   * @returns Backend port number
+   */
+  getPort(): number {
+    return this._getBackendPort();
   }
 
   /**

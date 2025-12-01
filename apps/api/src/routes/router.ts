@@ -1,20 +1,20 @@
-import Router from "@koa/router";
+import type { FastifyInstance } from "fastify";
 import { registerApiRoutes } from "../utils/route-registry";
 import { getCycleData } from "../controllers/actions/get-cycle-data";
 import type { HeadNorthConfig } from "@headnorth/config";
-import type { Router as ApiRouter } from "../types/api-response-types";
 
 /**
- * Create router with HeadNorthConfig dependency injection
- * @param headNorthConfig - HeadNorthConfig instance
- * @returns Koa router instance
+ * Register routes with Fastify instance
+ * @param fastify - Fastify instance
+ * @param headNorthConfig - HeadNorthConfig instance (for future use)
  */
-function createRouter(_headNorthConfig: HeadNorthConfig): Router {
-  const router = new Router();
-
+function registerRoutes(
+  fastify: FastifyInstance,
+  _headNorthConfig: HeadNorthConfig,
+): void {
   // Root endpoint
-  router.get("/", async (context) => {
-    context.body = "Welcome to the Head North Cycle Data Service Backend";
+  fastify.get("/", async (_request, reply) => {
+    reply.send("Welcome to the Head North Cycle Data Service Backend");
   });
 
   // Define API routes
@@ -36,13 +36,11 @@ function createRouter(_headNorthConfig: HeadNorthConfig): Router {
 
   // Define route handlers
   const handlers = {
-    cycleData: getCycleData as (context: unknown) => void | Promise<void>,
+    cycleData: getCycleData,
   };
 
   // Register API routes
-  registerApiRoutes(router as unknown as ApiRouter, routes, handlers);
-
-  return router;
+  registerApiRoutes(fastify, routes, handlers);
 }
 
-export default createRouter;
+export default registerRoutes;

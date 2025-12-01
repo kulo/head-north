@@ -97,7 +97,7 @@ All commands use `pnpm` and are orchestrated by Turborepo for optimal performanc
 - `pnpm test:web` - Run web app tests (via Turborepo)
 - `pnpm lint:web` - Lint web app code (via Turborepo)
 
-### API Service (Node.js/Koa)
+### API Service (Node.js/Fastify)
 
 - `pnpm dev:api` - Start API in development mode (builds with tsup --watch and runs with nodemon)
 - `pnpm start:api` - Start API in production mode (requires build first)

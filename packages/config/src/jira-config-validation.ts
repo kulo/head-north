@@ -6,8 +6,8 @@
  */
 
 import { z } from "zod";
-import type { Either } from "purify-ts";
-import { Left, Right } from "purify-ts";
+import type { Either } from "@headnorth/utils";
+import { Left, Right, formatZodErrorMessage } from "@headnorth/utils";
 import type { JiraConfigData } from "./jira-config";
 
 /**
@@ -72,6 +72,7 @@ const jiraConfigSchema = z.object({
 
 /**
  * Format Zod validation errors into Error with informative message
+ * Uses the generic formatZodErrorMessage utility and adds JIRA-specific context
  */
 function formatZodErrors(error: z.ZodError): Error {
   const missingFields = error.issues.map((err) => {
@@ -84,17 +85,11 @@ function formatZodErrors(error: z.ZodError): Error {
 
   const uniqueMissingFields = [...new Set(missingFields)]; // Remove duplicates
 
-  const errorMessages = error.issues
-    .map((err) => {
-      const path = err.path.join(".");
-      const fieldPath = path.startsWith("connection.")
-        ? path.replace("connection.", "")
-        : path || "unknown";
-      return `${fieldPath}: ${err.message}`;
-    })
-    .join("; ");
+  // Use the generic utility for base formatting
+  const baseErrorMessage = formatZodErrorMessage(error);
 
-  const errorMessage = `JIRA configuration validation failed: ${errorMessages}. Missing or invalid fields: ${uniqueMissingFields.join(", ")}`;
+  // Add JIRA-specific context
+  const errorMessage = `JIRA configuration validation failed: ${baseErrorMessage}. Missing or invalid fields: ${uniqueMissingFields.join(", ")}`;
 
   return new Error(errorMessage);
 }

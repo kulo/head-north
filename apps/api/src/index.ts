@@ -1,71 +1,88 @@
-import Koa from "koa";
-import createRouter from "./routes/router";
-import cors from "@koa/cors";
+import Fastify from "fastify";
+import cors from "@fastify/cors";
 import { HeadNorthConfig } from "@headnorth/config";
 import { logger } from "@headnorth/utils";
 import errorHandler from "./middleware/error-handler";
 import { createJiraAdapter } from "./adapters/adapter-factory";
+import type { JiraAdapter } from "./adapters/jira-adapter.interface";
+import registerRoutes from "./routes/router";
 
-try {
-  // Create HeadNorthConfig instance for backend
-  const headNorthConfig = new HeadNorthConfig({
-    processEnv: process.env,
-    overrides: { environment: process.env.NODE_ENV || "development" },
-  });
-
-  // Validate JIRA config and create adapter at app startup
-  // This ensures configuration errors are caught early (fail-fast)
+/**
+ * Creates and validates JIRA adapter at application startup.
+ * Exits the process if adapter creation fails (critical startup failure).
+ *
+ * @param headNorthConfig - Head North configuration instance
+ * @returns Validated JIRA adapter
+ */
+function getJiraAdapterOrExit(headNorthConfig: HeadNorthConfig): JiraAdapter {
   const adapterResult = createJiraAdapter(headNorthConfig);
-  const jiraAdapter = adapterResult.caseOf({
+  return adapterResult.caseOf({
     Left: (error) => {
-      const errorMessage = `JIRA configuration is invalid: ${error.message}. 
-      Application cannot start without valid JIRA configuration when not using fake data.`;
-      logger.default.error(errorMessage);
-      logger.error.errorSafe("Backend App crashed:", error);
+      // Critical startup failure - fail fast to prevent running in invalid state
+      logger.error.errorSafe(
+        "Cannot create JIRA adapter due to invalid configuration:",
+        error,
+      );
       process.exit(1);
       return null as never;
     },
     Right: (adapter) => adapter,
   });
+}
 
-  // Create the Koa app
-  const app = new Koa();
+async function startServer(): Promise<void> {
+  const headNorthConfig = new HeadNorthConfig({
+    processEnv: process.env,
+    overrides: { environment: process.env.NODE_ENV || "development" },
+  });
 
-  // Make headNorthConfig and pre-validated jiraAdapter available to the app context
-  app.context.headNorthConfig = headNorthConfig;
-  app.context.jiraAdapter = jiraAdapter;
+  try {
+    const jiraAdapter = getJiraAdapterOrExit(headNorthConfig);
 
-  // Create router with headNorthConfig injection
-  const router = createRouter(headNorthConfig);
+    const fastify = Fastify({
+      logger: false, // We use our own logger
+    });
 
-  app.use(cors());
-  app.use(errorHandler);
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+    await fastify.register(cors, {
+      origin: true, // Allow all origins (can be configured later)
+    });
 
-  // Start server
-  const port = headNorthConfig.get("backend.port");
-  const server = app.listen(port);
+    // Decorate request with headNorthConfig and pre-validated jiraAdapter
+    // Using a hook to attach these to every request
+    fastify.addHook("onRequest", async (request) => {
+      (
+        request as unknown as { headNorthConfig: HeadNorthConfig }
+      ).headNorthConfig = headNorthConfig;
+      (request as unknown as { jiraAdapter: typeof jiraAdapter }).jiraAdapter =
+        jiraAdapter;
+    });
 
-  // Handle server errors (e.g., port already in use)
-  server.on("error", (error: NodeJS.ErrnoException) => {
-    if (error.code === "EADDRINUSE") {
+    fastify.setErrorHandler(errorHandler);
+
+    registerRoutes(fastify, headNorthConfig);
+
+    // Start server
+    const port = headNorthConfig.getPort();
+    await fastify.listen({ port, host: "0.0.0.0" });
+    logger.default.info("Started Head-North backend process! ", { port });
+  } catch (error: unknown) {
+    const err = error as NodeJS.ErrnoException;
+
+    if (err.code === "EADDRINUSE") {
+      const portNumber = headNorthConfig.getPort();
       logger.default.error(
-        `Port ${port} is already in use. Please stop the process using this port or use a different port.`,
+        `Port ${portNumber} is already in use. Please stop the process using this port or use a different port.`,
       );
       logger.default.info(
-        `You can stop processes on port ${port} by running: pnpm stop:api or lsof -ti:${port} | xargs kill -9`,
+        `You can stop processes on port ${portNumber} by running: pnpm stop:api or lsof -ti:${portNumber} | xargs kill -9`,
       );
     } else {
-      logger.error.errorSafe("Server error:", error);
+      // Unified error logging for startup errors (JIRA config errors handled separately above)
+      logger.error.errorSafe("Backend App crashed:", err);
     }
     process.exit(1);
-  });
-
-  server.on("listening", () => {
-    logger.default.info("started", { port });
-  });
-} catch (error) {
-  logger.error.errorSafe("Backend App crashed:", error);
-  process.exit(1);
+  }
 }
+
+// Start the server
+startServer();

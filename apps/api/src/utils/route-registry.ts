@@ -3,20 +3,19 @@
  * Utility for registering routes using shared configuration
  */
 
-import { Context } from "koa";
+import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { logger } from "@headnorth/utils";
 import type { RouteDefinition, RouteHandlers, RouteOptions } from "../types";
-import type { Router, RouterLayer } from "../types/api-response-types";
 
 /**
  * Register API routes using provided route definitions
- * @param router - Koa router instance
+ * @param fastify - Fastify instance
  * @param routes - Array of route definitions
  * @param handlers - Object containing route handlers
  * @param options - Registration options
  */
 function registerApiRoutes(
-  router: Router,
+  fastify: FastifyInstance,
   routes: RouteDefinition[],
   handlers: RouteHandlers,
   options: RouteOptions = {},
@@ -32,11 +31,23 @@ function registerApiRoutes(
 
     if (handlerFunction) {
       const fullPath = prefix + route.path;
-      (
-        router as unknown as {
-          [key: string]: (path: string, handler: unknown) => void;
-        }
-      )[route.method.toLowerCase()]?.(fullPath, handlerFunction);
+      const method = route.method.toLowerCase() as
+        | "get"
+        | "post"
+        | "put"
+        | "delete"
+        | "patch"
+        | "head"
+        | "options";
+
+      // Register route with Fastify
+      fastify[method](
+        fullPath,
+        handlerFunction as (
+          request: FastifyRequest,
+          reply: FastifyReply,
+        ) => Promise<void>,
+      );
 
       if (logRoutes) {
         logger.default.info("Route registered", {
@@ -59,27 +70,50 @@ function registerApiRoutes(
 /**
  * Default health check handler
  */
-function defaultHealthCheck(context: Context): void {
-  context.body = {
+function defaultHealthCheck(
+  _request: FastifyRequest,
+  reply: FastifyReply,
+): void {
+  reply.send({
     success: true,
     timestamp: new Date().toISOString(),
     service: "headnorth-backend",
-  };
+  });
 }
 
 /**
  * Get all registered routes for debugging
- * @param router - Koa router instance
+ * @param fastify - Fastify instance
  * @returns Array of registered routes
  */
 function getRegisteredRoutes(
-  router: Router,
-): Array<{ method: string; path: string; name: string }> {
-  return router.stack.map((layer: RouterLayer) => ({
-    method: layer.methods.join(", ").toUpperCase(),
-    path: layer.path,
-    name: layer.name || "unnamed",
-  }));
+  fastify: FastifyInstance,
+): Array<{ method: string; path: string }> {
+  const routes: Array<{ method: string; path: string }> = [];
+  const validMethods = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "PATCH",
+    "HEAD",
+    "OPTIONS",
+  ];
+  fastify
+    .printRoutes()
+    .split("\n")
+    .forEach((line) => {
+      const match = line.match(/^(\w+)\s+(.+)$/);
+      if (match && match[1] && match[2]) {
+        const method = match[1].toUpperCase();
+        const path = match[2].trim();
+        // Only include valid HTTP methods and paths starting with /
+        if (validMethods.includes(method) && path.startsWith("/")) {
+          routes.push({ method, path });
+        }
+      }
+    });
+  return routes;
 }
 
 export { registerApiRoutes, getRegisteredRoutes };

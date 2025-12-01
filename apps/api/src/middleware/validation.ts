@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { Either } from "@headnorth/utils";
 import { Left, Right } from "@headnorth/utils";
-import type { Context } from "koa";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import type { CycleData } from "@headnorth/types";
 
 // ============================================================================
@@ -154,17 +154,18 @@ export const validateCycleData = (
 };
 
 /**
- * Koa middleware for validating request body
+ * Fastify preHandler hook for validating request body
  */
 export const validateRequestBody = <T extends z.ZodType>(schema: T) => {
-  return async (ctx: Context, next: () => Promise<void>): Promise<void> => {
-    // Koa request body is available via bodyParser middleware
-    const body = (ctx.request as { body?: unknown }).body;
+  return async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const body = request.body;
     const result = schema.safeParse(body);
 
     if (!result.success) {
-      ctx.status = 400;
-      ctx.body = {
+      reply.status(400).send({
         success: false,
         error: "Validation failed",
         errors: result.error.issues.map((err: z.ZodIssue) => ({
@@ -172,33 +173,35 @@ export const validateRequestBody = <T extends z.ZodType>(schema: T) => {
           message: err.message,
           code: err.code,
         })),
-      };
+      });
       return;
     }
 
-    // Attach validated data to context
-    (ctx.request as unknown as { body: unknown }).body = result.data;
-    await next();
+    // Attach validated data to request
+    (request as { body: unknown }).body = result.data;
   };
 };
 
 /**
- * Koa middleware for validating response data
+ * Fastify onSend hook for validating response data
  * Useful for ensuring API responses match expected schema
  */
 export const validateResponse = <T extends z.ZodType>(schema: T) => {
-  return async (ctx: Context, next: () => Promise<void>): Promise<void> => {
-    await next();
-
-    // Only validate if body exists and status is success
-    if (ctx.body && ctx.status >= 200 && ctx.status < 300) {
-      const result = schema.safeParse(ctx.body);
+  return async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    payload: unknown,
+  ): Promise<unknown> => {
+    // Only validate if payload exists and status is success
+    if (payload && reply.statusCode >= 200 && reply.statusCode < 300) {
+      const result = schema.safeParse(payload);
 
       if (!result.success) {
         // Log validation error but don't fail request (response already sent)
         console.error("Response validation failed:", result.error.issues);
       }
     }
+    return payload;
   };
 };
 

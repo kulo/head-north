@@ -9,18 +9,13 @@
     "@headnorth/jira-primitives": "file:../../packages/jira-primitives",
     "@headnorth/types": "file:../../packages/types",
     "@headnorth/utils": "file:../../packages/utils",
-    "@koa/cors": "^5.0.0",
-    "@koa/router": "^14.0.0",
+    "@fastify/cors": "^10.0.1",
     "axios": "^1.6.0",
     "extensionless": "^1.9.9",
-    "jira.js": "^5.2.2",
-    "koa": "^2.14.2"
+    "fastify": "^5.1.0",
+    "jira.js": "^5.2.2"
   },
   "devDependencies": {
-    "@types/koa": "^3.0.1",
-    "@types/koa-router": "^7.4.8",
-    "@types/koa__cors": "^3.0.0",
-    "@types/koa__router": "^12.0.0",
     "@types/node": "^24.10.1",
     "concurrently": "^9.2.1",
     "dotenv": "^16.3.0",

@@ -2,7 +2,7 @@
 // Handles standard JIRA setup: separate Roadmap Item and Cycle Item issue types
 // Uses Either for functional error handling
 
-import { Either, Maybe, safeAsync } from "@headnorth/utils";
+import { Either, EitherAsync, Maybe } from "@headnorth/utils";
 import type { HeadNorthConfig, JiraConfigData } from "@headnorth/config";
 import type {
   CycleData,
@@ -46,21 +46,26 @@ export class DefaultJiraAdapter implements JiraAdapter {
   }
 
   async fetchCycleData(): Promise<Either<Error, CycleData>> {
-    return safeAsync(async () => {
+    return EitherAsync(async ({ fromPromise }) => {
       // 1. Fetch all JIRA data in parallel
       const boardId = this.jiraConfig.connection.boardId;
 
+      // Fetch all JIRA data in parallel - fromPromise unwraps Promise<Either<Error, T>>
       const [sprints, roadmapIssues, cycleIssues] = await Promise.all([
-        this.jiraClient.getSprints(boardId),
-        this.jiraClient.searchIssues(
-          'issuetype = "Roadmap Item"',
-          ["summary", "labels"],
-          boardId,
+        fromPromise(this.jiraClient.getSprints(boardId)),
+        fromPromise(
+          this.jiraClient.searchIssues(
+            'issuetype = "Roadmap Item"',
+            ["summary", "labels"],
+            boardId,
+          ),
         ),
-        this.jiraClient.searchIssues(
-          'issuetype = "Cycle Item"',
-          ["*"],
-          boardId,
+        fromPromise(
+          this.jiraClient.searchIssues(
+            'issuetype = "Cycle Item"',
+            ["*"],
+            boardId,
+          ),
         ),
       ]);
 

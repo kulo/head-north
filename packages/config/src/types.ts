@@ -98,6 +98,7 @@ export interface FrontendConfig {
 }
 
 export interface BackendConfig {
+  host?: string;
   port?: string;
   maxRetry?: string;
   delayBetweenRetry?: string;

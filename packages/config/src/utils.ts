@@ -56,7 +56,7 @@ export function getEnvVarWithFallback(
           process.env.VITEST_WORKER_ID !== undefined)) ||
       // Check if vitest is running via global
       (typeof globalThis !== "undefined" &&
-        (globalThis as any).__vitest__ !== undefined);
+        (globalThis as { __vitest__?: unknown }).__vitest__ !== undefined);
 
     if (!isTestEnv) {
       console.warn(

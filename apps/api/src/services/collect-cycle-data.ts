@@ -68,18 +68,21 @@ export const prepareCycleDataResponse = (
  */
 export const validateAndPrepareCycleData = (
   rawData: CycleData,
-): Either<
-  { message: string; validationErrors: unknown[] },
-  ReturnType<typeof prepareCycleDataResponse>
-> => {
+): Either<Error, ReturnType<typeof prepareCycleDataResponse>> => {
   const validationResult = validateCycleData(rawData);
 
   return validationResult.caseOf({
-    Left: (error) =>
-      Left({
-        message: "Collected data does not match expected schema",
-        validationErrors: formatValidationErrors(error),
-      }),
+    Left: (error) => {
+      // Create error with validation details in message
+      const validationErrors = formatValidationErrors(error);
+      const errorMessage = `Data validation failed: ${validationErrors.map((e) => `${e.field}: ${e.message}`).join(", ")}`;
+      const validationError = new Error(errorMessage);
+      // Attach validation errors to error object for HTTP response
+      (
+        validationError as Error & { validationErrors?: unknown[] }
+      ).validationErrors = validationErrors;
+      return Left(validationError);
+    },
     Right: (validatedData) => Right(prepareCycleDataResponse(validatedData)),
   });
 };

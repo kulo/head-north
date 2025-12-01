@@ -30,7 +30,10 @@ describe("Cycle Data Service", () => {
 
   describe("Configuration", () => {
     test("should have correct default host", () => {
-      expect(headNorthConfig.getHost()).toBe("http://localhost:3000");
+      // getHost() now combines backend.host and backend.port
+      // Default is localhost:3000 with http protocol
+      const host = headNorthConfig.getHost();
+      expect(host).toBe("http://localhost:3000");
     });
 
     test("should get host from configuration", () => {

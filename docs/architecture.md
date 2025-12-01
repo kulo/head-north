@@ -13,7 +13,7 @@ Related docs:
 Head North consists of:
 
 1. Web Application (Vue.js frontend) – interactive dashboards
-2. API Service (Node.js/Koa backend) – collects, transforms, serves data
+2. API Service (Node.js/Fastify backend) – collects, transforms, serves data
 3. Data Adapters – map external data sources (Jira) to Head North domain
 4. Shared Packages – types, utils, config, jira primitives
 
@@ -23,7 +23,7 @@ Head North consists of:
 head-north/
 ├── apps/
 │   ├── web/           # Vue.js web application (port 8080)
-│   └── api/           # Node.js/Koa API service (port 3000)
+│   └── api/           # Node.js/Fastify API service (port 3000)
 ├── packages/
 │   ├── types/         # Shared TypeScript types and interfaces
 │   ├── utils/         # Shared utilities (logging, functional helpers)

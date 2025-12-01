@@ -17,8 +17,10 @@
   "dependencies": {
     "@headnorth/config": "file:../config",
     "@headnorth/types": "file:../types",
+    "@headnorth/utils": "file:../utils",
     "jira.js": "^5.2.2",
-    "purify-ts": "^2.1.2"
+    "purify-ts": "^2.1.2",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "tsup": "^8.5.1",

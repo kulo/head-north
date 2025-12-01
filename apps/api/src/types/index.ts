@@ -16,15 +16,22 @@ export * from "./error-types";
 // API Route Types
 // ============================================================================
 
+import type { FastifyRequest, FastifyReply } from "fastify";
+
 export interface RouteDefinition {
   method: string;
   path: string;
-  handler: string | ((context: unknown) => Promise<void> | void);
+  handler:
+    | string
+    | ((request: FastifyRequest, reply: FastifyReply) => Promise<void> | void);
   description: string;
 }
 
 export interface RouteHandlers {
-  [key: string]: (context: unknown) => Promise<void> | void;
+  [key: string]: (
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) => Promise<void> | void;
 }
 
 export interface RouteOptions {

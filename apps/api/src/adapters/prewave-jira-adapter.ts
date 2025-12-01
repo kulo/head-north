@@ -2,7 +2,7 @@
 // Handles Prewave-specific JIRA setup: Epic issue types, virtual Roadmap Items
 // Uses Either for functional error handling
 
-import { Either, Maybe, safeAsync } from "@headnorth/utils";
+import { Either, EitherAsync, Maybe } from "@headnorth/utils";
 import { logger } from "@headnorth/utils";
 import { match } from "ts-pattern";
 import type { HeadNorthConfig, JiraConfigData } from "@headnorth/config";
@@ -181,16 +181,19 @@ export class PrewaveJiraAdapter implements JiraAdapter {
   }
 
   async fetchCycleData(): Promise<Either<Error, CycleData>> {
-    return safeAsync(async () => {
+    return EitherAsync(async ({ fromPromise }) => {
       // 1. Fetch all JIRA data in parallel
       const boardId = this.jiraConfig.connection.boardId;
 
+      // Fetch all JIRA data in parallel - fromPromise unwraps Promise<Either<Error, T>>
       const [sprints, epicIssues] = await Promise.all([
-        this.jiraClient.getSprints(boardId),
+        fromPromise(this.jiraClient.getSprints(boardId)),
         // Don't pass boardId for Epic search - Epic issues aren't on boards, use regular search API
-        this.jiraClient.searchIssues(
-          'project = PRODUCT AND issuetype = "Epic" ORDER BY updated DESC',
-          ["summary", "status", "assignee", "labels", PREWAVE_FIELDS.sprint],
+        fromPromise(
+          this.jiraClient.searchIssues(
+            'project = PRODUCT AND issuetype = "Epic" ORDER BY updated DESC',
+            ["summary", "status", "assignee", "labels", PREWAVE_FIELDS.sprint],
+          ),
         ),
       ]);
 
