@@ -12,13 +12,6 @@ import type { JiraAdapter } from "../../src/adapters/jira-adapter.interface";
 import type { CycleData } from "@headnorth/types";
 import { Right, Left } from "@headnorth/utils";
 import { logger } from "@headnorth/utils";
-import * as collectCycleDataModule from "../../src/services/collect-cycle-data";
-
-// Mock the collect-cycle-data service
-vi.mock("../../src/services/collect-cycle-data", () => ({
-  default: vi.fn(),
-  validateAndPrepareCycleData: vi.fn(),
-}));
 
 describe("getCycleData Controller", () => {
   let mockRequest: HeadNorthRequest;
@@ -69,82 +62,35 @@ describe("getCycleData Controller", () => {
       objectives: [],
     };
 
-    vi.mocked(collectCycleDataModule.default).mockResolvedValue(
+    vi.mocked(mockJiraAdapter.fetchCycleData).mockResolvedValue(
       Right(mockCycleData),
     );
-    vi.mocked(
-      collectCycleDataModule.validateAndPrepareCycleData,
-    ).mockReturnValue(Right(mockCycleData));
 
     await getCycleData(mockRequest, mockReply);
 
-    expect(collectCycleDataModule.default).toHaveBeenCalledWith(
-      mockJiraAdapter,
-      mockHeadNorthConfig,
-    );
+    expect(mockJiraAdapter.fetchCycleData).toHaveBeenCalled();
     expect(mockReply.send).toHaveBeenCalledWith(mockCycleData);
     expect(mockReply.status).not.toHaveBeenCalled();
     expect(logger.default.info).toHaveBeenCalledWith("fetching raw cycle data");
   });
 
-  it("should handle validation errors", async () => {
-    const mockCycleData: CycleData = {
-      cycles: [],
-      roadmapItems: [],
-      cycleItems: [],
-      assignees: [],
-      areas: [],
-      stages: [],
-      objectives: [],
-    };
-
-    const validationErrors = [
-      { field: "cycles", message: "Cycles are required" },
-    ];
-    const validationError = new Error(
-      `Data validation failed: ${validationErrors.map((e) => `${e.field}: ${e.message}`).join(", ")}`,
-    );
-    (
-      validationError as Error & { validationErrors?: unknown[] }
-    ).validationErrors = validationErrors;
-
-    vi.mocked(collectCycleDataModule.default).mockResolvedValue(
-      Right(mockCycleData),
-    );
-    vi.mocked(
-      collectCycleDataModule.validateAndPrepareCycleData,
-    ).mockReturnValue(Left(validationError));
-
-    await getCycleData(mockRequest, mockReply);
-
-    expect(mockReply.status).toHaveBeenCalledWith(500);
-    expect(mockReply.send).toHaveBeenCalledWith({
-      success: false,
-      error: validationError.message,
-      validationErrors: validationErrors,
-    });
-    expect(logger.default.errorSafe).toHaveBeenCalledWith(
-      "Cycle data operation failed",
-      validationError,
-    );
-  });
-
   it("should handle adapter errors", async () => {
     const adapterError = new Error("JIRA API error");
 
-    vi.mocked(collectCycleDataModule.default).mockResolvedValue(
+    vi.mocked(mockJiraAdapter.fetchCycleData).mockResolvedValue(
       Left(adapterError),
     );
 
     await getCycleData(mockRequest, mockReply);
 
+    expect(mockJiraAdapter.fetchCycleData).toHaveBeenCalled();
     expect(mockReply.status).toHaveBeenCalledWith(500);
     expect(mockReply.send).toHaveBeenCalledWith({
       success: false,
       error: adapterError.message,
     });
     expect(logger.default.errorSafe).toHaveBeenCalledWith(
-      "Cycle data operation failed",
+      "Getting cycle data failed!",
       adapterError,
     );
   });
@@ -152,12 +98,13 @@ describe("getCycleData Controller", () => {
   it("should handle non-Error adapter failures", async () => {
     const adapterError = new Error("String error");
 
-    vi.mocked(collectCycleDataModule.default).mockResolvedValue(
+    vi.mocked(mockJiraAdapter.fetchCycleData).mockResolvedValue(
       Left(adapterError),
     );
 
     await getCycleData(mockRequest, mockReply);
 
+    expect(mockJiraAdapter.fetchCycleData).toHaveBeenCalled();
     expect(mockReply.status).toHaveBeenCalledWith(500);
     expect(mockReply.send).toHaveBeenCalledWith({
       success: false,
@@ -165,7 +112,7 @@ describe("getCycleData Controller", () => {
     });
   });
 
-  it("should log successful data validation", async () => {
+  it("should log successful data preparation", async () => {
     const mockCycleData: CycleData = {
       cycles: [
         {
@@ -194,17 +141,15 @@ describe("getCycleData Controller", () => {
       objectives: [],
     };
 
-    vi.mocked(collectCycleDataModule.default).mockResolvedValue(
+    vi.mocked(mockJiraAdapter.fetchCycleData).mockResolvedValue(
       Right(mockCycleData),
     );
-    vi.mocked(
-      collectCycleDataModule.validateAndPrepareCycleData,
-    ).mockReturnValue(Right(mockCycleData));
 
     await getCycleData(mockRequest, mockReply);
 
+    expect(mockJiraAdapter.fetchCycleData).toHaveBeenCalled();
     expect(logger.default.info).toHaveBeenCalledWith(
-      expect.stringContaining("Raw cycle data validated successfully"),
+      expect.stringContaining("Raw cycle data fetched successfully"),
     );
   });
 });

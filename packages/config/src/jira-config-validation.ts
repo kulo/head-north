@@ -15,38 +15,25 @@ import type { JiraConfigData } from "./jira-config";
  * Ensures all required fields are present and valid
  * Note: JiraConnection interface allows null, but for validation we require non-null strings
  */
-const jiraConnectionSchema = z
-  .object({
-    user: z
-      .string({ message: "JIRA user is required" })
-      .min(1, "JIRA user cannot be empty")
-      .transform((val) => val.trim()),
-    token: z
-      .string({ message: "JIRA token is required" })
-      .min(1, "JIRA token cannot be empty")
-      .transform((val) => val.trim()),
-    host: z
-      .string({ message: "JIRA host is required" })
-      .min(1, "JIRA host cannot be empty")
-      .url("JIRA host must be a valid URL")
-      .transform((val) => val.trim()),
-    boardId: z
-      .number({ message: "JIRA boardId is required" })
-      .int("JIRA boardId must be an integer")
-      .positive("JIRA boardId must be greater than 0"),
-  })
-  .refine((data) => data.user && data.user.trim().length > 0, {
-    message: "JIRA user cannot be empty",
-    path: ["user"],
-  })
-  .refine((data) => data.token && data.token.trim().length > 0, {
-    message: "JIRA token cannot be empty",
-    path: ["token"],
-  })
-  .refine((data) => data.host && data.host.trim().length > 0, {
-    message: "JIRA host cannot be empty",
-    path: ["host"],
-  });
+const jiraConnectionSchema = z.object({
+  user: z
+    .string({ message: "JIRA user is required" })
+    .min(1, "JIRA user cannot be empty")
+    .transform((val) => val.trim()),
+  token: z
+    .string({ message: "JIRA token is required" })
+    .min(1, "JIRA token cannot be empty")
+    .transform((val) => val.trim()),
+  host: z
+    .string({ message: "JIRA host is required" })
+    .min(1, "JIRA host cannot be empty")
+    .url("JIRA host must be a valid URL")
+    .transform((val) => val.trim()),
+  boardId: z
+    .number({ message: "JIRA boardId is required" })
+    .int("JIRA boardId must be an integer")
+    .positive("JIRA boardId must be greater than 0"),
+});
 
 /**
  * Zod schema for complete JIRA configuration validation
