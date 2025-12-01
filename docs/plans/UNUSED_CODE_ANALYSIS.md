@@ -48,7 +48,7 @@
 
 **Potential candidates:**
 
-- Functions in `apps/api/src/services/collect-cycle-data.ts`
+- Functions in `apps/api/src/controllers/actions/get-cycle-data.ts` (controller now calls adapter directly)
 - Helper functions in `apps/web/src/services/`
 - Utility functions in `apps/web/src/lib/utils/`
 
