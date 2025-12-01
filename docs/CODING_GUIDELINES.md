@@ -344,7 +344,7 @@ result.caseOf({
 });
 ```
 
-**Real example**: `apps/api/src/services/collect-cycle-data.ts`
+**Real example**: `apps/api/src/controllers/actions/get-cycle-data.ts`
 
 ### TypeScript Optional Properties (`?`) vs `Maybe` - When to Use Each
 
@@ -1269,7 +1269,7 @@ function process(data: unknown): Either<Error, ProcessedData> {
 
 ## Real Examples in Codebase
 
-- **Error handling**: `apps/api/src/services/collect-cycle-data.ts`
+- **Error handling**: `apps/api/src/controllers/actions/get-cycle-data.ts`
 - **Optional values**: `apps/web/src/lib/utils/filter.ts`
 - **Pattern matching**: `apps/web/src/lib/constants/status-constants.ts`
 - **Composition**: `packages/utils/src/purify-utils.ts`

@@ -4,10 +4,10 @@ This document describes how data flows through the Head North system, from JIRA 
 
 ## Overview
 
-Data flows through 8 distinct layers, with transformations at each stage:
+Data flows through 7 distinct layers, with transformations at each stage:
 
 ```
-JIRA API → Adapter → API Service → API Controller → Frontend Service → Data Transformer → Store → Vue Components
+JIRA API → Adapter → API Controller → Frontend Service → Data Transformer → Store → Vue Components
 ```
 
 ### Data Flow Diagram
@@ -17,7 +17,6 @@ graph TB
     subgraph "Backend"
         JIRA["JIRA API<br/>JiraIssue Array, JiraSprint Array"]
         ADAPTER["Adapter Layer<br/>DefaultJiraAdapter / PrewaveJiraAdapter / FakeDataAdapter"]
-        SERVICE["API Service<br/>collect-cycle-data.ts"]
         CONTROLLER["API Controller<br/>get-cycle-data.ts"]
     end
 
@@ -29,8 +28,7 @@ graph TB
     end
 
     JIRA -->|"JiraIssue Array, JiraSprint Array"| ADAPTER
-    ADAPTER -->|"CycleData<br/>Area Array"| SERVICE
-    SERVICE -->|"CycleData<br/>Validated"| CONTROLLER
+    ADAPTER -->|"CycleData<br/>Area Array"| CONTROLLER
     CONTROLLER -->|"HTTP JSON<br/>CycleData"| FRONTEND_SERVICE
     FRONTEND_SERVICE -->|"CycleData<br/>Cached"| TRANSFORMER
     TRANSFORMER -->|"NestedCycleData<br/>With Progress"| STORE
@@ -38,7 +36,6 @@ graph TB
 
     style JIRA fill:#e1f5ff
     style ADAPTER fill:#b3e5fc
-    style SERVICE fill:#81d4fa
     style CONTROLLER fill:#4fc3f7
     style FRONTEND_SERVICE fill:#fff3e0
     style TRANSFORMER fill:#ffe0b2
@@ -90,25 +87,20 @@ graph LR
 - `PrewaveJiraAdapter`: Prewave-specific (creates virtual roadmap items)
 - `FakeDataAdapter`: Generates fake data for development
 
-### 3. API Service Layer
-
-**Location:** `apps/api/src/services/collect-cycle-data.ts`
-
-- **Input:** `CycleData` from adapter
-- **Output:** `CycleData` (validated)
-- **Transformations:**
-  - Validates data structure
-  - **Note:** Progress calculations are handled in the frontend, not the backend
-
-### 4. API Controller Layer
+### 3. API Controller Layer
 
 **Location:** `apps/api/src/controllers/actions/get-cycle-data.ts`
 
-- **Input:** `CycleData` from service
+- **Input:** `CycleData` from adapter (via `jiraAdapter.fetchCycleData()`)
 - **Output:** HTTP response with `CycleData`
 - **Format:** JSON serialization of `CycleData`
+- **Key Features:**
+  - Calls adapter directly (no intermediate service layer)
+  - Handles HTTP I/O (request/response)
+  - Functional error handling using `Either` types
+  - **Note:** Progress calculations are handled in the frontend, not the backend
 
-### 5. Frontend Service Layer
+### 4. Frontend Service Layer
 
 **Location:** `apps/web/src/services/cycle-data-service.ts`
 
@@ -119,7 +111,7 @@ graph LR
   - No transformation needed (areas already in array format)
   - Direct pass-through of `CycleData`
 
-### 6. Data Processing Layer
+### 5. Data Processing Layer
 
 **Location:** `apps/web/src/lib/transformers/data-transformer.ts`
 
@@ -132,7 +124,7 @@ graph LR
   - Each roadmap item contains nested `cycleItems`
   - Creates `CycleWithProgress` combining `Cycle`, `ProgressMetrics`, and `CycleMetadata`
 
-### 7. Store Layer
+### 6. Store Layer
 
 **Location:** `apps/web/src/stores/data-store.ts`
 
@@ -147,7 +139,7 @@ graph LR
   - `cycleOverviewData`: For cycle overview view
   - `filteredCycleOverviewData`: Filtered version
 
-### 8. Vue Component Layer
+### 7. Vue Component Layer
 
 **Location:** `apps/web/src/components/`
 
