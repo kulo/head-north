@@ -1,5 +1,6 @@
 // Low-level JIRA API wrapper
 import { AgileClient, Version3Client } from "jira.js";
+import type { AgileModels, Version3Models, Paginated } from "jira.js";
 import type { Either } from "@headnorth/utils";
 import { Left, safeAsync } from "@headnorth/utils";
 import type { z } from "zod";
@@ -67,12 +68,14 @@ export class JiraClient {
     // If boardId is provided, use board-specific search
     if (boardId !== undefined) {
       const fetchResult = await safeAsync(async () => {
-        return await this.agileClient.board.getIssuesForBoard({
-          boardId,
-          maxResults: 1000,
-          jql,
-          fields,
-        });
+        const response: AgileModels.SearchResults =
+          await this.agileClient.board.getIssuesForBoard({
+            boardId,
+            maxResults: 1000,
+            jql,
+            fields,
+          });
+        return response;
       });
 
       return fetchResult.chain((response) => {
@@ -117,7 +120,8 @@ export class JiraClient {
         );
       }
 
-      return await response.json();
+      const data: AgileModels.SearchResults = await response.json();
+      return data;
     });
 
     return fetchResult.chain((data) => {
@@ -132,10 +136,12 @@ export class JiraClient {
    */
   async getSprints(boardId: number): Promise<Either<Error, JiraSprint[]>> {
     const fetchResult = await safeAsync(async () => {
-      return await this.agileClient.board.getAllSprints({
-        boardId,
-        state: "active,closed,future",
-      });
+      const response: Paginated<AgileModels.Sprint> =
+        await this.agileClient.board.getAllSprints({
+          boardId,
+          state: "active,closed,future",
+        });
+      return response;
     });
 
     return fetchResult.chain((response) => {
@@ -151,9 +157,11 @@ export class JiraClient {
    */
   async getIssue(key: string): Promise<Either<Error, JiraIssue>> {
     const fetchResult = await safeAsync(async () => {
-      return await this.version3Client.issues.getIssue({
-        issueIdOrKey: key,
-      });
+      const response: Version3Models.Issue =
+        await this.version3Client.issues.getIssue({
+          issueIdOrKey: key,
+        });
+      return response;
     });
 
     return fetchResult.chain((response) => {
@@ -173,12 +181,14 @@ export class JiraClient {
     fields: string[] = [],
   ): Promise<Either<Error, JiraIssue[]>> {
     const fetchResult = await safeAsync(async () => {
-      return await this.agileClient.board.getBoardIssuesForSprint({
-        maxResults: 1000,
-        boardId,
-        sprintId: Number(sprintId),
-        fields,
-      });
+      const response: AgileModels.SearchResults =
+        await this.agileClient.board.getBoardIssuesForSprint({
+          maxResults: 1000,
+          boardId,
+          sprintId: Number(sprintId),
+          fields,
+        });
+      return response;
     });
 
     return fetchResult.chain((response) => {
