@@ -1,7 +1,12 @@
 // Jira-specific Types
 // These types represent the Jira domain and should be shielded from the Head North domain
 
-import type { ISODateString, AreaId, Person } from "@headnorth/types";
+import type {
+  ISODateString,
+  AreaId,
+  Person,
+  ValidationItem,
+} from "@headnorth/types";
 import type {
   JiraStatusMappings,
   JiraStatusCategories,
@@ -50,8 +55,8 @@ export interface JiraIssue {
   url?: string;
   isExternal?: boolean;
   stage?: string;
-  assignee?: Person | Record<string, unknown>;
-  validations?: unknown[];
+  assignee?: Person;
+  validations?: ValidationItem[];
 }
 
 export interface JiraIssueFields {
